@@ -1,6 +1,6 @@
 # Tools4Market — Tool QC Report
 
-Generated: 2026-10-20T18:28:04.323Z · environment: local dev server (http://localhost:8090, `node serve-dev.mjs`) · test engine: jsdom driving the real built pages and runtime scripts in `dist/`.
+Generated: 2026-10-20T20:01:17.750Z · environment: local dev server (http://localhost:8090, `node serve-dev.mjs`) · test engine: jsdom driving the real built pages and runtime scripts in `dist/`.
 
 Every tool below was executed with a real sample query; the *Query* section lists exactly what was entered, *Response* is the actual tool output captured from the page, and each check states PASS or FAIL. `expect` checks are tool-specific correctness assertions (e.g. a generated slug must contain the expected words); every tool also asserts zero console errors and successful initialisation.
 
@@ -25,41 +25,41 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 | # | Tool | Status | Checks | Completed (ISO) |
 |---|------|--------|--------|-----------------|
-| 1 | meta-tag-generator | ✅ PASS | 5/5 | 2026-10-20T18:27:43.064Z |
-| 2 | open-graph-generator | ✅ PASS | 5/5 | 2026-10-20T18:27:43.936Z |
-| 3 | twitter-card-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:44.547Z |
-| 4 | canonical-tag-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:45.310Z |
-| 5 | hreflang-tag-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:45.868Z |
-| 6 | schema-markup-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:46.579Z |
-| 7 | serp-preview-tool | ✅ PASS | 4/4 | 2026-10-20T18:27:47.098Z |
-| 8 | meta-description-checker | ✅ PASS | 3/3 | 2026-10-20T18:27:47.666Z |
-| 9 | web-crawler-audit | ✅ PASS | 3/3 | 2026-10-20T18:27:48.658Z |
-| 10 | seo-score-checker | ✅ PASS | 3/3 | 2026-10-20T18:27:49.410Z |
-| 11 | robots-txt-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:50.049Z |
-| 12 | ai-crawler-blocker | ✅ PASS | 4/4 | 2026-10-20T18:27:50.993Z |
-| 13 | llms-txt-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:51.472Z |
-| 14 | url-slug-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:51.999Z |
-| 15 | utm-link-builder | ✅ PASS | 5/5 | 2026-10-20T18:27:52.731Z |
-| 16 | keyword-density-checker | ✅ PASS | 3/3 | 2026-10-20T18:27:53.452Z |
-| 17 | hashtag-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:53.938Z |
-| 18 | case-converter | ✅ PASS | 3/3 | 2026-10-20T18:27:54.474Z |
-| 19 | duplicate-line-remover | ✅ PASS | 4/4 | 2026-10-20T18:27:54.899Z |
-| 20 | lorem-ipsum-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:55.561Z |
-| 21 | reading-time-calculator | ✅ PASS | 4/4 | 2026-10-20T18:27:55.936Z |
-| 22 | htaccess-redirect-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:56.306Z |
-| 23 | sitemap-generator | ✅ PASS | 4/4 | 2026-10-20T18:27:56.949Z |
-| 24 | password-generator | ✅ PASS | 3/3 | 2026-10-20T18:27:58.373Z |
-| 25 | base64-encoder-decoder | ✅ PASS | 3/3 | 2026-10-20T18:27:59.190Z |
-| 26 | url-encoder-decoder | ✅ PASS | 3/3 | 2026-10-20T18:28:00.961Z |
-| 27 | uuid-generator | ✅ PASS | 4/4 | 2026-10-20T18:28:02.047Z |
-| 28 | jwt-decoder | ✅ PASS | 3/3 | 2026-10-20T18:28:02.710Z |
-| 29 | user-agent-parser | ✅ PASS | 4/4 | 2026-10-20T18:28:03.357Z |
-| 30 | ics-calendar-generator | ✅ PASS | 5/5 | 2026-10-20T18:28:04.238Z |
+| 1 | meta-tag-generator | ✅ PASS | 5/5 | 2026-10-20T20:00:55.711Z |
+| 2 | open-graph-generator | ✅ PASS | 5/5 | 2026-10-20T20:00:57.096Z |
+| 3 | twitter-card-generator | ✅ PASS | 4/4 | 2026-10-20T20:00:57.964Z |
+| 4 | canonical-tag-generator | ✅ PASS | 4/4 | 2026-10-20T20:00:58.870Z |
+| 5 | hreflang-tag-generator | ✅ PASS | 3/3 | 2026-10-20T20:00:59.842Z |
+| 6 | schema-markup-generator | ✅ PASS | 4/4 | 2026-10-20T20:01:00.683Z |
+| 7 | serp-preview-tool | ✅ PASS | 4/4 | 2026-10-20T20:01:01.379Z |
+| 8 | meta-description-checker | ✅ PASS | 3/3 | 2026-10-20T20:01:02.017Z |
+| 9 | web-crawler-audit | ✅ PASS | 3/3 | 2026-10-20T20:01:02.736Z |
+| 10 | seo-score-checker | ✅ PASS | 3/3 | 2026-10-20T20:01:03.500Z |
+| 11 | robots-txt-generator | ✅ PASS | 4/4 | 2026-10-20T20:01:03.958Z |
+| 12 | ai-crawler-blocker | ✅ PASS | 4/4 | 2026-10-20T20:01:04.833Z |
+| 13 | llms-txt-generator | ✅ PASS | 4/4 | 2026-10-20T20:01:05.503Z |
+| 14 | url-slug-generator | ✅ PASS | 3/3 | 2026-10-20T20:01:06.154Z |
+| 15 | utm-link-builder | ✅ PASS | 5/5 | 2026-10-20T20:01:06.729Z |
+| 16 | keyword-density-checker | ✅ PASS | 3/3 | 2026-10-20T20:01:07.863Z |
+| 17 | hashtag-generator | ✅ PASS | 3/3 | 2026-10-20T20:01:08.729Z |
+| 18 | case-converter | ✅ PASS | 3/3 | 2026-10-20T20:01:09.300Z |
+| 19 | duplicate-line-remover | ✅ PASS | 4/4 | 2026-10-20T20:01:10.034Z |
+| 20 | lorem-ipsum-generator | ✅ PASS | 3/3 | 2026-10-20T20:01:10.956Z |
+| 21 | reading-time-calculator | ✅ PASS | 4/4 | 2026-10-20T20:01:11.395Z |
+| 22 | htaccess-redirect-generator | ✅ PASS | 3/3 | 2026-10-20T20:01:12.358Z |
+| 23 | sitemap-generator | ✅ PASS | 4/4 | 2026-10-20T20:01:13.109Z |
+| 24 | password-generator | ✅ PASS | 3/3 | 2026-10-20T20:01:14.090Z |
+| 25 | base64-encoder-decoder | ✅ PASS | 3/3 | 2026-10-20T20:01:14.497Z |
+| 26 | url-encoder-decoder | ✅ PASS | 3/3 | 2026-10-20T20:01:15.083Z |
+| 27 | uuid-generator | ✅ PASS | 4/4 | 2026-10-20T20:01:15.860Z |
+| 28 | jwt-decoder | ✅ PASS | 3/3 | 2026-10-20T20:01:16.406Z |
+| 29 | user-agent-parser | ✅ PASS | 4/4 | 2026-10-20T20:01:17.004Z |
+| 30 | ics-calendar-generator | ✅ PASS | 5/5 | 2026-10-20T20:01:17.737Z |
 
 ## 1. meta-tag-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:40.958Z`
-- Finished: `2026-10-20T18:27:43.064Z`
+- Started: `2026-10-20T20:00:53.256Z`
+- Finished: `2026-10-20T20:00:55.711Z`
 
 **Query**
 
@@ -92,8 +92,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 2. open-graph-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:43.091Z`
-- Finished: `2026-10-20T18:27:43.936Z`
+- Started: `2026-10-20T20:00:55.752Z`
+- Finished: `2026-10-20T20:00:57.096Z`
 
 **Query**
 
@@ -125,8 +125,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 3. twitter-card-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:43.952Z`
-- Finished: `2026-10-20T18:27:44.547Z`
+- Started: `2026-10-20T20:00:57.144Z`
+- Finished: `2026-10-20T20:00:57.964Z`
 
 **Query**
 
@@ -154,8 +154,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 4. canonical-tag-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:44.556Z`
-- Finished: `2026-10-20T18:27:45.310Z`
+- Started: `2026-10-20T20:00:57.975Z`
+- Finished: `2026-10-20T20:00:58.870Z`
 
 **Query**
 
@@ -176,8 +176,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 5. hreflang-tag-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:45.315Z`
-- Finished: `2026-10-20T18:27:45.868Z`
+- Started: `2026-10-20T20:00:58.876Z`
+- Finished: `2026-10-20T20:00:59.842Z`
 
 **Query**
 
@@ -200,8 +200,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 6. schema-markup-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:45.873Z`
-- Finished: `2026-10-20T18:27:46.579Z`
+- Started: `2026-10-20T20:00:59.849Z`
+- Finished: `2026-10-20T20:01:00.683Z`
 
 **Query**
 
@@ -237,8 +237,8 @@ The user reported tools "not working properly". Root-cause analysis found the to
 
 ## 7. serp-preview-tool — ✅ PASS
 
-- Started: `2026-10-20T18:27:46.605Z`
-- Finished: `2026-10-20T18:27:47.098Z`
+- Started: `2026-10-20T20:01:00.692Z`
+- Finished: `2026-10-20T20:01:01.379Z`
 
 **Query**
 
@@ -264,8 +264,8 @@ DESCRIPTION: 144 chars / 1152px (ideal 120–158 chars / ≤920px) — WILL TRUN
 
 ## 8. meta-description-checker — ✅ PASS
 
-- Started: `2026-10-20T18:27:47.129Z`
-- Finished: `2026-10-20T18:27:47.666Z`
+- Started: `2026-10-20T20:01:01.388Z`
+- Finished: `2026-10-20T20:01:02.017Z`
 
 **Query**
 
@@ -287,8 +287,8 @@ TOO LONG: 1040px — Google truncates around 920px (~155 chars). Trim to 28 fewe
 
 ## 9. web-crawler-audit — ✅ PASS
 
-- Started: `2026-10-20T18:27:47.695Z`
-- Finished: `2026-10-20T18:27:48.658Z`
+- Started: `2026-10-20T20:01:02.026Z`
+- Finished: `2026-10-20T20:01:02.736Z`
 
 **Query**
 
@@ -310,8 +310,8 @@ PASS · Page reachable over HTTP(S): Crawlers can reach this page (fetched in <1
 
 ## 10. seo-score-checker — ✅ PASS
 
-- Started: `2026-10-20T18:27:48.666Z`
-- Finished: `2026-10-20T18:27:49.410Z`
+- Started: `2026-10-20T20:01:02.746Z`
+- Finished: `2026-10-20T20:01:03.500Z`
 
 **Query**
 
@@ -335,8 +335,8 @@ Title tag (15 pts): Title is 4 characters — fine, but could be sharper (30–6
 
 ## 11. robots-txt-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:49.417Z`
-- Finished: `2026-10-20T18:27:50.049Z`
+- Started: `2026-10-20T20:01:03.529Z`
+- Finished: `2026-10-20T20:01:03.958Z`
 
 **Query**
 
@@ -360,8 +360,8 @@ Sitemap: https://example.com/sitemap.xml
 
 ## 12. ai-crawler-blocker — ✅ PASS
 
-- Started: `2026-10-20T18:27:50.082Z`
-- Finished: `2026-10-20T18:27:50.993Z`
+- Started: `2026-10-20T20:01:03.960Z`
+- Finished: `2026-10-20T20:01:04.833Z`
 
 **Query**
 
@@ -440,8 +440,8 @@ Sitemap: https://example.com/sitemap.xml
 
 ## 13. llms-txt-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:50.998Z`
-- Finished: `2026-10-20T18:27:51.472Z`
+- Started: `2026-10-20T20:01:04.846Z`
+- Finished: `2026-10-20T20:01:05.503Z`
 
 **Query**
 
@@ -473,8 +473,8 @@ https://example.com/pricing`
 
 ## 14. url-slug-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:51.478Z`
-- Finished: `2026-10-20T18:27:51.999Z`
+- Started: `2026-10-20T20:01:05.528Z`
+- Finished: `2026-10-20T20:01:06.154Z`
 
 **Query**
 
@@ -494,8 +494,8 @@ complete-guide-technical-seo-2026
 
 ## 15. utm-link-builder — ✅ PASS
 
-- Started: `2026-10-20T18:27:52.003Z`
-- Finished: `2026-10-20T18:27:52.731Z`
+- Started: `2026-10-20T20:01:06.159Z`
+- Finished: `2026-10-20T20:01:06.729Z`
 
 **Query**
 
@@ -520,8 +520,8 @@ https://example.com/spring-sale?utm_source=newsletter&utm_medium=email&utm_campa
 
 ## 16. keyword-density-checker — ✅ PASS
 
-- Started: `2026-10-20T18:27:52.782Z`
-- Finished: `2026-10-20T18:27:53.452Z`
+- Started: `2026-10-20T20:01:06.737Z`
+- Finished: `2026-10-20T20:01:07.863Z`
 
 **Query**
 
@@ -543,8 +543,8 @@ Words: 24Unique: 18Reading time: 1 minanalysis below
 
 ## 17. hashtag-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:53.457Z`
-- Finished: `2026-10-20T18:27:53.938Z`
+- Started: `2026-10-20T20:01:07.875Z`
+- Finished: `2026-10-20T20:01:08.729Z`
 
 **Query**
 
@@ -567,8 +567,8 @@ Words: 24Unique: 18Reading time: 1 minanalysis below
 
 ## 18. case-converter — ✅ PASS
 
-- Started: `2026-10-20T18:27:53.941Z`
-- Finished: `2026-10-20T18:27:54.474Z`
+- Started: `2026-10-20T20:01:08.743Z`
+- Finished: `2026-10-20T20:01:09.300Z`
 
 **Query**
 
@@ -590,8 +590,8 @@ Hello World from Tools4market
 
 ## 19. duplicate-line-remover — ✅ PASS
 
-- Started: `2026-10-20T18:27:54.494Z`
-- Finished: `2026-10-20T18:27:54.899Z`
+- Started: `2026-10-20T20:01:09.313Z`
+- Finished: `2026-10-20T20:01:10.034Z`
 
 **Query**
 
@@ -623,8 +623,8 @@ gamma
 
 ## 20. lorem-ipsum-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:54.901Z`
-- Finished: `2026-10-20T18:27:55.561Z`
+- Started: `2026-10-20T20:01:10.042Z`
+- Finished: `2026-10-20T20:01:10.956Z`
 
 **Query**
 
@@ -634,9 +634,9 @@ gamma
 **Response**
 
 ```
-Lorem ipsum dolor sit amet praesentium ex velit quis odio voluptate quo aliquip. Esse officia assumenda mollit deserunt voluptatem eligendi labore tempora rem nostrum. Perspiciatis quo pariatur in accusamus id nobis dolores eiusmod quibusdam aspernatur cum corrupti. Necessitatibus dolore velit eius sed est sit reprehenderit eiusmod dolor minima. Consequatur fugiat reprehenderit aliquip quis odio officiis enim. Molestias perspiciatis sed quia perspiciatis ex quis cupiditate autem itaque. Libero tempora exercitation cumque laborum voluptate nam autem tenetur quasi.
+Lorem ipsum dolor sit amet consequat tempor cillum. Quaerat eos eaque praesentium ad quis illum accusantium consectetur repellat alias minus cupiditate velit velit est. Itaque aliquip repellat anim ipsam libero nam quo dolor soluta possimus praesentium nisi commodo dolore magnam. Maiores amet cum enim beatae voluptate incididunt accusamus dolor error sed quia natus cupidatat.
 
-Quia minim hic anim tempora voluptatem adipisci delectus velit. Nisi consectetur rem architecto pariatur debitis ipsum explicabo alias enim deserunt molestiae molestias. Nisi natus anima occaecati tempor duis ratione tempora ducimus. Nihil elit dolor aliquip enim beatae quo corporis ipsum tempor corporis velit ullamco hic conse
+Porro molestias ad sit consectetur lorem repudiandae natus excepturi quia sint ducimus culpa voluptates sunt. Do nihil maxime laborum dolor consequuntur voluptatem provident tempora aspernatur. Repellendus dolore placeat consequatur nulla ad aliqua elit consequuntur eos eos. Sint consequatur eaque enim placeat voluptatem perferendis quos amet quos ab nobis necessitatibus. Consectetur accusantium laborum assumenda tempora recusandae quisquam vel dolores modi debitis omnis aliqua adipisci aliqua. Nostrud aperiam moll
 … (truncated)
 ```
 
@@ -648,8 +648,8 @@ Quia minim hic anim tempora voluptatem adipisci delectus velit. Nisi consectetur
 
 ## 21. reading-time-calculator — ✅ PASS
 
-- Started: `2026-10-20T18:27:55.565Z`
-- Finished: `2026-10-20T18:27:55.936Z`
+- Started: `2026-10-20T20:01:10.987Z`
+- Finished: `2026-10-20T20:01:11.395Z`
 
 **Query**
 
@@ -675,8 +675,8 @@ Speaking time: about 3 min (at 130 wpm)
 
 ## 22. htaccess-redirect-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:55.942Z`
-- Finished: `2026-10-20T18:27:56.306Z`
+- Started: `2026-10-20T20:01:11.405Z`
+- Finished: `2026-10-20T20:01:12.358Z`
 
 **Query**
 
@@ -698,8 +698,8 @@ Redirect 301 /2023-report https://example.com/reports/2023
 
 ## 23. sitemap-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:56.310Z`
-- Finished: `2026-10-20T18:27:56.949Z`
+- Started: `2026-10-20T20:01:12.382Z`
+- Finished: `2026-10-20T20:01:13.109Z`
 
 **Query**
 
@@ -725,8 +725,8 @@ https://example.com/about`
 
 ## 24. password-generator — ✅ PASS
 
-- Started: `2026-10-20T18:27:56.958Z`
-- Finished: `2026-10-20T18:27:58.373Z`
+- Started: `2026-10-20T20:01:13.141Z`
+- Finished: `2026-10-20T20:01:14.090Z`
 
 **Query**
 
@@ -736,7 +736,7 @@ https://example.com/about`
 **Response**
 
 ```
-JL%DfY9=9.#XSoP/vH)ap(~v
+2uR23+.W-PQ5d/&;IfIA^60G
 ```
 
 **Checks**
@@ -747,8 +747,8 @@ JL%DfY9=9.#XSoP/vH)ap(~v
 
 ## 25. base64-encoder-decoder — ✅ PASS
 
-- Started: `2026-10-20T18:27:58.386Z`
-- Finished: `2026-10-20T18:27:59.190Z`
+- Started: `2026-10-20T20:01:14.110Z`
+- Finished: `2026-10-20T20:01:14.497Z`
 
 **Query**
 
@@ -770,8 +770,8 @@ aGVsbG8gd29ybGQg8J+MjQ==
 
 ## 26. url-encoder-decoder — ✅ PASS
 
-- Started: `2026-10-20T18:27:59.196Z`
-- Finished: `2026-10-20T18:28:00.961Z`
+- Started: `2026-10-20T20:01:14.520Z`
+- Finished: `2026-10-20T20:01:15.083Z`
 
 **Query**
 
@@ -792,8 +792,8 @@ hello%20world%20%26%20more%3Fx%3D1
 
 ## 27. uuid-generator — ✅ PASS
 
-- Started: `2026-10-20T18:28:01.021Z`
-- Finished: `2026-10-20T18:28:02.047Z`
+- Started: `2026-10-20T20:01:15.234Z`
+- Finished: `2026-10-20T20:01:15.860Z`
 
 **Query**
 
@@ -803,11 +803,11 @@ hello%20world%20%26%20more%3Fx%3D1
 **Response**
 
 ```
-707ff0ab-1ad0-4cf2-8c08-292aa2c55a37
-b54e7648-5ec5-4ce6-9779-1ef35d11d55e
-00dbcf6b-16ba-4fdf-bcc3-18aa8b420e67
-4113429b-14c5-41bd-a6d4-18bf159d1320
-d2d22908-aa81-46e8-8514-35514bcb0f26
+93aa5de5-d7d8-459c-9b4a-2b207ab41472
+e4b4d187-88ad-450a-8ca6-b2fbf581f470
+cc5b6aa0-cdf7-4913-8cdf-f3170592f22b
+27922eb8-76d0-4c0c-b637-5b74e7282336
+41b3bb1f-7c34-496d-8820-4d21e04e13d2
 ```
 
 **Checks**
@@ -819,8 +819,8 @@ d2d22908-aa81-46e8-8514-35514bcb0f26
 
 ## 28. jwt-decoder — ✅ PASS
 
-- Started: `2026-10-20T18:28:02.052Z`
-- Finished: `2026-10-20T18:28:02.710Z`
+- Started: `2026-10-20T20:01:15.865Z`
+- Finished: `2026-10-20T20:01:16.406Z`
 
 **Query**
 
@@ -844,8 +844,8 @@ d2d22908-aa81-46e8-8514-35514bcb0f26
 
 ## 29. user-agent-parser — ✅ PASS
 
-- Started: `2026-10-20T18:28:02.715Z`
-- Finished: `2026-10-20T18:28:03.357Z`
+- Started: `2026-10-20T20:01:16.419Z`
+- Finished: `2026-10-20T20:01:17.004Z`
 
 **Query**
 
@@ -870,8 +870,8 @@ Raw: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like G
 
 ## 30. ics-calendar-generator — ✅ PASS
 
-- Started: `2026-10-20T18:28:03.410Z`
-- Finished: `2026-10-20T18:28:04.238Z`
+- Started: `2026-10-20T20:01:17.007Z`
+- Finished: `2026-10-20T20:01:17.737Z`
 
 **Query**
 
@@ -891,8 +891,8 @@ BEGIN:VCALENDAR
 VERSION:1.0
 PRODID:-//Tools4Market//EN
 BEGIN:VEVENT
-UID:60c3e2c8-c0e2-44a7-91e2-7917d84c898c
-DTSTAMP:20261020T182803Z
+UID:37b6fcb4-08e4-4783-b910-5fb2d01a1e05
+DTSTAMP:20261020T200117Z
 DTSTART:20261110T090000
 DTEND:20261110T170000
 SUMMARY:Team Offsite

@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Sitemap rebuilt as a proper index (pages + tools)
+
+**Why:** for GSC submission the sitemap is the single most important file on the site, so it was rebuilt from one flat `urlset` into a **sitemap index** with two children — `sitemap-pages.xml` (home + 4 category hubs + 5 policy pages) and `sitemap-tools.xml` (all 30 tool pages). An index is the format that scales (a blog/content sitemap can be added later without touching the index), lets crawlers fetch only the slice they need, and keeps `lastmod` accurate per section.
+
+**Also:** per-URL priority/changefreq are now meaningful (home 1.0 daily · categories 0.7 weekly · tools 0.8 weekly · policy 0.4 yearly) instead of one flat value; every URL carries `lastmod`; `<link rel="sitemap">` added to every page head for crawler discovery; `robots.txt` points at the index.
+
+**Verification:** XML parsed and validated (well-formed, 10 + 30 URLs, all on the canonical `www` host, zero duplicates, zero missing `lastmod`); test harnesses updated to read the tools child and re-run — audit 236/236 · edge 236/236 · smoke 30/30 · E2E 11/11 · Phase-2 129/129 · engine 123/123 · QC 30/30 PASS.
+
+**GSC submission link:** `https://www.tools4market.online/sitemap.xml`
+
 ## 2026-10-21 — Deploy failure RCA + fix: Worker entrypoint, Workers-safe `_redirects`
 
 **Symptom (user's Cloudflare build log):** build succeeded (41 pages), assets uploaded (57 files), then the deploy step failed: `Invalid _redirects configuration: Line 1: Only relative URLs are allowed. [code: 100324]`.

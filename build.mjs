@@ -72,6 +72,7 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
+<link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
 <meta name="theme-color" content="#5b4fff">
 ${GA_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${esc(GA_ID)}',{anonymize_ip:true});</script>` : ''}
@@ -353,9 +354,22 @@ const run = async () => {
     }
   }
 
-  const sitemapPaths = ['/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...TOOLS.map((t) => '/tools/' + t.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapPaths.map((p) => `  <url><loc>${SITE.url}${p === '/' ? '/' : p}</loc><lastmod>${TODAY}</lastmod><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : p.includes('/tools/') ? '0.8' : '0.7'}</priority></url>`).join('\n')}\n</urlset>\n`;
-  await writeFile(R + 'dist/sitemap.xml', sitemap);
+  // ---- sitemaps: a sitemap INDEX + two children (pages, tools) ---------
+  // An index keeps room to grow (a blog/content sitemap later) and lets crawlers
+  // fetch only the slice they need. Both children carry accurate lastmod.
+  const pagePaths = ['/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
+  const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
+  const isPolicy = (p) => POLICY.some((x) => p === '/' + x.slug + '/');
+  const entry = (p) => {
+    const priority = p === '/' ? '1.0' : p.includes('/tools/') ? '0.8' : isPolicy(p) ? '0.4' : '0.7';
+    const changefreq = p === '/' ? 'daily' : p.includes('/tools/') ? 'weekly' : isPolicy(p) ? 'yearly' : 'weekly';
+    return `  <url><loc>${SITE.url}${p}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
+  };
+  const urlset = (paths) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(entry).join('\n')}\n</urlset>\n`;
+  await writeFile(R + 'dist/sitemap-pages.xml', urlset(pagePaths));
+  await writeFile(R + 'dist/sitemap-tools.xml', urlset(toolPaths));
+  const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml'];
+  await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc><lastmod>${TODAY}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 
   const robots = `# Tools4Market robots.txt\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE.url}/sitemap.xml\n`;
   await writeFile(R + 'dist/robots.txt', robots);
