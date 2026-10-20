@@ -11,9 +11,27 @@
 
 import { onRequestGet } from './functions/api/fetch.js';
 
+// Canonical host. The apex serves the site; www is redirected here in one hop
+// (path + query preserved) so there is never a redirect chain or a loop, and
+// so both hosts can be attached to this Worker safely.
+const CANONICAL_HOST = 'tools4market.online';
+const CANONICAL_ORIGIN = 'https://' + CANONICAL_HOST;
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
+
+    // ---- one-hop canonical redirect: www -> apex -------------------------
+    if (host === 'www.' + CANONICAL_HOST) {
+      return new Response(null, {
+        status: 301,
+        headers: {
+          'Location': CANONICAL_ORIGIN + url.pathname + url.search,
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
     // ---- backend: the live-URL proxy ------------------------------------
     if (url.pathname === '/api/fetch' || url.pathname === '/api/fetch/') {
