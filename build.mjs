@@ -11,9 +11,21 @@ const TODAY = new Date().toISOString().slice(0, 10);
 
 const SITE = {
   name: 'Tools4Market',
-  url: 'https://www.tools4market.online', // canonical host — apex (tools4market.online) should 301 → www at the host (Cloudflare Page Rule)
-  email: 'support@tools4market.online',
+  url: (process.env.SITE_URL || 'https://www.tools4market.online').replace(/\/+$/, ''),
+  email: process.env.SITE_EMAIL || 'support@tools4market.online',
   tagline: 'Free Marketing, SEO & AI-Search Tools',
+};
+
+// ---- Integration switches (set as build env vars; unset = feature stays off)
+// GA4 measurement id, e.g. G-ABC123XYZ
+const GA_ID = (process.env.GA_ID || '').trim();
+// AdSense publisher id, e.g. ca-pub-0000000000000000
+const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || '').trim();
+// Per-position AdSense ad unit ids (falls back to a single shared slot)
+const AD_SLOTS = {
+  'top banner': (process.env.AD_SLOT_TOP || '').trim(),
+  'below content': (process.env.AD_SLOT_CONTENT || '').trim(),
+  sidebar: (process.env.AD_SLOT_SIDEBAR || '').trim(),
 };
 
 const esc = (s) => String(s ?? '')
@@ -58,6 +70,11 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
+<link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
+<link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
+<meta name="theme-color" content="#5b4fff">
+${GA_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${esc(GA_ID)}',{anonymize_ip:true});</script>` : ''}
 <link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
 ${ld.map(ldTag).join('\n')}
 </head>
@@ -119,7 +136,16 @@ const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' 
   <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span></span>
 </a>`;
 
-const adSlot = (label) => `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space &mdash; live after AdSense approval${label ? ' &middot; ' + label : ''}</div>`;
+const adSlot = (label) => {
+  if (!ADSENSE_CLIENT) {
+    return `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space &mdash; live after AdSense approval${label ? ' &middot; ' + label : ''}</div>`;
+  }
+  const slot = AD_SLOTS[label] || AD_SLOTS.sidebar || ADSENSE_CLIENT;
+  return `<div class="ad-slot" role="complementary" aria-label="Advertisement">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="${esc(ADSENSE_CLIENT)}" data-ad-slot="${esc(slot)}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>`;
+};
 
 function homeLd() {
   return [
@@ -350,6 +376,43 @@ const run = async () => {
   await writeFile(R + 'dist/assets/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b4fff"/><stop offset="1" stop-color="#0ea47a"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="42" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#fff" text-anchor="middle">T4</text></svg>\n`);
   // social share image (og:image / twitter:image) — pre-rendered, brand palette
   await copyFile(R + 'src/assets/og-image.png', R + 'dist/assets/og-image.png');
+  for (const ic of ['icon-192.png', 'icon-512.png']) {
+    await copyFile(R + 'src/assets/' + ic, R + 'dist/assets/' + ic);
+  }
+  // PWA manifest (installability + mobile polish)
+  await writeFile(R + 'dist/manifest.webmanifest', JSON.stringify({
+    name: SITE.name + ' — ' + SITE.tagline,
+    short_name: 'Tools4Market',
+    description: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Nothing uploaded, no signup, no limits.`,
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    background_color: '#f5f4f0',
+    theme_color: '#5b4fff',
+    icons: [
+      { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    ],
+  }, null, 2) + '\n');
+  // Cloudflare Pages: cache + security headers, and apex → www canonical redirect
+  await writeFile(R + 'dist/_headers', `/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=300, must-revalidate
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+`);
+  await writeFile(R + 'dist/_redirects', `https://tools4market.online/* https://www.tools4market.online/:splat 301\n`);
+  // AdSense ads.txt (only meaningful once a publisher id exists)
+  if (ADSENSE_CLIENT) {
+    const pub = ADSENSE_CLIENT.replace(/^ca-/, '');
+    await writeFile(R + 'dist/ads.txt', `google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`);
+  }
 
   const pageCount = pages.length;
   console.log(`\u2714 Built ${pageCount} HTML pages (${TOOLS.length} tools, ${Object.keys(CATEGORIES).length} categories, ${POLICY.length} policy pages) + sitemap.xml, robots.txt, 404.html, assets.`);

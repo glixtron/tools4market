@@ -2,6 +2,23 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Private GitHub repo, MIT licence, and the Cloudflare frontend+backend integration layer
+
+**User brief:** make the repository private with an MIT licence, and treat "deploy frontend and backend both on Cloudflare" as a first-class requirement.
+
+**GitHub:** `glixtron/tools4market` created (switched the `gh` session to the `glixtron` account) → **visibility PRIVATE**, **MIT licence** added (`LICENSE`), `main` pushed, `origin` tracking set. `dist/` gitignored — Cloudflare builds it from source.
+
+**Cloudflare architecture (frontend + backend, one project):** the static `dist/` is the frontend and `functions/api/fetch.js` is the backend, both served from the same Pages project, so the client calls `/api/fetch` same-origin (no CORS, no keys, one SSL cert, one cache policy). Documented in README ("Cloudflare Pages: frontend and backend in one project") including the **private-repo caveat** — the Cloudflare Pages GitHub App must be granted access to `tools4market` or the repo won't appear in the picker — and the optional future split to a standalone Worker on `api.tools4market.online`.
+
+**Integration layer added to the build (all env-var driven, nothing hardcoded):**
+- `SITE_URL` / `SITE_EMAIL` overrides · `GA_ID` → GA4 `gtag` snippet (IP anonymised) · `ADSENSE_CLIENT` + `AD_SLOT_TOP/CONTENT/SIDEBAR` → real `<ins class="adsbygoogle">` units in the pre-reserved slots.
+- `dist/ads.txt` written automatically when a publisher id is present (verified with a test id).
+- `dist/_headers` — 1-year immutable assets, 5-minute HTML revalidation, `nosniff` / referrer-policy / frame-options / permissions-policy.
+- `dist/_redirects` — host-level 301 `tools4market.online/*` → `https://www.tools4market.online/:splat` (one canonical host).
+- `dist/manifest.webmanifest` + `icon-192.png` / `icon-512.png` (PWA installability, mobile theme colour).
+
+**Verification after the changes:** build 41 pages / 0 warnings; integration build with test env vars confirmed gtag + ad units + `ads.txt`, clean build confirms they're absent by default; full battery green — audit 236/236 · edge-suite 236/236 · smoke 30/30 · URL E2E 11/11 · Phase-2 suite 129/129 · engine suite 123/123; dev server 200 with manifest + icons served.
+
 ## 2026-10-20 (night, 3rd pass) — Domain wired: `www.tools4market.online`
 
 **User provided the purchased domain:** `www.tools4market.online`.

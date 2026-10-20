@@ -1,15 +1,17 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 20 Oct 2026 (night, 2nd pass — QA/RCA + SEO content + QC report).*
+*Living tracker — update after every session. Last updated: 21 Oct 2026 (private repo + MIT licence + Cloudflare frontend/backend integration layer).*
 
 ## 👤 User actions required — **these block launch**
 
-- [x] ~~**Buy domain**~~ — DONE: **`www.tools4market.online`** · `SITE.url` = `https://www.tools4market.online`, `SITE.email` = `hello@tools4market.online`, all dist URLs verified (0 old-domain references) · canonical = **www** (apex should 301 → www via a Cloudflare Page Rule)
+- [x] ~~**Buy domain**~~ — DONE: **`www.tools4market.online`** · `SITE.url` = `https://www.tools4market.online`, `SITE.email` = `support@tools4market.online`, all dist URLs verified (0 old-domain references) · canonical = **www** (apex 301 → www via `dist/_redirects` + optional Cloudflare Page Rule)
 - [ ] Create Google account assets: Search Console property, GA4 property (after deploy)
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
-- [ ] **Create the GitHub repo + push** — local repo is already committed (`main`, remote `origin` → `https://github.com/glixtron/tools4market.git`). The authed `gh` session here is a different account, so either: (a) create the empty repo at <https://github.com/new> (name `tools4market`, Public, **no** README/gitignore init files), then push; or (b) `gh auth login` as `glixtron` and ask the agent to run the create + push. Push command: `git push -u origin main`.
-- [ ] **Deploy to Cloudflare Pages** — Cloudflare dashboard → Pages → **Create project → Connect to Git → `glixtron/tools4market`** → build command `node build.mjs`, output dir `dist` → Deploy. This also activates the public `/api/fetch` live-URL proxy.
+- [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
+- [ ] **Deploy to Cloudflare Pages** — Cloudflare dashboard → Workers & Pages → Create → Pages → **Connect to Git → `glixtron/tools4market`** → build command `node build.mjs`, output dir `dist` → Deploy. This publishes the **frontend** (41 static pages) *and* the **backend** (`/api/fetch` Pages Function) from the same repo. Because the repo is private, grant the **Cloudflare Pages GitHub App** access to it (GitHub → Settings → Installed Apps → Cloudflare Pages → Configure → select `tools4market`), otherwise it won't appear in Cloudflare's repo picker.
+- [ ] **Set integration env vars in Cloudflare Pages** (Settings → Environment variables → Production): `GA_ID` (GA4), `ADSENSE_CLIENT` + `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` (AdSense; also writes `ads.txt`). `SITE_URL` / `SITE_EMAIL` are optional overrides — the defaults already point at the live domain.
+- [ ] **Point DNS to Cloudflare** (nameservers at the registrar) → add `www.tools4market.online` as a custom domain → verify `https://www.tools4market.online/api/fetch?url=https://example.com` returns `{"ok":true,…}`
 
 ## ✅ Phase 1 — complete (20 Oct 2026)
 
@@ -46,7 +48,7 @@
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
 - [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")
 - [x] ~~OG image (1200×630 PNG) for social sharing~~ — done (branded PNG + twitter:card=summary_large_image)
-- [ ] Minify assets at build (CSS/JS), add cache headers via `_headers` file
+- [x] ~~Minify assets at build (CSS/JS), add cache headers via `_headers` file~~ — `_headers` DONE (1-year immutable assets + 5-min HTML revalidate + security headers); minification still open (optional — keep readable source for the Cloudflare build)
 - [ ] Extend the URL-check panel to fetch `/robots.txt` + `/sitemap.xml` for site-level context (currently page-level)
 
 ## 📅 Phase 3 — months 3–4
@@ -61,10 +63,10 @@
 - [ ] 50K sessions/mo: apply Mediavine/Raptive
 
 ## 🚀 Launch sequence (order matters — see README pre-launch checklist)
-1. Domain purchase → 2. `SITE.url` update (`TODO-DOMAIN`) → 3. rebuild → 4. deploy to Cloudflare Pages → 5. custom domain → 6. Search Console + sitemap → 7. GA4 → 8. content → 9. AdSense application
+1. ~~Domain~~ ✔ → 2. ~~`SITE.url` wired~~ ✔ → 3. ~~GitHub repo (private, MIT) + push~~ ✔ → 4. deploy to Cloudflare Pages (frontend + `/api/fetch` backend) → 5. custom domain + apex 301 → 6. set `GA_ID` / AdSense env vars → 7. Search Console + sitemap → 8. content engine → 9. AdSense application
 
 ## 🧹 Debt / nice-to-have
-- [ ] Expand every tool page body copy to 400+ words (launch target is ~250–350)
+- [x] ~~Expand every tool page body copy to 400+ words~~ — DONE for all 30 tools (431–542 words each)
 - [ ] CSV export for keyword density tool
 - [ ] Dark mode (low priority)
 - [ ] Internal search page (client filter currently home/category only)
