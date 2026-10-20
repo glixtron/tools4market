@@ -53,7 +53,7 @@
 - Every structural decision lands in Architecture.md; every feature change updates pending-work.md + progress.md.
 - After any change to `src/`, run `node build.mjs` — `dist/` is never hand-edited.
 - Test in browser before declaring a tool done (browser-use skill).
-- `SITE.url` in build.mjs is now **`https://www.tools4market.online`** (domain purchased 20 Oct 2026). Keep the apex (`tools4market.online`) as a 301 → www at the host so all canonical URLs consolidate on one host.
+- `SITE.url` in build.mjs is now **`https://tools4market.online`** (domain purchased 20 Oct 2026) — the apex is the canonical host; `www` must 301 → apex (zone-level Cloudflare Redirect Rule). Override with the `SITE_URL` build env var if the host ever changes.
 
 ## 7. Metrics we optimise (in priority order)
 

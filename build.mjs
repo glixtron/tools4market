@@ -11,7 +11,7 @@ const TODAY = new Date().toISOString().slice(0, 10);
 
 const SITE = {
   name: 'Tools4Market',
-  url: (process.env.SITE_URL || 'https://www.tools4market.online').replace(/\/+$/, ''),
+  url: (process.env.SITE_URL || 'https://tools4market.online').replace(/\/+$/, ''), // canonical host — www redirects here at the zone level
   email: process.env.SITE_EMAIL || 'support@tools4market.online',
   tagline: 'Free Marketing, SEO & AI-Search Tools',
 };
@@ -423,12 +423,12 @@ const run = async () => {
 `);
   // Cloudflare Pages supports host-level redirects in _redirects, but Workers Static
   // Assets rejects them ("Only relative URLs are allowed", error 100324). So the
-  // apex → www 301 is opt-in via SITE_REDIRECTS_PAGES=1; on Workers it belongs to a
+  // www -> apex 301 is opt-in via SITE_REDIRECTS_PAGES=1; on Workers it belongs to a
   // zone-level Cloudflare Redirect Rule instead.
   await writeFile(R + 'dist/_redirects', process.env.SITE_REDIRECTS_PAGES === '1'
-    ? 'https://tools4market.online/* https://www.tools4market.online/:splat 301\n'
+    ? 'https://www.tools4market.online/* https://tools4market.online/:splat 301\n'
     : '# Host-level redirects are not allowed in Workers Static Assets (error 100324).\n' +
-      '# The apex -> www 301 is set as a Cloudflare Redirect Rule on the zone.\n');
+      '# The www -> apex 301 is set as a Cloudflare Redirect Rule on the zone.\n');
   // AdSense ads.txt (only meaningful once a publisher id exists)
   if (ADSENSE_CLIENT) {
     const pub = ADSENSE_CLIENT.replace(/^ca-/, '');

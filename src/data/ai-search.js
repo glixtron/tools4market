@@ -118,7 +118,7 @@ ${outputBlock('ab-out', 'robots.txt')}`,
     html: `
 ${f.text('ll-name', 'Site name', 'Tools4Market')}
 ${f.text('ll-desc', 'One-line description', 'Free marketing, SEO and AI-search tools that run in the browser.')}
-${f.url('ll-url', 'Homepage URL', 'https://www.tools4market.online')}
+${f.url('ll-url', 'Homepage URL', 'https://tools4market.online')}
 ${f.textarea('ll-pages', 'Key pages — one per line as: URL | Title | Note (title/note optional)', 'https://example.com/guide | Complete SEO guide | The deepest resource we have\nhttps://example.com/tools | All free tools\nhttps://example.com/blog/llms-explained | llms.txt explained', 8)}
 ${outputBlock('ll-out', 'llms.txt')}
 ${note('Upload as <strong>llms.txt</strong> at your domain root and link it from your homepage.')}`,

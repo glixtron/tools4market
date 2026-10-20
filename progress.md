@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Canonical host switched to the apex `tools4market.online`
+
+**User decision:** the main site URL is `tools4market.online` (not `www.`), and the live redirect loop on the apex was resolved by serving the site on the apex host.
+
+**Change:** `SITE.url` default is now `https://tools4market.online`. Everything derived from it followed automatically — per-page canonicals, `og:url`/`og:image`, `twitter:*`, the `WebSite`/`Organization`/`WebApplication`/`FAQPage`/`BreadcrumbList` JSON-LD `url` fields, `robots.txt`'s `Sitemap:` line, and all three sitemap files. The llms.txt homepage placeholder was corrected too. Verified: **0 references to `www.tools4market.online` remain in `dist/`** (the only remaining occurrence in the repo is the intentional, opt-in Pages redirect rule).
+
+**Host model now:** apex serves the site and is the canonical host; `www` must 301 → apex as a **zone-level Cloudflare Redirect Rule** (Workers Static Assets reject host-level rules in `_redirects` — error `100324`), attaching only the apex to the Worker so nothing can loop.
+
+**Sitemap for GSC:** `https://tools4market.online/sitemap.xml` (index → `sitemap-pages.xml` with home + 4 category hubs + 5 policy pages, `sitemap-tools.xml` with all 30 tool pages).
+
 ## 2026-10-21 — Sitemap rebuilt as a proper index (pages + tools)
 
 **Why:** for GSC submission the sitemap is the single most important file on the site, so it was rebuilt from one flat `urlset` into a **sitemap index** with two children — `sitemap-pages.xml` (home + 4 category hubs + 5 policy pages) and `sitemap-tools.xml` (all 30 tool pages). An index is the format that scales (a blog/content sitemap can be added later without touching the index), lets crawlers fetch only the slice they need, and keeps `lastmod` accurate per section.
