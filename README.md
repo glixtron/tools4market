@@ -161,7 +161,7 @@ Confirm the build warns nothing, then test in a browser before declaring it done
 
 `wrangler.jsonc` is committed, so wrangler never runs its interactive setup wizard on the build server — the deploy is one command.
 
-- **Build command:** `node build.mjs` · **Deploy command:** `npx wrangler deploy`
+- **Build command:** `npm run build` · **Deploy command:** `npm run deploy` (which runs the build first, then `npx wrangler deploy` — so the deploy can never run without a fresh `dist/`)
 - `wrangler.jsonc` sets: Worker name `tools4market`, entrypoint `worker.js`, static assets from `dist/` bound as `env.ASSETS`, `html_handling: auto-trailing-slash` (so `/tools/slug/` → `/tools/slug/index.html`), `not_found_handling: 404-page` (branded 404).
 - **One Worker = frontend + backend:** `worker.js` serves the static site through the ASSETS binding and routes `GET /api/fetch?url=…` to the shared proxy handler in `functions/api/fetch.js` — same origin, so no CORS and no API keys.
 - After the first deploy, attach the custom domain: Worker → **Settings → Domains & Routes → Add Custom Domain** → `tools4market.online` (the canonical host).
