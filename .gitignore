@@ -5,6 +5,10 @@ dist/
 node_modules/
 package-lock.json
 
+# Cloudflare Wrangler local state
+.wrangler/
+.dev.vars
+
 # macOS
 .DS_Store
 

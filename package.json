@@ -6,6 +6,8 @@
   "description": "Tools4Market — free browser-based marketing, SEO & AI-search tools",
   "scripts": {
     "build": "node build.mjs",
-    "serve": "node serve-dev.mjs"
+    "serve": "node serve-dev.mjs",
+    "deploy": "npx wrangler deploy",
+    "preview": "npx wrangler dev"
   }
 }

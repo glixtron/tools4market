@@ -1,0 +1,15 @@
+{
+  // Tools4Market — Cloudflare Workers Static Assets + Worker backend.
+  // Deploys the built site in dist/ and the /api/fetch proxy (worker.js) from one project.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tools4market",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-19",
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    // /tools/slug/ → /tools/slug/index.html, and /tools/slug → 301 to the slash form
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
