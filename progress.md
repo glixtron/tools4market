@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — DNS cutover completed; live launch verification 35/38
+
+**The DNS problem, end to end.** The domain was silently split-brained: the registrar's nameservers (`dns1/dns2.registrar-servers.com`) were still authoritative at the `.online` registry, and *that* zone had no A/CNAME record for the site — so Googlebot and every visitor got `ENOTFOUND` ("Sitemap could not be read" in GSC), while the owner's browser kept working off a cached Cloudflare IP. Cloudflare's 11 correct records (Worker routes, GSC verification TXT, privateemail MX/SPF/DMARC) were sitting unused.
+
+**Two distinct root causes, both now closed:**
+1. **Nameserver delegation** — fixed at the registrar: `curt.ns.cloudflare.com` + `rose.ns.cloudflare.com`. Registry flipped at 21:22:03Z; authoritative records confirmed (apex + www → Cloudflare anycast, GSC TXT published, MX → `mx1/mx2.privateemail.com`).
+2. **`ERR_TOO_MANY_REDIRECTS` was never DNS** — a **Cloudflare Access (Zero Trust) application** was guarding `www.tools4market.online` and 302-ing visitors to `hemant-vigyanllm.cloudflareaccess.com/cdn-cgi/access/login/...`, which bounced back to the app URL → infinite loop. The Worker now issues a single-hop `www → apex` 301 itself (`assets.run_worker_first: true` so the Worker actually runs for asset paths), so no zone rule is needed. **The Access app still needs deleting in the dashboard** — the only user action left.
+
+**Live verification (public site, Googlebot UA, authoritative DNS + real TLS through Cloudflare's edge): 35/38 PASS** → `launch-verification.md` in the repo root. All 40 pages return 200 with a self-referencing canonical on the apex host and are indexable; the sitemap index + both children are valid; `robots.txt` allows crawling and points at the canonical sitemap; `/api/fetch` returns real HTML in production and refuses loopback/metadata hosts; all assets and JSON-LD (WebSite, Organization, FAQPage) serve correctly. The 3 failures = 2× the Access app on `www` + 1 cosmetic `/404.html → 307` (Workers' `auto-trailing-slash` strips `.html`; real 404s still render the branded page).
+
+**Local suites at this build:** audit 236/236 · edge 236/236 · smoke 30/30 · URL E2E 11/11 · Phase-2 129/129 · engine 123/123 · QC 30/30.
+
 ## 2026-10-21 — Canonical host switched to the apex `tools4market.online`
 
 **User decision:** the main site URL is `tools4market.online` (not `www.`), and the live redirect loop on the apex was resolved by serving the site on the apex host.
