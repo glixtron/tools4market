@@ -1,0 +1,63 @@
+# Tools4Market — Project Rules
+
+*Binding for all future work on this codebase.*
+
+## 1. What we build / never build
+
+**Build:** free, instantly-useful, client-side tools for marketers, bloggers, developers, and webmasters. Global (English/US-first) audience.
+
+**Never build (AdSense-policy & reputation risk):**
+- Email extractors, scrapers, or any tool harvesting personal data
+- Fake "hackers", account crackers, or privacy-violating utilities
+- Tools requiring paid APIs we don't control (breaks = dead pages)
+- Duplicate/synonym-spammed tool variants (one tool per job, or programmatic with genuinely unique value)
+
+## 2. Definition of Done — every tool page must have
+
+- [ ] Working tool logic, tested in browser (correct output + edge cases: empty input, weird chars)
+- [ ] Unique H1 in pattern: `Free {Tool} — No Signup, No Limits`
+- [ ] Meta title ≤60 chars, meta description ≤158 chars (checked by build)
+- [ ] ≥2 unique content sections (what it does / how to use / use cases)
+- [ ] 3–5 FAQs with FAQPage schema
+- [ ] Copy button on every output; output escapes properly (textContent, never innerHTML)
+- [ ] Works on mobile; keyboard-operable
+- [ ] Listed on homepage + its category page + related-tools sidebar
+- [ ] In sitemap.xml (automatic via build)
+
+## 3. Code rules
+
+- **No frameworks, no npm dependencies.** Vanilla JS + one CSS file. Build = plain Node (`node build.mjs`).
+- Runtime JS: classic scripts, no modules (must work on `file://`). Shared registry: `window.T4M_TOOLS[slug] = (root) => {}`; lookup by `#tool-root[data-tool]`.
+- All dynamic DOM output via `textContent` / `createElement` — `innerHTML` only for build-time strings from our own data files.
+- Element IDs prefixed per tool (`mt-`, `og-`, `pw-`…) — pages are standalone but avoid collisions.
+- Every user-facing string in `src/data/*` — no hardcoded copy inside runtime files.
+- CSS: use design tokens from design.md; no inline styles except trivial layout tweaks in generated markup.
+
+## 4. SEO & content rules
+
+- One page = one search intent. No cannibalisation: before adding a tool, check it doesn't duplicate an existing page's target keyword.
+- Long-tail blog posts always link to their tool; tools link back to 2–3 posts (once blog exists).
+- No thin content: if a page can't justify 250+ unique words, it doesn't ship (expand later per pending-work.md).
+- Titles/descriptions written for US search intent; avoid India-only phrasing.
+- Schema honesty: only mark up what's genuinely on the page.
+
+## 5. Monetization rules
+
+- Ads only in `.ad-slot` positions; never inside the tool interaction flow.
+- Apply for AdSense only after: 18 tools + policy pages + 20–30 original articles + 50–100 daily visitors.
+- Affiliate disclosures added to any page carrying affiliate links (FTC + AdSense policy).
+- Privacy Policy must disclose: cookies, Google AdSense/third-party vendors, Analytics — already drafted in policy.js; update with real ad-account IDs after approval.
+
+## 6. Process rules
+
+- Every structural decision lands in Architecture.md; every feature change updates pending-work.md + progress.md.
+- After any change to `src/`, run `node build.mjs` — `dist/` is never hand-edited.
+- Test in browser before declaring a tool done (browser-use skill).
+- `SITE.url` in build.mjs is now **`https://www.tools4market.online`** (domain purchased 20 Oct 2026). Keep the apex (`tools4market.online`) as a 301 → www at the host so all canonical URLs consolidate on one host.
+
+## 7. Metrics we optimise (in priority order)
+
+1. Core Web Vitals (LCP < 1.5s, CLS < 0.05, INP < 200ms)
+2. Search impressions growth (GSC, reviewed weekly)
+3. Tool completion rate (used → copied output)
+4. RPM once ads are live

@@ -1,0 +1,11 @@
+{
+  "name": "tools4market",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tools4Market — free browser-based marketing, SEO & AI-search tools",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node serve-dev.mjs"
+  }
+}
