@@ -16,6 +16,8 @@
 
 **Next launch steps (user):** point DNS to Cloudflare → deploy repo to Pages (build `node build.mjs`, output `dist`) → add a Cloudflare Page Rule `tools4market.online/*` → `https://www.tools4market.online/$1` (301) → verify the public `/api/fetch` proxy responds → Search Console + sitemap submission.
 
+**GitHub + Cloudflare flow (21 Oct 2026):** local git repo created (`main`, 31 files, `dist/` ignored, identity glixtron <support@tools4market.online>), remote `origin` → `https://github.com/glixtron/tools4market.git`. Remote creation pending user (authed `gh` account here is different): create empty repo at github.com/new (name `tools4market`, Public, no init files) → `git push -u origin main` → Cloudflare Pages → Connect to Git → that repo, build `node build.mjs`, output `dist`.
+
 ## 2026-10-20 (late night) — Phase 2: 10 new tools (content + web suites)
 
 **Scope:** add 10 tools — 4 content (`case-converter`, `duplicate-line-remover`, `lorem-ipsum-generator`, `reading-time-calculator`) and 6 web (`base64-encoder-decoder`, `url-encoder-decoder`, `uuid-generator`, `jwt-decoder`, `user-agent-parser`, `ics-calendar-generator`).

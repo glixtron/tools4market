@@ -8,7 +8,8 @@
 - [ ] Create Google account assets: Search Console property, GA4 property (after deploy)
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
-- [ ] **Deploy to Cloudflare Pages** — this activates the `/api/fetch` live-URL proxy for the *public* site. Local testing already has full parity via `npm run serve` (`serve-dev.mjs` = static + the same proxy on :8090).
+- [ ] **Create the GitHub repo + push** — local repo is already committed (`main`, remote `origin` → `https://github.com/glixtron/tools4market.git`). The authed `gh` session here is a different account, so either: (a) create the empty repo at <https://github.com/new> (name `tools4market`, Public, **no** README/gitignore init files), then push; or (b) `gh auth login` as `glixtron` and ask the agent to run the create + push. Push command: `git push -u origin main`.
+- [ ] **Deploy to Cloudflare Pages** — Cloudflare dashboard → Pages → **Create project → Connect to Git → `glixtron/tools4market`** → build command `node build.mjs`, output dir `dist` → Deploy. This also activates the public `/api/fetch` live-URL proxy.
 
 ## ✅ Phase 1 — complete (20 Oct 2026)
 

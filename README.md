@@ -156,14 +156,14 @@ Confirm the build warns nothing, then test in a browser before declaring it done
 
 ## Deploying to Cloudflare Pages
 
-1. Push this repository to GitHub (or upload `dist/` directly).
-2. Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git** (or "Direct Upload").
+1. Push this repository to GitHub (repo: `github.com/glixtron/tools4market`; or upload `dist/` directly via "Direct Upload").
+2. Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git** (or "Direct Upload") → select `glixtron/tools4market`.
 3. Build settings:
    - **Framework preset:** None
    - **Build command:** `node build.mjs`
    - **Build output directory:** `dist`
 4. Deploy. Cloudflare gives you a `*.pages.dev` URL — verify the homepage, a tool page and `robots.txt`/`sitemap.xml` there.
-5. **Custom domain:** once the domain is bought, add it under Custom domains (Cloudflare handles SSL automatically). Point the domain's nameservers at Cloudflare.
+5. **Custom domain:** add `www.tools4market.online` under Custom domains (Cloudflare handles SSL automatically) and point the domain's nameservers at Cloudflare. Add a **Page Rule** `tools4market.online/*` → `https://www.tools4market.online/$1` (301) so www stays the canonical host.
 
 Any static host works the same way (Vercel, Netlify, GitHub Pages): build `node build.mjs`, publish `dist`.
 
