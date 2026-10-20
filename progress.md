@@ -2,6 +2,21 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Deploy failure RCA + fix: Worker entrypoint, Workers-safe `_redirects`
+
+**Symptom (user's Cloudflare build log):** build succeeded (41 pages), assets uploaded (57 files), then the deploy step failed: `Invalid _redirects configuration: Line 1: Only relative URLs are allowed. [code: 100324]`.
+
+**RCA — two problems, the second one silent and worse than the reported error:**
+1. **The reported error:** `dist/_redirects` contained a *host-level* rule (`https://tools4market.online/* → https://www.tools4market.online/:splat 301`). Cloudflare **Pages** supports host-level redirects, but **Workers Static Assets** only allow relative URLs → the API rejected the whole deployment. Fix: `_redirects` is now comment-only by default (the apex→www 301 moved to a zone-level Cloudflare Redirect Rule); the host rule is opt-in via `SITE_REDIRECTS_PAGES=1` for Pages deploys.
+2. **The silent one:** the deploy pipeline is `npx wrangler deploy` → a **Worker**, but the backend existed only as `functions/api/fetch.js` (a **Pages Function** convention). Even with the `_redirects` error fixed, the site would have deployed with **no `/api/fetch` route** — the URL-analysis features would have silently fallen back to paste-HTML in production. Fix: new `worker.js` entrypoint — one Worker serves the frontend through the `ASSETS` binding and routes `/api/fetch` to the *same* shared handler in `functions/api/fetch.js` (one codebase, deploys correctly on both Pages and Workers). `wrangler.jsonc` committed (`name`, `main: worker.js`, `assets.directory: dist`, `binding: ASSETS`, `html_handling: auto-trailing-slash`, `not_found_handling: 404-page`) so wrangler skips its interactive setup wizard on the build server (it was rewriting package.json/.gitignore and creating a config in the sandbox on every build).
+
+**Verification with the exact build toolchain (wrangler 4.151.3 + Node 24.13.0, same majors as the Cloudflare env):**
+- `wrangler deploy --dry-run` → assets read (101 files), `env.ASSETS` bound, 3 header rules parsed, **0 redirect rules**, no wizard prompts, no `_redirects` error.
+- `wrangler dev` (local workerd) → live requests: `/` 200 · `/tools/meta-tag-generator/` 200 · `/assets/style.css` 200 · **`/api/fetch?url=https://example.com` 200 with real fetched HTML** · unknown path → 404 with the branded page.
+- Site unchanged otherwise: build 41 pages / 0 warnings; full battery green (audit 236/236 · edge 236/236 · smoke 30/30 · URL E2E 11/11 · Phase-2 129/129 · engine 123/123).
+
+**Deploy now:** push done → Cloudflare redeploys automatically (build `node build.mjs`, deploy `npx wrangler deploy`).
+
 ## 2026-10-21 — Private GitHub repo, MIT licence, and the Cloudflare frontend+backend integration layer
 
 **User brief:** make the repository private with an MIT licence, and treat "deploy frontend and backend both on Cloudflare" as a first-class requirement.

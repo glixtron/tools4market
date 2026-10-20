@@ -155,7 +155,22 @@ Confirm the build warns nothing, then test in a browser before declaring it done
 
 ---
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare
+
+### Path A — Workers (the current pipeline: GitHub → `npx wrangler deploy`)
+
+`wrangler.jsonc` is committed, so wrangler never runs its interactive setup wizard on the build server — the deploy is one command.
+
+- **Build command:** `node build.mjs` · **Deploy command:** `npx wrangler deploy`
+- `wrangler.jsonc` sets: Worker name `tools4market`, entrypoint `worker.js`, static assets from `dist/` bound as `env.ASSETS`, `html_handling: auto-trailing-slash` (so `/tools/slug/` → `/tools/slug/index.html`), `not_found_handling: 404-page` (branded 404).
+- **One Worker = frontend + backend:** `worker.js` serves the static site through the ASSETS binding and routes `GET /api/fetch?url=…` to the shared proxy handler in `functions/api/fetch.js` — same origin, so no CORS and no API keys.
+- After the first deploy, attach the custom domain: Worker → **Settings → Domains & Routes → Add Custom Domain** → `www.tools4market.online`.
+- **Apex → www 301** (Workers Static Assets reject host-level rules in `_redirects` — error `100324`): do it at the **zone** level — Cloudflare → **Rules → Redirect Rules → Single redirect**:
+  - If: `Hostname equals tools4market.online`
+  - Then: **Dynamic redirect**, status `301`, target `concat("https://www.tools4market.online", http.request.uri.path)` (preserves the path), preserve query string.
+  - Attach only `www.tools4market.online` to the Worker so the apex never resolves to the site itself (no redirect loop).
+
+### Path B — Cloudflare Pages (alternative)
 
 1. Push this repository to GitHub (repo: `github.com/glixtron/tools4market`; or upload `dist/` directly via "Direct Upload").
 2. Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git** (or "Direct Upload") → select `glixtron/tools4market`.
@@ -166,20 +181,22 @@ Confirm the build warns nothing, then test in a browser before declaring it done
 4. Deploy. Cloudflare gives you a `*.pages.dev` URL — verify the homepage, a tool page and `robots.txt`/`sitemap.xml` there.
 5. **Custom domain:** add `www.tools4market.online` under Custom domains (Cloudflare handles SSL automatically) and point the domain's nameservers at Cloudflare. Add a **Page Rule** `tools4market.online/*` → `https://www.tools4market.online/$1` (301) so www stays the canonical host.
 
+On Pages, `functions/api/fetch.js` is deployed automatically as a Pages Function — no extra config, and the client calls it same-origin.
+
 Any static host works the same way (Vercel, Netlify, GitHub Pages): build `node build.mjs`, publish `dist`.
 
-### Cloudflare Pages: frontend **and** backend in one project
+### Cloudflare: frontend **and** backend in one project
 
-Both layers ship from this single repo to one Cloudflare Pages project — no second service to operate:
+Both layers ship from this single repo to one Cloudflare project — no second service to operate:
 
 | Layer | What it is | Where it comes from | Runs on |
 |---|---|---|---|
-| **Frontend** | 41 static pages (HTML/CSS/JS, 30 tools) | `dist/` (built by `node build.mjs`) | Cloudflare Pages static hosting (global CDN) |
-| **Backend** | `/api/fetch` live-URL proxy (SSRF-guarded) | `functions/api/fetch.js` | Cloudflare Pages Functions (serverless, same domain) |
+| **Frontend** | 41 static pages (HTML/CSS/JS, 30 tools) | `dist/` (built by `node build.mjs`) | Cloudflare static assets (global CDN) |
+| **Backend** | `/api/fetch` live-URL proxy (SSRF-guarded) | `functions/api/fetch.js`, served by `worker.js` | The same Worker (serverless) — or a Pages Function on Path B |
 
-Because the Function lives on the same host as the pages, the client can call `/api/fetch?url=…` **without CORS** and without any API key in the browser. The same-origin setup also means one SSL certificate, one cache policy and one deployment to reason about.
+Because the proxy lives on the same host as the pages, the client can call `/api/fetch?url=…` **without CORS** and without any API key in the browser. The same-origin setup also means one SSL certificate, one cache policy and one deployment to reason about.
 
-**Private repo note:** the repo is private, so after connecting Cloudflare you must grant the **Cloudflare Pages GitHub App** access to it — in the Pages project → *Settings → Builds & deployments → Connect to Git*, or on GitHub → *Settings → Installed Apps → Cloudflare Pages → Configure → select `tools4market`*. A private repo that the App cannot see simply won't appear in Cloudflare's repo picker.
+**Private repo note:** the repo is private, so the Cloudflare Git integration must be granted access to it — in the Pages project → *Settings → Builds & deployments → Connect to Git*, or on GitHub → *Settings → Installed Apps → Cloudflare Pages → Configure → select `tools4market`*. A private repo that the App cannot see simply won't appear in Cloudflare's repo picker.
 
 **If you later want a separate backend domain** (e.g. `api.tools4market.online`): `functions/api/fetch.js` is plain Workers-style code, so it can be deployed as a standalone Worker (`wrangler deploy`) with `Access-Control-Allow-Origin: https://www.tools4market.online`, and the client would call `https://api.tools4market.online/?url=…`. The current same-origin setup is simpler and free — treat the Worker split as a scale step, not a launch requirement.
 
@@ -202,11 +219,11 @@ In Cloudflare Pages: **Settings → Environment variables → Production** (and 
 | File | Purpose |
 |---|---|
 | `dist/_headers` | Cache policy (`/assets/*` immutable 1y, HTML revalidate 5 min) + security headers (nosniff, referrer-policy, frame-options, permissions-policy) |
-| `dist/_redirects` | Host-level 301: `tools4market.online/*` → `https://www.tools4market.online/:splat` (keeps one canonical host) |
+| `dist/_redirects` | Comment-only on Workers (host-level redirects are rejected with error 100324). Set `SITE_REDIRECTS_PAGES=1` to emit the apex→www rule when deploying to Pages; on Workers use a zone-level Cloudflare Redirect Rule instead |
 | `dist/manifest.webmanifest` | PWA/installability + mobile theme colour, with 192/512 icons |
 | `dist/ads.txt` | AdSense publisher id (written only when `ADSENSE_CLIENT` is set) |
 | `dist/robots.txt`, `dist/sitemap.xml` | Crawl directives + the 40-URL sitemap, both auto-pointed at `SITE_URL` |
-| `functions/api/fetch.js` | The backend route — deployed automatically as a Pages Function |
+| `functions/api/fetch.js` | The backend route — deployed as a Pages Function on Path B, or served by `worker.js` on Path A |
 
 
 ### The `/api/fetch` proxy (live URL checks)
