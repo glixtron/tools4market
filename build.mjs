@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Tools4Market — static site generator. Run: node build.mjs
-import { rm, mkdir, writeFile, copyFile } from 'node:fs/promises';
+import { rm, mkdir, writeFile, copyFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { TOOLS, CATEGORIES, POLICY } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
@@ -21,6 +21,8 @@ const SITE = {
 const GA_ID = (process.env.GA_ID || '').trim();
 // AdSense publisher id, e.g. ca-pub-0000000000000000
 const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || '').trim();
+// Bing Webmaster Tools site-verification id (also shipped as /BingSiteAuth.xml)
+const BING_VERIFY = (process.env.BING_VERIFY || '77EFF8B735065A945570BBFD566B0530').trim();
 // Per-position AdSense ad unit ids (falls back to a single shared slot)
 const AD_SLOTS = {
   'top banner': (process.env.AD_SLOT_TOP || '').trim(),
@@ -67,6 +69,7 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${SITE.url}/assets/og-image.png">
+${BING_VERIFY ? `<meta name="msvalidate.01" content="${esc(BING_VERIFY)}">` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
@@ -408,6 +411,14 @@ const run = async () => {
       { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
   }, null, 2) + '\n');
+  // static root files (site-verification files, ads.txt overrides, …) → served from the domain root
+  try {
+    const staticFiles = await readdir(R + 'src/static');
+    for (const f of staticFiles) {
+      await copyFile(R + 'src/static/' + f, R + 'dist/' + f);
+    }
+  } catch (e) { /* no src/static directory — nothing to copy */ }
+
   // Cloudflare Pages: cache + security headers, and apex → www canonical redirect
   await writeFile(R + 'dist/_headers', `/assets/*
   Cache-Control: public, max-age=31536000, immutable
