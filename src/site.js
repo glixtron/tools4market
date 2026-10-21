@@ -131,6 +131,15 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
         functionality_storage: 'granted',
         security_storage: 'granted',
       });
+      // keep GA4 (gtag.js) in sync with the choice
+      if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+          analytics_storage: analytics ? 'granted' : 'denied',
+          ad_storage: ads ? 'granted' : 'denied',
+          ad_user_data: ads ? 'granted' : 'denied',
+          ad_personalization: ads ? 'granted' : 'denied',
+        });
+      }
     }
     function apply(state) {
       write(state);

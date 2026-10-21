@@ -170,17 +170,34 @@ npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (D
 
 `npm run test:live` verifies what Googlebot actually sees: authoritative DNS, the sitemap index + children, **every URL in the sitemap** (200 + self-referencing canonical + indexable), `robots.txt`, the `/api/fetch` backend (including the SSRF guard), the Bing/Google verification files, and all assets. The last full run is recorded in [`launch-verification.md`](launch-verification.md) and [`qcreport.md`](qcreport.md).
 
-### Analytics & cookies (Google Tag Manager)
+### Analytics & cookies (Google Tag Manager + GA4)
 
-Every page ships the GTM container (`GTM-P6P4FLGB`): the loader in `<head>` and the `noscript` iframe at the top of `<body>`. Analytics is **consent-gated** so the site is GDPR/CCPA-safe out of the box:
+Every page ships **one** Google tag per page, in this order:
 
-1. An inline script (before GTM loads) sets **Consent Mode v2 defaults to `denied`** for `analytics_storage`, `ad_storage`, `ad_user_data` and `ad_personalization` — so no analytics or ad storage is written before the visitor chooses.
-2. A cookie banner appears on first visit: **Accept all** · **Reject non-essential** · **Manage preferences** (analytics and ads are separate toggles). The choice is stored in `localStorage` (`t4m_consent`) and pushed to `dataLayer` as a `consent_update` event, so the container can react to it.
+```html
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>…Consent Mode v2 defaults: denied…</script>   <!-- consent first, always -->
+  <!-- Google tag (gtag.js) -->                             <!-- GA4  G-6B4GGFC96K  -->
+  <!-- Google Tag Manager -->                              <!-- GTM   GTM-P6P4FLGB  -->
+</head>
+```
+
+- **GA4** (`G-6B4GGFC96K`) — `gtag.js` with IP anonymisation, consent-aware.
+- **GTM** (`GTM-P6P4FLGB`) — loader in `<head>` + the `noscript` iframe at the top of `<body>`.
+
+Analytics is **consent-gated** so the site is GDPR/CCPA-safe out of the box:
+
+1. An inline script (before any Google tag loads) sets **Consent Mode v2 defaults to `denied`** for `analytics_storage`, `ad_storage`, `ad_user_data` and `ad_personalization` — so no analytics or ad storage is written before the visitor chooses. It calls both `gtag('consent','default', …)` (for GA4) and pushes a `default_consent` event (for the GTM container).
+2. A cookie banner appears on first visit: **Accept all** · **Reject non-essential** · **Manage preferences** (analytics and ads are separate toggles). The choice is stored in `localStorage` (`t4m_consent`) and pushed to `dataLayer` as a `consent_update` event, and to GA4 as `gtag('consent','update', …)`.
 3. A **"Cookie settings"** link in the footer reopens the preferences at any time (GDPR requires withdrawal to be as easy as consent).
 
 **One thing to set up in your GTM container** (once, in the GTM UI): create the Consent Mode variables (`analytics_storage`, `ad_storage`, …) and set their default value to **Denied**; the `default_consent` / `consent_update` events pushed by the site then flip them to Granted when the visitor accepts. Without that, the container's tags would fire regardless of the banner.
 
-Verify with `npm run test:consent` (17 behavioural checks) and `npm run test:live` (GTM + consent presence on the public site).
+> **Avoid double counting:** the site loads GA4 directly (`G-6B4GGFC96K`) *and* GTM. If your GTM container also contains a **Google Analytics / GA4 Configuration** tag, remove one of the two — otherwise every pageview is counted twice.
+
+Verify with `npm run test:consent` (20 behavioural checks) and `npm run test:live` (Google tag + GTM + consent presence on the public site).
 
 ---
 
@@ -237,7 +254,7 @@ Everything optional is switched by an environment variable at build time — the
 |---|---|
 | `SITE_URL` | Overrides the canonical origin (defaults to `https://tools4market.online`) — used by canonical, Open Graph, JSON-LD, sitemap, robots.txt |
 | `SITE_EMAIL` | Overrides the contact address in the Organization JSON-LD |
-| `GA_ID` | Injects the GA4 `gtag` snippet on every page (IP anonymisation on) |
+| `GA_ID` | Google Analytics 4 measurement id (default `G-6B4GGFC96K`). Injects **one** `gtag.js` tag per page, immediately after `<head>`, with IP anonymisation and Consent Mode v2 defaults |
 | `GTM_ID` | Google Tag Manager container (default `GTM-P6P4FLGB`). Injected on every page — head script + noscript iframe — and gated by the cookie-consent banner (Consent Mode v2). |
 | `ADSENSE_CLIENT` | Swaps the `.ad-slot` placeholders for real `<ins class="adsbygoogle">` units and writes `ads.txt` with your publisher id |
 | `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` | Per-position AdSense ad-unit ids (falls back to one shared slot) |

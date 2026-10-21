@@ -17,7 +17,7 @@ const SITE = {
 
 // ---- Integration switches (set as build env vars; unset = feature stays off)
 // GA4 measurement id, e.g. G-ABC123XYZ
-const GA_ID = (process.env.GA_ID || '').trim();
+const GA_ID = (process.env.GA_ID || 'G-6B4GGFC96K').trim();
 // AdSense publisher id, e.g. ca-pub-0000000000000000
 const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || '').trim();
 // Bing Webmaster Tools site-verification id (also shipped as /BingSiteAuth.xml)
@@ -95,10 +95,23 @@ function layout({ path, title, desc, body, ld = [], noindex = false }) {
   // analytics/ad storage is written until the visitor accepts.
   const consentDefaults = `<script>
 window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+window.gtag('consent', 'default', {
+  analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied',
+  ad_personalization: 'denied', functionality_storage: 'granted', security_storage: 'granted' });
 window.dataLayer.push({ event: 'default_consent',
   analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied',
   ad_personalization: 'denied', functionality_storage: 'granted', security_storage: 'granted' });
 </script>`;
+  const gaTag = GA_ID ? `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${esc(GA_ID)}', {anonymize_ip:true});
+</script>` : '';
   const gtmHead = GTM_ID ? `<!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -115,7 +128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-${consentDefaults}${gtmHead}
+${consentDefaults}${gaTag}${gtmHead}
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical" href="${url}">
@@ -140,8 +153,6 @@ ${BING_VERIFY ? `<meta name="msvalidate.01" content="${esc(BING_VERIFY)}">` : ''
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
 <link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
 <meta name="theme-color" content="#5b4fff">
-${GA_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${esc(GA_ID)}',{anonymize_ip:true});</script>` : ''}
 <link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
 ${ld.map(ldTag).join('\n')}
 </head>

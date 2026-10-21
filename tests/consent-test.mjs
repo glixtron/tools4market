@@ -99,10 +99,23 @@ const defaultConsent = (win) => {
 // 5. accept all
 {
   const { dom, doc, win } = await load('/');
+  const gtagCalls = () => (win.dataLayer || []).filter((e) => e && e[0] === 'consent' && e[1] === 'update');
+  ok('GA4 tag loaded once with the right id', (doc.documentElement.innerHTML.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length === 1);
   doc.getElementById('ck-accept').click();
   const c = lastConsent(win);
   ok('accept all → consent granted', !!c && c.analytics_storage === 'granted' && c.ad_storage === 'granted', JSON.stringify(c));
   ok('accept all → banner hidden', doc.getElementById('ck-banner').hidden === true);
+  const calls = gtagCalls();
+  ok('GA4 consent updated on accept', calls.length === 1 && calls[0][2] && calls[0][2].analytics_storage === 'granted', JSON.stringify(calls[0] && calls[0][2]));
+  dom.window.close();
+}
+
+// 6. reject → GA4 consent must be updated to denied as well
+{
+  const { dom, doc, win } = await load('/');
+  doc.getElementById('ck-reject').click();
+  const calls = (win.dataLayer || []).filter((e) => e && e[0] === 'consent' && e[1] === 'update');
+  ok('GA4 consent updated on reject', calls.length === 1 && calls[0][2] && calls[0][2].analytics_storage === 'denied', JSON.stringify(calls[0] && calls[0][2]));
   dom.window.close();
 }
 

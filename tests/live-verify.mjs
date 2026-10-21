@@ -123,6 +123,8 @@ ok('homepage Bing msvalidate meta', /name="msvalidate\.01"/.test(home));
 ok('homepage has no noindex', !/content="noindex"/i.test(home));
 ok('GTM container script in head', /googletagmanager\.com\/gtm\.js/.test(home) && /GTM-P6P4FLGB/.test(home));
 ok('GTM noscript iframe in body', /ns\.html\?id=GTM-P6P4FLGB/.test(home));
+ok('exactly one Google tag (gtag.js) on the page', (home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length === 1, String((home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length));
+ok('gtag consent default is denied', /gtag\('consent',\s*'default'/.test(home) && /analytics_storage:\s*'denied'/.test(home));
 ok('consent defaults deny analytics/ads', /default_consent/.test(home) && /analytics_storage:\s*'denied'/.test(home) && /ad_storage:\s*'denied'/.test(home));
 ok('cookie consent banner + preferences present', /id="ck-banner"/.test(home) && /id="ck-panel"/.test(home) && /id="ck-accept"/.test(home) && /id="ck-reject"/.test(home));
 const toolPage = (await grab(ORIGIN + '/tools/case-converter/')).body;
