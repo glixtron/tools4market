@@ -15,6 +15,11 @@
 **Site-wide SEO definition pass** — every tool page now declares an explicit **`focus`** field: the ONE search phrase that page targets (`'meta tag generator'`, `'xml sitemap generator'`, `'jwt decoder'`, …). A new audit (`tests/seo-audit.mjs`, `npm run test:seo`) enforces that the target phrase appears in the meta title, meta description, intro, at least one section heading and at least two FAQs, and checks title/description/H1 length and uniqueness, section depth (430–600 words), FAQ quality, structured-data completeness (WebApplication + FAQPage + BreadcrumbList), internal linking, HTML hygiene and site-wide duplicate detection (titles, descriptions, H1s, paragraphs, FAQ questions/answers, keyword strings).
 - **Homepage** gained a visible FAQ section (6 real questions: free?, data upload?, client work?, offline?, preview accuracy?, how do you make money?) + `FAQPage` JSON-LD.
 - The audit found **124 genuine gaps** (keyword targeting across 26 tools, 4 pages under the word floor, one duplicate FAQ question across two tools) — being fixed now, one data file per agent, then re-audited to zero.
+**AdSense-readiness content (review submitted):** the About page grew 270 → 729 words (what we build, how it works, how we test, editorial standards), the Contact page 115 → 338 words with a working form and explicit complaints / privacy / business routes, and every policy email is now a `mailto:` link. AdSense's usual "low content" and "no contact route" objections are answered.
+
+**Guides section (new `/blog/`):** hub + article pages with `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author/reviewer/date, cited sources, and each guide links into the tools it discusses. Two full guides published: *"robots.txt for search engines and AI crawlers"* and *"The website launch SEO checklist"* — both from the keyword plan's recommended list. `sitemap-blog.xml` added to the sitemap index.
+
+**Final state of this pass:** 44 pages (30 tools · 4 categories · 5 policy · 2 guides · guide hub · home) · build 0 warnings · **SEO audit 1254/1254** · smoke 30/30 · consent 30/30 · personalized 84/84 · **live 52/52**.
 
 ## 2026-10-21 — Five page-personalized SEO tools upgraded
 
