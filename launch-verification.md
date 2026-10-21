@@ -3,7 +3,7 @@
 **Run against the public site (https://tools4market.online) with a Googlebot user-agent.**
 DNS is read from the authoritative nameservers (`curt.ns.cloudflare.com`); pages are fetched over TLS through Cloudflare's edge — i.e. exactly what Googlebot sees.
 
-## Result: 43 / 43 checks PASS — 0 failures
+## Result: 53 / 53 checks PASS — 0 failures
 
 ```
 === DNS (authoritative) ===
@@ -27,13 +27,14 @@ PASS  unknown URL returns branded, noindex 404  | status 404
 
 === Sitemap ===
 PASS  sitemap.xml is a sitemapindex
-PASS  index lists children  | https://tools4market.online/sitemap-pages.xml https://tools4market.online/sitemap-tools.xml
-PASS  sitemap-pages.xml: valid urlset (10 urls)
+PASS  index lists children  | https://tools4market.online/sitemap-pages.xml https://tools4market.online/sitemap-tools.xml https://tools4market.online/sitemap-blog.xml
+PASS  sitemap-pages.xml: valid urlset (11 urls)
 PASS  sitemap-tools.xml: valid urlset (30 urls)
-PASS  all URLs unique and on the canonical host  | 40 urls
+PASS  sitemap-blog.xml: valid urlset (10 urls)
+PASS  all URLs unique and on the canonical host  | 51 urls
 
 === Every sitemap URL ===
-PASS  all 40 URLs: 200 + self-referencing canonical + indexable  | 40/40
+PASS  all 51 URLs: 200 + self-referencing canonical + indexable  | 51/51
 PASS  all non-home sitemap pages have visible + JSON-LD breadcrumbs  | all breadcrumb trails present
 
 === Backend /api/fetch ===
@@ -43,6 +44,7 @@ PASS  proxy blocks SSRF to loopback  | {"ok":false,"error":"That host is not all
 === Metadata & assets ===
 PASS  homepage og:image on the canonical host
 PASS  homepage WebSite + Organization JSON-LD
+PASS  homepage has a visible FAQ section + FAQPage schema
 PASS  homepage Bing msvalidate meta
 PASS  homepage has no noindex
 PASS  GTM container script in head
@@ -55,6 +57,14 @@ PASS  consent defaults deny analytics/ads
 PASS  cookie consent banner + preferences present
 PASS  tool pages also carry GTM + consent UI
 PASS  privacy policy documents cookies/consent
+PASS  AdSense loader present with the publisher id
+PASS  ads.txt served with the publisher id
+PASS  ad slots reserve space without broken ad units
+PASS  every live page (51) carries exactly one Google tag (G-6B4GGFC96K), consent first
+PASS  blog index reachable with article links  | /blog/ / /assets/favicon.svg /assets/icon-192.png /manifest.webmanifest /sitemap
+PASS  article page has BlogPosting + FAQPage + Breadcrumb schema
+PASS  article links into its matching tools
+PASS  sitemap index includes the blog child
 PASS  asset /assets/style.css  | status 200
 PASS  asset /assets/og-image.png  | status 200
 PASS  asset /assets/icon-192.png  | status 200
@@ -63,26 +73,29 @@ PASS  asset /assets/runtime/inspect.js  | status 200
 PASS  asset /assets/runtime/audit.js  | status 200
 PASS  asset /assets/inspect-strings.js  | status 200
 
-TOTAL: 43 passed, 0 failed
+TOTAL: 53 passed, 0 failed
 ```
 
 ## Coverage
 
 - **DNS** — apex + www delegated to Cloudflare and resolving; GSC verification TXT published; MX/SPF (privateemail) live.
 - **Redirects** — `www` → 301 → `https://tools4market.online/`; apex serves 200 with no redirect.
-- **Sitemaps** — `sitemap.xml` is a valid index → `sitemap-pages.xml` (10 URLs) + `sitemap-tools.xml` (30 URLs); 40 unique URLs on the canonical host, no synthetic `lastmod`.
-- **Every page** — all 40 URLs: HTTP 200, self-referencing canonical, indexable, with visible + JSON-LD breadcrumbs on every non-home page.
-- **robots.txt** — allows crawling, points at the canonical sitemap; unknown URLs return a branded `noindex` 404.
+- **Sitemaps** — `sitemap.xml` is a valid index → pages + tools + blog children; every URL on the canonical host, no synthetic `lastmod`.
+- **Every page** — all URLs: HTTP 200, self-referencing canonical, indexable, visible + JSON-LD breadcrumbs on non-home pages.
+- **Google tag** — exactly one `G-6B4GGFC96K` gtag.js tag on **every** published page, always after the Consent Mode v2 defaults.
+- **Consent Mode v2** — region-scoped defaults (EEA/UK/CH denied), `wait_for_update`, `url_passthrough`, `ads_data_redaction`; banner + preferences on every page; privacy policy documents it.
+- **AdSense** — loader with the publisher id on every page, `ads.txt` at the root, ad slots reserved with no broken units.
+- **Guides** — `/blog/` hub + 10 articles, each with `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author/reviewer/date, cited sources and links into its tools; RSS feed; `/llms.txt` + `/llms-full.txt` for AI crawlers.
 - **Backend `/api/fetch`** — returns real fetched HTML in production; loopback/metadata hosts refused (SSRF guard).
-- **Analytics & consent (Consent Mode v2)** — exactly one Google tag (`G-6B4GGFC96K`) per page immediately after `<head>`; GTM container (`GTM-P6P4FLGB`) loader + noscript iframe; region-scoped default consent (EEA/UK/CH), `wait_for_update`, `url_passthrough`, `ads_data_redaction`; consent banner + preferences on every page; privacy policy documents it.
-- **Assets & metadata** — style.css, og-image, icons, site.js, all runtime bundles; `og:image` on the canonical host; `WebSite` + `Organization` + `FAQPage` JSON-LD; Bing `msvalidate` meta; no `noindex` on live pages.
 
 ## Local regression suites (same build)
 
 | Suite | Result |
 |---|---|
 | `npm test` — tests/smoke.mjs (all 30 tool pages) | 30/30 clean |
-| `npm run test:consent` — tests/consent-test.mjs | 30/30 PASS |
-| build (`node build.mjs`) | 41 pages, **0 SEO warnings** |
+| `npm run test:seo` — tests/seo-audit.mjs (site-wide SEO definition) | 1487/1487 |
+| `npm run test:consent` — tests/consent-test.mjs | 30/30 |
+| tests/personalized-tools-test.mjs | 84/84 |
+| build (`node build.mjs`) | 52 pages, **0 SEO warnings** |
 | `wrangler deploy --dry-run` (node 24 = CF runtime) | clean, 104 assets, `env.ASSETS` bound |
 
