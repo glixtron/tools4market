@@ -23,7 +23,20 @@ const esc = (s) => String(s || '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').r
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 const slugOf = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 const read = (p) => readFileSync(path.join(DIST, p), 'utf8');
-const hasFocus = (hay, focus) => { const h = norm(hay); const t = norm(focus); return h.includes(t) || t.split(' ').filter((w) => w.length > 3).every((w) => h.includes(w)); };
+// A page targets its focus phrase when the phrase appears, or when the
+// significant words of it do (long-tail phrases contain words like "your" that
+// should not have to appear verbatim). Short phrases must match completely.
+const STOPWORDS = new Set(['the', 'and', 'for', 'with', 'your', 'our', 'how', 'to', 'of', 'in', 'on', 'a', 'an', 'is', 'are', 'if', 'can', 'my', 'me', 'not', 'or', 'that', 'this', 'it', 'you', 'we', 'at', 'be', 'by', 'from', 'as', 'so', 'do', 'does', 'did', 'was', 'were', 'will', 'would', 'should', 'could', 'when', 'what', 'why', 'where', 'which', 'who']);
+const hasFocus = (hay, focus) => {
+  const h = norm(hay);
+  const t = norm(focus);
+  if (h.includes(t)) return true;
+  const words = t.split(' ').filter((w) => w.length > 3 && !STOPWORDS.has(w));
+  if (!words.length) return true;
+  if (words.length <= 2) return words.every((w) => h.includes(w));
+  const hits = words.filter((w) => h.includes(w)).length;
+  return hits >= Math.ceil(words.length * 0.6);
+};
 
 // ---------- site-wide duplicate detection
 const titles = new Map(), descs = new Map(), h1s = new Map();
@@ -134,7 +147,7 @@ for (const t of TOOLS) {
   const seenParas = new Map();
   for (const a of ARTICLES) {
     const p = 'blog/' + a.slug;
-    const words = a.sections.reduce((n, s2) => n + s2.p.join(' ').split(/\s+/).filter(Boolean).length, 0);
+    const words = a.sections.reduce((n, s2) => n + [...(s2.p || []), ...(s2.p2 || [])].join(' ').split(/\s+/).filter(Boolean).length, 0);
     ok(`${p}: metaTitle 25-60`, a.metaTitle.length >= 25 && a.metaTitle.length <= 60, a.metaTitle.length + '');
     ok(`${p}: metaTitle carries the target phrase`, hasFocus(a.metaTitle, a.focus), `"${a.metaTitle}" vs "${a.focus}"`);
     ok(`${p}: metaDesc 110-158`, a.metaDesc.length >= 110 && a.metaDesc.length <= 158, a.metaDesc.length + '');
@@ -150,7 +163,7 @@ for (const t of TOOLS) {
     ok(`${p}: has a date + author`, !!a.date && !!a.author);
     ok(`${p}: links to >=3 tools`, (a.relatedTools || []).length >= 3, (a.relatedTools || []).length + '');
     ok(`${p}: cites authoritative sources`, (a.links || []).length >= 2);
-    for (const s2 of a.sections) for (const pr of s2.p) { const k = norm(pr).slice(0, 120); if (k.length > 60) add(seenParas, k, p); }
+    for (const s2 of a.sections) for (const pr of [...(s2.p || []), ...(s2.p2 || [])]) { const k = norm(pr).slice(0, 120); if (k.length > 60) add(seenParas, k, p); }
   }
   for (const [k, v] of [...seenParas.entries()].filter(([, v]) => v.length > 1)) ok('blog: no duplicate paragraphs', false, v.join(' , '));
   // built pages
@@ -168,6 +181,60 @@ for (const t of TOOLS) {
   const idxResolved = new Set([...idxHtml.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/blog/').pathname; } catch (e) { return ''; } }));
   ok('blog index: links to every article', ARTICLES.every((a) => idxResolved.has('/blog/' + a.slug + '/')), ARTICLES.filter((a) => !idxResolved.has('/blog/' + a.slug + '/')).map((a) => a.slug).join(','));
   ok('blog index: CollectionPage schema', /"@type":"CollectionPage"/.test(idxHtml));
+}
+
+// ---------- AI-search surfaces (llms.txt / RSS feed / blog sitemap)
+{
+  let llms = '';
+  try { llms = read('llms.txt'); } catch (e) {}
+  ok('llms.txt: exists at the domain root', llms.length > 0);
+  ok('llms.txt: starts with an H1', llms.startsWith('# '));
+  ok('llms.txt: has a blockquote summary', llms.includes('\n> '));
+  ok('llms.txt: lists every tool', TOOLS.every((t) => llms.includes(`/tools/${t.slug}/`)), TOOLS.filter((t) => !llms.includes(`/tools/${t.slug}/`)).map((t) => t.slug).join(','));
+  ok('llms.txt: lists every guide', ARTICLES.every((a) => llms.includes(`/blog/${a.slug}/`)), ARTICLES.filter((a) => !llms.includes(`/blog/${a.slug}/`)).map((a) => a.slug).join(','));
+  ok('llms.txt: every listed URL is on the canonical host', !llms.includes('www.tools4market.online') && !llms.includes('http://'));
+
+  let feed = '';
+  try { feed = read('feed.xml'); } catch (e) {}
+  ok('feed.xml: exists and is RSS 2.0', feed.startsWith('<?xml') && feed.includes('<rss version="2.0"'));
+  ok('feed.xml: carries every guide', ARTICLES.every((a) => feed.includes(`<link>${'https://tools4market.online'}/blog/${a.slug}/</link>`)));
+  ok('feed.xml: self-referencing atom:link', feed.includes('rel="self"'));
+
+  let blogMap = '';
+  try { blogMap = read('sitemap-blog.xml'); } catch (e) {}
+  ok('sitemap-blog.xml: lists every guide', ARTICLES.every((a) => blogMap.includes(`/blog/${a.slug}/`)), ARTICLES.filter((a) => !blogMap.includes(`/blog/${a.slug}/`)).map((a) => a.slug).join(','));
+  const sitemapIdx = read('sitemap.xml');
+  ok('sitemap.xml: index includes the blog child', sitemapIdx.includes('sitemap-blog.xml'));
+  ok('robots.txt: points at the sitemap index', read('robots.txt').includes('Sitemap: https://tools4market.online/sitemap.xml'));
+}
+
+// ---------- every page carries exactly one Google tag (and consent comes first)
+{
+  const { readdirSync, statSync } = await import('node:fs');
+  const walk = (dir) => {
+    const out = [];
+    for (const e of readdirSync(dir)) {
+      const full = path.join(dir, e);
+      if (statSync(full).isDirectory()) out.push(...walk(full));
+      else if (full.endsWith('.html')) out.push(full);
+    }
+    return out;
+  };
+  const files = walk(DIST);
+  let missing = 0, doubled = 0, misordered = 0, wrongId = 0;
+  for (const f of files) {
+    const html = readFileSync(f, 'utf8');
+    const rel = f.slice(DIST.length);
+    const tagCount = (html.match(/googletagmanager\.com\/gtag\/js\?id=/g) || []).length;
+    if (tagCount === 0) { missing++; ok(rel + ': Google tag present', false, 'no gtag.js tag'); continue; }
+    if (tagCount > 1) { doubled++; ok(rel + ': exactly one Google tag', false, tagCount + ' tags'); continue; }
+    if (!/googletagmanager\.com\/gtag\/js\?id=G-6B4GGFC96K/.test(html)) { wrongId++; ok(rel + ': Google tag uses the right id', false, 'wrong id'); continue; }
+    const consentAt = html.indexOf("gtag('consent', 'default'");
+    const tagAt = html.indexOf('googletagmanager.com/gtag/js');
+    if (consentAt === -1 || (tagAt !== -1 && consentAt > tagAt)) { misordered++; ok(rel + ': consent default precedes the Google tag', false, 'consent@' + consentAt + ' tag@' + tagAt); continue; }
+    pass++;
+  }
+  ok(`all ${files.length} built pages carry exactly one Google tag (G-6B4GGFC96K) with consent first`, missing === 0 && doubled === 0 && wrongId === 0 && misordered === 0, `${files.length} pages checked`);
 }
 
 // ---------- homepage

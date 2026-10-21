@@ -53,8 +53,10 @@ function rel(from, to) {
   return '../'.repeat(f.length - i) + tail + (tail && to.endsWith('/') ? '/' : '');
 }
 
-// escape, then re-allow **bold** markers for our own content
-const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+// escape, then re-allow **bold** and `code` markers for our own content
+const rich = (s) => esc(s)
+  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  .replace(/`([^`]+)`/g, '<code>$1</code>');
 
 const ldTag = (obj) => '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, '\\u003c') + '</script>';
 
@@ -157,14 +159,17 @@ function layout({ path, title, desc, body, ld = [], noindex = false }) {
   gtag('set', 'ads_data_redaction', true);
 })();
 </script>`;
+  // Google's Google tag (gtag.js) — exactly the snippet from the GA4 property,
+  // placed immediately after the consent defaults (Consent Mode v2 requires the
+  // default state to run before any tag that can send a measurement event).
   const gaTag = GA_ID ? `<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function(){dataLayer.push(arguments);}
+  function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', '${esc(GA_ID)}', {anonymize_ip:true});
+  gtag('config', '${esc(GA_ID)}');
 </script>` : '';
   const adsenseLoader = ADSENSE_CLIENT ? `<!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(ADSENSE_CLIENT)}"
@@ -210,6 +215,7 @@ ${ADSENSE_CLIENT ? '<link rel="preconnect" href="https://pagead2.googlesyndicati
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
 <link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
+<link rel="alternate" type="application/rss+xml" title="${SITE.name} — Guides" href="/feed.xml">
 <meta name="theme-color" content="#5b4fff">
 <link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
 ${ld.map(ldTag).join('\n')}
@@ -342,6 +348,20 @@ function homeBody() {
       <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
     </section>`;
   }).join('')}
+  <section class="cat-section" id="guides">
+    <div class="cat-header">
+      <h2><a href="${rel(path, '/blog/')}">Guides and how-tos</a></h2>
+      <span class="cat-count">${ARTICLES.length} guides</span>
+      <a class="cat-view-all" href="${rel(path, '/blog/')}">View all &rarr;</a>
+    </div>
+    <div class="blog-list">
+      ${[...ARTICLES].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3).map((a) => `<a class="blog-card" href="${rel(path, '/blog/' + a.slug + '/')}">
+        <span class="blog-date">${esc(a.date)}</span>
+        <strong>${esc(a.title)}</strong>
+        <span>${esc(a.intro.slice(0, 160))}…</span>
+      </a>`).join('\n      ')}
+    </div>
+  </section>
   <section class="tool-content home-content">
     <h2>Free browser-based tools for marketing, SEO and AI search</h2>
     <p>Tools4Market brings ${TOOLS.length} focused utilities into one place: generate meta tags and Open Graph cards, preview your Google snippet, ship a <a href="${rel(path, '/tools/robots-txt-generator/')}">robots.txt</a> that covers every AI crawler, build UTM-tagged campaign links, analyse keyword density, create XML sitemaps, and run a full on-page audit of any URL. Each tool does one job properly — with presets, validation and copy-ready output — instead of burying it under ten ads and a signup wall.</p>
@@ -412,6 +432,8 @@ function toolPage(t) {
     ...TOOLS.filter((x) => x.cat === t.cat && x.slug !== t.slug).slice(0, 4),
     ...TOOLS.filter((x) => x.cat !== t.cat).slice(0, 5),
   ].slice(0, 5);
+  // guides that reference this tool — the blog↔tool link is two-way
+  const guides = ARTICLES.filter((a) => (a.relatedTools || []).includes(t.slug)).slice(0, 3);
   const ld = [
     {
       '@context': 'https://schema.org', '@type': 'WebApplication',
@@ -457,6 +479,10 @@ ${t.html}
       <h3>Related tools</h3>
       ${related.map((x) => `<a href="${rel(path, '/tools/' + x.slug + '/')}"><span aria-hidden="true">${x.icon}</span> ${x.name}</a>`).join('')}
     </div>
+    ${guides.length ? `<div class="side-box">
+      <h3>From the guides</h3>
+      ${guides.map((a) => `<a href="${rel(path, '/blog/' + a.slug + '/')}">${esc(a.title)}</a>`).join('')}
+    </div>` : ''}
     ${adSlot('sidebar')}
   </aside>
 </div>`;
@@ -473,12 +499,15 @@ function policyPage(p) {
 function articlePage(a) {
   const path = '/blog/' + a.slug + '/';
   const related = (a.relatedTools || []).map((s) => TOOLS.find((t) => t.slug === s)).filter(Boolean);
-  const words = a.sections.reduce((n, s) => n + s.p.join(' ').split(/\s+/).filter(Boolean).length, 0);
+  const words = a.sections.reduce((n, s) => n + [...(s.p || []), ...(s.p2 || [])].join(' ').split(/\s+/).filter(Boolean).length, 0);
+  const paras = (list) => list.map((p) => `<p>${rich(p)}</p>`).join('\n');
   return `<div class="container">
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/blog/')}">Guides</a> <span class="breadcrumb-sep">/</span> <span>${esc(a.title)}</span></nav>
   <article class="policy article">
+    <h1>${esc(a.title)}</h1>
     <p class="article-meta">Published ${esc(a.date)} · By ${esc(a.author)}${a.reviewer ? ' · Reviewed by ' + esc(a.reviewer) : ''} · ${words} words</p>
-    ${a.sections.map((s) => `<h2>${rich(s.h)}</h2>\n${s.p.map((p) => `<p>${rich(p)}</p>`).join('\n')}`).join('\n')}
+    <p class="lead">${rich(a.intro)}</p>
+    ${a.sections.map((s) => `<h2>${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}`).join('\n')}
     ${a.links && a.links.length ? `<h2>Sources and further reading</h2>\n<ul>${a.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener nofollow" target="_blank">${esc(l.label)}</a></li>`).join('\n')}</ul>` : ''}
     <h2>Frequently asked questions</h2>
     ${a.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${rich(f.a)}</p></details>`).join('\n')}
@@ -618,6 +647,51 @@ const run = async () => {
 
   const robots = `# Tools4Market robots.txt\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE.url}/sitemap.xml\n`;
   await writeFile(R + 'dist/robots.txt', robots);
+
+  // ---- llms.txt: curated markdown map of the site for AI tools that read it.
+  // Honest by design: it is a navigation aid, not a ranking mechanism (Google
+  // does not use llms.txt) — see the llms.txt guide we publish.
+  const llmsLines = [
+    `# ${SITE.name}`,
+    '',
+    `> ${SITE.tagline}. ${TOOLS.length}+ free browser-based tools for marketers, bloggers and webmasters — no signup, no limits. Most tools process input locally in the browser; public-page checks fetch the entered URL through our first-party proxy.`,
+    '',
+    '## Tools',
+    ...Object.values(CATEGORIES).flatMap((c) => [
+      `### ${c.name}`,
+      ...TOOLS.filter((t) => t.cat === c.id).map((t) => `- [${t.name}](${SITE.url}/tools/${t.slug}/): ${t.card}`),
+    ]),
+    '',
+    '## Guides',
+    ...ARTICLES.map((a) => `- [${a.title}](${SITE.url}/blog/${a.slug}/): ${a.intro.split('.')[0]}.`),
+    '',
+    '## Policies',
+    ...POLICY.map((p) => `- [${p.title}](${SITE.url}/${p.slug}/)`),
+    '',
+  ];
+  await writeFile(R + 'dist/llms.txt', llmsLines.join('\n'));
+
+  // ---- RSS 2.0 feed for the guides (discovery + freshness signal)
+  const rfc822 = (d) => new Date(d + 'T00:00:00Z').toUTCString();
+  const feedItems = ARTICLES.map((a) => `    <item>
+      <title>${esc(a.title)}</title>
+      <link>${SITE.url}/blog/${a.slug}/</link>
+      <guid isPermaLink="true">${SITE.url}/blog/${a.slug}/</guid>
+      <pubDate>${rfc822(a.date)}</pubDate>
+      <description>${esc(a.metaDesc)}</description>
+    </item>`).join('\n');
+  await writeFile(R + 'dist/feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${esc(SITE.name)} — Guides</title>
+    <link>${SITE.url}/blog/</link>
+    <atom:link href="${SITE.url}/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Practical guides for marketers, bloggers and webmasters: AI crawlers, robots.txt, indexing, schema and campaign tagging.</description>
+    <language>en</language>
+${feedItems}
+  </channel>
+</rss>
+`);
 
   await copyFile(R + 'src/style.css', R + 'dist/assets/style.css');
   await copyFile(R + 'src/site.js', R + 'dist/assets/site.js');

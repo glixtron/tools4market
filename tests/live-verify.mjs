@@ -138,6 +138,36 @@ ok('AdSense loader present with the publisher id', /adsbygoogle\.js\?client=ca-p
 ok('ads.txt served with the publisher id', (await grab(ORIGIN + '/ads.txt')).body.includes('pub-1509697031230558'));
 const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
 ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(toolHtml) && !/data-ad-slot=""/.test(toolHtml) && !/data-ad-slot="ca-pub/.test(toolHtml));
+// ---- Google tag on EVERY live page (not a sample)
+{
+  const urls = new Set(all);
+  const sitemapIndex = (await grab(ORIGIN + '/sitemap.xml')).body;
+  for (const child of [...sitemapIndex.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])) {
+    const x = (await grab(child)).body;
+    for (const u of [...x.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])) urls.add(u);
+  }
+  const missing = [], doubled = [], wrongId = [], misordered = [];
+  let checked = 0;
+  for (const u of urls) {
+    const r = await grab(u, { redirect: 'manual' });
+    if (r.status !== 200) { missing.push(u.replace(ORIGIN, '') + ' [HTTP ' + r.status + ']'); continue; }
+    checked++;
+    const count = (r.body.match(/googletagmanager\.com\/gtag\/js\?id=/g) || []).length;
+    if (count === 0) missing.push(u.replace(ORIGIN, ''));
+    else if (count > 1) doubled.push(u.replace(ORIGIN, ''));
+    else if (!/googletagmanager\.com\/gtag\/js\?id=G-6B4GGFC96K/.test(r.body)) wrongId.push(u.replace(ORIGIN, ''));
+    else {
+      const c = r.body.indexOf("gtag('consent', 'default'");
+      const t = r.body.indexOf('googletagmanager.com/gtag/js');
+      if (c === -1 || c > t) misordered.push(u.replace(ORIGIN, ''));
+    }
+  }
+  ok(`every live page (${checked}) carries exactly one Google tag (G-6B4GGFC96K), consent first`,
+    missing.length === 0 && doubled.length === 0 && wrongId.length === 0 && misordered.length === 0,
+    [missing.length && 'missing: ' + missing.slice(0, 3).join(','), doubled.length && 'dup: ' + doubled.slice(0, 3).join(','), wrongId.length && 'wrongid: ' + wrongId.slice(0, 3).join(','), misordered.length && 'order: ' + misordered.slice(0, 3).join(',')].filter(Boolean).join(' | '));
+}
+
+
 // blog / guides
 const blogIndex = (await grab(ORIGIN + '/blog/')).body;
 const blogLinks = new Set([...blogIndex.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], ORIGIN + '/blog/').pathname; } catch (e) { return ''; } }));

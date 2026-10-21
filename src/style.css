@@ -1217,6 +1217,9 @@ p { margin: 0 0 1em; }
 .blog-card span { color: var(--c-muted); font-size: .9rem; }
 .blog-date { color: var(--c-primary); font-size: .78rem; font-weight: 600; letter-spacing: .02em; }
 .article-meta { color: var(--c-muted); font-size: .88rem; margin: -6px 0 26px; }
+.article .lead { margin-bottom: 26px; }
+.article code { font-family: var(--font-mono); font-size: .9em; background: rgba(91, 79, 255, .08); padding: 1px 5px; border-radius: 4px; }
+.article pre.article-code { font-family: var(--font-mono); font-size: .85rem; background: #14120f; color: #f5f4f0; padding: 14px 16px; border-radius: 10px; overflow-x: auto; margin: 14px 0 18px; line-height: 1.55; }
 .article-tools { padding-left: 18px; }
 .article-tools li { margin-bottom: 8px; }
 .article-tools a { color: var(--c-primary); font-weight: 600; }
