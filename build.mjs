@@ -686,7 +686,7 @@ const run = async () => {
       '',
       a.intro,
       '',
-      ...a.sections.flatMap((s2) => ['### ' + s2.h, '', ...s2.p.map((p) => p.replace(/\*\*/g, '') + '\n')]),
+      ...a.sections.flatMap((s2) => ['### ' + s2.h, '', ...(s2.p || []).map((x) => x.replace(/\*\*/g, '') + '\n'), ...(s2.pre ? ['```', s2.pre, '```', ''] : []), ...(s2.p2 || []).map((x) => x.replace(/\*\*/g, '') + '\n')]),
       '### FAQ',
       '',
       ...a.faqs.flatMap((f) => ['**' + f.q + '**', '', f.a.replace(/\*\*/g, ''), '']),

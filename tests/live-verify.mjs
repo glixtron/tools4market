@@ -114,6 +114,22 @@ let bj = {}; try { bj = JSON.parse(bad2.body); } catch {}
 ok('proxy blocks SSRF to loopback', bj.ok === false, (bad2.body || '').slice(0, 80));
 out.push('');
 
+// ---- AI-search surfaces (llms.txt / llms-full.txt / RSS feed)
+{
+  const llms = (await grab(ORIGIN + '/llms.txt')).body;
+  ok('llms.txt served at the domain root', llms.startsWith('# '), llms.slice(0, 40));
+  const toolsXml = (await grab(ORIGIN + '/sitemap-tools.xml')).body;
+  const toolSlugs = [...toolsXml.matchAll(/<loc>[^<]*\/tools\/([a-z0-9-]+)\/<\/loc>/g)].map((m) => m[1]);
+  ok('llms.txt lists every tool', toolSlugs.length > 0 && toolSlugs.every((t) => llms.includes('/tools/' + t + '/')), toolSlugs.filter((t) => !llms.includes('/tools/' + t + '/')).join(','));
+  const guidesXml = (await grab(ORIGIN + '/sitemap-blog.xml')).body;
+  const guideSlugs = [...guidesXml.matchAll(/<loc>[^<]*\/blog\/([a-z0-9-]+)\/<\/loc>/g)].map((m) => m[1]);
+  ok('llms.txt lists every guide', guideSlugs.length > 0 && guideSlugs.every((g) => llms.includes('/blog/' + g + '/')), guideSlugs.filter((g) => !llms.includes('/blog/' + g + '/')).join(','));
+  const llmsFull = (await grab(ORIGIN + '/llms-full.txt')).body;
+  ok('llms-full.txt served with the full text', llmsFull.length > 20000, Math.round(llmsFull.length / 1024) + ' KB');
+  const feed = (await grab(ORIGIN + '/feed.xml')).body;
+  ok('RSS feed served with an item per guide', (feed.match(/<item>/g) || []).length >= guideSlugs.length, (feed.match(/<item>/g) || []).length + ' items');
+}
+
 // ---- site metadata
 out.push('=== Metadata & assets ===');
 const home = (await grab(ORIGIN + '/')).body;
