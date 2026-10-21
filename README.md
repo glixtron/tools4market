@@ -170,34 +170,55 @@ npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (D
 
 `npm run test:live` verifies what Googlebot actually sees: authoritative DNS, the sitemap index + children, **every URL in the sitemap** (200 + self-referencing canonical + indexable), `robots.txt`, the `/api/fetch` backend (including the SSRF guard), the Bing/Google verification files, and all assets. The last full run is recorded in [`launch-verification.md`](launch-verification.md) and [`qcreport.md`](qcreport.md).
 
-### Analytics & cookies (Google Tag Manager + GA4)
+### Analytics & cookies (Google Tag Manager + GA4 + Consent Mode v2)
 
-Every page ships **one** Google tag per page, in this order:
+Every page ships **one** Google tag per page, in the order Google's Consent Mode v2 documentation requires (the order is vital — consent defaults only work if they run first):
 
 ```html
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>…Consent Mode v2 defaults: denied…</script>   <!-- consent first, always -->
-  <!-- Google tag (gtag.js) -->                             <!-- GA4  G-6B4GGFC96K  -->
-  <!-- Google Tag Manager -->                              <!-- GTM   GTM-P6P4FLGB  -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    // 1. default consent state  (see below)
+    gtag('consent', 'default', { ad_storage:'denied', ad_user_data:'denied',
+      ad_personalization:'denied', analytics_storage:'denied', wait_for_update:500, region:[…EEA/UK/CH…] });
+    gtag('consent', 'default', { …granted… });        // everywhere else
+    gtag('set', 'url_passthrough', true);              // keep measurement without cookies
+    gtag('set', 'ads_data_redaction', true);           // redact ad ids when ad_storage is denied
+  </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6B4GGFC96K"></script>
+  <script>gtag('js', new Date()); gtag('config', 'G-6B4GGFC96K', {anonymize_ip:true});</script>
+  <!-- Google Tag Manager -->
+  <script>…gtm.js?id='+i…  (GTM-P6P4FLGB)</script>
 </head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6P4FLGB" …></iframe></noscript>
 ```
 
-- **GA4** (`G-6B4GGFC96K`) — `gtag.js` with IP anonymisation, consent-aware.
-- **GTM** (`GTM-P6P4FLGB`) — loader in `<head>` + the `noscript` iframe at the top of `<body>`.
+**Consent types (v2):** `ad_storage`, `ad_user_data`, `ad_personalization`, `analytics_storage`.
 
-Analytics is **consent-gated** so the site is GDPR/CCPA-safe out of the box:
+**Basic vs advanced consent mode** — switch with one env var:
 
-1. An inline script (before any Google tag loads) sets **Consent Mode v2 defaults to `denied`** for `analytics_storage`, `ad_storage`, `ad_user_data` and `ad_personalization` — so no analytics or ad storage is written before the visitor chooses. It calls both `gtag('consent','default', …)` (for GA4) and pushes a `default_consent` event (for the GTM container).
-2. A cookie banner appears on first visit: **Accept all** · **Reject non-essential** · **Manage preferences** (analytics and ads are separate toggles). The choice is stored in `localStorage` (`t4m_consent`) and pushed to `dataLayer` as a `consent_update` event, and to GA4 as `gtag('consent','update', …)`.
-3. A **"Cookie settings"** link in the footer reopens the preferences at any time (GDPR requires withdrawal to be as easy as consent).
+| `CONSENT_MODE` | Behaviour |
+|---|---|
+| `basic` *(default)* | Denied in the EEA/UK/CH (29 countries), granted elsewhere — Google's recommended basic mode, so measurement is preserved where no banner is legally required |
+| `advanced` | Denied for **every** visitor, everywhere — nothing is sent until someone accepts |
 
-**One thing to set up in your GTM container** (once, in the GTM UI): create the Consent Mode variables (`analytics_storage`, `ad_storage`, …) and set their default value to **Denied**; the `default_consent` / `consent_update` events pushed by the site then flip them to Granted when the visitor accepts. Without that, the container's tags would fire regardless of the banner.
+**How the choice flows:**
+1. First visit → the inline script sets the default state (denied in the required regions, `wait_for_update: 500` so the banner can answer before tags fire). The cookie banner appears.
+2. The visitor chooses → `gtag('consent','update', …)` fires **immediately, on the same page** (never on unload), and the choice is persisted in `localStorage` (`t4m_consent`).
+3. Return visits → the inline script **restores the stored choice as the default before any tag loads**, so the correct state is set on subsequent page loads.
+4. "Cookie settings" in the footer reopens the preferences; `window.T4M_CONSENT.get()/update()/granted()` is exposed for any custom UI.
+
+**One thing to set up in your GTM container** (once, in the GTM UI): use Google's [consent mode template](https://developers.google.com/tag-platform/tag-manager/templates/consent-apis) (or create one with `setDefaultConsentState` / `updateConsentState`) and set the Consent Mode variables' default to **Denied**. Google specifically recommends the Tag Manager APIs over `gtag('consent','update', …)` inside a container — the site-level `gtag` calls above cover GA4, the template covers GTM's own tags.
 
 > **Avoid double counting:** the site loads GA4 directly (`G-6B4GGFC96K`) *and* GTM. If your GTM container also contains a **Google Analytics / GA4 Configuration** tag, remove one of the two — otherwise every pageview is counted twice.
 
-Verify with `npm run test:consent` (20 behavioural checks) and `npm run test:live` (Google tag + GTM + consent presence on the public site).
+Verify with `npm run test:consent` (30 behavioural checks, incl. execution order, v2 types, region scoping, `wait_for_update`, passthrough, redaction, persistence/restore) and `npm run test:live` (Google tag + GTM + consent presence on the public site).
 
 ---
 

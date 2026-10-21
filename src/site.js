@@ -191,6 +191,12 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     } else {
       showBanner();
     }
+    // public API so any custom UI can drive consent (and Google can verify it)
+    window.T4M_CONSENT = {
+      get: function () { return read(); },
+      update: function (analytics, ads) { apply({ analytics: !!analytics, ads: !!ads }); },
+      granted: function () { var s = read(); return !!(s && s.analytics); },
+    };
   }
 
   function boot() { initCopy(); initDownload(); initSearch(); initTool(); initYear(); initConsent(); }

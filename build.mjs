@@ -25,6 +25,12 @@ const BING_VERIFY = (process.env.BING_VERIFY || '77EFF8B735065A945570BBFD566B053
 // Google Tag Manager container id (analytics). Consent-gated: nothing is stored
 // until the visitor accepts (Consent Mode v2 defaults are denied).
 const GTM_ID = (process.env.GTM_ID || 'GTM-P6P4FLGB').trim();
+// Consent mode scope: 'basic' = denied in EEA/UK/CH, granted elsewhere (Google's
+// recommended "basic" mode). 'advanced' = denied for every visitor, everywhere.
+const CONSENT_MODE = (process.env.CONSENT_MODE || 'basic').trim().toLowerCase();
+// Consent types (v2) + the region that requires a banner before anything is stored.
+const CONSENT_TYPES = ['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'];
+const CONSENT_REGION = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'GB', 'CH'];
 // Per-position AdSense ad unit ids (falls back to a single shared slot)
 const AD_SLOTS = {
   'top banner': (process.env.AD_SLOT_TOP || '').trim(),
@@ -93,21 +99,65 @@ function layout({ path, title, desc, body, ld = [], noindex = false }) {
   const url = SITE.url + path;
   // ---- consent defaults (Consent Mode v2) — pushed BEFORE GTM loads, so no
   // analytics/ad storage is written until the visitor accepts.
+  // ---- Consent Mode v2 (Google's documented order matters) ---------------
+  // 1. define dataLayer + gtag   2. set the default consent state
+  // 3. load the tags             4. update the state on user interaction (site.js)
   const consentDefaults = `<script>
-window.dataLayer = window.dataLayer || [];
-window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-window.gtag('consent', 'default', {
-  analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied',
-  ad_personalization: 'denied', functionality_storage: 'granted', security_storage: 'granted' });
-window.dataLayer.push({ event: 'default_consent',
-  analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied',
-  ad_personalization: 'denied', functionality_storage: 'granted', security_storage: 'granted' });
+(function () {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+
+  var TYPES = ${JSON.stringify(CONSENT_TYPES)};
+  var REGION = ${JSON.stringify(CONSENT_REGION)};
+  var MODE = '${esc(CONSENT_MODE)}';
+
+  // A returning visitor's stored choice is restored BEFORE any tag loads, so the
+  // correct state is set on subsequent page loads (Google: "Persistence").
+  var stored = null;
+  try { stored = JSON.parse(window.localStorage.getItem('t4m_consent') || 'null'); } catch (e) {}
+
+  function state(analytics, ads) {
+    var o = {};
+    TYPES.forEach(function (t) {
+      o[t] = (t === 'analytics_storage') ? (analytics ? 'granted' : 'denied') : (ads ? 'granted' : 'denied');
+    });
+    return o;
+  }
+
+  if (stored) {
+    gtag('consent', 'default', state(!!stored.analytics, !!stored.ads));
+    window.dataLayer.push({ event: 'default_consent', scope: 'stored', ad_storage: stored.ads ? 'granted' : 'denied',
+      ad_user_data: stored.ads ? 'granted' : 'denied', ad_personalization: stored.ads ? 'granted' : 'denied',
+      analytics_storage: stored.analytics ? 'granted' : 'denied' });
+  } else if (MODE === 'advanced') {
+    // Advanced consent mode: nothing is sent anywhere until the visitor agrees.
+    gtag('consent', 'default', state(false, false));
+    window.dataLayer.push({ event: 'default_consent', scope: 'advanced', ad_storage: 'denied', ad_user_data: 'denied',
+      ad_personalization: 'denied', analytics_storage: 'denied' });
+  } else {
+    // Basic consent mode: denied in the EEA/UK/CH, granted elsewhere.
+    // wait_for_update gives our banner 500 ms to answer before tags fire.
+    var denied = state(false, false);
+    denied.wait_for_update = 500;
+    denied.region = REGION;
+    gtag('consent', 'default', denied);
+    gtag('consent', 'default', state(true, true));
+    window.dataLayer.push({ event: 'default_consent', scope: 'basic', region: REGION, ad_storage: 'denied',
+      ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+  }
+
+  // Pass ad-click/click-id info through URLs without cookies (consent denied
+  // regions) and redact ad identifiers when ad_storage is denied.
+  gtag('set', 'url_passthrough', true);
+  gtag('set', 'ads_data_redaction', true);
+})();
 </script>`;
   const gaTag = GA_ID ? `<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=${esc(GA_ID)}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  window.gtag = window.gtag || function(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', '${esc(GA_ID)}', {anonymize_ip:true});

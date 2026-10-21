@@ -50,11 +50,13 @@ const lastConsent = (win) => {
   for (let i = dl.length - 1; i >= 0; i--) if (dl[i] && dl[i].event === 'consent_update') return dl[i];
   return null;
 };
+const gtagCalls = (win, cmd) => (win.dataLayer || []).filter((e) => e && e[0] === 'consent' && e[1] === cmd);
 const defaultConsent = (win) => {
   const dl = win.dataLayer || [];
   for (let i = 0; i < dl.length; i++) if (dl[i] && dl[i].event === 'default_consent') return dl[i];
   return null;
 };
+const setCalls = (win, name) => (win.dataLayer || []).filter((e) => e && e[0] === 'set' && e[1] === name);
 
 // 1. first visit: nothing stored → banner shown, defaults denied
 {
@@ -67,6 +69,27 @@ const defaultConsent = (win) => {
   ok('preferences panel starts hidden', doc.getElementById('ck-panel').hidden === true);
   ok('no console errors', errors.length === 0, errors.slice(0, 2).join(' | '));
 
+  // Google: "the order of the code here is vital" — the consent default must be
+  // executed before any tag fires. DOM position is not the signal (GTM's loader
+  // re-inserts itself as the first script in <head>); execution order is.
+  const dl = win.dataLayer || [];
+  const iConsentCall = dl.findIndex((e) => e && e[0] === 'consent' && e[1] === 'default');
+  const iGtmStart = dl.findIndex((e) => e && e.event === 'gtm.js');
+  const iConfig = dl.findIndex((e) => e && e[0] === 'config');
+  ok('consent default executes BEFORE the GTM loader', iConsentCall > -1 && (iGtmStart === -1 || iConsentCall < iGtmStart), 'consent@' + iConsentCall + ' gtm.start@' + iGtmStart);
+  ok('consent default executes BEFORE the GA4 config', iConsentCall > -1 && (iConfig === -1 || iConsentCall < iConfig), 'consent@' + iConsentCall + ' config@' + iConfig);
+  const html = doc.documentElement.innerHTML;
+  ok('exactly one Google tag on the page', (html.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length === 1);
+
+  // v2 consent types present in the default state
+  const def = gtagCalls(win, 'default');
+  const types = def.length ? Object.keys(def[0][2] || {}) : [];
+  ok('default consent declares all 4 v2 types', ['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'].every((t) => types.includes(t)), types.join(','));
+  ok('basic mode: EEA/UK region scoping present', def.some((c) => c[2] && Array.isArray(c[2].region) && c[2].region.includes('GB') && c[2].region.includes('DE')), JSON.stringify(def.map((c) => c[2] && c[2].region)));
+  ok('basic mode: wait_for_update lets the banner answer', def.some((c) => c[2] && c[2].wait_for_update === 500));
+  ok('url_passthrough enabled', setCalls(win, 'url_passthrough').length === 1);
+  ok('ads_data_redaction enabled', setCalls(win, 'ads_data_redaction').length === 1);
+
   // 2. reject
   doc.getElementById('ck-reject').click();
   const afterReject = lastConsent(win);
@@ -76,12 +99,15 @@ const defaultConsent = (win) => {
   dom.window.close();
 }
 
-// 3. return visit with a stored choice → banner stays hidden, state re-pushed
+// 3. return visit with a stored choice → banner stays hidden, state restored BEFORE the tags
 {
   const { dom, doc, win } = await load('/', '{"analytics":true,"ads":false}');
   ok('returning visitor: banner stays hidden', doc.getElementById('ck-banner').hidden === true);
   const c = lastConsent(win);
   ok('returning visitor: stored consent re-pushed', !!c && c.analytics_storage === 'granted' && c.ad_storage === 'denied', JSON.stringify(c));
+  // the stored choice must be restored in the head, before the tags fire
+  const def = gtagCalls(win, 'default');
+  ok('returning visitor: stored choice restored as the default (before tags)', def.length >= 1 && def[0][2] && def[0][2].analytics_storage === 'granted' && def[0][2].ad_storage === 'denied', JSON.stringify(def[0] && def[0][2]));
   // footer "Cookie settings" reopens the panel
   doc.querySelector('[data-ck-settings]').click();
   ok('footer link reopens preferences', doc.getElementById('ck-panel').hidden === false);
@@ -93,6 +119,8 @@ const defaultConsent = (win) => {
   const saved = lastConsent(win);
   ok('save → panel closes', doc.getElementById('ck-panel').hidden === true);
   ok('save → granular consent pushed', !!saved && saved.analytics_storage === 'granted' && saved.ad_storage === 'denied', JSON.stringify(saved));
+  // public API
+  ok('window.T4M_CONSENT API exposed', !!(win.T4M_CONSENT && typeof win.T4M_CONSENT.get === 'function' && typeof win.T4M_CONSENT.update === 'function' && typeof win.T4M_CONSENT.granted === 'function'));
   dom.window.close();
 }
 
