@@ -134,6 +134,7 @@
   T['password-generator'] = function (root) {
     var out = $(root, 'pw-out');
     var strength = $(root, 'pw-strength');
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).password) || {};
     var SETS = {
       upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
       lower: 'abcdefghijklmnopqrstuvwxyz',
@@ -156,9 +157,30 @@
 
     function randInt(max) {
       var a = new Uint32Array(1);
-      var limit = Math.floor(0xFFFFFFFF / max) * max;
+      var domain = 0x100000000;
+      var limit = domain - (domain % max);
       do { crypto.getRandomValues(a); } while (a[0] >= limit);
       return a[0] % max;
+    }
+
+    function hasEverySet(value, active) {
+      return active.every(function (set) {
+        for (var i = 0; i < value.length; i++) if (set.indexOf(value.charAt(i)) !== -1) return true;
+        return false;
+      });
+    }
+
+    function entropyBits(active, length) {
+      var pool = active.join('');
+      var total = pool.length;
+      var probability = 0;
+      for (var mask = 0; mask < (1 << active.length); mask++) {
+        var excluded = 0, bits = 0;
+        for (var i = 0; i < active.length; i++) if (mask & (1 << i)) { excluded += active[i].length; bits++; }
+        var p = Math.pow(Math.max(0, total - excluded) / total, length);
+        probability += bits % 2 ? -p : p;
+      }
+      return Math.max(0, length * Math.log2(total) + Math.log2(Math.max(Number.MIN_VALUE, probability)));
     }
 
     function generate() {
@@ -173,17 +195,32 @@
         return;
       }
       var all = active.join('');
-      var chars = active.map(function (s) { return s.charAt(randInt(s.length)); });
-      for (var i = chars.length; i < len; i++) chars.push(all.charAt(randInt(all.length)));
-      for (var j = chars.length - 1; j > 0; j--) {
-        var k = randInt(j + 1);
-        var tmp = chars[j]; chars[j] = chars[k]; chars[k] = tmp;
+      if (!window.crypto || typeof crypto.getRandomValues !== 'function') {
+        out.value = COPY.unavailable || '';
+        strength.textContent = '';
+        return;
       }
-      out.value = chars.slice(0, len).join('');
-      var bits = Math.round(len * Math.log2(all.length));
+      var value = '';
+      try {
+        // Rejection sampling keeps every accepted string equally likely while
+        // still honoring the user's request to include each selected set.
+        for (var attempt = 0; attempt < 1000; attempt++) {
+          var candidate = '';
+          for (var i = 0; i < len; i++) candidate += all.charAt(randInt(all.length));
+          if (hasEverySet(candidate, active)) { value = candidate; break; }
+        }
+      } catch (e) {}
+      if (!value) {
+        out.value = COPY.unavailable || '';
+        strength.textContent = '';
+        return;
+      }
+      out.value = value;
+      var bits = Math.round(entropyBits(active, len));
       strength.textContent = '';
       strength.appendChild(el('span', null, 'Strength: '));
       strength.appendChild(el('strong', null, '~' + bits + ' bits'));
+      strength.appendChild(document.createTextNode(' — ' + String(COPY.entropy || '').replace('{n}', String(bits))));
       var kind = bits < 40 ? 'bad' : bits < 60 ? 'warn' : bits < 80 ? 'good' : 'good';
       var label = bits < 40 ? 'Weak — increase length' : bits < 60 ? 'Fair' : bits < 80 ? 'Strong' : 'Excellent';
       strength.appendChild(chip(kind, label));
@@ -316,6 +353,7 @@
   T['jwt-decoder'] = function (root) {
     var out = $(root, 'jwt-out');
     var meta = $(root, 'jwt-meta');
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).jwt) || {};
     var ERR_SHAPE = 'That does not look like a valid JWT — a token has three dot-separated parts: header, payload, signature.';
     var ERR_DECODE = 'The header or payload could not be decoded — check that you pasted the complete token.';
     function b64urlDecode(s) {
@@ -356,10 +394,23 @@
       out.textContent = JSON.stringify(payload, null, 2);
       addPair('alg', typeof header.alg === 'string' ? header.alg : '—');
       if (typeof header.typ === 'string') addPair('typ', header.typ);
+      if (header.alg === 'none') meta.appendChild(el('p', 'tool-note', COPY.algNone));
+      if (typeof payload.iss === 'string') addPair('iss', payload.iss);
+      if (typeof payload.sub === 'string') addPair('sub', payload.sub);
+      if (payload.aud !== undefined) {
+        var audience = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+        addPair('aud', audience.slice(0, 8).map(function (v) { return String(v); }).join(', ') + (audience.length > 8 ? '…' : ''));
+      }
       var iat = fmtDate(payload.iat);
+      if (iat) addPair('iat', COPY.issuedAt.replace('{v}', iat));
+      else if (Object.prototype.hasOwnProperty.call(payload, 'iat')) addPair('iat', COPY.malformedDate);
       var exp = fmtDate(payload.exp);
-      if (iat) addPair('iat', iat);
-      if (exp) addPair('exp', exp);
+      if (exp) addPair('exp', (payload.exp <= Date.now() / 1000 ? COPY.expired : COPY.active).replace('{v}', exp));
+      else if (Object.prototype.hasOwnProperty.call(payload, 'exp')) addPair('exp', COPY.malformedDate);
+      else addPair('exp', COPY.noExpiry);
+      var nbf = fmtDate(payload.nbf);
+      if (nbf) addPair('nbf', (payload.nbf > Date.now() / 1000 ? COPY.notYetValid : COPY.activeNow).replace('{v}', nbf));
+      else if (Object.prototype.hasOwnProperty.call(payload, 'nbf')) addPair('nbf', COPY.malformedDate);
       meta.appendChild(el('span', null, 'signature not verified — decode only'));
     }
     root.addEventListener('input', update);
@@ -369,6 +420,7 @@
   // ---------------------------------------------------------- user agent parser
   T['user-agent-parser'] = function (root) {
     var out = $(root, 'ua-out');
+    var uaInput = $(root, 'ua-text');
     var BOTS = [
       [/(googlebot|google-inspectiontool|storebot-google)\//i, 'Googlebot'],
       [/(bingbot|bingpreview)\//i, 'Bingbot'],
@@ -456,7 +508,7 @@
       };
     }
     function update() {
-      var ua = $(root, 'ua-text').value.trim();
+      var ua = uaInput.value.trim();
       if (!ua) { out.textContent = 'Paste a user-agent string — or click “Use my browser’s UA” to parse yours.'; return; }
       var r = parse(ua);
       out.textContent = [
@@ -469,9 +521,10 @@
     }
     root.addEventListener('input', update);
     $(root, 'ua-mine').addEventListener('click', function () {
-      $(root, 'ua-text').value = navigator.userAgent;
+      uaInput.value = navigator.userAgent;
       update();
     });
+    if (!uaInput.value.trim()) uaInput.value = navigator.userAgent || '';
     update();
   };
 
@@ -479,6 +532,7 @@
   T['ics-calendar-generator'] = function (root) {
     var out = $(root, 'ics-out');
     var noteEl = $(root, 'ics-note');
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).ics) || {};
     function esc(s) {
       return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
     }
@@ -515,6 +569,7 @@
       var eDate = $(root, 'ics-edate').value;
       var sTime = $(root, 'ics-stime').value.trim();
       var eTime = $(root, 'ics-etime').value.trim();
+      var timeMode = $(root, 'ics-tz').value;
       function done(msg) { noteEl.textContent = msg; out.textContent = ''; }
       if (!title) { done('Add an event title to generate the .ics file.'); return; }
       if (!sDate) { done('Pick a start date to generate the .ics file.'); return; }
@@ -525,22 +580,23 @@
         done('Add valid 24-hour start and end times (e.g. 14:00) — or tick “All-day event”.');
         return;
       }
-      if (!allDay && eTime < sTime) { done('The end time must be on or after the start time — check the times above.'); return; }
-      var lines = ['BEGIN:VCALENDAR', 'VERSION:1.0', 'PRODID:-//Tools4Market//EN', 'BEGIN:VEVENT'];
+      if (!allDay && eDate === sDate && eTime <= sTime) { done(COPY.sameDayInvalid); return; }
+      var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tools4Market//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT'];
       lines.push('UID:' + uid());
       lines.push('DTSTAMP:' + stamp());
       if (allDay) {
         lines.push('DTSTART;VALUE=DATE:' + compact(sDate));
         lines.push('DTEND;VALUE=DATE:' + nextDay(eDate));
       } else {
-        lines.push('DTSTART:' + compact(sDate) + 'T' + sTime.replace(':', '') + '00');
-        lines.push('DTEND:' + compact(eDate) + 'T' + eTime.replace(':', '') + '00');
+        var suffix = timeMode === 'utc' ? 'Z' : '';
+        lines.push('DTSTART:' + compact(sDate) + 'T' + sTime.replace(':', '') + '00' + suffix);
+        lines.push('DTEND:' + compact(eDate) + 'T' + eTime.replace(':', '') + '00' + suffix);
       }
       lines.push('SUMMARY:' + esc(title));
       if (desc) lines.push('DESCRIPTION:' + esc(desc));
       if (loc) lines.push('LOCATION:' + esc(loc));
       lines.push('END:VEVENT', 'END:VCALENDAR');
-      noteEl.textContent = 'Event ready — download event.ics or copy it from the output below.';
+      noteEl.textContent = timeMode === 'utc' ? COPY.readyUtc : COPY.readyFloating;
       out.textContent = lines.join('\r\n');
     }
     root.addEventListener('input', update);

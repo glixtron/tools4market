@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 21 Oct 2026 (personalized SEO tool upgrade).*
+*Living tracker — update after every session. Last updated: 21 Oct 2026 (page-aware tool upgrades and site-wide SEO pass).*
 
 ## 👤 User actions required — **these block launch**
 
@@ -38,7 +38,7 @@
 - [x] Full regression re-run — **236/236** audit + **43/43** URL crawl clean after the changes
 
 ### ⏳ One item still open from Phase 1
-- [ ] **Visual browser verification** — load tool pages, type real inputs, confirm previews render; 390×844 mobile screenshots. *Functional logic already verified in Node; only the visual pass + screenshots remain, blocked on the desktop browser connection.*
+- [ ] **Remaining visual QA** — local browser interaction has verified the sitemap tool against the live public site; still capture a 390×844 mobile pass across representative tools.
 
 ### ✅ Launch-grade QA + SEO content (20 Oct 2026, night 2nd pass)
 
@@ -49,7 +49,7 @@
 - [x] **QC harness + `qcreport.md`** — timestamped query→response report per tool, **20/20 PASS**; suites: audit 236/236, edge-suite 236/236, smoke 20/20, URL E2E 11/11
 
 ## 📅 Phase 2 — in progress (started 20 Oct 2026, user go-ahead given)
-- [ ] **Site-wide SEO definition pass (IN PROGRESS)** — every tool page + the homepage audited against a full checklist (unique/optimised title, meta description, H1, intro, keyword placement, section depth, FAQ quality, structured data, internal linking, HTML hygiene, site-wide duplicate detection). Harness: `tests/seo-audit.mjs`. **Audit built and run — defects found and being fixed:** duplicate FAQ question across two tools, duplicate terms in 3 `keywords` lists, `jwt-decoder` meta description missing its primary keyword, `url-encoder-decoder` heading/description keyword gaps, `ics-calendar-generator` FAQs under-targeted, and a missing **homepage FAQ section + FAQPage schema**. Remaining: apply fixes → re-run to 100% → push.
+- [x] **Site-wide SEO definition pass (21 Oct)** — all 30 tools and homepage checked for metadata, headings, keyword placement, content depth, FAQs, schema, internal links, HTML hygiene and duplicates. `tests/seo-audit.mjs`: **1,254 passed, 0 failed**. Utility-page focus terms and repeated FAQ wording corrected locally; deploy remains a separate step.
 - [x] **Google AdSense connected (21 Oct 2026)** — publisher `ca-pub-1509697031230558`: loader in every `<head>` (site-ownership verification), `ads.txt` generated at the domain root, preconnect for the ad server, ad slots keep their reserved height (no CLS) and switch to real `<ins>` units as soon as `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` ad-unit ids are set. Consent-aware: EEA/UK/CH get limited non-personalised ads until the visitor accepts. **Next:** create the three ad units in the AdSense console → set the env vars → tick "I've placed the code" in the AdSense console → request review.
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
 - [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")

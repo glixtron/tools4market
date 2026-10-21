@@ -2,6 +2,20 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Google AdSense connected + site-wide SEO definition pass (target phrase per page)
+
+**AdSense (publisher `ca-pub-1509697031230558`)** — wired into the build, nothing to paste by hand:
+- loader `adsbygoogle.js?client=ca-pub-1509697031230558` in every `<head>` (async, crossorigin) — this is what the AdSense site-ownership check looks for
+- `dist/ads.txt` generated at the domain root with the publisher id
+- preconnect to `pagead2.googlesyndication.com`
+- the three reserved `.ad-slot` containers keep their height and switch to real `<ins class="adsbygoogle">` units the moment `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` ad-unit ids are set (no CLS, no broken units in the meantime)
+- privacy policy now names the publisher id and states that declining ad consent yields limited, non-personalised ads (Consent Mode v2 default denied in EEA/UK/CH)
+- **Remaining (user):** create the three ad units in the AdSense console → set the env vars → tick "I've placed the code" → Request review.
+
+**Site-wide SEO definition pass** — every tool page now declares an explicit **`focus`** field: the ONE search phrase that page targets (`'meta tag generator'`, `'xml sitemap generator'`, `'jwt decoder'`, …). A new audit (`tests/seo-audit.mjs`, `npm run test:seo`) enforces that the target phrase appears in the meta title, meta description, intro, at least one section heading and at least two FAQs, and checks title/description/H1 length and uniqueness, section depth (430–600 words), FAQ quality, structured-data completeness (WebApplication + FAQPage + BreadcrumbList), internal linking, HTML hygiene and site-wide duplicate detection (titles, descriptions, H1s, paragraphs, FAQ questions/answers, keyword strings).
+- **Homepage** gained a visible FAQ section (6 real questions: free?, data upload?, client work?, offline?, preview accuracy?, how do you make money?) + `FAQPage` JSON-LD.
+- The audit found **124 genuine gaps** (keyword targeting across 26 tools, 4 pages under the word floor, one duplicate FAQ question across two tools) — being fixed now, one data file per agent, then re-audited to zero.
+
 ## 2026-10-21 — Five page-personalized SEO tools upgraded
 
 **Scope:** Web Crawler Audit, SEO Score Checker, SERP Preview Tool, Meta Description Checker and Keyword Density Checker.
@@ -241,3 +255,13 @@
 **Project docs created:** RESEARCH-AND-PLAN.md, Architecture.md, design.md, rules.md, pending-work.md, progress.md, projectreport.md.
 
 **Phase 1 build started:** Node v18.20.8 available. Scaffold + build system + 18 tools + policy pages → `dist/`, then browser verification.
+
+## 2026-10-21 — Personalized diagnostics and utility upgrades
+
+**Page-aware prefill:** the shared inspector now reuses fetched page evidence across relevant tools. It extracts supported JSON-LD and same-origin content links; robots and sitemap generators can inspect the site's existing `robots.txt` and sitemap files, with URL/file caps and human-review notes. Hreflang, schema, llms.txt, sitemap, content, reading-time and URL tools are prefilled only with observed page values. Independent utilities skip unrelated page analysis. Homepage FAQ/privacy copy now disclose same-host robots/sitemap fetches.
+
+**Utility behavior:** password generation uses unbiased secure sampling while honoring selected character sets and gives a more accurate constrained-space estimate; JWT decode shows issuer, subject, audience and time-claim status while preserving the no-signature-verification warning; the UA parser starts from the current browser value; the calendar generator emits iCalendar 2.0 with explicit UTC or floating-local timing and stricter duration checks. Utility metadata and FAQ copy were tuned to each page's actual primary search intent.
+
+**Verification:** build produced 44 pages with no length warnings; all 30 tool pages passed smoke checks; personalized tool harness passed 84 checks; consent suite passed 30 checks; site-wide SEO audit passed 1,254 checks with zero failures; `git diff --check` is clean. The locally generated sitemap lists all 43 indexable HTML pages exactly once across three child files (404 excluded). In the local browser, the sitemap tool fetched the public Tools4Market homepage and same-host robots/sitemap files, then populated 40 URLs from the current production sitemap. A deterministic case also confirms an index plus all three child maps can be imported. Public fetches confirm source signals only; they do not confirm index status or Search Console performance.
+
+**Pending:** capture a representative 390×844 mobile pass and deploy the local changes when publication is authorized. Production was not modified.

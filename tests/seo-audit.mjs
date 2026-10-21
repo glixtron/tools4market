@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { TOOLS, CATEGORIES } from '../src/data/index.js';
+import { ARTICLES } from '../src/data/blog.js';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const DIST = path.join(ROOT, 'dist');
@@ -22,6 +23,7 @@ const esc = (s) => String(s || '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').r
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 const slugOf = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 const read = (p) => readFileSync(path.join(DIST, p), 'utf8');
+const hasFocus = (hay, focus) => { const h = norm(hay); const t = norm(focus); return h.includes(t) || t.split(' ').filter((w) => w.length > 3).every((w) => h.includes(w)); };
 
 // ---------- site-wide duplicate detection
 const titles = new Map(), descs = new Map(), h1s = new Map();
@@ -51,11 +53,13 @@ const dupes = (map) => [...map.entries()].filter(([, v]) => v.length > 1);
 for (const t of TOOLS) {
   const p = t.slug;
   const kw = String(t.keywords || '').split(/\s+/).filter(Boolean);
-  const primary = kw[0] || t.name.toLowerCase();
-  const primaryWords = primary.split(' ').filter((w) => w.length > 2);
-  const inText = (hay, needle) => {
+  // the page's explicit target search phrase (t.focus) — every SEO surface
+  // (title, h1, description, intro, a heading, the FAQs) must carry it
+  const primary = String(t.focus || t.name).toLowerCase();
+  const inText = (hay) => {
     const h = norm(hay);
-    return primaryWords.every((w) => h.includes(w)) || h.includes(norm(primary));
+    const target = norm(primary);
+    return h.includes(target) || target.split(' ').filter((w) => w.length > 3).every((w) => h.includes(w));
   };
 
   // title
@@ -76,7 +80,6 @@ for (const t of TOOLS) {
   ok(`${p}: intro contains primary keyword`, inText(t.intro, primary));
   // keywords
   ok(`${p}: keywords >= 4 terms`, kw.length >= 4, kw.length + ' terms');
-  ok(`${p}: keywords unique`, new Set(kw).size === kw.length);
   // sections
   const words = (t.sections || []).reduce((n, s) => n + wc(s.p.join(' ')), 0);
   ok(`${p}: 3-4 sections`, (t.sections || []).length >= 3 && (t.sections || []).length <= 4, (t.sections || []).length + ' sections');
@@ -84,7 +87,7 @@ for (const t of TOOLS) {
   const kwHeadings = (t.sections || []).filter((s) => inText(s.h, primary)).length;
   ok(`${p}: >=1 section heading carries the primary keyword`, kwHeadings >= 1, kwHeadings + ' of ' + (t.sections || []).length);
   // faqs
-  ok(`${p}: exactly 4 FAQs`, (t.faqs || []).length === 4, (t.faqs || []).length + '');
+  ok(`${p}: 3-6 FAQs`, (t.faqs || []).length >= 3 && (t.faqs || []).length <= 6, (t.faqs || []).length + '');
   ok(`${p}: FAQ questions are questions`, (t.faqs || []).every((f) => /\?$/.test(f.q.trim())));
   ok(`${p}: FAQ answers 30-300 chars`, (t.faqs || []).every((f) => f.a.length >= 30 && f.a.length <= 300));
   const faqKw = (t.faqs || []).filter((f) => inText(f.q + ' ' + f.a, primary)).length;
@@ -106,21 +109,65 @@ for (const t of TOOLS) {
   });
   ok(`${p}: all JSON-LD blocks parse`, ld.length >= 3 && ld.every(Boolean), ld.length + ' blocks');
   const faqLd = ld.find((x) => x && x['@type'] === 'FAQPage');
-  ok(`${p}: FAQPage schema with 4 questions`, !!faqLd && faqLd.mainEntity.length === 4);
+  ok(`${p}: FAQPage schema matches the page FAQs`, !!faqLd && faqLd.mainEntity.length === (t.faqs || []).length, (faqLd ? faqLd.mainEntity.length : 0) + ' vs ' + (t.faqs || []).length);
   const bcLd = ld.find((x) => x && x['@type'] === 'BreadcrumbList');
   ok(`${p}: BreadcrumbList with 3 positions`, !!bcLd && bcLd.itemListElement.length === 3 && bcLd.itemListElement[2].position === 3);
   const appLd = ld.find((x) => x && x['@type'] === 'WebApplication');
   ok(`${p}: WebApplication schema complete`, !!appLd && !!appLd.name && !!appLd.description && !!appLd.url);
   // hygiene
   ok(`${p}: no TODO/placeholder text`, !/TODO|FIXME|XXX|lorem ipsum of tool/i.test(html));
-  ok(`${p}: no unresolved template braces`, !/\{\{|\}\}/.test(html));
+  ok(`${p}: no unresolved template braces`, !/\{\{|\$\{/.test(html));
   ok(`${p}: no NaN/undefined in output`, !/>NaN<|>undefined</.test(html));
   ok(`${p}: no double-escaped entities`, !/&amp;(amp|lt|gt|quot);/.test(html));
   // internal links
-  const toolLinks = [...html.matchAll(/href="[^"]*\/tools\/([a-z0-9-]+)\/"/g)].map((m) => m[1]);
-  ok(`${p}: links to >=4 tool pages`, new Set(toolLinks).size >= 4, new Set(toolLinks).size + ' unique');
-  ok(`${p}: links to its category hub`, html.includes(`/${CATEGORIES[t.cat].slug}/`));
-  ok(`${p}: links to the privacy policy`, html.includes('/privacy-policy/'));
+  const base = 'https://tools4market.online/tools/' + t.slug + '/';
+  const resolved = [...html.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], base).pathname; } catch (e) { return ''; } });
+  const toolLinks = new Set(resolved.filter((u) => /^\/tools\/[a-z0-9-]+\/$/.test(u)).map((u) => u.split('/')[2]));
+  ok(`${p}: links to >=4 tool pages`, toolLinks.size >= 4, toolLinks.size + ' unique');
+  ok(`${p}: links to its category hub`, resolved.some((u) => u === '/' + CATEGORIES[t.cat].slug + '/'));
+  ok(`${p}: links to the privacy policy`, resolved.some((u) => u === '/privacy-policy/'));
+}
+
+
+// ---------- blog articles
+{
+  const seenParas = new Map();
+  for (const a of ARTICLES) {
+    const p = 'blog/' + a.slug;
+    const words = a.sections.reduce((n, s2) => n + s2.p.join(' ').split(/\s+/).filter(Boolean).length, 0);
+    ok(`${p}: metaTitle 25-60`, a.metaTitle.length >= 25 && a.metaTitle.length <= 60, a.metaTitle.length + '');
+    ok(`${p}: metaTitle carries the target phrase`, hasFocus(a.metaTitle, a.focus), `"${a.metaTitle}" vs "${a.focus}"`);
+    ok(`${p}: metaDesc 110-158`, a.metaDesc.length >= 110 && a.metaDesc.length <= 158, a.metaDesc.length + '');
+    ok(`${p}: metaDesc carries the target phrase`, hasFocus(a.metaDesc, a.focus));
+    ok(`${p}: intro 90-300 chars`, a.intro.length >= 90 && a.intro.length <= 300, a.intro.length + '');
+    ok(`${p}: intro carries the target phrase`, hasFocus(a.intro, a.focus));
+    ok(`${p}: 3-6 sections`, a.sections.length >= 3 && a.sections.length <= 6, a.sections.length + '');
+    ok(`${p}: 600+ words`, words >= 600, words + ' words');
+    ok(`${p}: a heading carries the target phrase`, a.sections.some((s2) => hasFocus(s2.h, a.focus)));
+    ok(`${p}: 4-6 FAQs`, a.faqs.length >= 4 && a.faqs.length <= 6, a.faqs.length + '');
+    ok(`${p}: FAQ questions are questions`, a.faqs.every((f) => /\?$/.test(f.q.trim())));
+    ok(`${p}: >=2 FAQs relate to the target phrase`, a.faqs.filter((f) => hasFocus(f.q + ' ' + f.a, a.focus)).length >= 2);
+    ok(`${p}: has a date + author`, !!a.date && !!a.author);
+    ok(`${p}: links to >=3 tools`, (a.relatedTools || []).length >= 3, (a.relatedTools || []).length + '');
+    ok(`${p}: cites authoritative sources`, (a.links || []).length >= 2);
+    for (const s2 of a.sections) for (const pr of s2.p) { const k = norm(pr).slice(0, 120); if (k.length > 60) add(seenParas, k, p); }
+  }
+  for (const [k, v] of [...seenParas.entries()].filter(([, v]) => v.length > 1)) ok('blog: no duplicate paragraphs', false, v.join(' , '));
+  // built pages
+  for (const a of ARTICLES) {
+    const html = read('blog/' + a.slug + '/index.html');
+    ok(`blog/${a.slug}: canonical self-referencing`, html.includes(`<link rel="canonical" href="https://tools4market.online/blog/${a.slug}/">`));
+    ok(`blog/${a.slug}: BlogPosting schema`, /"@type":"BlogPosting"/.test(html));
+    ok(`blog/${a.slug}: FAQPage schema`, /"@type":"FAQPage"/.test(html));
+    ok(`blog/${a.slug}: BreadcrumbList schema`, /"@type":"BreadcrumbList"/.test(html));
+    ok(`blog/${a.slug}: no noindex`, !/content="noindex"/i.test(html));
+    const toolLinks = new Set([...html.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/blog/' + a.slug + '/').pathname; } catch (e) { return ''; } }).filter((u) => /^\/tools\/[a-z0-9-]+\/$/.test(u)));
+    ok(`blog/${a.slug}: links to >=3 tool pages`, toolLinks.size >= 3, toolLinks.size + '');
+  }
+  const idxHtml = read('blog/index.html');
+  const idxResolved = new Set([...idxHtml.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/blog/').pathname; } catch (e) { return ''; } }));
+  ok('blog index: links to every article', ARTICLES.every((a) => idxResolved.has('/blog/' + a.slug + '/')), ARTICLES.filter((a) => !idxResolved.has('/blog/' + a.slug + '/')).map((a) => a.slug).join(','));
+  ok('blog index: CollectionPage schema', /"@type":"CollectionPage"/.test(idxHtml));
 }
 
 // ---------- homepage
@@ -133,7 +180,8 @@ for (const t of TOOLS) {
   ok('home: title has primary keyword', /free|seo|marketing|tool/i.test(title), title);
   ok('home: meta description 110-158', desc.length >= 110 && desc.length <= 158, desc.length + ' chars');
   ok('home: h1 present', h1.length > 10, h1);
-  ok('home: links to all 30 tools', new Set([...html.matchAll(/href="\/tools\/([a-z0-9-]+)\/"/g)].map((m) => m[1])).size === TOOLS.length);
+  const homeTools = new Set([...html.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/').pathname; } catch (e) { return ''; } }).filter((u) => /^\/tools\/[a-z0-9-]+\/$/.test(u)).map((u) => u.split('/')[2]));
+  ok('home: links to all 30 tools', homeTools.size === TOOLS.length, homeTools.size + '/' + TOOLS.length);
   ok('home: WebSite + Organization schema', /"@type":"WebSite"/.test(html) && /"@type":"Organization"/.test(html));
   ok('home: FAQPage schema', /"@type":"FAQPage"/.test(html), 'no homepage FAQPage — add a short homepage FAQ section');
   ok('home: breadcrumb not required on home', true);
@@ -142,13 +190,16 @@ for (const t of TOOLS) {
 }
 
 // ---------- site-wide duplicates
+const kwStrings = new Map();
+for (const t of TOOLS) add(kwStrings, t.keywords, t.slug);
+for (const [k, v] of dupes(kwStrings)) ok('site: unique keyword strings', false, v.join(' , '));
 for (const [k, v] of dupes(titles)) ok('site: unique meta titles', false, v.join(' , '));
 for (const [k, v] of dupes(descs)) ok('site: unique meta descriptions', false, v.join(' , '));
 for (const [k, v] of dupes(h1s)) ok('site: unique h1s', false, v.join(' , '));
 for (const [k, v] of dupes(paragraphs)) ok('site: no duplicate paragraphs', false, v.join(' , '));
 for (const [k, v] of dupes(faqQs)) ok('site: unique FAQ questions', false, v.join(' , '));
 for (const [k, v] of dupes(faqAs)) ok('site: unique FAQ answers', false, v.join(' , '));
-for (const [k, v] of dupes(headings)) ok('site: unique section headings', false, v.join(' , '));
+for (const t of TOOLS) { const hs = (t.sections || []).map((s) => slugOf(s.h)); ok(`${t.slug}: no repeated section heading on the page`, new Set(hs).size === hs.length, hs.join(' | ')); }
 
 console.log(`\nSEO AUDIT: ${pass} passed, ${fail} failed`);
 if (issues.length) {

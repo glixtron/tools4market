@@ -110,10 +110,12 @@
     });
 
     var schemaTypes = [];
+    var schemaNodes = [];
     Array.prototype.slice.call(doc.querySelectorAll('script[type="application/ld+json"]')).forEach(function (s) {
       try {
         var j = JSON.parse(s.textContent);
         collectTypes(j, schemaTypes);
+        collectSchemaNodes(j, schemaNodes);
       } catch (e) {}
     });
 
@@ -134,11 +136,31 @@
     var contentNodes = Array.prototype.slice.call(doc.querySelectorAll(
       '.tool-content, .tool-faq, .home-content, .cat-about, .policy, .entry-content, .post-content, article, main, [role="main"]'));
     var mainText = '';
+    var mainNode = null;
     contentNodes.forEach(function (n) {
       var text = visibleText(n);
-      if (text.length > mainText.length) mainText = text;
+      if (text.length > mainText.length) { mainText = text; mainNode = n; }
     });
     if (!mainText) mainText = bodyText;
+    var linkRoot = mainNode || doc.querySelector('main,article,[role="main"]') || doc.body;
+    var mainLinks = [];
+    var seenMainLinks = {};
+    Array.prototype.slice.call((linkRoot || doc.createElement('div')).querySelectorAll('a[href]')).forEach(function (a) {
+      if (/\bnofollow\b/i.test(a.getAttribute('rel') || '')) return;
+      var href = '';
+      try {
+        var target = new URL(a.getAttribute('href'), base || window.location.href);
+        var current = new URL(base || window.location.href);
+        if ((target.protocol !== 'http:' && target.protocol !== 'https:') || target.origin !== current.origin || target.username || target.password) return;
+        target.hash = '';
+        // Query URLs are often tracking/filter variants and should not be seeded into a sitemap.
+        if (target.search) return;
+        href = target.href;
+      } catch (e) { return; }
+      if (!href || href === base || seenMainLinks[href]) return;
+      seenMainLinks[href] = 1;
+      mainLinks.push({ url: href, text: (a.textContent || '').replace(/\s+/g, ' ').trim() });
+    });
     var countText = mainText;
     var words = countText ? countText.split(' ').filter(Boolean).length : 0;
 
@@ -157,7 +179,8 @@
       h1s: h1s, h2s: h2s, h3s: h3s,
       images: { total: imgs.length, missingAlt: missingAlt },
       links: { internal: internal, external: external, nofollow: nofollow },
-      schemaTypes: schemaTypes, hreflangs: hreflangs,
+      schemaTypes: schemaTypes, schemaNodes: schemaNodes.slice(0, 30), hreflangs: hreflangs,
+      mainLinks: mainLinks.slice(0, 250),
       words: words, bodyText: mainText, mainText: mainText, fullText: bodyText
     };
   }
@@ -176,6 +199,13 @@
       (Array.isArray(t) ? t : [t]).forEach(function (x) { if (out.indexOf(x) === -1) out.push(x); });
     }
     if (node['@graph']) collectTypes(node['@graph'], out);
+  }
+
+  function collectSchemaNodes(node, out) {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) { node.forEach(function (n) { collectSchemaNodes(n, out); }); return; }
+    if (node['@type'] && out.length < 30) out.push(node);
+    if (node['@graph']) collectSchemaNodes(node['@graph'], out);
   }
 
   function parseRobotsTxt(text, pageUrl, botName) {
@@ -223,6 +253,100 @@
       .map(function (line) { var m = /^\s*sitemap\s*:\s*(\S+)/i.exec(line.replace(/#.*$/, '')); return m ? m[1] : ''; }).filter(Boolean) };
   }
 
+  function sameOriginUrl(url, base) {
+    try {
+      var target = new URL(url, base);
+      return target.origin === new URL(base).origin && !target.username && !target.password;
+    } catch (e) { return false; }
+  }
+
+  function xmlLocs(node) {
+    var out = [];
+    Array.prototype.slice.call(node ? node.children : []).forEach(function (child) {
+      if (String(child.localName || '').toLowerCase() !== 'loc') return;
+      out.push((child.textContent || '').trim());
+    });
+    return out.filter(Boolean);
+  }
+
+  function parseSitemap(xml, base) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(xml, 'application/xml'); } catch (e) { return { kind: 'invalid', urls: [], children: [] }; }
+    if (!doc.documentElement || doc.getElementsByTagName('parsererror').length) return { kind: 'invalid', urls: [], children: [] };
+    var root = doc.documentElement;
+    var kind = String(root.localName || '').toLowerCase();
+    var urls = [], children = [];
+    function resolveList(nodes, target) {
+      Array.prototype.slice.call(nodes || []).forEach(function (node) {
+        xmlLocs(node).forEach(function (raw) {
+          try {
+            var u = new URL(raw, base);
+            if ((u.protocol !== 'http:' && u.protocol !== 'https:') || !sameOriginUrl(u.href, base)) return;
+            u.hash = '';
+            if (target.indexOf(u.href) === -1) target.push(u.href);
+          } catch (e) {}
+        });
+      });
+    }
+    if (kind === 'sitemapindex') resolveList(root.getElementsByTagName('*'), children);
+    else if (kind === 'urlset') resolveList(root.getElementsByTagName('*'), urls);
+    else return { kind: 'invalid', urls: [], children: [] };
+    return { kind: kind, urls: urls, children: children };
+  }
+
+  // Only sitemap-related generators fetch supporting same-origin files. The
+  // visitor explicitly starts this analysis; every resource stays on that host.
+  function loadRelatedContext(page, slug) {
+    var robotsTools = ['robots-txt-generator', 'ai-crawler-blocker', 'sitemap-generator'];
+    if (robotsTools.indexOf(slug) === -1) return Promise.resolve({});
+    var pageUrl = page.finalUrl || page.url;
+    var base;
+    try { base = new URL(pageUrl).origin; } catch (e) { return Promise.resolve({}); }
+    var robotsUrl = base + '/robots.txt';
+    return fetchPage(robotsUrl, { allowText: true }).then(function (robots) {
+      var validRobots = robots.ok && (!robots.contentType || /text|xml/i.test(robots.contentType)) &&
+        sameOriginUrl(robots.finalUrl || robots.url, base);
+      var robotsText = validRobots ? robots.html : '';
+      var declared = validRobots ? parseRobotsTxt(robotsText, pageUrl).sitemapUrls.filter(function (u) { return sameOriginUrl(u, base); }) : [];
+      var ruleLines = robotsText.split(/\r?\n/).filter(function (line) { return /^\s*(user-agent|allow|disallow)\s*:/i.test(line); });
+      var context = {
+        siteRobots: { ok: !!validRobots, url: robotsUrl, status: validRobots ? robots.status : (robots.status || 0),
+          sitemapUrls: declared, ruleCount: ruleLines.length },
+      };
+      if (slug !== 'sitemap-generator') return context;
+
+      var candidates = declared.length ? declared.slice(0, 2) : [base + '/sitemap.xml'];
+      var inventory = { urls: [], filesFetched: 0, source: declared.length ? 'robots.txt declaration' : 'common /sitemap.xml path', found: false };
+      function readMap(url, depth) {
+        if (inventory.filesFetched >= 4 || !sameOriginUrl(url, base)) return Promise.resolve();
+        return fetchPage(url, { allowText: true }).then(function (map) {
+          if (!map.ok || !sameOriginUrl(map.finalUrl || map.url, base) || (map.contentType && !/xml|text/i.test(map.contentType))) return;
+          inventory.filesFetched++;
+          var parsed = parseSitemap(map.html, base);
+          if (parsed.kind === 'urlset') {
+            inventory.found = true;
+            parsed.urls.forEach(function (u) { if (inventory.urls.length < 250 && inventory.urls.indexOf(u) === -1) inventory.urls.push(u); });
+            return;
+          }
+          if (parsed.kind === 'sitemapindex' && depth < 1) {
+            var children = parsed.children.slice(0, 3);
+            return children.reduce(function (chain, childUrl) {
+              return chain.then(function () { return readMap(childUrl, depth + 1); });
+            }, Promise.resolve());
+          }
+        }).catch(function () {});
+      }
+      function nextCandidate(index) {
+        if (index >= candidates.length || inventory.urls.length >= 250 || inventory.filesFetched >= 4) return Promise.resolve();
+        return readMap(candidates[index], 0).then(function () { return nextCandidate(index + 1); });
+      }
+      return nextCandidate(0).then(function () {
+        context.siteSitemap = inventory;
+        return context;
+      });
+    }).catch(function () { return {}; });
+  }
+
   // ---------------------------------------------------------------- summary
   // A compact "what we found" readout shared by every tool's panel.
   function summarize(snap) {
@@ -254,6 +378,13 @@
     add('Language', snap.lang ? 'pass' : 'warn', snap.lang ? fill(V.lang.pass, { v: snap.lang }) : V.lang.fail);
     add('Mobile viewport', snap.viewport ? 'pass' : 'warn', snap.viewport ? V.viewport.pass : V.viewport.fail);
     add('Content length', 'none', fill(V.words.info, { n: snap.words }));
+    if (snap.mainLinks && snap.mainLinks.length) add(V.context.linksLabel, 'none', fill(V.context.links, { n: snap.mainLinks.length }));
+    if (snap.siteRobots) add(V.context.robotsLabel, 'none', snap.siteRobots.ok
+      ? fill(V.context.robots, { n: snap.siteRobots.ruleCount, m: snap.siteRobots.sitemapUrls.length })
+      : V.context.robotsUnavailable);
+    if (snap.siteSitemap) add(V.context.sitemapLabel, 'none', snap.siteSitemap.found
+      ? fill(V.context.sitemap, { n: snap.siteSitemap.urls.length, m: snap.siteSitemap.filesFetched })
+      : V.context.sitemapUnavailable);
     if (snap.schemaTypes.length) add('Structured data', 'pass', 'Schema found: ' + snap.schemaTypes.join(', '));
     if (snap.hreflangs.length) add('Hreflang', 'pass', snap.hreflangs.length + ' hreflang annotations.');
 
@@ -262,18 +393,155 @@
 
   // ---------------------------------------------------------------- per-tool apply
   // How each tool turns a snapshot into pre-filled, personalized inputs.
+  function setNodeValue(node, value, eventName) {
+    if (!node) return false;
+    node.value = value == null ? '' : String(value);
+    var ev = document.createEvent('Event');
+    ev.initEvent(eventName || 'input', true, true);
+    node.dispatchEvent(ev);
+    return true;
+  }
   function setVal(root, id, val) {
     var el = root.querySelector('#' + id);
     if (!el) return false;
-    el.value = val == null ? '' : val;
-    // notify the tool so it recomputes its output for THIS user's page
-    var ev = document.createEvent('Event');
-    ev.initEvent('input', true, true);
-    el.dispatchEvent(ev);
-    return true;
+    return setNodeValue(el, val, 'input');
   }
   function origin(u) { try { return new URL(u).origin; } catch (e) { return ''; } }
   function host(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } }
+
+  function schemaType(node) {
+    if (!node || !node['@type']) return [];
+    return Array.isArray(node['@type']) ? node['@type'] : [node['@type']];
+  }
+  function schemaMatch(snap, names) {
+    return (snap.schemaNodes || []).filter(function (node) {
+      var types = schemaType(node);
+      return types.some(function (type) { return names.indexOf(type) !== -1; });
+    })[0] || null;
+  }
+  function schemaText(value) {
+    if (typeof value === 'string' || typeof value === 'number') return String(value);
+    if (value && typeof value === 'object' && typeof value.name === 'string') return value.name;
+    return '';
+  }
+  function schemaUrl(value) {
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.length ? schemaUrl(value[0]) : '';
+    if (value && typeof value === 'object') return schemaUrl(value.url || value.contentUrl || value['@id'] || '');
+    return '';
+  }
+  function fillSchema(snap, root) {
+    var candidates = [
+      { key: 'article', names: ['Article', 'NewsArticle', 'BlogPosting', 'TechArticle'] },
+      { key: 'product', names: ['Product'] },
+      { key: 'localbusiness', names: ['LocalBusiness', 'Store', 'Restaurant', 'ProfessionalService'] },
+      { key: 'organization', names: ['Organization', 'Corporation', 'EducationalOrganization', 'NGO'] },
+      { key: 'breadcrumb', names: ['BreadcrumbList'] },
+      { key: 'faq', names: ['FAQPage'] },
+    ];
+    var match = null, selected = null;
+    for (var i = 0; i < candidates.length && !match; i++) {
+      match = schemaMatch(snap, candidates[i].names);
+      if (match) selected = candidates[i];
+    }
+    if (!match || !selected) return '';
+    var typeSelect = root.querySelector('#sc-type');
+    if (!typeSelect) return '';
+    setNodeValue(typeSelect, selected.key, 'change');
+    var fields = root.querySelector('#sc-fields');
+    if (!fields) return '';
+
+    if (selected.key === 'article') {
+      setVal(root, 'sa-headline', schemaText(match.headline || match.name) || snap.h1s[0] || snap.title);
+      var author = Array.isArray(match.author) ? match.author[0] : match.author;
+      setVal(root, 'sa-author', schemaText(author));
+      setVal(root, 'sa-date', String(match.datePublished || '').slice(0, 10));
+      setVal(root, 'sa-image', schemaUrl(match.image));
+      setVal(root, 'sa-publisher', schemaText(match.publisher));
+    } else if (selected.key === 'product') {
+      var offer = Array.isArray(match.offers) ? match.offers[0] : match.offers;
+      setVal(root, 'sp-name', schemaText(match.name));
+      setVal(root, 'sp-image', schemaUrl(match.image));
+      setVal(root, 'sp-desc', schemaText(match.description));
+      setVal(root, 'sp-brand', schemaText(match.brand));
+      if (offer && typeof offer === 'object') {
+        setVal(root, 'sp-price', schemaText(offer.price));
+        var currency = fields.querySelector('#sp-currency');
+        if (currency && ['USD', 'EUR', 'GBP', 'INR'].indexOf(String(offer.priceCurrency || '').toUpperCase()) !== -1) setNodeValue(currency, String(offer.priceCurrency).toUpperCase(), 'change');
+        var avail = fields.querySelector('#sp-avail');
+        if (avail && offer.availability) {
+          var value = String(offer.availability).replace(/^https?:\/\/schema\.org\//i, 'https://schema.org/');
+          if (Array.prototype.some.call(avail.options, function (opt) { return opt.value === value; })) setNodeValue(avail, value, 'change');
+        }
+      }
+    } else if (selected.key === 'localbusiness') {
+      var address = match.address || {};
+      setVal(root, 'sl-name', schemaText(match.name));
+      setVal(root, 'sl-url', schemaUrl(match.url));
+      setVal(root, 'sl-phone', schemaText(match.telephone));
+      setVal(root, 'sl-street', schemaText(address.streetAddress));
+      setVal(root, 'sl-city', schemaText(address.addressLocality));
+      setVal(root, 'sl-region', schemaText(address.addressRegion));
+      setVal(root, 'sl-postal', schemaText(address.postalCode));
+      setVal(root, 'sl-country', schemaText(address.addressCountry));
+    } else if (selected.key === 'organization') {
+      var sameAs = Array.isArray(match.sameAs) ? match.sameAs : (match.sameAs ? [match.sameAs] : []);
+      setVal(root, 'so-name', schemaText(match.name));
+      setVal(root, 'so-url', schemaUrl(match.url) || snap.url);
+      setVal(root, 'so-logo', schemaUrl(match.logo));
+      setVal(root, 'so-sameas', sameAs.map(schemaText).filter(Boolean).join(', '));
+    } else if (selected.key === 'breadcrumb') {
+      var items = Array.isArray(match.itemListElement) ? match.itemListElement : [];
+      var rows = fields.querySelectorAll('#sc-bc-rows .dyn-row');
+      while (rows.length < items.length) {
+        var add = fields.querySelector('[data-add="bc"]');
+        if (!add) break;
+        add.click();
+        rows = fields.querySelectorAll('#sc-bc-rows .dyn-row');
+      }
+      Array.prototype.forEach.call(rows, function (row, index) {
+        var item = items[index];
+        if (!item) return;
+        setNodeValue(row.querySelector('.bc-name'), schemaText(item.name), 'input');
+        setNodeValue(row.querySelector('.bc-url'), schemaUrl(item.item), 'input');
+      });
+    } else if (selected.key === 'faq') {
+      var questions = Array.isArray(match.mainEntity) ? match.mainEntity : [];
+      var faqRows = fields.querySelectorAll('#sc-faq-rows .dyn-row');
+      while (faqRows.length < questions.length) {
+        var addFaq = fields.querySelector('[data-add="faq"]');
+        if (!addFaq) break;
+        addFaq.click();
+        faqRows = fields.querySelectorAll('#sc-faq-rows .dyn-row');
+      }
+      Array.prototype.forEach.call(faqRows, function (row, index) {
+        var item = questions[index];
+        if (!item) return;
+        var answer = item.acceptedAnswer && (item.acceptedAnswer.text || item.acceptedAnswer);
+        setNodeValue(row.querySelector('.sc-q'), schemaText(item.name), 'input');
+        setNodeValue(row.querySelector('.sc-a'), schemaText(answer), 'input');
+      });
+    }
+    return schemaType(match)[0] || selected.key;
+  }
+
+  function fillHreflang(snap, root) {
+    if (!snap.hreflangs || !snap.hreflangs.length) return;
+    var rows = root.querySelectorAll('#hf-rows .hf-row');
+    var add = root.querySelector('[data-add="hf"]');
+    var normal = snap.hreflangs.filter(function (item) { return String(item.lang || '').toLowerCase() !== 'x-default'; });
+    var xdefault = snap.hreflangs.filter(function (item) { return String(item.lang || '').toLowerCase() === 'x-default'; })[0];
+    while (rows.length < normal.length && add) { add.click(); rows = root.querySelectorAll('#hf-rows .hf-row'); }
+    Array.prototype.forEach.call(rows, function (row, index) {
+      var item = normal[index];
+      if (!item) return;
+      var parts = String(item.lang || '').split('-');
+      setNodeValue(row.querySelector('.hf-lang'), parts.length === 2 ? parts[0] : String(item.lang || ''), 'input');
+      setNodeValue(row.querySelector('.hf-region'), parts.length === 2 ? parts[1] : '', 'input');
+      setNodeValue(row.querySelector('.hf-url'), item.href, 'input');
+    });
+    if (xdefault) setVal(root, 'hf-xdefault', xdefault.href);
+  }
 
   var APPLY = {
     'meta-tag-generator': function (snap, root) {
@@ -297,6 +565,20 @@
     'canonical-tag-generator': function (snap, root) {
       setVal(root, 'cn-url', snap.canonical || snap.url);
     },
+    'hreflang-tag-generator': function (snap, root) {
+      fillHreflang(snap, root);
+    },
+    'schema-markup-generator': function (snap, root) {
+      fillSchema(snap, root);
+    },
+    'robots-txt-generator': function (snap, root) {
+      var declared = snap.siteRobots && snap.siteRobots.sitemapUrls || [];
+      if (declared.length) setVal(root, 'rb-sitemap', declared[0]);
+    },
+    'ai-crawler-blocker': function (snap, root) {
+      var declared = snap.siteRobots && snap.siteRobots.sitemapUrls || [];
+      if (declared.length) setVal(root, 'ab-sitemap', declared[0]);
+    },
     'serp-preview-tool': function (snap, root) {
       setVal(root, 'sp-url', snap.url);
       setVal(root, 'sp-title', snap.title);
@@ -309,6 +591,9 @@
       setVal(root, 'll-name', snap.og.siteName || snap.title);
       setVal(root, 'll-desc', snap.desc);
       setVal(root, 'll-url', origin(snap.url));
+      setVal(root, 'll-pages', (snap.mainLinks || []).slice(0, 20).map(function (link) {
+        return link.url + (link.text ? ' | ' + link.text : '');
+      }).join('\n'));
     },
     'url-slug-generator': function (snap, root) {
       setVal(root, 'sl-text', snap.title);
@@ -319,6 +604,15 @@
     'keyword-density-checker': function (snap, root) {
       setVal(root, 'kd-text', snap.bodyText.slice(0, 6000));
     },
+    'case-converter': function (snap, root) {
+      setVal(root, 'cc-text', snap.h1s[0] || snap.title);
+    },
+    'duplicate-line-remover': function (snap, root) {
+      setVal(root, 'dl-lines', snap.h1s.concat(snap.h2s, snap.h3s).join('\n'));
+    },
+    'reading-time-calculator': function (snap, root) {
+      setVal(root, 'rt-text', snap.mainText.slice(0, 20000));
+    },
     'hashtag-generator': function (snap, root) {
       // derive a short topic from the page title (strip brand suffix after a dash/pipe)
       var t = (snap.og.title || snap.title).split(/\s+[|—–-]\s+/)[0].trim();
@@ -326,10 +620,20 @@
     },
     'htaccess-redirect-generator': function (snap, root) {
       setVal(root, 'ht-domain', host(snap.url));
+    },
+    'sitemap-generator': function (snap, root) {
+      var urls = snap.siteSitemap && snap.siteSitemap.found ? snap.siteSitemap.urls : [];
+      if (!urls.length) {
+        urls = [snap.canonical || snap.finalUrl || snap.url].filter(Boolean).concat((snap.mainLinks || []).map(function (link) { return link.url; }));
+      }
+      setVal(root, 'sm-urls', urls.filter(function (url, index, all) { return all.indexOf(url) === index; }).slice(0, 250).join('\n'));
+    },
+    'url-encoder-decoder': function (snap, root) {
+      setVal(root, 'ue-text', snap.finalUrl || snap.url);
+    },
+    'user-agent-parser': function (snap, root) {
+      setVal(root, 'ua-text', navigator.userAgent);
     }
-    // Tools with dynamic rows (hreflang, schema, sitemap, robots, ai-blocker, password)
-    // get the analysis summary but no field pre-fill — a snapshot can't safely map onto
-    // their add/remove row flows.
   };
 
   // ---------------------------------------------------------------- panel UI
@@ -340,9 +644,19 @@
     return e;
   }
 
-  // Tools that already own a URL input + fetch/paste flow natively (the two
-  // crawler/ranking tools) — skip the generic panel so there aren't two URL boxes.
-  var SKIP_PANEL = { 'web-crawler-audit': 1, 'seo-score-checker': 1 };
+  // Page analysis belongs on tools that can use page evidence. Keep it off
+  // independent utilities so it does not distract from unrelated local input.
+  var SKIP_PANEL = {
+    'web-crawler-audit': 1,
+    'seo-score-checker': 1,
+    'password-generator': 1,
+    'base64-encoder-decoder': 1,
+    'uuid-generator': 1,
+    'jwt-decoder': 1,
+    'ics-calendar-generator': 1,
+    'lorem-ipsum-generator': 1,
+    'user-agent-parser': 1,
+  };
 
   function mount(root, slug) {
     if (!root || root.querySelector('.inspect')) return; // already mounted
@@ -400,6 +714,8 @@
       catch (e) { status.textContent = 'Could not parse that HTML.'; return; }
       if (meta.xRobotsTag) snap.robots = [snap.robots, meta.xRobotsTag].filter(Boolean).join('; ');
       if (meta.status) { snap.status = meta.status; snap.ms = meta.ms; snap.bytes = meta.bytes; }
+      if (meta.siteRobots) snap.siteRobots = meta.siteRobots;
+      if (meta.siteSitemap) snap.siteSitemap = meta.siteSitemap;
       snap.requestedUrl = meta.url || '';
       snap.finalUrl = meta.finalUrl || meta.url || '';
       snap.contentType = meta.contentType || '';
@@ -427,9 +743,23 @@
       status.textContent = P.analyzing || 'Analyzing…';
       btn.disabled = true;
       fetchPage(u).then(function (r) {
+        if (!r.ok) {
+          btn.disabled = false;
+          status.textContent = ERR.fetchFailed || 'Could not fetch that page.';
+          det.open = true;
+          return;
+        }
+        return loadRelatedContext(r, slug).then(function (related) {
+          btn.disabled = false;
+          analyze(r.html, Object.assign({}, r, related));
+        }).catch(function () {
+          btn.disabled = false;
+          analyze(r.html, r);
+        });
+      }).catch(function () {
         btn.disabled = false;
-        if (r.ok) analyze(r.html, r);
-        else { status.textContent = ERR.fetchFailed || 'Could not fetch that page.'; det.open = true; }
+        status.textContent = ERR.fetchFailed || 'Could not fetch that page.';
+        det.open = true;
       });
     });
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); btn.click(); } });
@@ -580,6 +910,7 @@
   }
 
   function tipFor(slug, snap) {
+    var tips = ((TXT.personalized || {}).tips) || {};
     switch (slug) {
       case 'meta-tag-generator':
         return 'We pre-filled the fields with your live title (' + snap.title.length + ' chars), description (' +
@@ -601,10 +932,19 @@
           'No description was present in the fetched HTML. Google can still generate a snippet from visible page text.';
       case 'keyword-density-checker':
         return 'Extracted about ' + snap.words + ' words from the main content area of this fetched page. Frequency counts describe the text; they are not a recommended keyword-density target.';
+      case 'robots-txt-generator':
+      case 'ai-crawler-blocker':
+        return snap.siteRobots && snap.siteRobots.ok
+          ? tips.robots.replace('{url}', snap.siteRobots.url)
+          : tips.robotsUnavailable;
       case 'url-slug-generator':
         return 'We loaded your page title \u2014 generate a clean slug, or paste other titles (one per line) for bulk.';
       case 'llms-txt-generator':
-        return 'We pre-filled your site name, description and domain from the page. Add your key pages below.';
+        return tips.llms;
+      case 'sitemap-generator':
+        return snap.siteSitemap && snap.siteSitemap.found
+          ? tips.sitemapImported
+          : tips.sitemapSeeded;
       case 'utm-link-builder':
         return 'Destination pre-filled with your page URL \u2014 just add source, medium and campaign.';
       case 'htaccess-redirect-generator':
@@ -612,11 +952,24 @@
       case 'hashtag-generator':
         return 'Derived a topic from your title. Tweak it, pick a platform, and get a tuned hashtag set.';
       case 'schema-markup-generator':
-        return (snap.schemaTypes.length ? 'Your page already uses: ' + snap.schemaTypes.join(', ') + '. ' :
-          'Your page has no JSON-LD schema. ') + 'Build the right type below to win rich results.';
+        var supported = schemaMatch(snap, ['Article', 'NewsArticle', 'BlogPosting', 'TechArticle', 'Product', 'LocalBusiness', 'Store', 'Restaurant', 'ProfessionalService', 'Organization', 'Corporation', 'EducationalOrganization', 'NGO', 'BreadcrumbList', 'FAQPage']);
+        if (supported) return tips.schemaExisting.replace('{type}', schemaType(supported)[0]);
+        if (snap.schemaTypes.length) return tips.schemaUnsupported.replace('{types}', snap.schemaTypes.join(', '));
+        return tips.schemaEmpty;
       case 'hreflang-tag-generator':
-        return snap.hreflangs.length ? 'Your page has ' + snap.hreflangs.length + ' hreflang annotations \u2014 rebuild or extend the cluster below.' :
-          'Your page has no hreflang. If you serve multiple languages, build the cluster below.';
+        return snap.hreflangs.length
+          ? tips.hreflangLoaded
+          : tips.hreflangMissing;
+      case 'case-converter':
+        return tips.case;
+      case 'duplicate-line-remover':
+        return tips.duplicates;
+      case 'reading-time-calculator':
+        return tips.reading;
+      case 'url-encoder-decoder':
+        return tips.urlEncode;
+      case 'user-agent-parser':
+        return tips.userAgent;
       default:
         return '';
     }

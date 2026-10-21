@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.1 · 21 Oct 2026 · 30 tools, 41 generated HTML pages*
+*Version: 2.1 · 21 Oct 2026 · 30 tools, 44 generated HTML pages*
 
 ---
 
@@ -301,3 +301,11 @@ This remains the only backend surface. Tool generation and pasted-text analysis 
 | GitHub Pages | Run build in Actions, push `dist/` to `gh-pages` branch |
 
 **Node version required:** 18+ (uses `node:fs/promises` and ES modules with `import`)
+
+## 11. Page-aware prefill and higher-confidence utility output (21 Oct 2026)
+
+The shared inspector in `src/runtime/inspect.js` keeps a single fetched HTML snapshot and adds evidence only where a tool can use it. It extracts existing JSON-LD objects and up to 250 distinct, same-origin links from the strongest page-content container. When the visitor analyzes a page for the Robots.txt Generator, AI Crawler Blocker or XML Sitemap Generator, it also requests that host's public `robots.txt`; the sitemap generator follows at most four same-origin sitemap files (an index plus three child maps) and imports up to 250 unique URLs. It reads at most two sitemap declarations from robots.txt, considers up to three child maps, and falls back to `/sitemap.xml` when no declaration exists. Sitemap URLs and page links are candidates; the tool does not validate page status, canonical, noindex or index inclusion for every candidate.
+
+The page-prefill map now also uses observed values for existing hreflang and supported JSON-LD fields, robots sitemap declarations, sitemap lists, llms.txt link suggestions, headings and extracted main text. It does not invent missing locale/schema facts. Page-independent tools (for example password, Base64, UUID, JWT and lorem ipsum) skip the unrelated page-analysis panel. The homepage FAQ and privacy policy explain that sitemap/crawler checks may fetch `robots.txt` and sitemap files on the same public host.
+
+Standalone utility changes remain browser-side: password strings use unbiased rejection sampling conditioned on selected character sets, and the strength estimate accounts for that constraint; JWT output summarizes registered time and identity claims while explicitly remaining decode-only; the user-agent parser starts with the current browser string; and calendar output uses RFC 5545 VERSION:2.0 with explicit floating-local or UTC interpretation. These tools do not send pasted values to the page-analysis fetch service.

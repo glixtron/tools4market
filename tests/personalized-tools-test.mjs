@@ -1,5 +1,5 @@
-// Page-specific regression coverage for the five upgraded SEO tools.
-// Runs the built pages with a deterministic page/robots/sitemap response fixture.
+// Regression coverage for personalized SEO and utility tools.
+// Runs the built pages with deterministic page/robots/sitemap response fixtures.
 import { JSDOM, ResourceLoader, VirtualConsole } from 'jsdom';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -7,22 +7,28 @@ import path from 'node:path';
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const DIST = path.join(ROOT, 'dist');
 const PAGE_URL = 'https://example.test/seo-guide/';
+const INDEXED_URL = 'https://indexed.test/seo-guide/';
 const QUERY = 'technical SEO audit';
 const PAGE_HTML = `<!doctype html><html lang="en"><head>
 <title>Technical SEO Audit for SaaS Teams</title>
 <meta name="description" content="Technical SEO audit guidance for SaaS teams, based on the page’s actual crawl and content signals.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="canonical" href="${PAGE_URL}">
+<link rel="alternate" hreflang="en" href="${PAGE_URL}">
+<link rel="alternate" hreflang="fr-FR" href="https://example.test/fr/seo-guide/">
+<link rel="alternate" hreflang="x-default" href="https://example.test/seo-guide/">
 <meta property="og:title" content="Technical SEO Audit for SaaS Teams">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Technical SEO Audit for SaaS Teams","author":{"@type":"Person","name":"A. Writer"},"datePublished":"2026-10-01","publisher":{"@type":"Organization","name":"Example Test"}}</script>
 </head><body>
 <nav>technical SEO audit navigation probe</nav>
 <main><article><h1>Technical SEO Audit for SaaS Teams</h1>
 <p>A technical SEO audit checks crawl access, page metadata and internal discovery. This technical SEO audit guide explains which evidence to review before prioritizing fixes for a SaaS page.</p>
-<a href="/seo-guide/related">Related audit guide</a><img alt="Crawl report example"><img></article></main>
+<a href="/seo-guide/related">Related audit guide</a><a href="https://user:pass@example.test/private">Credentialed page URL</a><img alt="Crawl report example"><img></article></main>
 <footer>technical SEO audit footer probe</footer></body></html>`;
 const ROBOTS = `User-agent: *\nDisallow: /private\nAllow: /private/public\nSitemap: https://example.test/sitemap.xml\n`;
 const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${PAGE_URL}</loc></url></urlset>`;
+const INDEXED_ROBOTS = `User-agent: *\nSitemap: https://indexed.test/sitemap.xml\n`;
+const INDEXED_MAP = `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>https://indexed.test/sitemap-pages.xml</loc></sitemap><sitemap><loc>https://indexed.test/sitemap-tools.xml</loc></sitemap><sitemap><loc>https://indexed.test/sitemap-blog.xml</loc></sitemap></sitemapindex>`;
 
 class LocalLoader extends ResourceLoader {
   fetch(url) {
@@ -62,13 +68,16 @@ function response(url) {
   let xRobotsTag = '';
   let status = 200;
   if (target.pathname === '/robots.txt') {
-    body = target.hostname === 'common.test' ? 'User-agent: *\n' : ROBOTS;
+    body = target.hostname === 'common.test' ? 'User-agent: *\n' : target.hostname === 'indexed.test' ? INDEXED_ROBOTS : ROBOTS;
     contentType = 'text/plain; charset=utf-8';
   }
   else if (target.pathname === '/sitemap.xml') {
-    body = target.hostname === 'common.test' ? SITEMAP.replace(PAGE_URL, 'https://common.test/page/') : SITEMAP;
+    body = target.hostname === 'common.test' ? SITEMAP.replace(PAGE_URL, 'https://common.test/page/') : target.hostname === 'indexed.test' ? INDEXED_MAP : SITEMAP;
     contentType = 'application/xml; charset=utf-8';
   }
+  else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-pages.xml') body = SITEMAP.replace(PAGE_URL, INDEXED_URL);
+  else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-tools.xml') body = SITEMAP.replace(PAGE_URL, 'https://indexed.test/tools/meta-tag-generator/');
+  else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-blog.xml') body = SITEMAP.replace(PAGE_URL, 'https://indexed.test/blog/launch-guide/');
   else if (target.pathname === '/blocked/') xRobotsTag = 'noindex';
   return { ok: true, status, finalUrl: target.href, contentType, xRobotsTag, bytes: Buffer.byteLength(body), ms: 17, truncated: false, body };
 }
@@ -116,9 +125,38 @@ async function boot(slug) {
   check('main text excludes navigation/footer probes', !parsed.mainText.includes('navigation probe') && !parsed.mainText.includes('footer probe'));
   check('extractor counts the missing alt attribute but accepts a present alt', parsed.images.total === 2 && parsed.images.missingAlt === 1);
   check('target phrase counter counts contiguous exact wording', win.T4M_INSPECT.phraseCount(parsed.mainText, QUERY) === 3);
+  check('page snapshot extracts same-origin content links for sitemap curation', parsed.mainLinks.length === 1 && parsed.mainLinks[0].url === 'https://example.test/seo-guide/related');
+  check('page snapshot excludes credentialed URLs from personalized suggestions', parsed.mainLinks.every((link) => !link.url.includes('@')));
+  check('page snapshot retains supported schema data for safe prefill', parsed.schemaNodes.some((node) => node['@type'] === 'Article' && node.headline === 'Technical SEO Audit for SaaS Teams'));
   check('robots parser applies the longest matching allow rule', win.T4M_INSPECT.parseRobotsTxt(ROBOTS, 'https://example.test/private/public/page', 'googlebot').allowed);
   check('robots parser reports a disallowed path', !win.T4M_INSPECT.parseRobotsTxt(ROBOTS, 'https://example.test/private/page', 'googlebot').allowed);
   check('shared extractor has no browser errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Page-specific generators start with real source values instead of fictional example output.
+{
+  const { dom, win, doc, errors } = await boot('hreflang-tag-generator');
+  check('hreflang generator starts without example URLs', !doc.getElementById('hf-out').textContent.includes('example.com'));
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'hreflang page snapshot');
+  check('hreflang rows import actual language URLs and x-default', doc.getElementById('hf-out').textContent.includes('hreflang="fr-fr"') && doc.getElementById('hf-out').textContent.includes('hreflang="x-default"'));
+  check('hreflang output reflects fetched URLs instead of samples', doc.getElementById('hf-out').textContent.includes('https://example.test/fr/seo-guide/'));
+  check('hreflang prefill has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Existing supported JSON-LD can be inspected and edited without inventing fields.
+{
+  const { dom, doc, errors } = await boot('schema-markup-generator');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'schema page snapshot');
+  check('schema generator selects the existing page type', doc.getElementById('sc-type').value === 'article');
+  check('schema generator prefills source headline and author', doc.getElementById('sa-headline').value === 'Technical SEO Audit for SaaS Teams' && doc.getElementById('sa-author').value === 'A. Writer');
+  check('schema output is grounded in the fetched JSON-LD', doc.getElementById('sc-out').textContent.includes('"datePublished": "2026-10-01"'));
+  check('schema prefill has no JavaScript errors', errors.length === 0);
   dom.window.close();
 }
 
@@ -215,6 +253,120 @@ async function boot(slug) {
   check('phrase placement is informational and excluded from score', doc.getElementById('sc2-ring-num').textContent === scoreWithoutQuery);
   check('SEO score explains its measured main-text length', doc.getElementById('sc2-out').textContent.includes('text-extraction check'));
   check('SEO score tool has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Sitemap, robots and llms tools use reachable site data and label its limits.
+{
+  const { dom, doc, errors } = await boot('robots-txt-generator');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'robots page snapshot');
+  check('robots generator uses the sitemap declared by the fetched robots.txt', doc.getElementById('rb-sitemap').value === 'https://example.test/sitemap.xml');
+  check('robots generator warns that its output does not merge existing rules', doc.querySelector('.inspect-tip').textContent.includes('not a merge'));
+  check('robots source fetch has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('ai-crawler-blocker');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'AI crawler page snapshot');
+  check('AI crawler blocker pre-fills only the verified sitemap URL', doc.getElementById('ab-sitemap').value === 'https://example.test/sitemap.xml');
+  check('AI crawler output includes the verified sitemap declaration', doc.getElementById('ab-out').textContent.includes('Sitemap: https://example.test/sitemap.xml'));
+  check('AI crawler tool has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('sitemap-generator');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'sitemap page snapshot');
+  check('sitemap generator imports URLs from the fetched sitemap', doc.getElementById('sm-urls').value === PAGE_URL);
+  check('sitemap generator labels imported entries for human review', doc.querySelector('.inspect-tip').textContent.includes('Remove redirected, noindex, duplicate or error URLs'));
+  check('sitemap generator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('sitemap-generator');
+  doc.querySelector('.inspect-url').value = INDEXED_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'sitemap index page snapshot');
+  const urls = doc.getElementById('sm-urls').value.split('\n');
+  check('sitemap generator follows the index plus all three child sitemaps', urls.length === 3 && urls.includes(INDEXED_URL) && urls.includes('https://indexed.test/tools/meta-tag-generator/') && urls.includes('https://indexed.test/blog/launch-guide/'));
+  check('sitemap inventory reports every fetched sitemap file', doc.querySelector('.inspect-result').textContent.includes('3 URLs from a readable sitemap across 4 fetched file(s)'));
+  check('sitemap index traversal stays free of JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('llms-txt-generator');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'llms page snapshot');
+  check('llms.txt suggestions use actual link URLs and anchor text', doc.getElementById('ll-pages').value === 'https://example.test/seo-guide/related | Related audit guide');
+  check('llms.txt explains that candidates require curation', doc.querySelector('.inspect-tip').textContent.includes('Curate the list'));
+  check('llms.txt prefill has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Other page-aware tools prefill the data that makes their normal output useful.
+for (const [slug, selector, expected] of [
+  ['case-converter', '#cc-text', 'Technical SEO Audit for SaaS Teams'],
+  ['duplicate-line-remover', '#dl-lines', 'Technical SEO Audit for SaaS Teams'],
+  ['reading-time-calculator', '#rt-text', 'A technical SEO audit checks crawl access'],
+  ['url-encoder-decoder', '#ue-text', PAGE_URL],
+]) {
+  const { dom, doc, errors } = await boot(slug);
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, slug + ' page snapshot');
+  check(slug + ' pre-fills from fetched page data', doc.querySelector(selector).value.includes(expected));
+  check(slug + ' prefill has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Standalone tools are strengthened without asking for an unrelated page URL.
+{
+  const { dom, doc, errors } = await boot('password-generator');
+  const password = doc.getElementById('pw-out').value;
+  check('password generator uses secure randomness and fills every selected set', password.length === 16 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[!@#$%^&*()\-_=+\[\]{};:,.<>?/~]/.test(password));
+  check('password entropy explains the configured string space', doc.getElementById('pw-strength').textContent.includes('uniformly sampled string containing every selected character set'));
+  check('standalone password utility has no unrelated page-analysis panel', !doc.querySelector('.inspect'));
+  check('password generator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('jwt-decoder');
+  const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  const token = [encode({ alg: 'none', typ: 'JWT' }), encode({ iss: 'https://issuer.example', sub: 'user-7', aud: ['api', 'web'], iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 3600, nbf: Math.floor(Date.now() / 1000) + 3600 }), 'signature'].join('.');
+  setValue(win, 'jwt-in', token);
+  check('JWT decoder diagnoses issuer, subject and audiences', doc.getElementById('jwt-meta').textContent.includes('iss: https://issuer.example') && doc.getElementById('jwt-meta').textContent.includes('sub: user-7') && doc.getElementById('jwt-meta').textContent.includes('aud: api, web'));
+  check('JWT decoder reports expiry and not-before against the device clock', doc.getElementById('jwt-meta').textContent.includes('exp is in the future') && doc.getElementById('jwt-meta').textContent.includes('nbf is in the future'));
+  check('JWT decoder calls out alg=none and unverified signature', doc.getElementById('jwt-meta').textContent.includes('alg=none') && doc.getElementById('jwt-meta').textContent.includes('signature not verified'));
+  check('JWT decoder has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('user-agent-parser');
+  check('user-agent parser immediately reads this browser', doc.getElementById('ua-text').value === win.navigator.userAgent && doc.getElementById('ua-out').textContent.includes('Browser:'));
+  check('user-agent parser avoids the irrelevant page-analysis panel', !doc.querySelector('.inspect'));
+  check('user-agent parser has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('ics-calendar-generator');
+  setValue(win, 'ics-title', 'Overnight deploy');
+  setValue(win, 'ics-sdate', '2026-10-22');
+  setValue(win, 'ics-edate', '2026-10-23');
+  setValue(win, 'ics-stime', '23:00');
+  setValue(win, 'ics-etime', '01:00');
+  setValue(win, 'ics-tz', 'utc');
+  check('ICS generator emits RFC 5545 version 2.0 and UTC time values', doc.getElementById('ics-out').textContent.includes('VERSION:2.0') && doc.getElementById('ics-out').textContent.includes('DTSTART:20261022T230000Z') && doc.getElementById('ics-out').textContent.includes('DTEND:20261023T010000Z'));
+  check('ICS generator identifies UTC interpretation in its result', doc.getElementById('ics-note').textContent.includes('Entered times are marked as UTC'));
+  setValue(win, 'ics-edate', '2026-10-22');
+  setValue(win, 'ics-etime', '22:00');
+  check('ICS generator rejects a same-day event that ends before it starts', doc.getElementById('ics-out').textContent === '' && doc.getElementById('ics-note').textContent.includes('end time must be after'));
+  check('ICS generator handles event fields without JavaScript errors', errors.length === 0);
   dom.window.close();
 }
 

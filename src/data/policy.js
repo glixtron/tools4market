@@ -10,12 +10,20 @@ export const POLICY = [
 <p>Tools4Market is a collection of free browser-based tools for marketers, bloggers, developers and webmasters. Most tools process pasted input on your device. When you choose page analysis, the public URL is sent to our first-party fetch service so it can retrieve the page for your browser to inspect. There is no signup or software to install.</p>
 <h2>Why we exist</h2>
 <p>Most “free tool” websites bury the tool under ads and demand an email address before showing a result. We are building the opposite: a fast, honest toolbox where the tool is the first thing on the page and works the moment it loads. Our specialty is the toolkit of the AI-search era — meta tags, robots.txt, llms.txt, structured data and the utilities that keep a website healthy in front of both classic search engines and AI assistants.</p>
+<p>The problem we keep running into is not a lack of tools. It is a lack of tools that tell you the truth. A snippet preview that pretends to be a Google result, a keyword-density tool that quotes an “ideal” percentage, a canonical-tag generator that implies a link is a command — each of those small lies costs somebody a afternoon of work. So the rule here is simple: <strong>every tool states what it actually measured, and what it cannot know.</strong> If a number is an estimate, the page says so; if a check cannot see inside Google, the page says that too.</p>
+<h2>What is on the site</h2>
+<p>Thirty tools across four groups. The <strong>SEO &amp; Meta</strong> group generates and explains meta tags, Open Graph and Twitter cards, canonical and hreflang links, JSON-LD schema, and previews your title and description. The <strong>AI Search</strong> group covers the newer wave: robots.txt presets for eighteen-plus AI crawlers, one-click blocking of training bots, and llms.txt files for answer engines. The <strong>Content &amp; Social</strong> group covers slugs, UTM campaigns, keyword frequency and hashtags. The <strong>Web</strong> group covers XML sitemaps, .htaccess redirects, passwords, Base64 and URL encoding, UUIDs, JWT inspection, user-agent parsing and calendar files.</p>
 <h2>How the tools work</h2>
 <p>Tools are built with plain HTML, CSS and JavaScript. Pasted text and generated output are processed locally. Public URL analysis sends the URL to our first-party fetch service, which retrieves the public response and returns it to your browser for analysis. The app does not save the resulting report. Some tools need an internet connection to fetch a page or download a file.</p>
+<p>That architecture is not only a privacy choice, it is a performance one. There is no application server to queue behind, no rate limit to hit, and nothing to go down at 9am when everyone realises they need a robots.txt. The pages are static files on a global content delivery network, and the only dynamic part of the site is a single, tightly scoped fetch endpoint.</p>
+<h2>How we test what we ship</h2>
+<p>Every tool is exercised automatically against a real DOM: each input is driven with sample and hostile data (empty values, 100,000-character pastes, malformed URLs and markup, non-numeric numbers), every button is clicked, and the run fails on any console error or missing output. On top of that, a live check runs against the published site after every deploy — DNS, the sitemap, all forty published URLs, their canonical tags, the backend endpoint and the ad slots. When a change ships, the same suites run again. It is unglamorous, and it is the reason the tools still work.</p>
 <h2>How we keep it free</h2>
-<p>The site is supported by advertising (Google AdSense) and, on some pages, clearly disclosed affiliate links for tools we consider worth paying for. Ads never sit inside the tools themselves. If a page carries an affiliate link, the disclosure is on that page.</p>
+<p>The site is supported by advertising (Google AdSense) and, on some pages, clearly disclosed affiliate links for tools we consider worth paying for. Ads never sit inside the tools themselves. If a page carries an affiliate link, the disclosure is on that page. We do not sell data, and we do not ask for an account — there is nothing to sell you, because the tools already work.</p>
+<h2>Editorial standards</h2>
+<p>Every explanation is written for a practitioner rather than a search engine. We do not quote character limits that search engines do not enforce, we do not promise rankings, and we do not publish “guaranteed” results. Where guidance is genuinely contested, we say so. Corrections are welcome and made quickly — see the contact page.</p>
 <h2>Contact</h2>
-<p>Questions, bug reports, or tool suggestions are welcome at <a href="/contact/">our contact page</a>. We read everything.</p>`,
+<p>Questions, bug reports, or tool suggestions are welcome at <a href="/contact/">our contact page</a>. We read everything, and we answer most things within two business days.</p>`,
   },
   {
     slug: 'contact',
@@ -24,17 +32,37 @@ export const POLICY = [
     metaDesc: 'Contact the Tools4Market team: tool suggestions, bug reports, feedback or business inquiries. We aim to reply within two business days.',
     html: `
 <h1>Contact</h1>
-<p>Reach us at <strong>support@tools4market.online</strong> — we usually reply within two business days.</p>
+<p>Everything reaches the same small inbox: <a href="mailto:support@tools4market.online"><strong><a href="mailto:support@tools4market.online">support@tools4market.online</a></strong></a>. We usually reply within two business days, and we answer complaints, privacy requests and takedown notices first.</p>
+<h2>Write to us</h2>
+<p>Use the form below — it opens your own email app with the message pre-filled, so nothing is stored on our servers and nothing is sent anywhere until you press send. You can also write directly, whichever is easier.</p>
+<form class="ct-form" action="mailto:support@tools4market.online" method="post" enctype="text/plain">
+  <div class="field"><label for="ct-name">Your name</label><input id="ct-name" name="name" type="text" placeholder="Jane Doe" autocomplete="name" required></div>
+  <div class="field"><label for="ct-email">Your email</label><input id="ct-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+  <div class="field"><label for="ct-topic">What is this about?</label><select id="ct-topic" name="topic">
+    <option>A bug in a tool</option>
+    <option>A complaint about this website</option>
+    <option>A correction to the content</option>
+    <option>A tool suggestion</option>
+    <option>A privacy or data request</option>
+    <option>Advertising, sponsorship or partnership</option>
+    <option>Something else</option>
+  </select></div>
+  <div class="field"><label for="ct-message">Message</label><textarea id="ct-message" name="message" rows="6" placeholder="Which tool, what you expected, and what happened instead." required></textarea></div>
+  <div class="ck-actions"><button type="submit" class="btn">Open in my email app</button></div>
+  <p class="tool-note">The button opens your mail client with the fields above filled in. If nothing happens, email <a href="mailto:support@tools4market.online">support@tools4market.online</a> directly.</p>
+</form>
 <h2>What to contact us about</h2>
 <ul>
-<li><strong>Bug reports:</strong> tell us the tool name, your browser, and what you expected vs. what happened.</li>
+<li><strong>Bug reports:</strong> tell us the tool name, your browser, and what you expected vs. what happened. A screenshot of the output helps enormously.</li>
+<li><strong>Complaints:</strong> about the site, an advertisement you saw, or the way a page behaved — these go to the same address and are handled as priority. Describe the page URL and what went wrong.</li>
 <li><strong>Tool suggestions:</strong> the roadmap is driven by user requests — the most requested tools get built first.</li>
 <li><strong>Content corrections:</strong> if a guide or FAQ is outdated or wrong, we want to know.</li>
-<li><strong>Business &amp; advertising:</strong> sponsorships and partnerships.</li>
-<li><strong>Privacy requests:</strong> see our <a href="/privacy-policy/">Privacy Policy</a>.</li>
+<li><strong>Privacy or data requests:</strong> access, correction or deletion requests are answered by the same address — see our <a href="/privacy-policy/">Privacy Policy</a> for what we hold and why.</li>
+<li><strong>Business &amp; advertising:</strong> sponsorships, partnerships and advertising enquiries.</li>
 </ul>
 <h2>Before you write</h2>
-<p>Many questions are already answered in the FAQ section of each tool page. If a tool misbehaves, try a hard refresh (Ctrl/Cmd+Shift+R) first — a stale cached script is the most common culprit.</p>`,
+<p>Many questions are already answered in the FAQ section of each tool page. If a tool misbehaves, try a hard refresh (Ctrl/Cmd+Shift+R) first — a stale cached script is the most common culprit.</p>
+<p>One thing we cannot do: look up your browsing history or a report a tool produced. Tools run in your browser and we do not keep a copy of the output, so please paste the text you want us to look at into your message.</p>`,
   },
   {
     slug: 'privacy-policy',
@@ -64,7 +92,7 @@ export const POLICY = [
 <h2>5. Children</h2>
 <p>This site is not directed at children under 13 and we do not knowingly collect personal information from them.</p>
 <h2>6. Your rights</h2>
-<p>Depending on your jurisdiction (GDPR, CCPA and similar), you may have rights to access, correct or delete personal data we hold. Since our tools collect none, such requests mostly concern contact emails — write to <strong>support@tools4market.online</strong>.</p>
+<p>Depending on your jurisdiction (GDPR, CCPA and similar), you may have rights to access, correct or delete personal data we hold. Since our tools collect none, such requests mostly concern contact emails — write to <strong><a href="mailto:support@tools4market.online">support@tools4market.online</a></strong>.</p>
 <h2>7. Changes</h2>
 <p>We will update this policy as the site evolves and revise the “last updated” date above when we do.</p>`,
   },
@@ -111,6 +139,6 @@ export const POLICY = [
 <h2>5. External links</h2>
 <p>Links to third-party sites are provided for convenience. We do not control and are not responsible for their content, availability or policies.</p>
 <h2>6. Contact</h2>
-<p>Questions about this disclaimer: <strong>support@tools4market.online</strong>.</p>`,
+<p>Questions about this disclaimer: <strong><a href="mailto:support@tools4market.online">support@tools4market.online</a></strong>.</p>`,
   },
 ];

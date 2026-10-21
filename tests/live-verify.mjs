@@ -119,6 +119,7 @@ out.push('=== Metadata & assets ===');
 const home = (await grab(ORIGIN + '/')).body;
 ok('homepage og:image on the canonical host', home.includes('og:image" content="' + ORIGIN + '/assets/og-image.png'));
 ok('homepage WebSite + Organization JSON-LD', home.includes('"@type":"WebSite"') && home.includes('"@type":"Organization"'));
+ok('homepage has a visible FAQ section + FAQPage schema', /Frequently asked questions/.test(home) && /"@type":"FAQPage"/.test(home));
 ok('homepage Bing msvalidate meta', /name="msvalidate\.01"/.test(home));
 ok('homepage has no noindex', !/content="noindex"/i.test(home));
 ok('GTM container script in head', /googletagmanager\.com\/gtm\.js/.test(home) && /GTM-P6P4FLGB/.test(home));
@@ -135,7 +136,15 @@ const privacy = (await grab(ORIGIN + '/privacy-policy/')).body;
 ok('privacy policy documents cookies/consent', /Cookie settings/.test(privacy) && /Consent Mode/i.test(privacy));
 ok('AdSense loader present with the publisher id', /adsbygoogle\.js\?client=ca-pub-1509697031230558/.test(home));
 ok('ads.txt served with the publisher id', (await grab(ORIGIN + '/ads.txt')).body.includes('pub-1509697031230558'));
-ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(home) && !/data-ad-slot=""/.test(home));
+const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
+ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(toolHtml) && !/data-ad-slot=""/.test(toolHtml) && !/data-ad-slot="ca-pub/.test(toolHtml));
+// blog / guides
+const blogIndex = (await grab(ORIGIN + '/blog/')).body;
+ok('blog index reachable with article links', blogIndex.length > 0 && /\/blog\/[a-z0-9-]+\//.test(blogIndex));
+const article = (await grab(ORIGIN + '/blog/robots-txt-for-search-and-ai-crawlers/')).body;
+ok('article page has BlogPosting + FAQPage + Breadcrumb schema', /"@type":"BlogPosting"/.test(article) && /"@type":"FAQPage"/.test(article) && /"@type":"BreadcrumbList"/.test(article));
+ok('article links into its matching tools', /\/tools\/robots-txt-generator\//.test(article) && /\/tools\/ai-crawler-blocker\//.test(article));
+ok('sitemap index includes the blog child', (await grab(ORIGIN + '/sitemap.xml')).body.includes('sitemap-blog.xml'));
 for (const a of ['/assets/style.css', '/assets/og-image.png', '/assets/icon-192.png', '/assets/site.js', '/assets/runtime/inspect.js', '/assets/runtime/audit.js', '/assets/inspect-strings.js']) {
   const r = await grab(ORIGIN + a, { redirect: 'manual' });
   ok('asset ' + a, r.status === 200, 'status ' + r.status);

@@ -2,8 +2,9 @@
 // Tools4Market — static site generator. Run: node build.mjs
 import { rm, mkdir, writeFile, copyFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { TOOLS, CATEGORIES, POLICY } from './src/data/index.js';
+import { TOOLS, CATEGORIES, POLICY, HOME_FAQS } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
+import { ARTICLES } from './src/data/blog.js';
 
 const R = fileURLToPath(new URL('.', import.meta.url));
 const YEAR = new Date().getFullYear();
@@ -51,6 +52,9 @@ function rel(from, to) {
   const tail = t.slice(i).join('/');
   return '../'.repeat(f.length - i) + tail + (tail && to.endsWith('/') ? '/' : '');
 }
+
+// escape, then re-allow **bold** markers for our own content
+const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
 const ldTag = (obj) => '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, '\\u003c') + '</script>';
 
@@ -217,6 +221,7 @@ ${gtmBody}
     <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
     <nav class="site-nav" aria-label="Main">
       ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}">${c.nav}</a>`).join('')}
+      <a href="${rel(path, '/blog/')}">Guides</a>
       <a href="${rel(path, '/about/')}">About</a>
       <a href="${rel(path, '/contact/')}">Contact</a>
     </nav>
@@ -297,6 +302,10 @@ function homeLd() {
       name: SITE.name, url: SITE.url + '/', logo: SITE.url + '/assets/og-image.png',
       email: SITE.email,
     },
+    {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: HOME_FAQS.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    },
   ];
 }
 
@@ -341,6 +350,8 @@ function homeBody() {
     <p>Most tools process pasted text and generated output in your browser. If you choose page analysis, the entered public URL is sent to our first-party fetch service, which retrieves the page and returns its response for local analysis. The app does not save a report. This keeps everyday text tools fast while making URL-based checks useful against a real page. See the <a href="${rel(path, '/privacy-policy/')}">privacy policy</a> for details.</p>
     <h2>How it works</h2>
     <p>Pick a tool from the grids above or search from the box at the top. Fill in the fields — or paste your own page URL where the tool offers a live check — then copy or download the result. Output is validated as you go, so the first result is usually the final one. Every tool page also carries a short how-to, honest FAQs and links to related tools, so you can go deeper without another round of search results.</p>
+    <h2>Frequently asked questions</h2>
+    ${HOME_FAQS.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n    ')}
   </section>
 </div>`;
 }
@@ -459,6 +470,61 @@ function policyPage(p) {
 </div>`;
 }
 
+function articlePage(a) {
+  const path = '/blog/' + a.slug + '/';
+  const related = (a.relatedTools || []).map((s) => TOOLS.find((t) => t.slug === s)).filter(Boolean);
+  const words = a.sections.reduce((n, s) => n + s.p.join(' ').split(/\s+/).filter(Boolean).length, 0);
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/blog/')}">Guides</a> <span class="breadcrumb-sep">/</span> <span>${esc(a.title)}</span></nav>
+  <article class="policy article">
+    <p class="article-meta">Published ${esc(a.date)} · By ${esc(a.author)}${a.reviewer ? ' · Reviewed by ' + esc(a.reviewer) : ''} · ${words} words</p>
+    ${a.sections.map((s) => `<h2>${rich(s.h)}</h2>\n${s.p.map((p) => `<p>${rich(p)}</p>`).join('\n')}`).join('\n')}
+    ${a.links && a.links.length ? `<h2>Sources and further reading</h2>\n<ul>${a.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener nofollow" target="_blank">${esc(l.label)}</a></li>`).join('\n')}</ul>` : ''}
+    <h2>Frequently asked questions</h2>
+    ${a.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${rich(f.a)}</p></details>`).join('\n')}
+    ${related.length ? `<h2>Tools for this guide</h2>\n<ul class="article-tools">${related.map((t) => `<li><a href="${rel(path, '/tools/' + t.slug + '/')}">${esc(t.name)}</a> — ${esc(t.card)}</li>`).join('\n')}</ul>` : ''}
+  </article>
+</div>`;
+}
+
+function blogIndexBody() {
+  const path = '/blog/';
+  const list = [...ARTICLES].sort((a, b) => (a.date < b.date ? 1 : -1));
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>Guides</span></nav>
+  <h1>Guides and how-to articles</h1>
+  <p class="lead">Practical, tested walkthroughs for the jobs these tools do: crawler rules, launch checklists, structured data, campaigns and the technical side of keeping a site healthy in front of search engines and AI assistants.</p>
+  <div class="blog-list">
+    ${list.map((a) => `<a class="blog-card" href="${rel(path, '/blog/' + a.slug + '/')}">
+      <span class="blog-date">${esc(a.date)}</span>
+      <strong>${esc(a.title)}</strong>
+      <span>${esc(a.intro.slice(0, 180))}…</span>
+    </a>`).join('\n    ')}
+  </div>
+</div>`;
+}
+
+function articleLd(a) {
+  const path = '/blog/' + a.slug + '/';
+  return [
+    {
+      '@context': 'https://schema.org', '@type': 'BlogPosting',
+      headline: a.title, description: a.metaDesc, url: SITE.url + path,
+      datePublished: a.date, dateModified: a.date,
+      author: { '@type': 'Organization', name: a.author },
+      publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/og-image.png' } },
+      image: SITE.url + '/assets/og-image.png',
+      inLanguage: 'en', mainEntityOfPage: { '@type': 'WebPage', '@id': SITE.url + path },
+      keywords: a.focus,
+    },
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }, { name: a.title, path }]),
+    {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: a.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    },
+  ];
+}
+
 function notFoundBody() {
   return `<div class="container" style="text-align:center;padding:80px 0">
   <div style="font-size:4rem;margin-bottom:16px">404</div>
@@ -510,6 +576,8 @@ const run = async () => {
       };
     }),
     ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t) })),
+    { path: '/blog/', title: 'Guides — Free SEO and Marketing How-Tos | ' + SITE.name, desc: 'Practical guides for the jobs these tools do: crawler rules, launch checklists, structured data, campaigns and technical SEO — tested, plain and free.', body: blogIndexBody(), ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Guides', url: SITE.url + '/blog/', description: 'How-to guides for marketers, bloggers and webmasters.' }, breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }])] },
+    ...ARTICLES.map((a) => ({ path: '/blog/' + a.slug + '/', title: a.metaTitle, desc: a.metaDesc, body: articlePage(a), ld: articleLd(a) })),
     ...POLICY.map((p) => {
       const path = '/' + p.slug + '/';
       return {
@@ -536,7 +604,7 @@ const run = async () => {
   // ---- sitemaps: a sitemap INDEX + two children (pages, tools) ---------
   // An index keeps room to grow (a blog/content sitemap later) and lets crawlers
   // fetch only the slice they need.
-  const pagePaths = ['/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
+  const pagePaths = ['/', '/blog/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
   const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
   // Do not emit synthetic lastmod values: a build date is not the page's
   // significant content-modification date. Google ignores priority/changefreq.
@@ -544,7 +612,8 @@ const run = async () => {
   const urlset = (paths) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(entry).join('\n')}\n</urlset>\n`;
   await writeFile(R + 'dist/sitemap-pages.xml', urlset(pagePaths));
   await writeFile(R + 'dist/sitemap-tools.xml', urlset(toolPaths));
-  const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml'];
+  await writeFile(R + 'dist/sitemap-blog.xml', urlset(ARTICLES.map((a) => '/blog/' + a.slug + '/')));
+  const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml', '/sitemap-blog.xml'];
   await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 
   const robots = `# Tools4Market robots.txt\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE.url}/sitemap.xml\n`;

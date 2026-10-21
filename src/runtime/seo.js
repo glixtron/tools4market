@@ -180,9 +180,8 @@
       return div;
     }
 
-    rows.appendChild(makeRow('en', '', 'https://example.com/'));
-    rows.appendChild(makeRow('de', 'de', 'https://example.com/de/'));
-    rows.appendChild(makeRow('fr', '', 'https://example.com/fr/'));
+    // Start blank so users never copy fictional language URLs by accident.
+    rows.appendChild(makeRow('', '', ''));
 
     function update() {
       var lines = [];

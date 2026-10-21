@@ -68,3 +68,31 @@ export const CATEGORIES = {
 
 export const TOOLS = [...TOOLS_SEO, ...TOOLS_AI, ...TOOLS_CONTENT, ...TOOLS_WEB];
 export { POLICY };
+
+// Homepage FAQ — rendered as visible <details> blocks and as FAQPage JSON-LD.
+export const HOME_FAQS = [
+  {
+    q: 'Are these tools really free?',
+    a: 'Yes — every tool on the site is free, with no account, no usage cap and no upsell. There is no "free tier" that ends after five queries: if a tool is here, it works as many times as you need. The site is funded by advertising and clearly disclosed affiliate links, never by locking the tools behind a signup.',
+  },
+  {
+    q: 'Do the tools upload the text I paste?',
+    a: 'Most tools process what you paste entirely in your browser — the text never leaves your device. The optional page-analysis tools are the exception: if you ask a tool to check a public page, that URL is sent to our first-party fetch service, which retrieves the page and, for sitemap or crawler tools, may also retrieve that host’s robots.txt and sitemap files. Responses are handed back to your browser for analysis. We do not store a report. Never enter private URLs or links containing access tokens.',
+  },
+  {
+    q: 'Can I use these tools for client work?',
+    a: 'Yes. Every tool runs in the browser with no account, so there is nothing to license and no per-seat cost. The output is plain text or copy-paste-ready markup, which makes it easy to hand a result to a client. If you find a tool that saves you real time, the footer of each page links to the tools we rate highly.',
+  },
+  {
+    q: 'Do the tools need an internet connection?',
+    a: 'Text and generator tools work offline once the page has loaded, because the work happens locally. The page-analysis tools — Web Crawler Audit, SEO Score Checker and the "analyze your page" panel — do need a connection, because they retrieve a live page to inspect it. If a fetch fails, the tools fall back to a paste-HTML path so you can still work.',
+  },
+  {
+    q: 'Are the search previews exact?',
+    a: 'No, and no tool can be. A snippet preview shows the title and description you entered in a layout similar to a search result. Google decides the final title and snippet for each query: it may rewrite the title, pull a passage from the page instead of your description, or show a different snippet for a different search. Treat the previews as a layout check, not a promise.',
+  },
+  {
+    q: 'How do you make money from a free tool site?',
+    a: 'Advertising (Google AdSense) and a small number of clearly disclosed affiliate links. Ads are placed in reserved spaces around the tools and never inside the tool itself, so the layout never shifts and the interaction area stays clean. If you decline advertising consent, Google serves limited, non-personalised ads instead of personalised ones.',
+  },
+];

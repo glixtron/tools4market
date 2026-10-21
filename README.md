@@ -100,15 +100,16 @@ Add an object to the matching category file in `src/data/` (`seo.js`, `ai-search
   icon: '🔢',
   card: 'Count words, characters and reading time instantly.',
   keywords: 'word counter character count reading time',
+  focus: 'word counter',                   // the ONE search phrase this page targets
   h1: 'Free Word Counter — No Signup, No Limits',           // pattern required by rules.md
   metaTitle: 'Free Word Counter — Words, Chars & Read Time', // ≤60 chars
   metaDesc: 'Count words, characters, sentences and…',       // ≤158 chars
   intro: 'One-line summary shown under the H1.',
-  sections: [                            // ≥2 unique sections, hand-written
+  sections: [                            // 3–4 unique sections, hand-written
     { h: 'What it does', p: ['Paragraph one…', 'Paragraph two…'] },
     { h: 'How to use it', p: ['Steps…'] },
   ],
-  faqs: [                                // 3–5 questions → FAQPage schema, auto-added
+  faqs: [                                // 3–6 questions → FAQPage schema, auto-added
     { q: 'Is it free?', a: 'Yes — every tool on this site is free.' },
   ],
   html: `
@@ -118,6 +119,8 @@ ${outputArea('wc-out', 'Counts')}`,     // helpers: f.text/url/textarea/select/n
 ```
 
 Every user-facing string lives in these data files — never hardcode copy inside runtime files (rules.md §3).
+
+**`focus` is mandatory.** It is the single search phrase the page targets, and the SEO audit enforces that it appears in the meta title, meta description, intro, at least one section heading and at least two FAQs — so every page has one clear keyword target instead of a keyword list. Run `npm run test:seo` after adding or editing a tool; it checks all pages (titles, descriptions, H1s, intros, keyword targeting, section depth, FAQ quality, structured data, internal linking, HTML hygiene and site-wide duplicates).
 
 ### 2. Runtime logic (client-side)
 
@@ -324,32 +327,27 @@ grep -rn "TODO-DOMAIN" .     # must return nothing
 
 ---
 
-## Monetization: AdSense insertion points
+## Monetization: AdSense (connected)
 
-Ad slots are **pre-positioned placeholders** (`.ad-slot`) on every tool page — top banner, below content, and desktop sidebar — with layout already reserved so live ads cause zero CLS. Nothing may ever sit inside the tool interaction area (rules.md §5).
+**Publisher id: `ca-pub-1509697031230558`** — wired into the build, no manual editing required.
 
-To go live after AdSense approval, edit **one function** in `build.mjs`:
+| Piece | Where it comes from | Status |
+|---|---|---|
+| Loader (`adsbygoogle.js?client=ca-pub-1509697031230558`) | every page `<head>`, async + `crossorigin="anonymous"` | ✅ live — this is what AdSense's site-ownership check looks for |
+| `ads.txt` | generated at the domain root by the build | ✅ live (`google.com, pub-1509697031230558, DIRECT, f08c47fec0942fa0`) |
+| Preconnect | `pagead2.googlesyndication.com` | ✅ live |
+| Ad slots | three reserved `.ad-slot` containers per tool page (top banner, below content, desktop sidebar) | ✅ reserved height — no CLS when ads switch on |
+| Real ad units | `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` env vars | ⬜ set the ad-unit ids from the AdSense console to switch them on |
+| Privacy disclosure | `src/data/policy.js` — publisher id + "limited, non-personalised ads when consent is denied" | ✅ live |
 
-```js
-const adSlot = (label) => `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space — live after AdSense approval${label ? ' · ' + label : ''}</div>`;
-```
+**Consent-aware by design:** the loader is present in the HTML (required for verification), but Google's Consent Mode v2 state decides what actually happens — in the EEA/UK/Switzerland `ad_storage` is `denied` until the visitor accepts, so Google serves **limited, non-personalised ads** and sets no ad cookies. The banner's **Ads** toggle controls it.
 
-Replace its body with the real unit, keeping the wrapper so the reserved layout still applies:
+**To switch on real ads:**
+1. AdSense console → *Ad units* → create three display units (top banner, below content, sidebar) and copy their ids.
+2. Cloudflare → Worker → *Settings → Variables and Secrets* → add `AD_SLOT_TOP`, `AD_SLOT_CONTENT`, `AD_SLOT_SIDEBAR` → redeploy. Each slot then renders a real `<ins class="adsbygoogle">` unit; until then the reserved placeholder stays (no broken units, no layout shift).
+3. AdSense console → tick *"I've placed the code"* → **Request review**.
 
-```js
-const adSlot = (label) => `<div class="ad-slot">
-  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-       data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
-</div>`;
-```
-
-Then add the AdSense loader once in the `<head>` of `layout()` in `build.mjs`:
-
-```html
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-```
-
-Also update the **Privacy Policy** in `src/data/policy.js` with the real publisher ID once approved (rules.md §5). Apply for AdSense only after: 20 tools + policy pages + 20–30 original articles + 50–100 daily visitors.
+**Rules:** nothing may ever sit inside the tool interaction area (rules.md §5) — the reserved slots are outside it by construction.
 
 ---
 
