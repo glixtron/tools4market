@@ -12,40 +12,51 @@
   var P = TXT.panel || {};
   var V = TXT.verdicts || {};
   var ERR = TXT.errors || {};
+  function $(root, id) { return root.querySelector('#' + id); }
 
   // ---------------------------------------------------------------- fetch
   // Layer 1: our Cloudflare Pages Function /api/fetch (CORS-free, first-party).
   // Layer 2: direct browser fetch (works only for CORS-open origins).
-  // Returns { ok, html, url, finalUrl, status, ms, bytes } or { ok:false, reason }.
-  function fetchPage(url) {
+  // Returns a checked response record. Text/XML is accepted only for supporting
+  // resources such as robots.txt and sitemaps.
+  function fetchPage(url, options) {
+    options = options || {};
     if (typeof fetch !== 'function') return Promise.resolve({ ok: false, reason: 'cors' });
     // Same-origin pages are already fetchable by the browser. Avoid sending a
     // request through our own Worker proxy, which can recurse at the edge.
     try {
-      if (new URL(url, window.location.href).origin === window.location.origin) return tryDirect(url);
+      if (new URL(url, window.location.href).origin === window.location.origin) return tryDirect(url, options);
     } catch (e) {}
     var proxy = '/api/fetch?url=' + encodeURIComponent(url);
     return fetch(proxy)
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (j && j.ok && j.status >= 200 && j.status < 400 && typeof j.body === 'string' && j.body.trim()) {
+        var type = String(j && j.contentType || '').toLowerCase();
+        var acceptableType = !type || /html|xhtml/i.test(type) || (options.allowText && /text|xml/i.test(type));
+        if (j && j.ok && j.status >= 200 && j.status < 300 && acceptableType && typeof j.body === 'string' && j.body.trim()) {
           return { ok: true, html: j.body, url: url, finalUrl: j.finalUrl || url,
-                   status: j.status, ms: j.ms, bytes: j.bytes, xRobotsTag: j.xRobotsTag || '' };
+                   status: j.status, ms: j.ms, bytes: j.bytes, contentType: j.contentType || '',
+                   truncated: !!j.truncated, xRobotsTag: j.xRobotsTag || '' };
         }
-        if (j && j.ok && j.status >= 400) return { ok: false, reason: 'http', status: j.status };
-        return tryDirect(url);
+        if (j && j.status >= 400) return { ok: false, reason: 'http', status: j.status, finalUrl: j.finalUrl || url };
+        if (j && j.ok && !acceptableType) return { ok: false, reason: 'content-type', contentType: j.contentType || '' };
+        return tryDirect(url, options);
       })
-      .catch(function () { return tryDirect(url); });
+      .catch(function () { return tryDirect(url, options); });
   }
 
-  function tryDirect(url) {
+  function tryDirect(url, options) {
     return fetch(url, { mode: 'cors', credentials: 'omit' })
       .then(function (r) {
         if (!r.ok) return { ok: false, reason: 'http', status: r.status };
         return r.text().then(function (t) {
           if (!t.trim()) return { ok: false, reason: 'empty', status: r.status };
+          var contentType = r.headers.get('content-type') || '';
+          if (contentType && !/html|xhtml/i.test(contentType) && !(options && options.allowText && /text|xml/i.test(contentType))) {
+            return { ok: false, reason: 'content-type', status: r.status, contentType: contentType };
+          }
           return { ok: true, html: t, url: url, finalUrl: r.url || url,
-                   status: r.status, ms: 0, bytes: t.length,
+                   status: r.status, ms: 0, bytes: t.length, contentType: contentType,
                    xRobotsTag: r.headers.get('x-robots-tag') || '' };
         });
       })
@@ -60,14 +71,17 @@
     function prop(p) { return meta('meta[property="' + p + '"]'); }
     function name(n) { return meta('meta[name="' + n + '"]'); }
 
-    var title = (doc.querySelector('title') ? doc.querySelector('title').textContent : '').trim();
+    var titleEls = Array.prototype.slice.call(doc.querySelectorAll('title'));
+    var title = (titleEls[0] ? titleEls[0].textContent : '').trim();
     var desc = name('description');
-    var canonEl = doc.querySelector('link[rel="canonical"]');
+    var canonicalEls = Array.prototype.slice.call(doc.querySelectorAll('link[rel="canonical"]'));
+    var canonEl = canonicalEls[0];
     var canonical = canonEl ? (canonEl.getAttribute('href') || '').trim() : '';
     // resolve relative canonical against the base URL
     if (canonical && base) { try { canonical = new URL(canonical, base).toString(); } catch (e) {} }
 
-    var robots = name('robots') || name('googlebot');
+    var robotEls = Array.prototype.slice.call(doc.querySelectorAll('meta[name="robots"],meta[name="googlebot"],meta[name="bingbot"]'));
+    var robots = robotEls.map(function (e) { return e.getAttribute('content') || ''; }).filter(Boolean).join('; ');
     var langEl = doc.documentElement.getAttribute('lang');
 
     var h1s = texts(doc, 'h1');
@@ -77,19 +91,19 @@
     var imgs = Array.prototype.slice.call(doc.querySelectorAll('img'));
     var missingAlt = imgs.filter(function (im) {
       var a = im.getAttribute('alt');
-      return a === null || a.trim() === '';
+      return a === null && !/presentation|none/i.test(im.getAttribute('role') || '');
     }).length;
 
     var links = Array.prototype.slice.call(doc.querySelectorAll('a[href]'));
     var internal = 0, external = 0, nofollow = 0;
     var baseHost = '';
-    if (base) { try { baseHost = new URL(base).host; } catch (e) {} }
+    if (base) { try { baseHost = new URL(base).hostname.replace(/^www\./i, ''); } catch (e) {} }
     links.forEach(function (a) {
       var href = a.getAttribute('href') || '';
       if (/^(mailto:|tel:|javascript:|#)/i.test(href)) return;
       var isInternal = true;
       if (/^https?:\/\//i.test(href)) {
-        try { isInternal = new URL(href).host === baseHost; } catch (e) { isInternal = false; }
+        try { isInternal = new URL(href).hostname.replace(/^www\./i, '') === baseHost; } catch (e) { isInternal = false; }
       }
       if (isInternal) internal++; else external++;
       if (/\bnofollow\b/i.test(a.getAttribute('rel') || '')) nofollow++;
@@ -107,16 +121,25 @@
       .map(function (l) { return { lang: l.getAttribute('hreflang'), href: l.getAttribute('href') }; });
 
     // visible body text (scripts/styles removed) — powers the keyword-density prefill
-    var clone = doc.body ? doc.body.cloneNode(true) : doc.createElement('div');
-    Array.prototype.slice.call(clone.querySelectorAll('script,style,noscript')).forEach(function (n) { n.parentNode.removeChild(n); });
-    var bodyText = (clone.textContent || '').replace(/\s+/g, ' ').trim();
-    var contentNodes = doc.querySelectorAll('.tool-content, .tool-faq, .home-content, .cat-about, .policy');
-    var contentText = Array.prototype.slice.call(contentNodes).map(function (n) {
-      var c = n.cloneNode(true);
-      Array.prototype.slice.call(c.querySelectorAll('script,style,noscript')).forEach(function (x) { x.parentNode.removeChild(x); });
-      return c.textContent || '';
-    }).join(' ').replace(/\s+/g, ' ').trim();
-    var countText = contentText || bodyText;
+    function visibleText(node) {
+      if (!node) return '';
+      var c = node.cloneNode(true);
+      Array.prototype.slice.call(c.querySelectorAll('script,style,noscript,svg,nav,header,footer,aside,form,button,input,select,textarea,[hidden],[aria-hidden="true"]'))
+        .forEach(function (x) { if (x.parentNode) x.parentNode.removeChild(x); });
+      return (c.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    var bodyText = visibleText(doc.body || doc.createElement('div'));
+    // Use the strongest available content container, never add nested containers
+    // together (which double-counts article text). Fall back to cleaned body text.
+    var contentNodes = Array.prototype.slice.call(doc.querySelectorAll(
+      '.tool-content, .tool-faq, .home-content, .cat-about, .policy, .entry-content, .post-content, article, main, [role="main"]'));
+    var mainText = '';
+    contentNodes.forEach(function (n) {
+      var text = visibleText(n);
+      if (text.length > mainText.length) mainText = text;
+    });
+    if (!mainText) mainText = bodyText;
+    var countText = mainText;
     var words = countText ? countText.split(' ').filter(Boolean).length : 0;
 
     var viewportEl = doc.querySelector('meta[name="viewport"]');
@@ -124,6 +147,7 @@
     return {
       url: base, finalUrl: base, status: 0, ms: 0, bytes: html.length,
       title: title, desc: desc, canonical: canonical, robots: robots,
+      titleCount: titleEls.length, canonicalCount: canonicalEls.length, robotsTags: robotEls.length,
       lang: langEl || '', viewport: viewportEl ? (viewportEl.getAttribute('content') || '') : '',
       charset: doc.querySelector('meta[charset]') ? 'yes' : '',
       og: { title: prop('og:title'), desc: prop('og:description'), image: prop('og:image'),
@@ -134,7 +158,7 @@
       images: { total: imgs.length, missingAlt: missingAlt },
       links: { internal: internal, external: external, nofollow: nofollow },
       schemaTypes: schemaTypes, hreflangs: hreflangs,
-      words: words, bodyText: bodyText
+      words: words, bodyText: mainText, mainText: mainText, fullText: bodyText
     };
   }
 
@@ -154,6 +178,51 @@
     if (node['@graph']) collectTypes(node['@graph'], out);
   }
 
+  function parseRobotsTxt(text, pageUrl, botName) {
+    var groups = [], group = { agents: [], rules: [] }, hasRules = false;
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      line = line.replace(/#.*$/, '').trim();
+      if (!line) return;
+      var ix = line.indexOf(':');
+      if (ix < 0) return;
+      var key = line.slice(0, ix).trim().toLowerCase();
+      var value = line.slice(ix + 1).trim();
+      if (key === 'user-agent') {
+        if (hasRules) { groups.push(group); group = { agents: [], rules: [] }; hasRules = false; }
+        group.agents.push(value.toLowerCase());
+      } else if ((key === 'allow' || key === 'disallow') && group.agents.length) {
+        if (key === 'disallow' && !value) return;
+        group.rules.push({ allow: key === 'allow', path: value });
+        hasRules = true;
+      }
+    });
+    if (group.agents.length) groups.push(group);
+    var bot = String(botName || 'googlebot').toLowerCase();
+    var matches = groups.filter(function (g) { return g.agents.some(function (a) { return a === bot || a === '*'; }); });
+    var specificity = matches.reduce(function (best, g) {
+      var s = g.agents.some(function (a) { return a === bot; }) ? 2 : 1;
+      return Math.max(best, s);
+    }, 0);
+    matches = matches.filter(function (g) { return (g.agents.indexOf(bot) !== -1 ? 2 : (g.agents.indexOf('*') !== -1 ? 1 : 0)) === specificity; });
+    var rules = [];
+    matches.forEach(function (g) { rules = rules.concat(g.rules); });
+    var pagePath = '/';
+    try { var u = new URL(pageUrl); pagePath = u.pathname + u.search; } catch (e) {}
+    var winning = null;
+    rules.forEach(function (r) {
+      if (!r.path) return;
+      var anchored = /\$$/.test(r.path);
+      var rawPattern = anchored ? r.path.slice(0, -1) : r.path;
+      var pattern = rawPattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + (anchored ? '$' : '.*');
+      var ok = false;
+      try { ok = new RegExp('^' + pattern).test(pagePath); } catch (e) {}
+      if (ok && (!winning || r.path.replace(/[\*$]/g, '').length > winning.path.replace(/[\*$]/g, '').length ||
+        (r.path.replace(/[\*$]/g, '').length === winning.path.replace(/[\*$]/g, '').length && r.allow))) winning = r;
+    });
+    return { allowed: !winning || winning.allow, matched: winning, sitemapUrls: String(text || '').split(/\r?\n/)
+      .map(function (line) { var m = /^\s*sitemap\s*:\s*(\S+)/i.exec(line.replace(/#.*$/, '')); return m ? m[1] : ''; }).filter(Boolean) };
+  }
+
   // ---------------------------------------------------------------- summary
   // A compact "what we found" readout shared by every tool's panel.
   function summarize(snap) {
@@ -166,23 +235,24 @@
     }
 
     var tl = snap.title.length;
-    add('Title', tl === 0 ? 'fail' : (tl >= 30 && tl <= 60 ? 'pass' : 'warn'),
-      tl === 0 ? 'No <title> tag found.' : fill(V.title && (tl >= 30 && tl <= 60 ? V.title.pass : (tl >= 15 && tl <= 70 ? V.title.warn : V.title.fail)), { n: tl, detail: tl < 30 ? 'too short to be descriptive' : 'too long, it will be cut in results' }));
+    add('Title', tl === 0 ? 'fail' : 'pass',
+      tl === 0 ? 'No <title> tag found.' : fill(V.title.pass, { n: tl }));
 
     var dl = snap.desc.length;
-    add('Meta description', dl === 0 ? 'fail' : (dl >= 120 && dl <= 158 ? 'pass' : 'warn'),
-      dl === 0 ? 'No meta description.' : fill(dl >= 120 && dl <= 158 ? V.desc.pass : (dl >= 70 && dl <= 200 ? V.desc.warn : V.desc.fail), { n: dl, detail: dl < 120 ? 'too short' : 'far too long, it will be cut' }));
+    add('Meta description', dl === 0 ? 'warn' : 'pass',
+      dl === 0 ? V.desc.missing : fill(V.desc.pass, { n: dl }));
 
-    add('H1', snap.h1s.length === 1 ? 'pass' : (snap.h1s.length === 0 ? 'fail' : 'warn'),
-      snap.h1s.length === 0 ? V.h1.fail : fill(snap.h1s.length === 1 ? V.h1.pass : V.h1.warn, { n: snap.h1s.length }));
+    add('Main heading', snap.h1s.length === 0 ? 'warn' : (snap.h1s.length === 1 ? 'pass' : 'warn'),
+      snap.h1s.length === 0 ? V.h1.missing : fill(snap.h1s.length === 1 ? V.h1.pass : V.h1.multiple, { n: snap.h1s.length }));
 
-    add('Canonical', snap.canonical ? 'pass' : 'fail', snap.canonical ? fill(V.canonical.pass, { v: snap.canonical }) : V.canonical.fail);
-    add('Open Graph', (snap.og.title || snap.og.desc) ? 'pass' : 'fail', (snap.og.title || snap.og.desc) ? V.og.pass : V.og.fail);
-    add('Indexable', /noindex/i.test(snap.robots) ? 'fail' : 'pass', /noindex/i.test(snap.robots) ? fill(V.robots.fail, { v: snap.robots }) : V.robots.pass);
+    add('Canonical', !snap.canonical ? 'warn' : (snap.canonicalCount > 1 ? 'warn' : 'pass'),
+      !snap.canonical ? V.canonical.missing : fill(snap.canonicalCount > 1 ? V.canonical.multiple : V.canonical.pass, { v: snap.canonical, n: snap.canonicalCount }));
+    add('Open Graph', (snap.og.title || snap.og.desc) ? 'pass' : 'none', (snap.og.title || snap.og.desc) ? V.og.pass : V.og.none);
+    add('Robots meta/header', /noindex/i.test(snap.robots) ? 'fail' : 'pass', /noindex/i.test(snap.robots) ? fill(V.robots.fail, { v: snap.robots }) : V.robots.pass);
     add('Images', snap.images.total === 0 ? 'none' : (snap.images.missingAlt === 0 ? 'pass' : 'warn'),
       snap.images.total === 0 ? 'No content images; alt text is not applicable.' : (snap.images.missingAlt === 0 ? fill(V.images.pass, { n: snap.images.total }) : fill(V.images.warn, { n: snap.images.total, m: snap.images.missingAlt })));
-    add('Language', snap.lang ? 'pass' : 'fail', snap.lang ? fill(V.lang.pass, { v: snap.lang }) : V.lang.fail);
-    add('Mobile viewport', snap.viewport ? 'pass' : 'fail', snap.viewport ? V.viewport.pass : V.viewport.fail);
+    add('Language', snap.lang ? 'pass' : 'warn', snap.lang ? fill(V.lang.pass, { v: snap.lang }) : V.lang.fail);
+    add('Mobile viewport', snap.viewport ? 'pass' : 'warn', snap.viewport ? V.viewport.pass : V.viewport.fail);
     add('Content length', 'none', fill(V.words.info, { n: snap.words }));
     if (snap.schemaTypes.length) add('Structured data', 'pass', 'Schema found: ' + snap.schemaTypes.join(', '));
     if (snap.hreflangs.length) add('Hreflang', 'pass', snap.hreflangs.length + ' hreflang annotations.');
@@ -326,17 +396,29 @@
 
     function analyze(html, meta) {
       var snap;
-      try { snap = parse(html, meta.url); }
+      try { snap = parse(html, meta.finalUrl || meta.url); }
       catch (e) { status.textContent = 'Could not parse that HTML.'; return; }
       if (meta.xRobotsTag) snap.robots = [snap.robots, meta.xRobotsTag].filter(Boolean).join('; ');
       if (meta.status) { snap.status = meta.status; snap.ms = meta.ms; snap.bytes = meta.bytes; }
+      snap.requestedUrl = meta.url || '';
+      snap.finalUrl = meta.finalUrl || meta.url || '';
+      snap.contentType = meta.contentType || '';
+      snap.truncated = !!meta.truncated;
+      root.__t4mInspectSnap = snap;
+      root.__t4mPageMeta = snap;
       var rows = summarize(snap);
       status.textContent = String(P.signals || 'Read {n} on-page signals from').replace('{n}', rows.length) + ' ' + (meta.url || 'pasted HTML') +
         (snap.status ? ' \u00b7 HTTP ' + snap.status : '') + (snap.bytes ? ' \u00b7 ' + fmtBytes(snap.bytes) : '') + '.';
+      if (snap.requestedUrl && snap.finalUrl && snap.requestedUrl !== snap.finalUrl) {
+        status.textContent += ' ' + String(P.redirected || 'Redirected to {url}.').replace('{url}', snap.finalUrl);
+      }
+      if (snap.truncated) status.textContent += ' ' + (P.truncated || 'Only part of the response was analyzed.');
       render(result, snap, slug, root, rows);
       result.hidden = false;
       var apply = APPLY[slug];
       if (apply) { try { apply(snap, root); } catch (e) {} }
+      bindPersonalizedTarget(root, slug);
+      refreshPersonalized(root, slug);
     }
 
     btn.addEventListener('click', function () {
@@ -382,6 +464,124 @@
       t.appendChild(document.createTextNode(tip));
       box.appendChild(t);
     }
+    appendPersonalized(box, slug, snap, root);
+  }
+
+  function normalizedWords(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+  }
+  function phraseCount(text, phrase) {
+    var hay = normalizedWords(text), needle = normalizedWords(phrase), count = 0;
+    if (!hay.length || !needle.length || needle.length > hay.length) return 0;
+    for (var i = 0; i <= hay.length - needle.length; i++) {
+      var matches = true;
+      for (var j = 0; j < needle.length; j++) if (hay[i + j] !== needle[j]) { matches = false; break; }
+      if (matches) count++;
+    }
+    return count;
+  }
+  function topicOverlap(a, b) {
+    var stop = { a: 1, an: 1, the: 1, and: 1, or: 1, for: 1, of: 1, to: 1, in: 1, on: 1, with: 1, from: 1 };
+    var aa = normalizedWords(a).filter(function (w) { return w.length > 2 && !stop[w]; });
+    var bb = normalizedWords(b).filter(function (w) { return w.length > 2 && !stop[w]; });
+    if (!aa.length || !bb.length) return 0;
+    var aset = {}; aa.forEach(function (w) { aset[w] = 1; });
+    return bb.filter(function (w) { return aset[w]; }).length / Math.max(1, Math.min(aa.length, bb.length));
+  }
+  function makeDescriptionDraft(snap) {
+    var lead = (snap.h1s[0] || snap.title || '').replace(/\s+/g, ' ').trim();
+    var text = (snap.mainText || '').replace(/\s+/g, ' ').trim();
+    if (!lead || text.split(/\s+/).length < 12) return '';
+    var sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+    var first = '';
+    for (var i = 0; i < sentences.length; i++) {
+      var s = sentences[i].trim();
+      if (s.split(/\s+/).length >= 7 && s.toLowerCase() !== lead.toLowerCase()) { first = s; break; }
+    }
+    var candidate = (lead + (first ? '. ' + first : '.')).replace(/\s+/g, ' ').trim();
+    if (candidate.length > 155) {
+      candidate = candidate.slice(0, 155);
+      var end = candidate.lastIndexOf(' ');
+      if (end > 90) candidate = candidate.slice(0, end).replace(/[,:;—-]+$/, '') + '…';
+    }
+    return candidate;
+  }
+  function appendPersonalized(box, slug, snap, root) {
+    if (['serp-preview-tool', 'meta-description-checker', 'keyword-density-checker'].indexOf(slug) === -1) return;
+    var I = TXT.personalized || {};
+    var old = box.querySelector('.inspect-personalized');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var card = el('div', 'inspect-tip inspect-personalized');
+    var head = slug === 'serp-preview-tool' ? I.serpTitle : slug === 'meta-description-checker' ? I.metaTitle : I.keywordTitle;
+    card.appendChild(el('strong', null, head || 'Page-specific findings'));
+    card.appendChild(document.createElement('br'));
+    if (slug === 'serp-preview-tool') {
+      var title = (($(root, 'sp-title') || {}).value || snap.title || '').trim();
+      var h1 = snap.h1s[0] || '';
+      var desc = (($(root, 'sp-desc') || {}).value || snap.desc || '').trim();
+      card.appendChild(document.createTextNode((I.titleLabel || 'Fetched title') + ': ' + (title || I.noTitle || 'Missing') + ' (' + title.length + ' chars). '));
+      card.appendChild(document.createTextNode((I.h1Label || 'Main heading') + ': ' + (h1 || I.noH1 || 'Missing') + '. '));
+      card.appendChild(document.createTextNode(h1 && title
+        ? (topicOverlap(title, h1) >= 0.5 ? (I.serpAligned || '') : (I.serpMismatch || ''))
+        : (I.serpNeedHeading || '')));
+      card.appendChild(document.createElement('br'));
+      card.appendChild(document.createTextNode((I.descLabel || 'Meta description') + ': ' + (desc ? desc.length + ' chars. The preview is a width estimate, not a prediction of Google’s chosen snippet.' : (I.noDesc || 'No description found.'))));
+      var serpQuery = (($(root, 'sp-query') || {}).value || '').trim();
+      if (serpQuery) {
+        var serpLocations = [title, h1, desc, snap.mainText].filter(function (x) { return phraseCount(x, serpQuery) > 0; }).length;
+        card.appendChild(document.createElement('br'));
+        card.appendChild(document.createTextNode(String(I.queryFound || 'Phrase appears in {n} locations.').replace('{n}', serpLocations)));
+      }
+    } else if (slug === 'meta-description-checker') {
+      var currentDesc = (($(root, 'md-text') || {}).value || '').trim();
+      card.appendChild(document.createTextNode((I.titleLabel || 'Title') + ': ' + (snap.title || I.noTitle || 'Missing') + '. '));
+      card.appendChild(document.createTextNode((I.h1Label || 'H1') + ': ' + (snap.h1s[0] || I.noH1 || 'Missing') + '. '));
+      card.appendChild(document.createElement('br'));
+      card.appendChild(document.createTextNode((I.descLabel || 'Description') + ': ' + (currentDesc || I.noDesc || 'Missing.')));
+      var metaQuery = (($(root, 'md-query') || {}).value || '').trim();
+      card.appendChild(document.createElement('br'));
+      if (metaQuery) {
+        var metaLocations = [snap.title, snap.h1s[0] || '', currentDesc, snap.mainText].filter(function (x) { return phraseCount(x, metaQuery) > 0; }).length;
+        card.appendChild(document.createTextNode(String(I.queryFound || 'Phrase appears in {n} of 4 locations.').replace('{n}', metaLocations)));
+      } else card.appendChild(document.createTextNode(I.noQuery || 'Add an optional target phrase to compare against the fetched page.'));
+      var draft = makeDescriptionDraft(snap);
+      if (draft) {
+        var b = el('button', 'btn btn-ghost', I.draftButton || 'Draft from page');
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          var input = $(root, 'md-text'); if (!input) return;
+          input.value = draft;
+          var ev = document.createEvent('Event'); ev.initEvent('input', true, true); input.dispatchEvent(ev);
+        });
+        card.appendChild(document.createElement('br'));
+        card.appendChild(b);
+        card.appendChild(document.createElement('br'));
+        card.appendChild(document.createTextNode(I.descriptionDraftNote || 'Review this source-based draft before publishing.'));
+      } else {
+        card.appendChild(document.createElement('br'));
+        card.appendChild(document.createTextNode(I.noDraftSource || 'Not enough visible page text to create a grounded draft.'));
+      }
+    } else {
+      var keyword = (($(root, 'kd-query') || {}).value || '').trim();
+      var found = keyword ? phraseCount(snap.mainText, keyword) : 0;
+      card.appendChild(document.createTextNode(keyword
+        ? String(I.phraseCount || 'Phrase appears {n} times in {words} words.').replace('{n}', found).replace('{words}', snap.words)
+        : (snap.words ? (I.noQuery || 'Add an optional target phrase to compare against this page.') : (I.noMainText || 'No visible page text was available.'))));
+    }
+    box.appendChild(card);
+  }
+
+  function bindPersonalizedTarget(root, slug) {
+    var id = slug === 'serp-preview-tool' ? 'sp-query' : slug === 'meta-description-checker' ? 'md-query' : slug === 'keyword-density-checker' ? 'kd-query' : '';
+    var input = id ? $(root, id) : null;
+    if (!input || input.__t4mInspectBound) return;
+    input.__t4mInspectBound = true;
+    input.addEventListener('input', function () { refreshPersonalized(root, slug); });
+  }
+  function refreshPersonalized(root, slug) {
+    var panel = root.querySelector('.inspect-result');
+    var snap = root.__t4mInspectSnap;
+    if (panel && snap) appendPersonalized(panel, slug, snap, root);
   }
 
   function tipFor(slug, snap) {
@@ -400,12 +600,12 @@
         return snap.canonical ? 'Your current canonical is ' + snap.canonical + '. Generate a corrected one if it is wrong.' :
           'Your page has NO canonical. We used your URL as the base \u2014 copy the generated tag into your <head>.';
       case 'serp-preview-tool':
-        return 'Below is your ACTUAL title and description as Google would show them, with live length warnings.';
+        return 'The fields below were prefilled from the fetched HTML. The preview is an estimate; Google may rewrite the title or choose a different snippet for each query.';
       case 'meta-description-checker':
-        return snap.desc ? 'We pasted your live meta description above \u2014 fix it using the verdict.' :
-          'Your page has no meta description, so there is nothing to check yet. Write one below.';
+        return snap.desc ? 'The fetched description is loaded above. Compare it with the page heading and opening copy; Google may choose a different passage.' :
+          'No description was present in the fetched HTML. Google can still generate a snippet from visible page text.';
       case 'keyword-density-checker':
-        return 'We pulled ~' + snap.words + ' words of your visible page text. The frequency tables below are for YOUR content.';
+        return 'Extracted about ' + snap.words + ' words from the main content area of this fetched page. Frequency counts describe the text; they are not a recommended keyword-density target.';
       case 'url-slug-generator':
         return 'We loaded your page title \u2014 generate a clean slug, or paste other titles (one per line) for bulk.';
       case 'llms-txt-generator':
@@ -432,5 +632,14 @@
     return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
   }
 
-  window.T4M_INSPECT = { mount: mount, parse: parse, fetchPage: fetchPage, summarize: summarize };
+  window.T4M_INSPECT = {
+    mount: mount,
+    parse: parse,
+    fetchPage: fetchPage,
+    summarize: summarize,
+    phraseCount: phraseCount,
+    topicOverlap: topicOverlap,
+    makeDescriptionDraft: makeDescriptionDraft,
+    parseRobotsTxt: parseRobotsTxt
+  };
 })();

@@ -64,7 +64,8 @@ async function apiFetch(res, reqUrl) {
     const body = new TextDecoder('utf-8').decode(truncated ? buf.slice(0, MAX_BYTES) : buf);
     json(res, 200, {
       ok: true, status: upstream.status, finalUrl: upstream.url, contentType,
-      bytes: buf.byteLength, truncated, ms: Date.now() - started, body,
+      bytes: buf.byteLength, truncated, ms: Date.now() - started,
+      xRobotsTag: upstream.headers.get('x-robots-tag') || '', body,
     });
   } catch (e) {
     json(res, 502, { ok: false, error: String((e && e.message) || e), ms: Date.now() - started });

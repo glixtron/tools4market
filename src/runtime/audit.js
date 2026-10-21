@@ -25,6 +25,63 @@
       .replace(/\{detail\}/g, o.detail != null ? o.detail : '');
   }
   function origin(u) { try { return new URL(u).origin; } catch (e) { return ''; } }
+  function normalizeUrl(u) {
+    try { var x = new URL(u); x.hash = ''; if (x.pathname.length > 1) x.pathname = x.pathname.replace(/\/+$/, ''); return x.toString(); }
+    catch (e) { return String(u || '').trim(); }
+  }
+  function sitemapLocs(xml, base) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(xml, 'application/xml'); } catch (e) { return { ok: false, index: false, locs: [] }; }
+    if (doc.querySelector('parsererror')) return { ok: false, index: false, locs: [] };
+    var rootName = (doc.documentElement && doc.documentElement.localName || '').toLowerCase();
+    var locs = Array.prototype.slice.call(doc.querySelectorAll('loc')).map(function (e) {
+      try { return new URL((e.textContent || '').trim(), base).toString(); } catch (x) { return ''; }
+    }).filter(Boolean);
+    return { ok: rootName === 'urlset' || rootName === 'sitemapindex', index: rootName === 'sitemapindex', locs: locs };
+  }
+  function crawlContext(url, includeSitemaps) {
+    var robotsUrl = origin(url) + '/robots.txt';
+    return INSP.fetchPage(robotsUrl, { allowText: true }).then(function (rb) {
+      var ctx = { robots: rb, rules: null, sitemapUrls: [], sitemapStatus: 'unverified', sitemapFound: null, sitemapSampled: 0 };
+      if (!rb.ok) {
+        // A 404 robots.txt means no published rules; other failures mean unknown.
+        if (rb.status === 404) ctx.rules = { allowed: true, matched: null, sitemapUrls: [] };
+        return ctx;
+      }
+      ctx.rules = INSP.parseRobotsTxt(rb.html, url, 'googlebot');
+      ctx.sitemapUrls = ctx.rules.sitemapUrls.slice(0, 3);
+      if (!includeSitemaps) { ctx.sitemapStatus = ctx.sitemapUrls.length ? 'not-checked' : 'undeclared'; return ctx; }
+      if (!ctx.sitemapUrls.length) { ctx.sitemapStatus = 'undeclared'; return ctx; }
+      return Promise.all(ctx.sitemapUrls.map(function (s) {
+        return INSP.fetchPage(s, { allowText: true }).then(function (r) { return { url: s, response: r }; });
+      })).then(function (maps) {
+        var childMaps = [];
+        maps.forEach(function (m) {
+          if (!m.response.ok) return;
+          var parsed = sitemapLocs(m.response.html, m.response.finalUrl || m.url);
+          if (!parsed.ok) return;
+          if (parsed.index) childMaps = childMaps.concat(parsed.locs);
+          else {
+            ctx.sitemapSampled++;
+            if (parsed.locs.some(function (loc) { return normalizeUrl(loc) === normalizeUrl(url); })) ctx.sitemapFound = true;
+          }
+        });
+        return Promise.all(childMaps.slice(0, 3).map(function (s) {
+          return INSP.fetchPage(s, { allowText: true }).then(function (r) { return { url: s, response: r }; });
+        })).then(function (children) {
+          children.forEach(function (m) {
+            if (!m.response.ok) return;
+            var parsed = sitemapLocs(m.response.html, m.response.finalUrl || m.url);
+            if (!parsed.ok || parsed.index) return;
+            ctx.sitemapSampled++;
+            if (parsed.locs.some(function (loc) { return normalizeUrl(loc) === normalizeUrl(url); })) ctx.sitemapFound = true;
+          });
+          ctx.sitemapStatus = maps.some(function (m) { return m.response.ok; }) ? 'fetched' : 'failed';
+          return ctx;
+        });
+      });
+    }).catch(function () { return { robots: null, rules: null, sitemapUrls: [], sitemapStatus: 'unverified', sitemapFound: null, sitemapSampled: 0 }; });
+  }
 
   // ---------------------------------------------------------- Web Crawler Audit
   T['web-crawler-audit'] = function (root) {
@@ -43,44 +100,48 @@
     out.textContent = A.empty || 'Analyze a page to see how crawlers see it.';
     fixes.textContent = '';
 
-    // Evaluate a single check against the snapshot (+ optional robots.txt text).
-    function evalCheck(c, snap, robotsTxt) {
+    // Each finding is tied to the response fetched for this exact URL.
+    function evalCheck(c, snap, ctx) {
+      ctx = ctx || {};
       var tl = snap.title.length, dl = snap.desc.length;
       switch (c.id) {
-        case 'fetch':
-          return { level: 'pass', v: fill(c.pass, { status: snap.status || 'fetched', ms: snap.ms || '<100', bytes: fmtBytes(snap.bytes) }) };
+        case 'http':
+          return { level: snap.status >= 200 && snap.status < 300 ? 'pass' : 'warn', v: fill(snap.status >= 200 && snap.status < 300 ? c.pass : c.fail, { status: snap.status || 'unknown', bytes: fmtBytes(snap.bytes) }) };
         case 'https':
-          return /^https:/i.test(snap.url || '') ? { level: 'pass', v: c.pass } : { level: 'fail', v: c.fail };
+          return /^https:/i.test(snap.finalUrl || snap.url || '') ? { level: 'pass', v: c.pass } : { level: 'warn', v: c.fail };
         case 'robots':
           return /noindex/i.test(snap.robots) ? { level: 'fail', v: fill(c.fail, { v: snap.robots }) } : { level: 'pass', v: c.pass };
+        case 'robotsTxt':
+          if (!ctx.robots || !ctx.robots.ok) {
+            if (ctx.robots && ctx.robots.status === 404) return { level: 'pass', v: 'No robots.txt file was found; there is no published rule blocking this URL.' };
+            return { level: 'none', v: fill(c.none, { v: ctx.robots && ctx.robots.status ? 'HTTP ' + ctx.robots.status : 'request failed' }) };
+          }
+          if (ctx.rules && ctx.rules.allowed) return { level: 'pass', v: c.pass };
+          var rule = ctx.rules && ctx.rules.matched;
+          return { level: 'warn', v: fill(c.warn, { v: rule ? (rule.allow ? 'Allow: ' : 'Disallow: ') + rule.path : 'matching rule' }) };
         case 'canonical':
-          if (!snap.canonical) return { level: 'fail', v: c.fail };
-          if (origin(snap.url) && origin(snap.canonical) && origin(snap.canonical) !== origin(snap.url)) return { level: 'warn', v: fill(c.warn, { v: snap.canonical }) };
+          if (!snap.canonical) return { level: 'none', v: c.none };
+          if (snap.canonicalCount > 1) return { level: 'fail', v: c.fail };
+          if (normalizeUrl(snap.canonical) !== normalizeUrl(snap.finalUrl || snap.url)) return { level: 'warn', v: fill(c.warn, { v: snap.canonical }) };
           return { level: 'pass', v: fill(c.pass, { v: snap.canonical }) };
         case 'title':
-          if (!tl) return { level: 'fail', v: c.fail };
-          return { level: tl >= 30 && tl <= 60 ? 'pass' : 'warn', v: fill(tl >= 30 && tl <= 60 ? c.pass : c.warn, { n: tl, v: snap.title }) };
-        case 'desc':
-          if (!dl) return { level: 'fail', v: c.fail };
-          return { level: dl >= 120 && dl <= 158 ? 'pass' : 'warn', v: fill(dl >= 120 && dl <= 158 ? c.pass : c.warn, { n: dl }) };
+          if (!tl) return { level: 'warn', v: c.warn };
+          return { level: 'pass', v: fill(c.pass, { n: tl, v: snap.title }) };
         case 'h1':
-          if (snap.h1s.length === 0) return { level: 'fail', v: c.fail };
-          if (snap.h1s.length === 1) return { level: 'pass', v: fill(c.pass, { v: snap.h1s[0] }) };
-          return { level: 'warn', v: fill(c.warn, { n: snap.h1s.length }) };
-        case 'sitemap': {
-          var m = robotsTxt ? /Sitemap:\s*(\S+)/i.exec(robotsTxt) : null;
-          return m ? { level: 'pass', v: fill(c.pass, { v: m[1] }) } : { level: 'fail', v: c.fail };
-        }
-        case 'hreflang':
-          return snap.hreflangs.length ? { level: 'pass', v: fill(c.pass, { n: snap.hreflangs.length }) } : { level: 'none', v: c.none };
-        case 'schema':
-          return snap.schemaTypes.length ? { level: 'pass', v: fill(c.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'fail', v: c.fail };
-        case 'og':
-          return (snap.og.title || snap.og.desc) ? { level: 'pass', v: c.pass } : { level: 'fail', v: c.fail };
-        case 'imgalt':
-          if (snap.images.total === 0) return { level: 'none', v: 'No images on this page.' };
-          return snap.images.missingAlt === 0 ? { level: 'pass', v: fill(c.pass, { n: snap.images.total }) }
-            : { level: 'warn', v: fill(c.warn, { n: snap.images.total, m: snap.images.missingAlt }) };
+          return snap.h1s.length ? { level: 'pass', v: fill(c.pass, { v: snap.h1s[0] }) } : { level: 'warn', v: c.warn };
+        case 'description':
+          return dl ? { level: 'pass', v: fill(c.pass, { n: dl }) } : { level: 'none', v: c.none };
+        case 'sitemap':
+          if (!ctx.sitemapUrls || !ctx.sitemapUrls.length) return { level: 'none', v: c.none };
+          if (ctx.sitemapStatus === 'failed') return { level: 'warn', v: fill(c.warn, { v: 'HTTP/network error for ' + ctx.sitemapUrls.join(', ') }) };
+          if (ctx.sitemapFound) return { level: 'pass', v: c.pass };
+          return { level: 'none', v: 'Fetched ' + ctx.sitemapSampled + ' sitemap file(s), but this URL was not found in the checked set. Membership is a discovery hint, not an indexing requirement.' };
+        case 'structured':
+          return snap.schemaTypes.length ? { level: 'none', v: fill(c.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'none', v: c.none };
+        case 'images':
+          if (snap.images.total === 0) return { level: 'none', v: c.none };
+          return snap.images.missingAlt === 0 ? { level: 'none', v: fill(c.pass, { n: snap.images.total }) }
+            : { level: 'none', v: fill(c.warn, { n: snap.images.total, m: snap.images.missingAlt }) };
         default:
           return { level: 'none', v: '' };
       }
@@ -99,15 +160,15 @@
           return;
         }
         var snap;
-        try { snap = INSP.parse(r.html, r.url || u); } catch (e) { status.textContent = 'Could not parse that page.'; runBtn.disabled = false; return; }
-        snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes;
-        status.textContent = 'Fetched HTTP ' + r.status + ' \u00b7 ' + fmtBytes(r.bytes) + ' \u00b7 ' + (r.ms || '<100') + 'ms';
-        // robots.txt (best-effort; failure just means no sitemap line detected)
-        return INSP.fetchPage(origin(u) + '/robots.txt').then(function (rb) {
-          render(snap, rb && rb.ok ? rb.html : '');
+        try { snap = INSP.parse(r.html, r.finalUrl || u); } catch (e) { status.textContent = 'Could not parse that page.'; runBtn.disabled = false; return; }
+        snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes; snap.finalUrl = r.finalUrl || u; snap.requestedUrl = u;
+        if (r.xRobotsTag) snap.robots = [snap.robots, r.xRobotsTag].filter(Boolean).join('; ');
+        status.textContent = 'Fetched HTTP ' + r.status + ' · ' + fmtBytes(r.bytes) + ' · ' + (r.ms || '<100') + 'ms' + (snap.finalUrl !== u ? ' · redirected to ' + snap.finalUrl : '');
+        return crawlContext(snap.finalUrl).then(function (ctx) {
+          render(snap, ctx);
           runBtn.disabled = false;
         });
-      });
+      }).catch(function () { runBtn.disabled = false; status.textContent = 'The page request failed before a report could be built. Check the URL or use the paste option.'; });
     }
 
     // paste-HTML path — best-effort robots.txt lookup, never blocks on it
@@ -118,18 +179,20 @@
       var snap;
       try { snap = INSP.parse(html, /^https?:\/\//i.test(u) ? u : ''); } catch (e) { status.textContent = 'Could not parse that HTML.'; return; }
       status.textContent = 'Audited pasted HTML \u00b7 ' + fmtBytes(html.length);
-      var rb = /^https?:\/\//i.test(u) ? INSP.fetchPage(origin(u) + '/robots.txt') : Promise.resolve(null);
-      rb.then(function (res) { render(snap, res && res.ok ? res.html : ''); });
+      if (u) { snap.finalUrl = u; snap.requestedUrl = u; }
+      if (u) {
+        crawlContext(u).then(function (ctx) { render(snap, ctx); }).catch(function () { render(snap, null); });
+      } else render(snap, null);
     }
 
-    function render(snap, robotsTxt) {
+    function render(snap, ctx) {
       // per-check report
       out.textContent = '';
       var list = el('ul', 'inspect-signals');
       var fixesArr = [];
       var earned = 0, total = 0;
       checks.forEach(function (c) {
-        var r = evalCheck(c, snap, robotsTxt);
+        var r = evalCheck(c, snap, ctx);
         var lvl = r.level;
         var li = el('li', 'sig-' + lvl);
         li.appendChild(el('span', 'sig-dot', ''));
@@ -138,7 +201,7 @@
         body.appendChild(document.createTextNode(r.v || ''));
         li.appendChild(body);
         list.appendChild(li);
-        if (c.weight) {
+        if (c.weight && lvl !== 'none') {
           total += c.weight;
           earned += lvl === 'pass' ? c.weight : lvl === 'warn' ? Math.round(c.weight * 0.5) : 0;
           if (lvl === 'fail' || lvl === 'warn') fixesArr.push({ w: c.weight, label: c.label, text: r.v, level: lvl });
@@ -155,7 +218,7 @@
       var s = A.summary || {};
       var note = pct >= 85 ? (s.great || '') : pct >= 60 ? (s.good || '') : (s.poor || '');
       gradeEl.textContent = fill(s.scoreLine || 'Crawl-health: {s}/100', { s: pct });
-      noteEl.textContent = note;
+      noteEl.textContent = note + ' ' + (s.disclaimer || 'This checklist is not a ranking prediction.');
 
       // prioritized fixes (highest weight first)
       fixesArr.sort(function (a, b) { return b.w - a.w; });
@@ -199,37 +262,55 @@
     out.textContent = (S.summary && S.summary.empty) || 'Analyze a page to score it.';
     fixes.textContent = '';
 
-    function evalFactor(f, snap) {
+    function evalFactor(f, snap, query, ctx) {
       var tl = snap.title.length, dl = snap.desc.length;
       switch (f.id) {
-        case 'title':
-          if (!tl) return { level: 'fail', v: fill(f.fail, { n: 0 }) };
-          return { level: tl >= 30 && tl <= 60 ? 'pass' : 'warn', v: fill(tl >= 30 && tl <= 60 ? f.pass : f.warn, { n: tl }) };
-        case 'desc':
-          if (!dl) return { level: 'fail', v: f.fail };
-          return { level: dl >= 120 && dl <= 158 ? 'pass' : 'warn', v: fill(dl >= 120 && dl <= 158 ? f.pass : f.warn, { n: dl }) };
-        case 'h1':
-          if (snap.h1s.length === 0) return { level: 'fail', v: f.fail };
-          return { level: snap.h1s.length === 1 ? 'pass' : 'warn', v: fill(snap.h1s.length === 1 ? f.pass : f.warn, { n: snap.h1s.length }) };
-        case 'headings': {
-          var sub = snap.h2s.length + snap.h3s.length;
-          return { level: sub >= 3 ? 'pass' : sub >= 1 ? 'warn' : 'fail', v: fill(sub >= 3 ? f.pass : sub >= 1 ? f.warn : f.fail, { n: sub }) };
+        case 'query': {
+          if (!query) return { level: 'none', v: S.summary.noQuery };
+          var areas = [snap.title, snap.h1s[0] || '', snap.desc, snap.mainText];
+          var found = areas.filter(function (v) { return INSP.phraseCount(v, query) > 0; }).length;
+          var level = found >= 3 ? 'pass' : found > 0 ? 'warn' : 'fail';
+          return { level: level, v: fill(f[level], { n: found }) };
         }
+        case 'title':
+          if (!tl) return { level: 'fail', v: f.fail };
+          return { level: 'pass', v: fill(f.pass, { n: tl }) };
+        case 'desc':
+          return dl ? { level: 'pass', v: fill(f.pass, { n: dl }) } : { level: 'warn', v: f.warn };
+        case 'h1':
+          return snap.h1s.length ? { level: 'pass', v: fill(f.pass, { v: snap.h1s[0] }) } : { level: 'warn', v: f.warn };
+        case 'content':
+          return snap.words > 0 ? { level: 'pass', v: fill(f.pass, { n: snap.words }) } : { level: 'warn', v: f.warn };
+        case 'canonical':
+          if (!snap.canonical) return { level: 'none', v: f.none };
+          if (snap.canonicalCount > 1) return { level: 'fail', v: f.fail };
+          return normalizeUrl(snap.canonical) === normalizeUrl(snap.finalUrl || snap.url)
+            ? { level: 'pass', v: fill(f.pass, { v: snap.canonical }) }
+            : { level: 'warn', v: fill(f.warn, { v: snap.canonical }) };
         case 'words':
           return { level: 'none', v: fill(f.info, { n: snap.words }) };
         case 'links':
-          return { level: snap.links.internal >= 3 ? 'pass' : snap.links.internal >= 1 ? 'warn' : 'fail', v: fill(snap.links.internal >= 3 ? f.pass : snap.links.internal >= 1 ? f.warn : f.fail, { n: snap.links.internal }) };
-        case 'imgalt':
-          if (snap.images.total === 0) return { level: 'none', v: f.none };
-          return { level: snap.images.missingAlt === 0 ? 'pass' : 'warn', v: fill(snap.images.missingAlt === 0 ? f.pass : f.warn, { n: snap.images.total, m: snap.images.missingAlt }) };
-        case 'schema':
-          return snap.schemaTypes.length ? { level: 'pass', v: fill(f.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'fail', v: f.fail };
-        case 'og':
-          return (snap.og.title || snap.og.desc) ? { level: 'pass', v: f.pass } : { level: 'fail', v: f.fail };
+          return snap.links.internal > 0 ? { level: 'pass', v: fill(f.pass, { n: snap.links.internal }) } : { level: 'warn', v: f.warn };
         case 'viewport':
-          return snap.viewport ? { level: 'pass', v: f.pass } : { level: 'fail', v: f.fail };
+          return snap.viewport ? { level: 'pass', v: f.pass } : { level: 'warn', v: f.warn };
         case 'https':
-          return /^https:/i.test(snap.url || '') ? { level: 'pass', v: f.pass } : { level: 'fail', v: f.fail };
+          return /^https:/i.test(snap.finalUrl || snap.url || '') ? { level: 'pass', v: f.pass } : { level: 'warn', v: f.warn };
+        case 'robots':
+          return /noindex/i.test(snap.robots) ? { level: 'fail', v: fill(f.fail, { v: snap.robots }) } : { level: 'pass', v: f.pass };
+        case 'robotsTxt':
+          if (!ctx || !ctx.robots) return { level: 'none', v: 'Not checked for pasted HTML.' };
+          if (!ctx.robots.ok) {
+            if (ctx.robots.status === 404) return { level: 'pass', v: 'No robots.txt file was found; there is no published rule blocking this URL.' };
+            return { level: 'none', v: 'Could not fetch robots.txt; page-level checks still ran.' };
+          }
+          return ctx.rules && ctx.rules.allowed ? { level: 'pass', v: f.pass }
+            : { level: 'warn', v: fill(f.warn, { v: ctx.rules && ctx.rules.matched ? ctx.rules.matched.path : 'matching rule' }) };
+        case 'headings':
+          return { level: 'none', v: fill(f.info, { n: snap.h2s.length + snap.h3s.length }) };
+        case 'schema':
+          return { level: 'none', v: snap.schemaTypes.length ? fill(f.info, { v: snap.schemaTypes.join(', ') }) : f.none };
+        case 'og':
+          return { level: 'none', v: (snap.og.title || snap.og.desc) ? f.info : f.none };
         default:
           return { level: 'none', v: '' };
       }
@@ -244,11 +325,15 @@
         runBtn.disabled = false;
         if (!r.ok) { status.textContent = 'Could not fetch that page. Use the paste-HTML option below for private pages.'; return; }
         var snap;
-        try { snap = INSP.parse(r.html, r.url || u); } catch (e) { status.textContent = 'Could not parse that page.'; return; }
-        snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes;
-        status.textContent = 'Fetched HTTP ' + r.status + ' \u00b7 ' + fmtBytes(r.bytes);
-        render(snap);
-      });
+        try { snap = INSP.parse(r.html, r.finalUrl || u); } catch (e) { status.textContent = 'Could not parse that page.'; return; }
+        snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes; snap.finalUrl = r.finalUrl || u; snap.requestedUrl = u;
+        snap.contentType = r.contentType || '';
+        if (r.xRobotsTag) snap.robots = [snap.robots, r.xRobotsTag].filter(Boolean).join('; ');
+        status.textContent = 'Fetched ' + snap.finalUrl + ' · HTTP ' + r.status + ' · ' + fmtBytes(r.bytes) + ' · ' + (r.ms || '<100') + 'ms';
+        return crawlContext(snap.finalUrl, false).then(function (ctx) {
+          render(snap, ctx);
+        });
+      }).catch(function () { runBtn.disabled = false; status.textContent = 'Page fetch failed before a score could be calculated.'; });
     }
 
     function scorePasted() {
@@ -257,17 +342,20 @@
       var u = (($(root, 'sc2-url') || {}).value || '').trim();
       var snap;
       try { snap = INSP.parse(html, /^https?:\/\//i.test(u) ? u : ''); } catch (e) { status.textContent = 'Could not parse that HTML.'; return; }
-      status.textContent = 'Scored pasted HTML \u00b7 ' + fmtBytes(html.length);
-      render(snap);
+      status.textContent = 'Scored pasted HTML · ' + fmtBytes(html.length) + ' · response headers and robots.txt were not fetched.';
+      snap.finalUrl = u || '';
+      snap.requestedUrl = u || '';
+      render(snap, null);
     }
 
-    function render(snap) {
+    function render(snap, ctx) {
+      var query = (($(root, 'sc2-query') || {}).value || '').trim();
       out.textContent = '';
       var list = el('ul', 'inspect-signals');
       var earned = 0, total = 0;
       var fixesArr = [];
       factors.forEach(function (f) {
-        var r = evalFactor(f, snap);
+        var r = evalFactor(f, snap, query, ctx);
         if (r.level !== 'none') {
           total += f.weight;
           earned += r.level === 'pass' ? f.weight : r.level === 'warn' ? Math.round(f.weight * 0.5) : 0;
@@ -279,9 +367,27 @@
         body.appendChild(document.createTextNode(r.v || ''));
         li.appendChild(body);
         list.appendChild(li);
-        if (r.level === 'fail' || r.level === 'warn') fixesArr.push({ w: f.weight, label: f.label, text: r.v, level: r.level });
+        if ((r.level === 'fail' || r.level === 'warn') && (f.weight || f.id === 'robots')) fixesArr.push({ w: f.weight, label: f.label, text: r.v, level: r.level });
       });
       out.appendChild(list);
+
+      var evidence = el('div', 'inspect-tip');
+      evidence.appendChild(el('strong', null, 'Evidence from this page'));
+      evidence.appendChild(document.createElement('br'));
+      evidence.appendChild(document.createTextNode('Title: ' + (snap.title || '(missing)') + ' · H1: ' + (snap.h1s[0] || '(missing)')));
+      evidence.appendChild(document.createElement('br'));
+      evidence.appendChild(document.createTextNode('Description: ' + (snap.desc || '(missing)')));
+      if (query) {
+        var hits = [snap.title, snap.h1s[0] || '', snap.desc, snap.mainText].map(function (txt) { return INSP.phraseCount(txt, query) > 0; });
+        evidence.appendChild(document.createElement('br'));
+      var foundAreas = ['title', 'H1', 'description', 'main text'].filter(function (_, i) { return hits[i]; });
+      evidence.appendChild(document.createTextNode('Target phrase “' + query + '” is present in ' + (foundAreas.length ? foundAreas.join(', ') : 'none of the four checked areas') + '.'));
+      } else evidence.appendChild(document.createTextNode(' ' + (S.summary.noQuery || 'Add a target phrase for topical placement feedback.')));
+      if (snap.words) {
+        evidence.appendChild(document.createElement('br'));
+        evidence.appendChild(document.createTextNode('Main text: about ' + snap.words + ' words. Count is contextual, not a minimum or ranking threshold.'));
+      }
+      out.appendChild(evidence);
 
       var pct = total ? Math.round(earned / total * 100) : 0;
       var grade = grades.find(function (g) { return pct >= g.min; }) || grades[grades.length - 1] || {};
@@ -289,7 +395,7 @@
       ringNum.textContent = pct;
       $(root, 'sc2-ring').style.setProperty('--p', pct);
       gradeEl.textContent = 'Grade ' + (grade.letter || '');
-      noteEl.textContent = grade.note || '';
+      noteEl.textContent = (grade.note || '') + ' ' + (S.summary.gradeNote || 'This checklist is not a ranking prediction.');
 
       fixesArr.sort(function (a, b) { return b.w - a.w; });
       fixes.textContent = '';

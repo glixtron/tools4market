@@ -2,6 +2,22 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Consent Mode v2 aligned to Google's official spec + GA4 tag live
+
+**Google tag added:** GA4 measurement id `G-6B4GGFC96K` now ships as **exactly one** `gtag.js` tag per page, immediately after `<head>` (IP anonymisation on), alongside the GTM container `GTM-P6P4FLGB` (head loader + `noscript` iframe).
+
+**Consent Mode v2 implemented per Google's documentation** (the spec was pasted in and the implementation audited line by line):
+- **Order is vital** — `dataLayer` + `gtag` are defined first, then the default consent state, then the tags, then updates on interaction. (Verified by *execution* order in `dataLayer`, not DOM position: GTM's own loader re-inserts itself as the first script in `<head>`, so position is not the signal.)
+- **All four v2 types** — `ad_storage`, `ad_user_data`, `ad_personalization`, `analytics_storage`.
+- **Basic vs advanced mode** via `CONSENT_MODE` env var: `basic` (default) = denied in the EEA/UK/CH (29 countries) with `wait_for_update: 500` so the banner can answer before tags fire, granted elsewhere; `advanced` = denied for every visitor everywhere.
+- **`url_passthrough` + `ads_data_redaction`** enabled — measurement survives without cookies, and ad identifiers are redacted when `ad_storage` is denied.
+- **Persistence** — a returning visitor's stored choice is restored as the *default* before any tag loads; the update command always fires on the page where the choice is made, never on unload.
+- `window.T4M_CONSENT.get()/update()/granted()` exposed for any custom UI.
+
+**Tests:** consent suite grown to **30/30** (execution order, v2 types, region scoping, `wait_for_update`, passthrough, redaction, restore-on-return, accept/reject/manage, persistence) · smoke suite made deterministic (3/3 consecutive 30/30 runs) · live verifier extended with region/passthrough/redaction checks · build 41 pages / 0 warnings · wrangler dry-run clean (104 assets, `env.ASSETS` bound).
+
+**Privacy policy** rewritten to describe the real behaviour (region-scoped denial, per-category choices, withdrawal via "Cookie settings", passthrough/redaction) instead of the earlier blanket "denied everywhere".
+
 ## 2026-10-21 — DNS cutover completed; live launch verification 35/38
 
 **The DNS problem, end to end.** The domain was silently split-brained: the registrar's nameservers (`dns1/dns2.registrar-servers.com`) were still authoritative at the `.online` registry, and *that* zone had no A/CNAME record for the site — so Googlebot and every visitor got `ENOTFOUND` ("Sitemap could not be read" in GSC), while the owner's browser kept working off a cached Cloudflare IP. Cloudflare's 11 correct records (Worker routes, GSC verification TXT, privateemail MX/SPF/DMARC) were sitting unused.

@@ -85,6 +85,9 @@
   // ---------------------------------------------------------- keyword density checker
   T['keyword-density-checker'] = function (root) {
     var out = $(root, 'kd-out');
+    var targetReport = $(root, 'kd-target-report');
+    var targetInput = $(root, 'kd-query');
+    var copy = ((window.T4M_ISTR || {}).tools || {}).keyword || {};
     var STOP = ('a,an,the,and,or,but,if,then,else,when,at,by,for,with,about,against,between,into,through,during,before,after,above,below,to,from,up,down,in,out,on,off,over,under,again,further,once,here,there,all,any,both,each,few,more,most,other,some,such,no,nor,not,only,own,same,so,than,too,very,can,will,just,is,are,was,were,be,been,being,have,has,had,do,does,did,of,it,its,this,that,these,those,i,you,he,she,we,they,them,his,her,their,our,your,my,me,us,what,which,who,whom,as,until,while,because,s,t,don,now').split(',');
 
     function table(n, totals) {
@@ -117,15 +120,18 @@
       var text = $(root, 'kd-text').value.toLowerCase();
       var raw = text.match(/[a-z0-9']+/g) || [];
       var words = raw.filter(function (w) { return w.replace(/'/g, '').length > 0; });
-      var kept = stop ? words.filter(function (w) { return STOP.indexOf(w) === -1; }) : words;
+      var singleWords = stop ? words.filter(function (w) { return STOP.indexOf(w) === -1; }) : words;
 
       counts = { 1: 0, 2: 0, 3: 0 };
       var grams = { 1: new Map(), 2: new Map(), 3: new Map() };
       for (var n = 1; n <= 3; n++) {
-        for (var i = 0; i + n <= kept.length; i++) {
-          var gram = kept.slice(i, i + n).join(' ');
-          if (n > 1 && kept.slice(i, i + n).some(function (w) { return STOP.indexOf(w) !== -1; })) continue;
-          if (n === 1 && stop && STOP.indexOf(gram) !== -1) continue;
+        var sequence = n === 1 ? singleWords : words;
+        for (var i = 0; i + n <= sequence.length; i++) {
+          var phraseWords = sequence.slice(i, i + n);
+          var gram = phraseWords.join(' ');
+          // Keep original word order; filtering hides phrases that contain a
+          // stop word instead of joining words across the removed gap.
+          if (n > 1 && stop && phraseWords.some(function (w) { return STOP.indexOf(w) !== -1; })) continue;
           grams[n].set(gram, (grams[n].get(gram) || 0) + 1);
           counts[n]++;
         }
@@ -141,14 +147,38 @@
       stats.appendChild(el('span', null, 'Reading time: '));
       stats.appendChild(el('strong', null, Math.max(1, Math.ceil(words.length / 200)) + ' min'));
       stats.appendChild(!words.length ? chip('warn', 'paste text to analyse')
-        : (grams[1].size ? chip('good', 'analysis below') : chip('warn', 'only stop words found')));
+        : (grams[1].size ? chip('good', 'term frequency calculated') : chip('warn', 'only stop words found')));
+
+      if (targetReport) {
+        targetReport.textContent = '';
+        var query = (targetInput.value || '').trim();
+        if (!query) targetReport.textContent = copy.noQuery || 'Enter an optional target phrase.';
+        else if (!words.length) targetReport.textContent = 'Paste or fetch page text before checking this phrase.';
+        else {
+          var qcount = window.T4M_INSPECT && window.T4M_INSPECT.phraseCount
+            ? window.T4M_INSPECT.phraseCount(text, query) : 0;
+          var percent = words.length ? (qcount / words.length * 100).toFixed(2) : '0.00';
+          targetReport.appendChild(el('strong', null, String(copy.count || 'Occurrences: {n} ({pct}%).').replace('{n}', qcount).replace('{pct}', percent)));
+          targetReport.appendChild(document.createElement('br'));
+          targetReport.appendChild(document.createTextNode(copy.densityNote || 'Frequency is descriptive, not a ranking target.'));
+          var page = root.__t4mPageMeta;
+          if (page) {
+            var values = [page.title, page.h1s[0] || '', page.desc, page.mainText];
+            var flags = values.map(function (value) { return window.T4M_INSPECT.phraseCount(value, query) > 0; });
+            targetReport.appendChild(document.createElement('br'));
+            targetReport.appendChild(document.createTextNode(String(copy.pageAreas || 'Fetched page placement: {title}; {h1}; {desc}; {body}.')
+              .replace('{title}', flags[0] ? 'found' : 'not found').replace('{h1}', flags[1] ? 'found' : 'not found')
+              .replace('{desc}', flags[2] ? 'found' : 'not found').replace('{body}', flags[3] ? 'found' : 'not found')));
+          }
+        }
+      }
 
       out.textContent = '';
       if (!words.length) {
         out.appendChild(el('p', null, 'Paste your text above — everything is analysed locally, nothing is uploaded.'));
         return;
       }
-      if (!kept.length) {
+      if (!singleWords.length && stop) {
         out.appendChild(el('p', null, 'Only stop words were found — turn off the stop-word filter above, or add more content words.'));
         return;
       }

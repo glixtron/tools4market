@@ -65,8 +65,14 @@ for (const slug of slugs) {
     try { b.click(); } catch (e) { errors.push('button: ' + e.message); }
   }
   await new Promise((r) => setTimeout(r, 80));
-  const out = [...doc.querySelectorAll('#tool-root pre.code, #tool-root .output-area, #tool-root input[id$="-out"], #tool-root [id$="-stats"], #tool-root [id$="-note"]')]
-    .map((o) => (o.value || o.textContent || '').trim()).filter(Boolean).join(' ');
+  // give slow tools a moment to produce output (avoid flaky failures under load)
+  let out = '';
+  for (let i = 0; i < 20; i++) {
+    out = [...doc.querySelectorAll('#tool-root pre.code, #tool-root .output-area, #tool-root input[id$="-out"], #tool-root [id$="-stats"], #tool-root [id$="-note"]')]
+      .map((o) => (o.value || o.textContent || '').trim()).filter(Boolean).join(' ');
+    if (out.length) break;
+    await new Promise((r) => setTimeout(r, 75));
+  }
   const checks = [
     ['tool registered', registered],
     ['no console/jsdom errors', errors.length === 0],

@@ -2,6 +2,8 @@
 (function () {
   'use strict';
   var T = window.T4M_TOOLS = window.T4M_TOOLS || {};
+  var TXT = window.T4M_ISTR || {};
+  var TOOLTXT = TXT.tools || {};
 
   function $(root, id) { return root.querySelector('#' + id); }
 
@@ -410,17 +412,25 @@
       var stats = stat(root, 'sp-stats');
       stats.appendChild(el('span', null, 'Title: '));
       stats.appendChild(el('strong', null, title.trim().length + ' chars · ' + tw + 'px'));
-      stats.appendChild(tw > 600 ? chip('bad', 'will truncate (>600px)') : tw > 580 ? chip('warn', 'close to limit') : chip('good', 'fits'));
+      stats.appendChild(tw > 600 ? chip('warn', (TOOLTXT.serp || {}).titleMayClip || 'May clip in this estimate') : chip('good', (TOOLTXT.serp || {}).titleContext || 'Width estimate only'));
       stats.appendChild(el('span', null, 'Description: '));
       stats.appendChild(el('strong', null, desc.trim().length + ' chars · ' + dw + 'px'));
       var dl = desc.trim().length;
-      stats.appendChild(dw > 920 ? chip('bad', 'will truncate') : dl < 120 ? chip('warn', 'short — add value prop') : chip('good', 'good length'));
-      var verdict = title.trim() + (tw <= 600 ? ' ✓ fits' : ' — TOO LONG, will be truncated');
-      stats.dataset.verdict = '';
-      $(root, 'sp-out').textContent =
-        'TITLE: ' + title.trim().length + ' chars / ' + tw + 'px (limit ~600px) — ' + (tw <= 600 ? 'OK' : 'WILL TRUNCATE') + '\n' +
-        'DESCRIPTION: ' + dl + ' chars / ' + dw + 'px (ideal 120–158 chars / ≤920px) — ' +
-        (dw > 920 ? 'WILL TRUNCATE' : dl < 120 ? 'SHORT' : 'OK');
+      stats.appendChild(dw > 920 ? chip('warn', (TOOLTXT.serp || {}).descMayClip || 'May clip in this estimate') : chip('good', (TOOLTXT.serp || {}).estimated || 'Estimated width only'));
+      var fit = stat(root, 'sp-fit');
+      var page = root.__t4mPageMeta;
+      var query = g('sp-query').value.trim();
+      if (!page) fit.textContent = (TOOLTXT.serp || {}).noPage || '';
+      else if (!query) fit.textContent = 'Fetched from ' + (page.finalUrl || page.url || '') + '. ' + ((TOOLTXT.serp || {}).estimated || 'Preview estimate only.');
+      else {
+        var areas = [title, page.h1s[0] || '', desc, page.mainText];
+        var count = areas.filter(function (x) { return window.T4M_INSPECT.phraseCount(x, query) > 0; }).length;
+        fit.textContent = String((TOOLTXT.serp || {}).phraseAreas || 'Phrase found in {n} areas.').replace('{n}', count) + ' ' + ((TOOLTXT.serp || {}).estimated || '');
+      }
+      $(root, 'sp-out').textContent = title.trim() || desc.trim()
+        ? String((TOOLTXT.serp || {}).titleContext || '') + '\nTitle: ' + title.trim().length + ' characters / ' + tw + 'px (browser estimate).' +
+          '\nDescription: ' + dl + ' characters / ' + dw + 'px (browser estimate). ' + ((TOOLTXT.serp || {}).estimated || '')
+        : ((TOOLTXT.serp || {}).empty || 'Enter a title and description.');
     }
     root.addEventListener('input', update);
     update();
@@ -436,18 +446,26 @@
       var stats = stat(root, 'md-stats');
       stats.appendChild(el('span', null, 'Length: '));
       stats.appendChild(el('strong', null, len + ' chars · ' + w + 'px'));
-      var kind = w > 920 ? 'bad' : len < 70 ? 'bad' : len < 120 ? 'warn' : 'good';
-      var label = w > 920 ? 'Too long — ends will be truncated' : len < 70 ? 'Too short — wasted space' : len < 120 ? 'A little short — aim for 120–158' : 'Good length';
-      stats.appendChild(chip(kind, label));
+      var page = root.__t4mPageMeta;
+      var copy = TOOLTXT.meta || {};
+      stats.appendChild(chip(!len ? 'warn' : w > 920 ? 'warn' : 'good', !len ? (copy.noDescription || '') : w > 920 ? (copy.mayClip || '') : (copy.widthNote || '')));
       $(root, 'md-prev').textContent = trimmed || 'Your meta description appears here…';
+      var pageTitle = $(root, 'md-prev-title'), pageUrl = $(root, 'md-prev-url');
+      if (pageTitle) pageTitle.textContent = page && page.title ? page.title : 'Your page title appears here';
+      if (pageUrl) pageUrl.textContent = page && (page.finalUrl || page.url) ? displayUrl(page.finalUrl || page.url) : 'example.com';
+      var fit = stat(root, 'md-fit');
+      var query = $(root, 'md-query').value.trim();
+      if (!page) fit.textContent = copy.noPage || '';
+      else if (!query) fit.textContent = 'Fetched title: ' + (page.title || '(missing)') + ' · main heading: ' + (page.h1s[0] || '(missing)') + '. Add a target phrase for a placement check.';
+      else {
+        var areas = [page.title, page.h1s[0] || '', trimmed, page.mainText];
+        var count = areas.filter(function (x) { return window.T4M_INSPECT.phraseCount(x, query) > 0; }).length;
+        fit.textContent = String(copy.inPage || 'Phrase appears in {n} areas.').replace('{n}', count);
+      }
       var verdict = $(root, 'md-out');
       verdict.textContent = trimmed
-        ? (kind === 'good'
-          ? 'GOOD: ' + len + ' chars / ' + w + 'px — within the 120–158 character sweet spot (≤920px). Front-load the value proposition so nothing critical is ever cut.'
-          : (w > 920
-            ? 'TOO LONG: ' + w + 'px — Google truncates around 920px (~155 chars). Trim to ' + Math.max(0, 158 - len) + ' fewer characters to end cleanly.'
-            : 'TOO SHORT: ' + len + ' chars — you have room for about ' + (120 - len) + ' more characters. Add one concrete reason to click.'))
-        : 'Paste a meta description to analyse it.';
+        ? 'Description measured: ' + len + ' characters / ' + w + 'px in this browser estimate. ' + (w > 920 ? (copy.mayClip || '') : (copy.widthNote || ''))
+        : (copy.noDescription || 'Enter a description to inspect it.');
     }
     root.addEventListener('input', update);
     update();

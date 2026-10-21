@@ -82,27 +82,29 @@ ${outputBlock('ut-out', 'Tagged URL')}`,
     name: 'Keyword Density Checker',
     cat: 'content',
     icon: '🔍',
-    card: 'Count 1/2/3-word phrase frequencies and density in any text.',
+    card: 'Fetch a page or paste text, then compare an optional target phrase with its title, H1, description and main copy.',
     keywords: 'keyword density checker word frequency counter ngram',
     h1: 'Free Keyword Density Checker — No Signup, No Limits',
     metaTitle: 'Free Keyword Density Checker — 1/2/3-Word Phrases',
-    metaDesc: 'Paste any text and see 1, 2 and 3-word phrase frequencies with density percentages. Stopword filtering, reading time and word count included. Free.',
-    intro: 'Paste your article and instantly see which words and phrases dominate — with 1, 2 and 3-word analysis, density percentages, and optional stopword filtering.',
+    metaDesc: 'Analyze a page’s extracted main text or paste a draft. Check exact target phrase placement and inspect common 1, 2 and 3-word phrases. Free.',
+    intro: 'Fetch a public page from the Analyze panel or paste a draft to inspect exact phrase occurrences and common terms. Optional stop-word filtering helps surface topic language; it does not set an ideal SEO density.',
     sections: [
-      { h: 'Reading density the smart way', p: ['Keyword density as a ranking tactic is decades out of date — but frequency analysis is still one of the fastest content audits you can run. It reveals your true on-page focus: if the bigrams table shows “conversion rate” five times, that is the topic Google will read; if your intended keyword barely appears, no amount of meta tags will fix the mismatch. Run it before you publish and again after a heavy edit; the table reports what you actually wrote rather than what you meant.', 'Healthy ranges: a primary phrase around 0.5–1.5% density, natural synonyms around it, and no single term spiking past ~3% (which reads as stuffing). Equally important is what is missing — pages that rank for a topic usually mention its adjacent terms, and their absence is a content-gap signal. Treat both ends as warnings: a number too low means the page never states its topic, and a number too high means you repeated yourself instead of covering the subject.'] },
+      { h: 'Use frequency as evidence, not a formula', p: ['Frequency analysis shows which words and phrases occur in the text you supplied. It can catch a missing product name, an accidental repeated phrase or a draft whose headings and body discuss different topics. When you fetch a page, the tool compares your optional target phrase with the fetched title, H1, description and extracted main text.', 'There is no ideal keyword density percentage. Search systems interpret language in context, and repeating a phrase to reach a numeric threshold can make copy less useful. Treat low or high frequency as a prompt to review the page, then make edits only when they improve clarity and accurately describe the subject.'] },
       { h: 'How to use it', p: ['Paste the full text (the tool processes everything locally — nothing is uploaded). With stopword filtering on, filler words like “the” and “and” are excluded so meaningful terms surface. Compare the 1-word table for topical focus, 2-word for the phrases people actually search, and 3-word for long-tail queries. Use the word count and reading time for quick editorial checks. Switch filtering off once to see the raw picture: if your topic word does not appear even unfiltered, the page has drifted from its subject.', 'Compare the three tables rather than any single number. The one-word list shows whether your headings and body agree on the topic, the two-word list approximates how people actually search, and the three-word list surfaces the long-tail phrasings you may be missing entirely. A page that ranks usually carries its neighbours: related verbs, product names and question forms appear alongside the main term.'] },
-      { h: 'How this tool works', p: ['The analysis runs entirely in your browser: the text is lowercased, split into word tokens, and every token is checked against a built-in stopword list. Single words are counted directly; two- and three-word phrases are built from the surviving tokens, so a phrase containing a stopword is skipped when filtering is on. Density is each phrase’s share of the phrases counted for that table, and the top twelve rows are shown.', 'The header line above the tables reports word count, unique words and an estimated reading time at two hundred words per minute — enough to catch a draft that is bloated or a page that is thinner than it looks. Because nothing leaves the page, you can analyse unpublished copy, client drafts or a whole series one document at a time. Nothing is cached, so consecutive drafts can be compared in seconds.'] },
+      { h: 'How this tool works', p: ['Text pasted into the checker is analyzed locally in your browser. A public URL is fetched so the tool can prefill the extracted main text; that fetch sends the URL to the site’s first-party proxy, and the fetched page itself is not saved. The phrase check counts contiguous word sequences in the source text, while the top-term tables summarize the frequencies after the optional stop-word filter.', 'Word count, unique words and estimated reading time describe the submitted text. Percentages describe frequency in that text only; they are not a measure of ranking potential. Fetching reads the server-returned HTML and may miss text that appears only after JavaScript rendering.'] },
     ],
     faqs: [
-      { q: 'What is the ideal keyword density for SEO?', a: 'There is no official target. As a sanity range, 0.5–1.5% for your primary phrase is natural; above ~3% reads as stuffing. Focus on covering the topic well rather than hitting a number.' },
+      { q: 'What is the ideal keyword density for SEO?', a: 'There is no official or recommended percentage target. Use counts to notice repetition or a missing phrase, then edit for clear, accurate content rather than a numeric density.' },
       { q: 'Is my text uploaded to a server?', a: 'No. All analysis runs in your browser with JavaScript — the text never leaves your device.' },
       { q: 'Why filter stop words?', a: 'Stop words (the, a, and, of…) dominate raw frequency but carry no topical meaning. Filtering them shows the words that actually define your content.' },
       { q: 'Does keyword density affect Google rankings directly?', a: 'No — Google uses many signals far more sophisticated than term frequency. Use this as an editorial audit tool, not a formula.' },
     ],
     html: `
-${f.textarea('kd-text', 'Paste your text (processed locally — never uploaded)', 'Paste your article or draft here to analyse word and phrase frequencies…', 9)}
-${f.check('kd-stop', 'Ignore common stop words (the, a, and…)', true)}
+${f.text('kd-query', 'Optional target phrase to check', '', 'Example: technical SEO audit')}
+${f.textarea('kd-text', 'Paste your text (processed locally — never uploaded)', 'Paste your article or draft here, or use Analyze my page above to fetch its main text…', 9)}
+${f.check('kd-stop', 'Hide phrases that contain common stop words (phrase order is preserved)', true)}
 <div class="stat-line" id="kd-stats"></div>
+<div class="stat-line" id="kd-target-report"></div>
 ${outputArea('kd-out', 'Frequency analysis')}`,
   },
 

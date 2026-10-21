@@ -254,35 +254,37 @@ ${outputBlock('sc-out', 'JSON-LD')}`,
     name: 'SERP Preview Tool',
     cat: 'seo',
     icon: '🖥️',
-    card: 'See your Google snippet with pixel-accurate truncation warnings.',
+    card: 'Preview a fetched page snippet and compare its title, H1, description and target phrase.',
     keywords: 'serp preview tool google snippet title pixel width checker',
     h1: 'Free SERP Preview Tool — No Signup, No Limits',
     metaTitle: 'Free SERP Preview Tool — Pixel-Accurate Snippet Checker',
-    metaDesc: 'Preview your Google search snippet with pixel-width measurement. Catch truncated titles and descriptions before you publish. Free SERP preview tool.',
-    intro: 'Type your title and description and see your Google result the way searchers will — with pixel-accurate truncation warnings, not just character counts.',
+    metaDesc: 'Preview title and description wording with browser-measured width estimates. Fetch a public page and compare its current title, H1 and target phrase. Free.',
+    intro: 'Preview your title and description, or fetch a public page to compare its live title, H1, description and visible topic. Width measurements are estimates; Google may rewrite or select different text for each query.',
     sections: [
-      { h: 'Why pixels matter more than characters', p: ['Google truncates titles and descriptions by pixel width, not by character count. A title of 58 characters in wide letters (lots of W’s and M’s) can cut off while a 66-character title in narrow letters fits. Pixel measurement is the only reliable check — it is what this tool uses internally.', 'Truncation is not just cosmetic: the tail of your title often carries the differentiator (“free”, “2026”, your brand). If it is cut, searchers clicking you may not see why you are the right result — and titles that get cut mid-phrase lower click-through rate.'] },
-      { h: 'How to use it', p: ['Enter your target URL, title and description. The preview updates live. Aim for a title under ~580 pixels (and put the primary keyword early), a description of 120–158 characters, and keep the URL short and readable. Adjust until no warning shows, then paste the final values into your page or CMS.', 'Mobile results allow slightly fewer pixels — treat any warning as a signal to shorten, even if the desktop preview still fits.'] },
-      { h: 'How this tool measures the snippet', p: ['Google does not count characters; it measures width. The preview renders your title in the same 20px Arial metrics desktop results use and your description at snippet size, then reports how many pixels each occupies against the point where results cut them off. That is why a title full of wide capitals can fail at sixty characters while a lean one survives past sixty-five.', 'The length check under the preview gives you both readings — characters and pixels — plus a pass or warn status, so you can decide with numbers instead of guesses. Treat the pixel figure as the limit and the character count as a writing guide. When the two disagree, the pixels win: they are what the results page actually renders.'] },
-      { h: 'Tightening your snippet until it fits', p: ['Work in this order: put the primary phrase at the front, add the brand at the end, then cut whatever sits between them that a searcher already knows. Qualifiers like best, free and online earn their place only when they change the promise. If the warning still shows, shorten the brand treatment — drop the tagline, keep the name — rather than losing the keyword.', 'Do the same for the description: put the differentiating sentence in the first hundred and twenty characters, and treat anything past the warning point as bonus. Then paste the final strings straight into your CMS and open the preview once more after publishing — CMS editors sometimes trim trailing punctuation or wrap text in markup that shifts what Google sees.', 'Keep the URL line short and readable — a clean path under the title makes the result look like a destination rather than a tracking link. Most CMS slug settings do this for you if you let them generate the path from the page name, and a shorter address also fits without an ellipsis.'] },
+      { h: 'What the preview can and cannot tell you', p: ['Search snippets vary with device, query and Google’s choice of title and page passage. This page renders your current title and description using browser font metrics so you can spot text that may be visually long; it does not reproduce a live Google result or guarantee where Google will cut or rewrite text.', 'Use the comparison to catch a title that differs from the visible heading or a description that misses the page topic. Keep the defining phrase and useful detail near the start, then read the whole line aloud. Clear, accurate wording matters more than hitting a fixed character target.'] },
+      { h: 'How to use it', p: ['Enter a URL, or use Analyze my page to fetch the current public HTML. The tool pre-fills the title and description and can compare an optional target phrase with the actual title, H1, description and main text. Edit the fields to compare alternatives. The browser preview and pixel counts are estimates, not live search data.', 'After publishing, fetch the URL again to confirm the HTML changed. To know the impressions and queries Google actually recorded, use Search Console; this tool does not have access to your private GSC account.'] },
+      { h: 'How this tool measures the preview', p: ['The preview uses browser canvas font metrics to estimate text width. It does not reproduce a live Google result or know Google’s truncation decision. A search result can show a different title or a page excerpt, and display can vary with the query and device.', 'Use the width reading to spot unusually long text, then prioritize accuracy, a clear page topic and a useful opening phrase. Character counts are a drafting aid. There is no fixed pixel or character cutoff that guarantees display.'] },
+      { h: 'Improving the result for a real query', p: ['Fetch the page, enter one target search phrase and see whether that exact phrase appears in the source title, visible H1, meta description and extracted main copy. If the title and H1 diverge, check whether they still describe the same page. If the phrase is absent, first confirm that it matches the page’s actual purpose; do not add it mechanically.', 'The preview cannot show impressions, clicks or the title Google selected for real searchers. Check those in Search Console, then use this page to edit the source text and compare a new version.'] },
     ],
     faqs: [
-      { q: 'What is the pixel limit for title tags?', a: 'Roughly 580–600 pixels on desktop, which is around 55–65 characters depending on letter widths. This tool measures with the same 20px Arial metrics Google-style snippets use.' },
+      { q: 'What is the pixel limit for title tags?', a: 'Google does not publish a fixed title pixel or character limit. This preview measures browser text width as an editing aid; actual search displays vary by device and query.' },
       { q: 'Does Google always use my title tag?', a: 'No. Google rewrites titles in a minority of cases (too long, keyword-stuffed, or a better match found in the page). Clean, accurate, well-sized titles are rewritten far less often.' },
-      { q: 'What is the ideal meta description length in 2026?', a: '120–158 characters (up to ~920 pixels). Google may pull a passage from the page instead, but a well-written description gives you the best shot at controlling the snippet.' },
+      { q: 'What is the ideal meta description length?', a: 'Google has no fixed description length limit. Write a useful, page-specific summary; the snippet may be shortened to fit or generated from page text.' },
       { q: 'Should I put my brand name in the title?', a: 'Yes, at the end, separated by a pipe or dash — as long as it fits. Brand names in titles can improve click-through and are rarely removed by Google.' },
     ],
     html: `
 ${f.url('sp-url', 'Page URL', 'https://example.com/free-seo-tools')}
+${f.text('sp-query', 'Optional target search phrase (for page comparison)', '', 'Example: free SEO tools')}
 ${f.text('sp-title', 'Title tag', 'Free SEO Tools — 18 Browser-Based Utilities | Tools4Market', 'Free SEO Tools — 18 Browser-Based Utilities | Tools4Market')}
 ${f.text('sp-desc', 'Meta description', 'Run 18 free SEO and marketing tools right in your browser. No signup, no limits — meta tags, robots.txt, schema, keyword density and more.', 'Run 18 free SEO and marketing tools right in your browser. No signup, no limits — meta tags, robots.txt, schema, keyword density and more.')}
-<p class="preview-label">Google desktop preview</p>
+<p class="preview-label">Estimated desktop snippet preview</p>
 <div class="google-preview">
   <div class="gp-url" id="sp-prev-url">example.com</div>
   <div class="gp-title" id="sp-prev-title">Title</div>
   <div class="gp-desc" id="sp-prev-desc">Description</div>
 </div>
 <div class="stat-line" id="sp-stats"></div>
+<div class="stat-line" id="sp-fit"></div>
 ${outputArea('sp-out', 'Length check')}`,
   },
 
@@ -292,31 +294,33 @@ ${outputArea('sp-out', 'Length check')}`,
     name: 'Meta Description Checker',
     cat: 'seo',
     icon: '📏',
-    card: 'Test length, pixel width and snippet fit of any description.',
+    card: 'Check a draft against the actual title, H1 and page text, with an estimated snippet preview.',
     keywords: 'meta description checker length tester serp snippet',
     h1: 'Free Meta Description Checker — No Signup, No Limits',
     metaTitle: 'Free Meta Description Checker — Length & Pixel Tester',
-    metaDesc: 'Check meta description length in characters and pixels with a live Google snippet preview. Instant feedback: too short, good, or too long. Free tool.',
-    intro: 'Paste any meta description and instantly see whether it is too short, in the sweet spot, or likely to be truncated in Google — measured in both characters and pixels.',
+    metaDesc: 'Compare a description with a fetched page title, H1 and optional target phrase. See its character count and browser-measured width estimate. Free.',
+    intro: 'Paste a draft or fetch a public page to compare the current description with its title, H1, opening text and optional target phrase. Character and pixel counts are editing estimates; Google chooses snippet text by query and device.',
     sections: [
-      { h: 'What a good description looks like', p: ['A strong meta description is 120–158 characters, contains the page’s primary keyword naturally, gives one concrete reason to click, and ends cleanly rather than mid-sentence. Descriptions below ~70 characters waste most of the snippet; above ~158 characters (about 920 pixels) the ending is cut with an ellipsis.', 'Google rewrites descriptions more often than titles — usually when the description does not match the query. You cannot force your snippet, but a relevant, well-sized description wins the majority of impressions.'] },
-      { h: 'How to use it', p: ['Paste or draft your description in the box. The checker reports characters, pixel width at Google-style 14px metrics, and a colour-coded status. Watch the preview: if the last words disappear, shorten. Front-load the value proposition in the first 120 characters so nothing critical is ever truncated, then paste the final text into your CMS or meta tag generator.'] },
+      { h: 'What a useful description looks like', p: ['Google does not set a preferred description length. A useful description accurately summarizes this page, distinguishes it from nearby pages and gives a searcher a concrete reason to visit. Keep its main point early so it still reads well if a search result display shortens it.', 'Google may use the meta description when it is a good summary, or choose a passage from the page that better matches a query. You influence the candidate text, not the exact snippet users will see.'] },
+      { h: 'How to use it', p: ['Paste a draft, or use Analyze my page to fetch the public HTML and load its current description. Add an optional target phrase to see whether it appears in the fetched title, H1, description or main text. Browser pixel width is an estimate for editing; it is not a Google truncation promise.', 'The page-based draft button uses the fetched H1/title and opening text. It does not know your offer, current pricing, inventory or business claims beyond what the page says, so review every sentence before publishing.'] },
       { h: 'Mistakes that get your description rewritten', p: ['The most common one is writing for the keyword rather than the click: a sentence crammed with the target phrase reads as machine text, and Google replaces it with a passage from the page that answers the query better. Use the keyword once, naturally, then say something specific — what the page offers, for whom, and why it beats the alternatives.', 'The second is letting one description serve a whole template. If every product page shares the same sentence, Google has no reason to show yours and searchers see nothing to distinguish the pages. The third is writing past the end of the thought: a description cut mid-sentence looks unfinished. Finish your point inside 120 characters, then use the rest for supporting detail.'] },
       { h: 'How to read the verdict', p: ['The stat line reports characters and pixel width together, and the verdict below tells you whether the text is too short, comfortably inside the range, or likely to be cut. Too short means you are giving away free space in the most valuable ad you will ever run for that query — expand it. Too long means the ending is at risk — move it forward.', 'Watch the preview as you edit rather than the number alone. If the final words disappear from the snippet box, the description is over the line regardless of what the count says, and if a whole line sits empty, you have room to make a stronger claim. When the preview holds the full sentence and the status goes green, paste it into your page and move on.', 'Paste the description back in from the finished page once it is published, since some CMS fields add or drop characters — an emoji in the title or a smart quote in the description can push the pixels over the line after you have already saved. It takes a moment and catches the last class of overflow.'] },
     ],
     faqs: [
       { q: 'Does the meta description affect rankings?', a: 'Not directly — Google has confirmed it is not a ranking factor. It affects click-through rate, which brings more engaged visitors and can influence performance indirectly.' },
       { q: 'Why does Google show different text than my description?', a: 'Google selects snippet text per query and may use a passage from the page when it believes it matches the search better. You influence, but never control, the snippet.' },
-      { q: 'Is 160 characters a hard limit?', a: 'No hard limit exists — Google truncates around 155–160 characters / ~920 pixels on desktop and slightly less on mobile. Longer text is not penalised, just cut.' },
+      { q: 'Is 160 characters a hard limit?', a: 'No. Google has no fixed description length limit. This preview is a browser-based estimate, while real snippets can vary by device and query.' },
       { q: 'Can I leave the description empty?', a: 'If omitted, Google auto-generates a snippet from page content — often worse than a hand-written one. Always write one for important pages.' },
     ],
     html: `
-${f.textarea('md-text', 'Your meta description', 'Discover 50+ free browser-based marketing tools. Nothing uploaded, no signup, no limits — run them right in your browser.', 4)}
+${f.text('md-query', 'Optional target search phrase', '', 'Example: free SEO tools')}
+${f.textarea('md-text', 'Your meta description', 'Paste or draft a page-specific description. A fetched page can prefill this field.', 4)}
 <div class="stat-line" id="md-stats"></div>
-<p class="preview-label">Google snippet preview</p>
+<div class="stat-line" id="md-fit"></div>
+<p class="preview-label">Estimated snippet preview — Google may use other page text</p>
 <div class="google-preview">
-  <div class="gp-url">example.com</div>
-  <div class="gp-title">Your page title appears here</div>
+  <div class="gp-url" id="md-prev-url">example.com</div>
+  <div class="gp-title" id="md-prev-title">Your page title appears here</div>
   <div class="gp-desc" id="md-prev">Description…</div>
 </div>
 ${outputArea('md-out', 'Verdict')}`,
@@ -328,15 +332,15 @@ ${outputArea('md-out', 'Verdict')}`,
     name: 'Web Crawler Audit',
     cat: 'seo',
     icon: '🕷️',
-    card: 'See your page the way Googlebot and AI crawlers see it — then fix what\u2019s blocking it.',
+    card: 'Fetch a URL and inspect its HTTP response, robots rules, canonical and discovery signals.',
     keywords: 'web crawler audit crawlability indexability googlebot robots noindex canonical check',
     h1: 'Free Web Crawler Audit — No Signup, No Limits',
     metaTitle: 'Free Web Crawler Audit — Check Crawlability & Indexing',
-    metaDesc: 'Audit any page the way Googlebot and AI crawlers see it: HTTPS, noindex, canonical, title, sitemap and schema — with prioritized fixes. Free, no signup.',
-    intro: 'Enter a URL and get a crawler\u2019s-eye view of the page: whether it can be reached and indexed, which on-page signals are present, and a prioritized list of what to fix first. No signup, nothing uploaded.',
+    metaDesc: 'Fetch a public URL to check its HTTP response, noindex directives, Googlebot robots.txt rule, canonical, sitemap declaration and page metadata. Free.',
+    intro: 'Fetch a public URL and inspect the response, visible robots directives, Googlebot robots.txt rule, canonical and sitemap discovery. The report includes the evidence it fetched; it cannot see Google\u2019s private index status.',
     sections: [
-      { h: 'What this crawler audit checks', p: ['A crawler has to successfully fetch a page, be allowed to index it, and understand it — in that order. This audit reports on all three: can Googlebot reach it (HTTPS, fetch status), will it index it (meta robots, canonical), and does it have the signals to rank it (title, description, H1, structured data, sitemap, Open Graph, image alt text).', 'Each check is scored by how much it typically moves the needle: a missing noindex fix or a broken canonical matters far more than a missing og:type. The verdict sorts issues by impact, so you fix what actually unlocks traffic first rather than chasing cosmetic tags.'] },
-      { h: 'How to use it', p: ['Paste any public page URL and run the audit. Green PASS lines are healthy; amber WARN lines are minor; red ISSUE lines are what is genuinely holding the page back. Work down the prioritized fix list in order — each item tells you the exact tag or change needed.', 'If your page is behind a login, on a private network, or the browser blocks the fetch, use the “paste the HTML” option instead: open the page, View Source, copy, and paste. The same analysis runs entirely in your browser.'] },
+      { h: 'What this page-level audit checks', p: ['For the URL you enter, the audit fetches the public HTML and records its final URL, HTTP response, content type, response size and request time. It reads meta robots and X-Robots-Tag, fetches robots.txt and applies the matching Googlebot rule to that path, then samples declared sitemap files to look for the tested URL.', 'It also reports the title, description, canonical and main heading from the fetched response. Sitemap presence and structured data are context, not prerequisites; a sitemap helps discovery, and valid structured data does not guarantee a rich result. The weighted score is a checklist summary, not a Google score, ranking prediction or indexation guarantee.'] },
+      { h: 'How to use it', p: ['Paste a public page URL and run the audit. Each item includes the value or response that triggered it, and fixes are prioritized by the impact of the measured technical issue. A robots.txt block prevents a crawler from fetching that path; it is not the same as a noindex directive, and it does not guarantee a URL is absent from search.', 'If a page is private or fetch is blocked, paste its HTML. That path can inspect tags and content, but cannot verify response headers, robots.txt or sitemap membership.'] },
       { h: 'When to run a crawler audit', p: ['Run it whenever a page’s indexing behaviour changes without you touching it: after a redesign or theme switch, after a plugin update that injects meta tags, after a platform migration, and before and after any launch that moves URLs. Template-level changes rewrite the head of every page at once, which is exactly when a stray noindex or a canonical pointing at the old domain appears.', 'It is also worth running on the pages that earn you money or attention — homepages, category pages, top posts — rather than everywhere. One healthy audit on your template pages tells you more than fifty audits on near-identical posts, because if the template is clean, every page built from it starts clean too.', 'A useful habit is to audit a known-good URL first whenever something looks wrong: if the healthy page suddenly fails too, the problem is site-wide rather than a one-page edit. That single comparison usually narrows a whole site problem down to a plugin, a header rule or a deploy in a couple of minutes.'] },
       { h: 'How to check your work', p: ['Fix the top issue on the list, then run the audit again on the same URL — the score should move and the red line should turn green. If it does not, the change did not reach the live page: a caching layer, an old template part, or a server-side header still sending the old instruction.', 'Then confirm what Google sees rather than only what the browser shows. Search Console’s URL inspection reports the robots meta it found, the canonical it selected and the last crawl date, and the elements panel in your browser will reveal a noindex injected after load. When the two views agree with the audit, your fix is genuinely in place.'] },
     ],
@@ -371,35 +375,36 @@ ${outputArea('ca-fixes', 'Fix these first')}
   // ---------------------------------------------------------- 10
   {
     slug: 'seo-score-checker',
-    name: 'SEO Ranking Score',
+    name: 'SEO Score Checker',
     cat: 'seo',
     icon: '🏆',
-    card: 'Score any page\u2019s on-page SEO 0\u2013100 with a letter grade and a fix list.',
+    card: 'Check a fetched page against its target phrase and get a prioritized, evidence-based fix list.',
     keywords: 'seo score checker rank page grade audit on-page optimization rating',
-    h1: 'Free SEO Ranking Score \u2014 No Signup, No Limits',
+    h1: 'Free SEO Score Checker \u2014 No Signup, No Limits',
     metaTitle: 'Free SEO Score Checker — On-Page Score & Fixes',
-    metaDesc: 'Score any page\u2019s on-page SEO from 0 to 100 with a letter grade, weighted factors and a prioritized fix list. Free online SEO ranking checker, no signup.',
-    intro: 'Enter a URL and get a single 0\u2013100 on-page SEO score with a letter grade \u2014 built from the weighted factors that actually move rankings, plus the specific fixes that would raise your score fastest.',
+    metaDesc: 'Check a page’s observable on-page signals and compare an optional target phrase with its title, H1, description and main copy. Checklist score, not a ranking prediction.',
+    intro: 'Fetch a public page and get a weighted on-page checklist based on its actual HTML. Add an optional target phrase to see whether it appears in the title, H1, description and main text. The score describes measured checks; it does not estimate Google rankings.',
     sections: [
-      { h: 'What the score measures', p: ['The score weights the on-page factors search engines reward: a keyword-led title (15), a well-sized meta description (12), a single clear H1 (12), real content depth (12), heading structure (8), internal links (10), image alt text (8), structured data (8), plus Open Graph, mobile viewport and HTTPS. Each factor is scored pass / partial / fail against Google\u2019s practical expectations.', 'This is an on-page score, not a Google rank position \u2014 nothing outside the page (backlinks, domain authority, competition) is included, and no tool can read Google\u2019s ranking systems. Think of it as a to-do meter: raise the score by fixing the listed factors and you have done everything on-page you can control.'] },
+      { h: 'What the checklist measures', p: ['The score summarizes observable page signals: whether a title, description and main heading exist, whether a target phrase you supply appears in the checked areas, whether visible main text and internal links were found, and whether canonical, viewport and HTTPS signals are present. Content length, Open Graph and structured data are shown as context; they are not universal requirements.', 'This is not a Google metric, ranking position or forecast. It does not include Search Console impressions or queries, backlinks, competition, site authority, page speed or rendered DOM content. Use the per-factor evidence and next steps to decide what to edit.'] },
       { h: 'How to use it', p: ['Paste any public URL and run the check. Your score appears with a letter grade (A\u2026F) and every factor broken out as pass, partial or fail. The fix list is ordered by impact \u2014 highest-weight failures first \u2014 so you get the biggest score gain per change.', 'Re-run after each round of edits to watch the score climb. For pages that are private or blocked, switch to the paste-HTML option and analyze the source directly \u2014 it all runs in your browser.'] },
       { h: 'Fix it in the template, not the page', p: ['Most pages on a site share the same theme or plugin output, so the fastest way to lift a whole directory of scores is to fix the template once. A missing viewport tag, a heading structure that renders H2s instead of an H1, images generated without alt text — these are not page problems, they are theme problems, and correcting them once repairs every page built from that template.', 'Score a representative page from each template first — homepage, category, article, product — and only then work through individual URLs. Pages that still score low after their template is clean usually have genuinely page-level gaps: a title that never mentions the topic, an H1 missing entirely, three internal links where there should be twenty. Those you fix by hand, one page at a time.'] },
       { h: 'How this tool works', p: ['The page is fetched — or pasted — then parsed for each factor on the list: does the head contain a keyword-led title and a well-sized description, is there exactly one H1, how deep does the heading structure go, how many internal links and images with alt text are present, and are viewport, HTTPS and structured data in place. Each factor returns pass, partial or fail, and the weights turn those results into one number.', 'Everything runs locally in the browser, which is why private pages work through the paste option and why nothing is stored between runs. It also means the score is a snapshot: it reflects the HTML you handed it at that moment. Re-run after each round of edits rather than trusting an earlier result, since a plugin update or a cached page can change the output in between.'] },
     ],
     faqs: [
       { q: 'Is this SEO score the same as my Google ranking?', a: 'No. This is an on-page quality score based on factors within the page itself. Google\u2019s actual ranking also weighs backlinks, site authority, user signals and competition, which no free tool can measure for your specific query.' },
-      { q: 'What is a good SEO score?', a: '90+ (grade A) means your on-page fundamentals are excellent. 75\u201389 (B) is solid with a few quick wins. Below 60 means several ranking signals are missing \u2014 work down the fix list and you will usually see the biggest jumps there.' },
+      { q: 'What is a good SEO score?', a: 'There is no Google SEO score. Treat this number as a checklist summary: inspect the failed or partial factors and decide whether each change improves the actual page for readers.' },
       { q: 'How can I raise my score fastest?', a: 'Fix the highest-weight failures first: add a missing H1, write a proper title and description, expand thin content, and add internal links. These carry the most points and are the quickest wins.' },
       { q: 'Does this tool store my results?', a: 'No. Everything runs in your browser \u2014 the page is fetched (or pasted) and scored locally, and nothing is saved or uploaded anywhere.' },
     ],
     html: `
 ${f.url('sc2-url', 'Page URL to score', 'https://your-site.com/your-page')}
+${f.text('sc2-query', 'Optional target search phrase', '', 'Example: local SEO audit')}
 <button type="button" class="btn sc2-run" id="sc2-run">Score this page</button>
 <div class="stat-line" id="sc2-status" aria-live="polite"></div>
 <div class="score-wrap" id="sc2-score" hidden>
   <div class="score-ring sc2" id="sc2-ring"><span id="sc2-ring-num">0</span></div>
   <div class="score-meta">
-    <p class="score-label">On-page SEO score</p>
+    <p class="score-label">On-page checklist score</p>
     <p class="score-grade" id="sc2-grade"></p>
     <p class="score-note" id="sc2-note"></p>
   </div>
