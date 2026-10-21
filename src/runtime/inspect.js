@@ -110,7 +110,14 @@
     var clone = doc.body ? doc.body.cloneNode(true) : doc.createElement('div');
     Array.prototype.slice.call(clone.querySelectorAll('script,style,noscript')).forEach(function (n) { n.parentNode.removeChild(n); });
     var bodyText = (clone.textContent || '').replace(/\s+/g, ' ').trim();
-    var words = bodyText ? bodyText.split(' ').filter(Boolean).length : 0;
+    var contentNodes = doc.querySelectorAll('.tool-content, .tool-faq, .home-content, .cat-about, .policy');
+    var contentText = Array.prototype.slice.call(contentNodes).map(function (n) {
+      var c = n.cloneNode(true);
+      Array.prototype.slice.call(c.querySelectorAll('script,style,noscript')).forEach(function (x) { x.parentNode.removeChild(x); });
+      return c.textContent || '';
+    }).join(' ').replace(/\s+/g, ' ').trim();
+    var countText = contentText || bodyText;
+    var words = countText ? countText.split(' ').filter(Boolean).length : 0;
 
     var viewportEl = doc.querySelector('meta[name="viewport"]');
 
@@ -172,11 +179,11 @@
     add('Canonical', snap.canonical ? 'pass' : 'fail', snap.canonical ? fill(V.canonical.pass, { v: snap.canonical }) : V.canonical.fail);
     add('Open Graph', (snap.og.title || snap.og.desc) ? 'pass' : 'fail', (snap.og.title || snap.og.desc) ? V.og.pass : V.og.fail);
     add('Indexable', /noindex/i.test(snap.robots) ? 'fail' : 'pass', /noindex/i.test(snap.robots) ? fill(V.robots.fail, { v: snap.robots }) : V.robots.pass);
-    add('Images', snap.images.total === 0 ? 'pass' : (snap.images.missingAlt === 0 ? 'pass' : 'warn'),
-      snap.images.total === 0 ? 'No images on this page.' : (snap.images.missingAlt === 0 ? fill(V.images.pass, { n: snap.images.total }) : fill(V.images.warn, { n: snap.images.total, m: snap.images.missingAlt })));
+    add('Images', snap.images.total === 0 ? 'none' : (snap.images.missingAlt === 0 ? 'pass' : 'warn'),
+      snap.images.total === 0 ? 'No content images; alt text is not applicable.' : (snap.images.missingAlt === 0 ? fill(V.images.pass, { n: snap.images.total }) : fill(V.images.warn, { n: snap.images.total, m: snap.images.missingAlt })));
     add('Language', snap.lang ? 'pass' : 'fail', snap.lang ? fill(V.lang.pass, { v: snap.lang }) : V.lang.fail);
     add('Mobile viewport', snap.viewport ? 'pass' : 'fail', snap.viewport ? V.viewport.pass : V.viewport.fail);
-    add('Content length', snap.words >= 300 ? 'pass' : (snap.words >= 100 ? 'warn' : 'fail'), fill(snap.words >= 300 ? V.words.pass : V.words.warn, { n: snap.words }));
+    add('Content length', 'none', fill(V.words.info, { n: snap.words }));
     if (snap.schemaTypes.length) add('Structured data', 'pass', 'Schema found: ' + snap.schemaTypes.join(', '));
     if (snap.hreflangs.length) add('Hreflang', 'pass', snap.hreflangs.length + ' hreflang annotations.');
 

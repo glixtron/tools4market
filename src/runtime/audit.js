@@ -216,11 +216,11 @@
           return { level: sub >= 3 ? 'pass' : sub >= 1 ? 'warn' : 'fail', v: fill(sub >= 3 ? f.pass : sub >= 1 ? f.warn : f.fail, { n: sub }) };
         }
         case 'words':
-          return { level: snap.words >= 300 ? 'pass' : snap.words >= 100 ? 'warn' : 'fail', v: fill(snap.words >= 300 ? f.pass : f.warn, { n: snap.words }) };
+          return { level: 'none', v: fill(f.info, { n: snap.words }) };
         case 'links':
           return { level: snap.links.internal >= 3 ? 'pass' : snap.links.internal >= 1 ? 'warn' : 'fail', v: fill(snap.links.internal >= 3 ? f.pass : snap.links.internal >= 1 ? f.warn : f.fail, { n: snap.links.internal }) };
         case 'imgalt':
-          if (snap.images.total === 0) return { level: 'fail', v: f.fail };
+          if (snap.images.total === 0) return { level: 'none', v: f.none };
           return { level: snap.images.missingAlt === 0 ? 'pass' : 'warn', v: fill(snap.images.missingAlt === 0 ? f.pass : f.warn, { n: snap.images.total, m: snap.images.missingAlt }) };
         case 'schema':
           return snap.schemaTypes.length ? { level: 'pass', v: fill(f.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'fail', v: f.fail };
@@ -268,16 +268,18 @@
       var fixesArr = [];
       factors.forEach(function (f) {
         var r = evalFactor(f, snap);
-        total += f.weight;
-        earned += r.level === 'pass' ? f.weight : r.level === 'warn' ? Math.round(f.weight * 0.5) : 0;
+        if (r.level !== 'none') {
+          total += f.weight;
+          earned += r.level === 'pass' ? f.weight : r.level === 'warn' ? Math.round(f.weight * 0.5) : 0;
+        }
         var li = el('li', 'sig-' + r.level);
         li.appendChild(el('span', 'sig-dot', ''));
         var body = el('span', 'sig-body');
-        body.appendChild(el('strong', null, f.label + ' (' + f.weight + '): '));
+        body.appendChild(el('strong', null, f.label + (r.level === 'none' ? ': ' : ' (' + f.weight + '): ')));
         body.appendChild(document.createTextNode(r.v || ''));
         li.appendChild(body);
         list.appendChild(li);
-        if (r.level !== 'pass') fixesArr.push({ w: f.weight, label: f.label, text: r.v, level: r.level });
+        if (r.level === 'fail' || r.level === 'warn') fixesArr.push({ w: f.weight, label: f.label, text: r.v, level: r.level });
       });
       out.appendChild(list);
 

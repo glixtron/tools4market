@@ -50,6 +50,31 @@ The `/404.html` file itself redirects to `/404` under Cloudflare's `auto-trailin
 
 These checks verify the source build. The public site still needs a deploy before the new category/policy breadcrumbs, cleaner sitemap, metadata title refinements, curated tool links, and www route can be verified on production.
 
+## Follow-up page audit and analyzer corrections
+
+The generated sitemap was checked again after the latest source edits:
+
+- **40/40 sitemap URLs** resolve to generated HTML files.
+- **40/40** have a title (at most 60 characters), description (at most 158 characters), self-referencing canonical, exactly one H1, no `noindex`, `lang`, viewport, `og:title`, and `og:description`.
+- All non-home sitemap pages have visible/structured breadcrumb markup; the homepage is correctly exempt.
+- The two overlong titles found in this pass were shortened: Reading Time Calculator and XML Sitemap Generator.
+- `npm run build` succeeds; `npm test` passes **30/30** tool smoke checks.
+
+The follow-up live verification attempt could not resolve `tools4market.online` (`ENOTFOUND`) from this execution environment. That is a network/DNS limitation of this check, not evidence that production is down. The live baseline above is from the earlier successful production fetch; re-run `npm run test:live` from a network that can resolve the domain after deployment.
+
+The site's generic “analyze your own page” panel had a real false-negative bug: for a same-origin URL it called the site's own `/api/fetch` proxy, which could recursively fail at Cloudflare; an error body could then be parsed as if it were a page. The source now directly fetches same-origin URLs, rejects unsuccessful or empty responses, and carries the `X-Robots-Tag` header into indexability checks. This corrects the reported zero-length title/description and three-word output when the source change is deployed.
+
+The scoring copy also treated fewer than 300 words as a failure and pages without images as a failure. Those are not universal Google requirements. Word count is now context-only and excluded from the score; no content images is informational and does not lower a score. Utility pages do not need decorative images, though useful original screenshots/diagrams can improve explanation and should have descriptive alt text. Google says there is no special optimization requirement for AI features beyond standard Search fundamentals and people-first content; there is no guaranteed “100% SEO” score or guarantee of indexing. See [Google's AI features guidance](https://developers.google.com/search/docs/appearance/ai-features) and [helpful content guidance](https://developers.google.com/search/docs/fundamentals/creating-helpful-content).
+
+## Current source changes not yet verified on production
+
+- Prevented recursive same-site fetches and stopped parsing proxy error responses as HTML.
+- Included response `X-Robots-Tag` in the crawler/indexability analysis.
+- Reframed thin-content and no-image results as non-scoring context instead of universal SEO failures.
+- Shortened the two tool titles discovered during the 40-page generated-page audit.
+
+These changes remain in the local source until deployed. Production verification is pending a network-accessible live run and a deployment.
+
 ## Breadcrumb and page structure
 
 - Homepage: one primary H1; top-level landing page, no breadcrumb.

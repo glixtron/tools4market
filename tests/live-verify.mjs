@@ -121,6 +121,14 @@ ok('homepage og:image on the canonical host', home.includes('og:image" content="
 ok('homepage WebSite + Organization JSON-LD', home.includes('"@type":"WebSite"') && home.includes('"@type":"Organization"'));
 ok('homepage Bing msvalidate meta', /name="msvalidate\.01"/.test(home));
 ok('homepage has no noindex', !/content="noindex"/i.test(home));
+ok('GTM container script in head', /googletagmanager\.com\/gtm\.js/.test(home) && /GTM-P6P4FLGB/.test(home));
+ok('GTM noscript iframe in body', /ns\.html\?id=GTM-P6P4FLGB/.test(home));
+ok('consent defaults deny analytics/ads', /default_consent/.test(home) && /analytics_storage:\s*'denied'/.test(home) && /ad_storage:\s*'denied'/.test(home));
+ok('cookie consent banner + preferences present', /id="ck-banner"/.test(home) && /id="ck-panel"/.test(home) && /id="ck-accept"/.test(home) && /id="ck-reject"/.test(home));
+const toolPage = (await grab(ORIGIN + '/tools/case-converter/')).body;
+ok('tool pages also carry GTM + consent UI', /GTM-P6P4FLGB/.test(toolPage) && /id="ck-banner"/.test(toolPage));
+const privacy = (await grab(ORIGIN + '/privacy-policy/')).body;
+ok('privacy policy documents cookies/consent', /Cookie settings/.test(privacy) && /Consent Mode/i.test(privacy));
 for (const a of ['/assets/style.css', '/assets/og-image.png', '/assets/icon-192.png', '/assets/site.js', '/assets/runtime/inspect.js', '/assets/runtime/audit.js', '/assets/inspect-strings.js']) {
   const r = await grab(ORIGIN + a, { redirect: 'manual' });
   ok('asset ' + a, r.status === 200, 'status ' + r.status);

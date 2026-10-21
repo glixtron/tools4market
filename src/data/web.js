@@ -53,7 +53,7 @@ ${note('Back up your existing .htaccess before overwriting it — a syntax error
     card: 'Turn a list of URLs into a valid XML sitemap, ready to submit.',
     keywords: 'xml sitemap generator create sitemap submit google',
     h1: 'Free XML Sitemap Generator — No Signup, No Limits',
-    metaTitle: 'Free XML Sitemap Generator — Create & Download sitemap.xml',
+    metaTitle: 'XML Sitemap Generator — Create & Download sitemap.xml',
     metaDesc: 'Paste your URLs and generate a valid XML sitemap with lastmod, changefreq and priority. Download sitemap.xml ready for Search Console. Free tool.',
     intro: 'Paste your URLs and download a standards-compliant sitemap.xml ready for Google Search Console and Bing Webmaster Tools.',
     sections: [

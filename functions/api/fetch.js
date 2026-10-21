@@ -76,6 +76,7 @@ export async function onRequestGet(context) {
       status: res.status,
       finalUrl: res.url,
       contentType,
+      xRobotsTag: res.headers.get('x-robots-tag') || '',
       bytes: buf.byteLength,
       truncated,
       ms: Date.now() - started,

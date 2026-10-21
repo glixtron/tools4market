@@ -22,7 +22,7 @@ export const INSPECT_TEXT = {
   },
   errors: {
     badUrl: 'Enter a full URL, e.g. https://your-site.com/page',
-    fetchFailed: 'This browser could not fetch that page directly (cross-origin blocked, and the live-fetch endpoint is not deployed yet). Paste the HTML instead: View Source → copy → paste.',
+    fetchFailed: 'Could not retrieve a successful HTML page. Check the URL and page access, or paste the HTML instead: View Source → copy → paste.',
     emptyPaste: 'Paste the page HTML first.',
   },
   // Per-signal verdicts. {n} = measured number, {v} = a value. Runtime picks
@@ -68,8 +68,7 @@ export const INSPECT_TEXT = {
       fail: 'No viewport meta — the page will render badly on phones.',
     },
     words: {
-      pass: 'About {n} words of body text.',
-      warn: 'Only about {n} words — thin pages struggle to rank. Aim for 300+.',
+      info: 'About {n} words of main content. This is context only; Google has no minimum word count. Check that the page answers its purpose.',
     },
   },
 };
@@ -162,10 +161,8 @@ export const SCORE = {
       pass: '{n} H2/H3 subheadings structure the content.',
       warn: 'Few subheadings ({n}) — break long content into H2/H3 sections.',
       fail: 'No H2/H3 subheadings — add structure for readers and crawlers.' },
-    { id: 'words', label: 'Content depth', weight: 12,
-      pass: 'About {n} words — substantial content.',
-      warn: 'About {n} words — thin. Aim for 300+ to compete.',
-      fail: 'Only about {n} words — very thin. Expand the page.' },
+    { id: 'words', label: 'Content depth', weight: 0,
+      info: 'About {n} words of main content. Word count is context, not a ranking threshold; make sure the page answers its purpose.' },
     { id: 'links', label: 'Internal links', weight: 10,
       pass: '{n} internal links help crawlers discover your site.',
       warn: 'Only {n} internal links — link to related pages.',
@@ -173,7 +170,7 @@ export const SCORE = {
     { id: 'imgalt', label: 'Image alt text', weight: 8,
       pass: 'All {n} images have alt text.',
       warn: '{m} of {n} images missing alt text.',
-      fail: 'No images, or none have alt text.' },
+      none: 'No content images; alt text is not applicable.' },
     { id: 'schema', label: 'Structured data', weight: 8,
       pass: 'JSON-LD structured data present: {v}',
       fail: 'No structured data — add JSON-LD to qualify for rich results.' },

@@ -22,6 +22,9 @@ const GA_ID = (process.env.GA_ID || '').trim();
 const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || '').trim();
 // Bing Webmaster Tools site-verification id (also shipped as /BingSiteAuth.xml)
 const BING_VERIFY = (process.env.BING_VERIFY || '77EFF8B735065A945570BBFD566B0530').trim();
+// Google Tag Manager container id (analytics). Consent-gated: nothing is stored
+// until the visitor accepts (Consent Mode v2 defaults are denied).
+const GTM_ID = (process.env.GTM_ID || 'GTM-P6P4FLGB').trim();
 // Per-position AdSense ad unit ids (falls back to a single shared slot)
 const AD_SLOTS = {
   'top banner': (process.env.AD_SLOT_TOP || '').trim(),
@@ -53,13 +56,66 @@ const breadcrumbLd = (items) => ({
   })),
 });
 
+// Cookie consent UI — rendered on every page. Hidden until the visitor chooses
+// (site.js reveals it), so no analytics storage is written before consent.
+function consentBanner(path) {
+  return `<div class="ck-banner" id="ck-banner" hidden role="region" aria-label="Cookie consent">
+  <div class="ck-inner container">
+    <p class="ck-text">We use cookies to measure how the tools are used (Google Tag Manager) and, once ads are enabled, to show relevant ads. Nothing is stored on your device until you choose. <a href="${rel(path, '/privacy-policy/')}">Privacy policy</a></p>
+    <div class="ck-actions">
+      <button type="button" class="btn btn-ghost" id="ck-manage">Manage preferences</button>
+      <button type="button" class="btn btn-ghost" id="ck-reject">Reject non-essential</button>
+      <button type="button" class="btn" id="ck-accept">Accept all</button>
+    </div>
+  </div>
+</div>
+<div class="ck-modal" id="ck-panel" hidden role="dialog" aria-modal="true" aria-labelledby="ck-panel-title">
+  <div class="ck-box">
+    <h2 id="ck-panel-title">Cookie preferences</h2>
+    <p class="ck-note">Choose what we may store on your device. Essential cookies keep the site working and are always on.</p>
+    <label class="ck-row">
+      <input type="checkbox" id="ck-analytics" checked>
+      <span><strong>Analytics</strong><span class="ck-desc">Google Tag Manager — anonymous measurement of how the tools are used. Our tools never upload your input.</span></span>
+    </label>
+    <label class="ck-row">
+      <input type="checkbox" id="ck-ads">
+      <span><strong>Ads</strong><span class="ck-desc">Personalised advertising (Google AdSense) — used only if you accept.</span></span>
+    </label>
+    <div class="ck-actions">
+      <button type="button" class="btn btn-ghost" id="ck-close">Close</button>
+      <button type="button" class="btn" id="ck-save">Save choices</button>
+    </div>
+  </div>
+</div>`;
+}
+
 function layout({ path, title, desc, body, ld = [], noindex = false }) {
   const url = SITE.url + path;
+  // ---- consent defaults (Consent Mode v2) — pushed BEFORE GTM loads, so no
+  // analytics/ad storage is written until the visitor accepts.
+  const consentDefaults = `<script>
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({ event: 'default_consent',
+  analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied',
+  ad_personalization: 'denied', functionality_storage: 'granted', security_storage: 'granted' });
+</script>`;
+  const gtmHead = GTM_ID ? `<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${esc(GTM_ID)}');</script>
+<!-- End Google Tag Manager -->` : '';
+  const gtmBody = GTM_ID ? `<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${esc(GTM_ID)}"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->` : '';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+${consentDefaults}${gtmHead}
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical" href="${url}">
@@ -90,6 +146,7 @@ ${GA_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(
 ${ld.map(ldTag).join('\n')}
 </head>
 <body>
+${gtmBody}
 <header class="site-header">
   <div class="container header-inner">
     <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
@@ -127,9 +184,10 @@ ${body}
     </div>
   </div>
   <div class="container footer-bottom">
-    <p>&copy; ${YEAR} ${SITE.name} &middot; ${SITE.tagline} &middot; <a href="${rel(path, '/privacy-policy/')}">Privacy</a> &middot; <a href="${rel(path, '/terms/')}">Terms</a> &middot; <a href="${rel(path, '/disclaimer/')}">Disclaimer</a></p>
+    <p>&copy; ${YEAR} ${SITE.name} &middot; ${SITE.tagline} &middot; <a href="${rel(path, '/privacy-policy/')}">Privacy</a> &middot; <a href="${rel(path, '/terms/')}">Terms</a> &middot; <a href="${rel(path, '/disclaimer/')}">Disclaimer</a> &middot; <a href="#" data-ck-settings>Cookie settings</a></p>
   </div>
 </footer>
+${consentBanner(path)}
 <script defer src="${rel(path, '/assets/site.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/seo.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/ai-search.js')}"></script>

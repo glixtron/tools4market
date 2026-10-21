@@ -1149,3 +1149,48 @@ p { margin: 0 0 1em; }
 }
 .btn-ghost { background: transparent; border: 1px solid var(--c-border-2); color: var(--c-text-2); }
 .btn-ghost:hover { background: var(--c-surface-2); }
+
+/* ============================================================
+   Cookie consent (analytics / ads) — rules.md §3: no innerHTML
+   ============================================================ */
+.ck-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-border);
+  box-shadow: 0 -8px 30px rgba(20, 18, 15, .12);
+  padding: 16px 0;
+}
+.ck-banner[hidden], .ck-modal[hidden] { display: none !important; }
+.ck-inner {
+  display: flex; gap: 18px; align-items: center;
+  justify-content: space-between; flex-wrap: wrap;
+}
+.ck-text { margin: 0; color: var(--c-text-2); font-size: .92rem; max-width: 68ch; }
+.ck-text a { color: var(--c-primary); }
+.ck-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ck-actions .btn { white-space: nowrap; }
+.ck-modal {
+  position: fixed; inset: 0; z-index: 95;
+  background: rgba(20, 18, 15, .45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.ck-box {
+  background: var(--c-surface); border-radius: 16px;
+  max-width: 540px; width: 100%; padding: 26px;
+  box-shadow: 0 20px 60px rgba(20, 18, 15, .25);
+}
+.ck-box h2 { margin: 0 0 6px; font-size: 1.15rem; color: var(--c-text); }
+.ck-note { margin: 0 0 14px; color: var(--c-muted); font-size: .9rem; }
+.ck-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 0; border-top: 1px solid var(--c-border); cursor: pointer;
+}
+.ck-row strong { display: block; color: var(--c-text); font-size: .95rem; }
+.ck-desc { display: block; color: var(--c-muted); font-size: .85rem; margin-top: 3px; }
+.ck-box .ck-actions { margin-top: 18px; justify-content: flex-end; }
+@media (max-width: 720px) {
+  .ck-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ck-actions { width: 100%; }
+  .ck-actions .btn { flex: 1 1 auto; }
+}

@@ -40,7 +40,7 @@ export const POLICY = [
     slug: 'privacy-policy',
     title: 'Privacy Policy',
     metaTitle: 'Privacy Policy — Tools4Market',
-    metaDesc: 'How Tools4Market handles data: tools run locally in your browser, cookies and advertising disclosure, analytics, and your rights.',
+    metaDesc: 'How Tools4Market handles data: tools run locally in your browser, cookie consent for analytics and advertising, and your rights.',
     html: `
 <h1>Privacy Policy</h1>
 <p>Last updated: 20 October 2026</p>
@@ -52,9 +52,10 @@ export const POLICY = [
 <li><strong>Usage analytics:</strong> we may use privacy-respecting analytics to count page views and understand which tools are popular. This data is aggregated and does not identify you.</li>
 <li><strong>Contact email:</strong> if you email us, we process your address and message solely to respond.</li>
 </ul>
-<h2>3. Cookies and advertising</h2>
-<p>We display advertising via <strong>Google AdSense</strong>. Third-party vendors, including Google, use cookies to serve ads based on a user’s prior visits to this and other websites. Google’s use of advertising cookies enables it and its partners to serve ads based on your visits to this site and/or other sites on the Internet.</p>
-<p>You may opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" rel="noopener nofollow" target="_blank">Google Ads Settings</a> or <a href="https://www.aboutads.info" rel="noopener nofollow" target="_blank">www.aboutads.info</a>. Where required by law (e.g. EU/UK), a cookie consent banner lets you accept or reject non-essential cookies before they are set.</p>
+<h2>3. Cookies, analytics and advertising</h2>
+<p>We use <strong>Google Tag Manager</strong> (container <code>GTM-P6P4FLGB</code>) to measure how the site is used, and <strong>Google AdSense</strong> to display advertising. Google and its partners may use cookies to serve ads based on your prior visits to this and other websites.</p>
+<p>Nothing is stored on your device until you agree. When you first visit, a consent banner appears and your browser is configured to <strong>deny</strong> analytics and advertising storage by default (Google Consent Mode v2). You can accept all, reject non-essential cookies, or choose per category — analytics and ads are separate. Your choice is saved in your browser’s local storage and can be changed at any time via the <strong>“Cookie settings”</strong> link in the footer.</p>
+<p>You may also opt out of personalised advertising at any time via <a href="https://www.google.com/settings/ads" rel="noopener nofollow" target="_blank">Google Ads Settings</a> or <a href="https://www.aboutads.info" rel="noopener nofollow" target="_blank">www.aboutads.info</a>. Where required by law (e.g. EU/UK), we do not set non-essential cookies before you consent.</p>
 <h2>4. Log data</h2>
 <p>Like most websites, our hosting provider records standard log data (IP address, browser type, pages requested) for security and performance purposes. This is retained by the hosting provider under its own policy.</p>
 <h2>5. Children</h2>

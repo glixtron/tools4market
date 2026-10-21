@@ -264,7 +264,7 @@ ${outputBlock('lo-out', 'Lorem Ipsum text')}`,
     card: 'Word, character and sentence counts plus reading and speaking time.',
     keywords: 'reading time calculator word count speaking time wpm text statistics',
     h1: 'Free Reading Time Calculator — No Signup, No Limits',
-    metaTitle: 'Free Reading Time Calculator — Words, WPM & Speaking Time',
+    metaTitle: 'Free Reading Time Calculator — Words & Speaking Time',
     metaDesc: 'Paste your text for word count, characters with and without spaces, sentences, paragraphs, reading time at 200 wpm and speaking time at 130 wpm. Free.',
     intro: 'Paste any text and see its word, character, sentence and paragraph counts — plus estimated reading time at 200 words per minute and speaking time at 130.',
     sections: [
