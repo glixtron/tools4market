@@ -297,7 +297,7 @@ ${outputArea('sp-out', 'Length check')}`,
     card: 'Check a draft against the actual title, H1 and page text, with an estimated snippet preview.',
     keywords: 'meta description checker length tester serp snippet',
     h1: 'Free Meta Description Checker — No Signup, No Limits',
-    metaTitle: 'Free Meta Description Checker — Length & Pixel Tester',
+    metaTitle: 'Free Meta Description Checker — Page-Fit Preview',
     metaDesc: 'Compare a description with a fetched page title, H1 and optional target phrase. See its character count and browser-measured width estimate. Free.',
     intro: 'Paste a draft or fetch a public page to compare the current description with its title, H1, opening text and optional target phrase. Character and pixel counts are editing estimates; Google chooses snippet text by query and device.',
     sections: [

@@ -13,11 +13,11 @@ export const CATEGORIES = {
     name: 'SEO & Meta Tools',
     icon: '🚀',
     homeDesc: 'Meta tags, Open Graph, canonical, hreflang, schema and snippet previews — the on-page essentials, generated correctly every time.',
-    pageDesc: 'The on-page SEO essentials: generate valid meta tags, Open Graph and Twitter cards, canonical and hreflang links, JSON-LD schema — and preview your Google snippet before you publish. Everything runs in your browser.',
-    metaDesc: 'Free online SEO tools: meta tag, Open Graph, canonical, hreflang and JSON-LD schema generators plus a pixel-accurate SERP preview. No signup, no limits.',
+    pageDesc: 'Generate meta tags, Open Graph and Twitter cards, canonical and hreflang links, and JSON-LD schema. Compare title and description wording in an estimated search preview. Everything runs in your browser.',
+    metaDesc: 'Free SEO tools for meta tags, Open Graph, canonical links, hreflang, JSON-LD schema and estimated snippet previews. No signup.',
     pageExtra: [
-      'Every tool here targets one on-page signal that search engines read directly from your HTML: the title and meta description that shape your snippet, Open Graph and Twitter tags for social shares, a canonical link that consolidates duplicates, hreflang pairs for multilingual sites, and JSON-LD schema that can unlock rich results. Generate the markup, preview it as it will appear in search, and paste the finished output into your template.',
-      'Used together, they form a quick pre-publish checklist: draft a meta description that actually fits the snippet, confirm the SERP preview reads well, validate your canonical, and only then ship. Everything runs on your device, so it is safe to use on client sites, unpublished drafts and staging environments alike.',
+      'Each tool focuses on a page signal: title and meta description candidates for search snippets, Open Graph and Twitter tags for social shares, canonical links for duplicate or alternate URLs, hreflang annotations for multilingual pages, and JSON-LD for supported rich-result features. Generate the markup, review an estimated title and description preview, then add the output to your template.',
+      'Together, these tools form a pre-publish checklist: write a page-specific description, compare title and snippet wording, and review canonical and language signals. The generators run in your browser, so you can use them with client sites, unpublished drafts and staging content.',
     ],
   },
   ai: {

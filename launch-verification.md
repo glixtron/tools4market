@@ -3,12 +3,12 @@
 **Run against the public site (https://tools4market.online) with a Googlebot user-agent.**
 DNS is read from the authoritative nameservers (`curt.ns.cloudflare.com`); pages are fetched over TLS through Cloudflare's edge — i.e. exactly what Googlebot sees.
 
-## Result: 41 / 41 checks PASS — 0 failures
+## Result: 43 / 43 checks PASS — 0 failures
 
 ```
 === DNS (authoritative) ===
 PASS  apex NS delegated to Cloudflare  | curt.ns.cloudflare.com. rose.ns.cloudflare.com.
-PASS  apex A records published  | 172.67.140.239 104.21.27.25
+PASS  apex A records published  | 104.21.27.25 172.67.140.239
 PASS  GSC verification TXT published
 PASS  MX records published (email)  | 10 mx1.privateemail.com. 10 mx2.privateemail.com.
 
@@ -49,6 +49,8 @@ PASS  GTM container script in head
 PASS  GTM noscript iframe in body
 PASS  exactly one Google tag (gtag.js) on the page  | 1
 PASS  gtag consent default is denied
+PASS  consent region scoping (EEA/UK/CH)
+PASS  consent wait_for_update + url_passthrough + ads_data_redaction
 PASS  consent defaults deny analytics/ads
 PASS  cookie consent banner + preferences present
 PASS  tool pages also carry GTM + consent UI
@@ -61,18 +63,18 @@ PASS  asset /assets/runtime/inspect.js  | status 200
 PASS  asset /assets/runtime/audit.js  | status 200
 PASS  asset /assets/inspect-strings.js  | status 200
 
-TOTAL: 41 passed, 0 failed
+TOTAL: 43 passed, 0 failed
 ```
 
-## What this covers
+## Coverage
 
 - **DNS** — apex + www delegated to Cloudflare and resolving; GSC verification TXT published; MX/SPF (privateemail) live.
 - **Redirects** — `www` → 301 → `https://tools4market.online/`; apex serves 200 with no redirect.
-- **Sitemaps** — `sitemap.xml` is a valid index → `sitemap-pages.xml` (10 URLs) + `sitemap-tools.xml` (30 URLs); 40 unique URLs, all on the canonical host, no synthetic `lastmod`.
-- **Every page** — all 40 URLs: HTTP 200, self-referencing canonical on the apex host, indexable, with visible + JSON-LD breadcrumbs on every non-home page.
+- **Sitemaps** — `sitemap.xml` is a valid index → `sitemap-pages.xml` (10 URLs) + `sitemap-tools.xml` (30 URLs); 40 unique URLs on the canonical host, no synthetic `lastmod`.
+- **Every page** — all 40 URLs: HTTP 200, self-referencing canonical, indexable, with visible + JSON-LD breadcrumbs on every non-home page.
 - **robots.txt** — allows crawling, points at the canonical sitemap; unknown URLs return a branded `noindex` 404.
 - **Backend `/api/fetch`** — returns real fetched HTML in production; loopback/metadata hosts refused (SSRF guard).
-- **Analytics & consent** — exactly one Google tag (`G-6B4GGFC96K`) per page, immediately after `<head>`; GTM container (`GTM-P6P4FLGB`) loader + noscript iframe; Consent Mode v2 defaults denied before any Google tag loads; consent banner + preferences on every page; privacy policy documents it.
+- **Analytics & consent (Consent Mode v2)** — exactly one Google tag (`G-6B4GGFC96K`) per page immediately after `<head>`; GTM container (`GTM-P6P4FLGB`) loader + noscript iframe; region-scoped default consent (EEA/UK/CH), `wait_for_update`, `url_passthrough`, `ads_data_redaction`; consent banner + preferences on every page; privacy policy documents it.
 - **Assets & metadata** — style.css, og-image, icons, site.js, all runtime bundles; `og:image` on the canonical host; `WebSite` + `Organization` + `FAQPage` JSON-LD; Bing `msvalidate` meta; no `noindex` on live pages.
 
 ## Local regression suites (same build)
@@ -80,7 +82,7 @@ TOTAL: 41 passed, 0 failed
 | Suite | Result |
 |---|---|
 | `npm test` — tests/smoke.mjs (all 30 tool pages) | 30/30 clean |
-| `npm run test:consent` — tests/consent-test.mjs | 20/20 PASS |
-| build (`node build.mjs`) | 41 pages, 0 SEO warnings |
+| `npm run test:consent` — tests/consent-test.mjs | 30/30 PASS |
+| build (`node build.mjs`) | 41 pages, **0 SEO warnings** |
 | `wrangler deploy --dry-run` (node 24 = CF runtime) | clean, 104 assets, `env.ASSETS` bound |
 
