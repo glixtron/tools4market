@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 21 Oct 2026 (indexability and breadcrumb audit).*
+*Living tracker — update after every session. Last updated: 21 Oct 2026 (personalized SEO tool upgrade).*
 
 ## 👤 User actions required — **these block launch**
 
@@ -11,7 +11,7 @@
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
-- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** deploy this audit's breadcrumb/sitemap/metadata updates.
+- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** deploy the local SEO diagnostics and copy improvements from 21 Oct.
 - [x] ~~Attach canonical apex domain~~ — DONE: `https://tools4market.online` serves the site and is used in canonicals/sitemaps.
 - [ ] **Fix `www` canonical redirect** — live fetch currently gets HTTP 403 on `https://www.tools4market.online/`, instead of the required one-hop 301 to apex. The Worker already implements the redirect and a `www` route is now declared in `wrangler.jsonc`; deploy it and check Cloudflare Zero Trust/Access or zone redirect settings if 403 remains. Historical `launch-verification.md` recorded an Access policy on `www`.
 - [ ] **Set integration env vars in Cloudflare Pages** (Settings → Environment variables → Production): `GA_ID` (GA4), `ADSENSE_CLIENT` + `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` (AdSense; also writes `ads.txt`). `SITE_URL` / `SITE_EMAIL` are optional overrides — the defaults already point at the live domain.
@@ -21,7 +21,7 @@
 
 - [x] build.mjs static site generator — clean build, no SEO length warnings
 - [x] style.css design system + site.js shell
-- [x] Tool definitions with copy + runtime implementations (now 20 tools — see below)
+- [x] Tool definitions with copy + runtime implementations (now 30 tools — see below)
 - [x] Policy pages (About, Contact, Privacy, Terms, Disclaimer)
 - [x] sitemap.xml + robots.txt + 404
 - [x] **Full tool functional audit — 236/236 checks passed** (real DOM via jsdom driving actual `dist/` HTML + production scripts; realistic inputs, edge cases, injection attempts, zero JS errors)
@@ -33,7 +33,7 @@
 - [x] **"Analyze your own page first" panel on all 18 original tools** — paste a URL, the tool reads the live page and pre-fills its fields + shows a personalized fix list (not generic advice)
 - [x] **`/api/fetch` Cloudflare Pages Function** — first-party, CORS-free live-URL proxy (SSRF-guarded, size/time capped). Graceful degradation: proxy → direct fetch → paste-HTML, so tools never break
 - [x] **Web Crawler Audit** tool (new) — crawlability & indexability report (HTTPS, noindex, canonical, sitemap, schema…) + prioritized fixes + crawl-health score
-- [x] **SEO Ranking Score** tool (new) — 0–100 on-page score with letter grade, weighted factor breakdown, biggest-improvements list
+- [x] **SEO Score Checker** tool (new) — weighted on-page checklist with letter grade and factor evidence; phrase placement is informational only
 - [x] New engine verified — **103/103 checks** (parse engine, panel mount, pre-fill, both new tools via URL + paste paths, XSS-inertness proof, all 20 tools boot clean)
 - [x] Full regression re-run — **236/236** audit + **43/43** URL crawl clean after the changes
 
@@ -53,7 +53,7 @@
 - [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")
 - [x] ~~OG image (1200×630 PNG) for social sharing~~ — done (branded PNG + twitter:card=summary_large_image)
 - [x] ~~Minify assets at build (CSS/JS), add cache headers via `_headers` file~~ — `_headers` DONE (1-year immutable assets + 5-min HTML revalidate + security headers); minification still open (optional — keep readable source for the Cloudflare build)
-- [ ] Extend the URL-check panel to fetch `/robots.txt` + `/sitemap.xml` for site-level context (currently page-level)
+- [x] ~~Extend URL diagnostics with robots.txt and sitemap evidence~~ — Web Crawler Audit checks the matching Googlebot rule, up to three declared sitemap files (plus up to three nested child maps), and falls back to `/sitemap.xml` when no sitemap is declared. Findings identify unverified data and do not claim Google index status.
 
 ## 📅 Phase 3 — months 3–4
 - [ ] 12 marketing calculators (ROI, ROAS, CAC, CPC/CPM/CPA, email ROI, growth)

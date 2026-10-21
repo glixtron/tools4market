@@ -66,7 +66,7 @@
       ctx.sitemapDeclared = declared.length > 0;
       ctx.sitemapUrls = declared.length ? declared.slice(0, 3) : [origin(url) + '/sitemap.xml'];
       ctx.sitemapSource = declared.length ? 'robots.txt declaration' : 'common /sitemap.xml path (not declared in robots.txt)';
-      if (!includeSitemaps) { ctx.sitemapStatus = 'not-checked'; return ctx; }
+      if (includeSitemaps === false) { ctx.sitemapStatus = 'not-checked'; return ctx; }
 
       function inspectMap(m, childMaps) {
         if (!m.response.ok) { ctx.sitemapFailures++; return; }
@@ -155,9 +155,9 @@
             var detail = ctx.sitemapUrls.join(', ') + ' (' + ctx.sitemapStatus + ')';
             return ctx.sitemapDeclared
               ? { level: 'warn', v: fill(c.warn, { v: detail }) }
-              : { level: 'none', v: fill(c.none, { v: 'No sitemap URL is declared in robots.txt; the common /sitemap.xml path could not be verified. Sitemap submissions made only in Search Console are not visible to this check.' }) };
+              : { level: 'none', v: fill(c.noDeclarationFailure, { v: detail }) };
           }
-          return { level: 'none', v: fill(c.none, { v: 'Fetched ' + ctx.sitemapSampled + ' sitemap file(s) via ' + ctx.sitemapSource + ', but this URL was not found.' }) };
+          return { level: 'none', v: fill(c.notFound, { n: ctx.sitemapSampled, v: ctx.sitemapSource }) };
         case 'structured':
           return snap.schemaTypes.length ? { level: 'none', v: fill(c.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'none', v: c.none };
         case 'images':

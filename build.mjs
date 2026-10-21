@@ -226,7 +226,7 @@ ${body}
   <div class="container footer-grid">
     <div>
       <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
-      <p>Free browser-based tools for marketers, bloggers and webmakers. Everything runs 100% in your browser — no signup, no limits, nothing uploaded.</p>
+      <p>Free browser-based tools for marketers, bloggers and webmakers. Most tools process input in your browser; page checks fetch the public URL through our first-party proxy. No signup, no limits.</p>
     </div>
     <div>
       <h4>Categories</h4>
@@ -250,12 +250,12 @@ ${body}
 </footer>
 ${consentBanner(path)}
 <script defer src="${rel(path, '/assets/site.js')}"></script>
+<script defer src="${rel(path, '/assets/inspect-strings.js')}"></script>
+<script defer src="${rel(path, '/assets/runtime/inspect.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/seo.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/ai-search.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/content.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/web.js')}"></script>
-<script defer src="${rel(path, '/assets/inspect-strings.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/inspect.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/audit.js')}"></script>
 </body>
 </html>`;
@@ -282,7 +282,7 @@ function homeLd() {
     {
       '@context': 'https://schema.org', '@type': 'WebSite',
       name: SITE.name, url: SITE.url + '/',
-      description: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Nothing uploaded, no signup, no limits.`,
+      description: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Public-page checks fetch the entered URL through our first-party proxy. No signup, no limits.`,
       inLanguage: 'en',
     },
     {
@@ -298,9 +298,9 @@ function homeBody() {
   const cats = Object.values(CATEGORIES);
   return `<section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">&#10022; 100% browser-based &mdash; nothing uploaded</div>
+    <div class="hero-eyebrow">&#10022; Browser-based tools &mdash; public-page checks included</div>
     <h1>Free Marketing, SEO &amp; AI-Search Tools</h1>
-    <p class="hero-sub">${TOOLS.length}+ tools that run entirely on your device &mdash; no signup, no limits. Built for marketers, bloggers and webmakers who value their time.</p>
+    <p class="hero-sub">${TOOLS.length}+ tools, most of which process input in your browser. Optional page analysis fetches a public URL through our first-party proxy. No signup, no limits.</p>
     <div class="hero-search">
       <input type="search" id="tool-search" placeholder="Search ${TOOLS.length} tools&hellip; try &ldquo;meta&rdquo;, &ldquo;robots&rdquo;, &ldquo;password&rdquo;" aria-label="Search tools">
     </div>
@@ -308,7 +308,7 @@ function homeBody() {
       <div class="hero-stat"><span class="hero-stat-num">${TOOLS.length}+</span><span class="hero-stat-label">Free Tools</span></div>
       <div class="hero-stat"><span class="hero-stat-num">${Object.keys(CATEGORIES).length}</span><span class="hero-stat-label">Categories</span></div>
       <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-label">Signups needed</span></div>
-      <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">In-browser</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">Most</span><span class="hero-stat-label">processing stays local</span></div>
     </div>
   </div>
 </section>
@@ -331,7 +331,7 @@ function homeBody() {
     <p>Tools4Market brings ${TOOLS.length} focused utilities into one place: generate meta tags and Open Graph cards, preview your Google snippet, ship a <a href="${rel(path, '/tools/robots-txt-generator/')}">robots.txt</a> that covers every AI crawler, build UTM-tagged campaign links, analyse keyword density, create XML sitemaps, and run a full on-page audit of any URL. Each tool does one job properly — with presets, validation and copy-ready output — instead of burying it under ten ads and a signup wall.</p>
     <p>Browse by category: ${cats.map((c) => `<a href="${rel(path, '/' + c.slug + '/')}">${c.nav}</a>`).join(', ')}.</p>
     <h2>Why run your tools in the browser?</h2>
-    <p>Because your inputs never leave your device. Pasting draft copy, campaign URLs or client data into a server-side tool means handing it to a stranger; here, the work happens in your tab. Results appear as you type, everything works offline once the page has loaded, and there are no usage queues, hidden limits or upgrade prompts. The <a href="${rel(path, '/privacy-policy/')}">privacy policy</a> says the same thing in legal language: we cannot see your inputs, because they are never sent to us.</p>
+    <p>Most tools process pasted text and generated output in your browser. If you choose page analysis, the entered public URL is sent to our first-party fetch service, which retrieves the page and returns its response for local analysis. The app does not save a report. This keeps everyday text tools fast while making URL-based checks useful against a real page. See the <a href="${rel(path, '/privacy-policy/')}">privacy policy</a> for details.</p>
     <h2>How it works</h2>
     <p>Pick a tool from the grids above or search from the box at the top. Fill in the fields — or paste your own page URL where the tool offers a live check — then copy or download the result. Output is validated as you go, so the first result is usually the final one. Every tool page also carries a short how-to, honest FAQs and links to related tools, so you can go deeper without another round of search results.</p>
   </section>
@@ -493,7 +493,7 @@ const run = async () => {
   await mkdir(R + 'dist/assets/runtime', { recursive: true });
 
   const pages = [
-    { path: '/', title: `${SITE.name} — Free Marketing & SEO Tools, No Signup`, desc: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Nothing uploaded, no signup, no limits. Run them right in your browser.`, body: homeBody(), ld: homeLd() },
+    { path: '/', title: `${SITE.name} — Free Marketing & SEO Tools, No Signup`, desc: `${TOOLS.length}+ browser-based marketing, SEO, AI-search and web tools. Public-page checks fetch the entered URL through our proxy. No signup, no limits.`, body: homeBody(), ld: homeLd() },
     ...Object.values(CATEGORIES).map((c) => {
       const list = TOOLS.filter((t) => t.cat === c.id);
       const path = '/' + c.slug + '/';
@@ -566,7 +566,7 @@ const run = async () => {
   await writeFile(R + 'dist/manifest.webmanifest', JSON.stringify({
     name: SITE.name + ' — ' + SITE.tagline,
     short_name: 'Tools4Market',
-    description: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Nothing uploaded, no signup, no limits.`,
+    description: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Public-page checks fetch the entered URL through our first-party proxy. No signup, no limits.`,
     start_url: '/',
     scope: '/',
     display: 'standalone',

@@ -13,7 +13,7 @@ export const CATEGORIES = {
     name: 'SEO & Meta Tools',
     icon: '🚀',
     homeDesc: 'Meta tags, Open Graph, canonical, hreflang, schema and snippet previews — the on-page essentials, generated correctly every time.',
-    pageDesc: 'Generate meta tags, Open Graph and Twitter cards, canonical and hreflang links, and JSON-LD schema. Compare title and description wording in an estimated search preview. Everything runs in your browser.',
+    pageDesc: 'Generate meta tags, Open Graph and Twitter cards, canonical and hreflang links, and JSON-LD schema. Compare title and description wording in an estimated preview; optional page checks fetch public URLs.',
     metaDesc: 'Free SEO tools for meta tags, Open Graph, canonical links, hreflang, JSON-LD schema and estimated snippet previews. No signup.',
     pageExtra: [
       'Each tool focuses on a page signal: title and meta description candidates for search snippets, Open Graph and Twitter tags for social shares, canonical links for duplicate or alternate URLs, hreflang annotations for multilingual pages, and JSON-LD for supported rich-result features. Generate the markup, review an estimated title and description preview, then add the output to your template.',
@@ -46,7 +46,7 @@ export const CATEGORIES = {
     pageExtra: [
       'Small utilities with outsized impact on publishing hygiene: URL slugs that stay clean after the twentieth edit, UTM tags your GA4 reports can actually group, phrase-frequency analysis for an honest read on what a draft is really about, and hashtag sets tuned to each platform’s norms. This is the category teams keep open in a second tab while writing.',
       'The mechanics of writing itself are covered too: a case converter for every headline and identifier style from Title Case to snake_case, a duplicate line remover that keeps long lists honest, a classic Lorem Ipsum generator for mockups, and a reading-time calculator that pairs word and character counts with reading and speaking estimates.',
-      'They are all instant and local: paste a headline list, a campaign URL or a draft, and the result updates as you type. Because nothing is uploaded, the tools are equally comfortable with confidential launch copy as with a public blog post — and the output is built to paste straight into your CMS, spreadsheets or scheduling tool.',
+      'Most tools process pasted content in your browser as you type. The keyword checker also offers an optional public-page fetch, which sends the entered URL through our first-party proxy and returns the page text for analysis. Keep confidential drafts in local text mode; the output is built to paste into your CMS, spreadsheets or scheduling tool.',
     ],
   },
   web: {
@@ -57,7 +57,7 @@ export const CATEGORIES = {
     icon: '🛠️',
     homeDesc: 'Sitemaps, .htaccess redirects and cryptographically random passwords — the utilities every webmaster needs eventually.',
     pageDesc: 'The webmaster’s utility belt: valid XML sitemaps, correct .htaccess redirect and HTTPS rules, and genuinely random passwords generated on your device.',
-    metaDesc: 'Free web tools: XML sitemap generator, .htaccess redirect generator (301, HTTPS, www) and a secure password generator. 100% in-browser.',
+    metaDesc: 'Free browser-based web tools: XML sitemap and .htaccess redirect generators, secure password generator and practical utilities.',
     pageExtra: [
       'The webmaster’s utility belt: a standards-valid XML sitemap generated from a URL list, .htaccess rules for the redirects, canonicalisation and HTTPS moves you eventually have to make, and a password generator that uses your browser’s cryptographically secure randomness instead of a predictable seed.',
       'The belt has grown to carry the daily decoders and generators as well: Base64 and URL percent-encoding in both directions, a bulk v4 UUID generator, a JWT decoder that shows claims and expiry dates without pretending to verify signatures, a user-agent parser for puzzling log lines, and an ICS generator that turns a simple form into a valid, downloadable calendar file.',

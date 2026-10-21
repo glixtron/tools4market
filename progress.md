@@ -2,6 +2,19 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-21 — Five page-personalized SEO tools upgraded
+
+**Scope:** Web Crawler Audit, SEO Score Checker, SERP Preview Tool, Meta Description Checker and Keyword Density Checker.
+
+- Added shared main-content extraction and exact phrase placement against the fetched page’s title, H1, meta description and main copy. SERP/meta fields now prefill from that page; the description draft uses its heading and opening sentence. Keyword counts have no recommended density target.
+- The crawler now reports final URL, HTTP status, content type, body size, request time and partial-response state; checks response noindex, Googlebot robots.txt access, canonical and sitemap evidence; follows a bounded sitemap-index sample and falls back to `/sitemap.xml` when robots.txt has no declaration.
+- The SEO checklist keeps phrase placement as context rather than score weight. Its weights are described as this tool’s review priorities, not Google ranking weights. Title/description lengths, word count, schema, Open Graph and image alt checks are presented without inventing universal Google thresholds.
+- Corrected the generated script dependency order: inspection strings and `inspect.js` now load before tool runtimes that capture them. The browser harness had exposed this integration bug and the crawler’s disabled-by-default sitemap path; both are fixed and covered by regression checks.
+- Updated homepage, About, Privacy Policy, Architecture and README statements to disclose that pasted text is processed locally while URL-based checks send the public URL through the first-party fetch service. Added guidance not to submit private/tokenized URLs.
+- Added `PERSONALIZED-SEO-TOOLS-PLAN.md` with the product scope, Google documentation principles, competitive positioning, release plan and boundaries of current data access.
+
+**Verification:** `npm run build` → 41 HTML pages, no SEO length warnings; `npm test` → 30/30 tools; `node tests/personalized-tools-test.mjs` → 31/31 checks; `git diff --check` clean. Browser test against the current live crawler page confirmed HTTP 200, no detected noindex, Googlebot allowed, self-canonical, sitemap membership and a 100/100 current-release checklist. Local changes are not deployed.
+
 ## 2026-10-21 — Consent Mode v2 aligned to Google's official spec + GA4 tag live
 
 **Google tag added:** GA4 measurement id `G-6B4GGFC96K` now ships as **exactly one** `gtag.js` tag per page, immediately after `<head>` (IP anonymisation on), alongside the GTM container `GTM-P6P4FLGB` (head loader + `noscript` iframe).

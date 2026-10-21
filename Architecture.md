@@ -1,18 +1,18 @@
 # Tools4Market — System Architecture
 
-*Version: 2.0 · 20 Oct 2026 · Phase 1 complete (18 tools, 29 pages)*
+*Version: 2.1 · 21 Oct 2026 · 30 tools, 41 generated HTML pages*
 
 ---
 
 ## 1. Architectural approach
 
-**100% static site.** A Node.js build script (`build.mjs`) compiles tool definitions into flat HTML pages. All 18 Phase-1 tools execute entirely in **client-side JavaScript** — no backend, no database, no user data collected or stored anywhere.
+**Static frontend with one bounded serverless fetch route.** A Node.js build script (`build.mjs`) compiles tool definitions into flat HTML pages. Most tool work executes in the browser. URL-based page diagnostics use the first-party `/api/fetch` route to retrieve a public page, `robots.txt` and selected sitemap files. The app does not save analysis reports or maintain a database.
 
 This gives:
 - **₹0 hosting** (Cloudflare Pages free tier, global CDN)
 - **Sub-100ms TTFB** → strongest Core Web Vitals → ranking advantage
-- **Zero attack surface** (no PHP, no plugins, no database)
-- **AdSense-safe** (no data collection, complete policy pages)
+- **Small server surface** (no PHP, plugins or database; `/api/fetch` has URL guards, a response cap and timeout)
+- **Low-friction tools** (pasted text is analyzed in-browser; URL mode sends the requested public URL to the fetch route)
 - **AI-Overview resistant** — tools give immediate value that AI summaries cannot replicate
 
 ---
@@ -41,7 +41,7 @@ build.mjs               ← Static site generator (Node 18+, zero npm deps)
 **Runs:** `node build.mjs` (local) or the `build` npm script (CI/Cloudflare)  
 **Output:** `dist/` directory (every file is plain static HTML/CSS/JS)
 
-### "Frontend" (shipped to browser — runs 100% client-side)
+### Frontend (shipped to browser)
 
 ```
 src/
@@ -51,10 +51,12 @@ src/
     ├── seo.js          ← Logic for 8 SEO & Meta tools
     ├── ai-search.js    ← Logic for robots.txt, AI blocker, llms.txt tools
     ├── content.js      ← Logic for slug, UTM, keyword density, hashtag tools
-    └── web.js          ← Logic for .htaccess, sitemap, password tools
+    ├── web.js          ← Logic for .htaccess, sitemap, password tools
+    ├── inspect.js      ← Page fetch, HTML extraction, phrase comparison, shared inspector panel
+    └── audit.js        ← Web Crawler Audit and SEO Score Checker
 ```
 
-**Role:** Runs in the visitor's browser after page load  
+**Role:** Runs in the visitor's browser after page load. URL mode calls `/api/fetch`; pasted text and markup checks stay in the browser.
 **Shipped as:** Static files copied verbatim to `dist/assets/`  
 **Size:** ~60KB total unminified (no framework, no bundler overhead)
 
@@ -76,7 +78,7 @@ Tools4market/
 │   ├── data/                    ← BUILD-TIME DATA (ES modules, not shipped)
 │   │   ├── index.js             ← Exports TOOLS[], CATEGORIES{}, POLICY[]
 │   │   ├── helpers.js           ← HTML builder: f.text(), f.select(), outputBlock(), …
-│   │   ├── seo.js               ← 8 SEO tool definitions
+│   │   ├── seo.js               ← SEO tool definitions
 │   │   ├── ai-search.js         ← 3 AI Search tool definitions
 │   │   ├── content.js           ← 4 Content tool definitions
 │   │   ├── web.js               ← 3 Web tool definitions
@@ -88,16 +90,18 @@ Tools4market/
 │       ├── ai-search.js         ← robots-txt-generator, ai-crawler-blocker, llms-txt-generator
 │       ├── content.js           ← url-slug-generator, utm-link-builder,
 │       │                           keyword-density-checker, hashtag-generator
-│       └── web.js               ← htaccess-redirect-generator, sitemap-generator,
-│                                   password-generator
+│       ├── web.js               ← htaccess-redirect-generator, sitemap-generator,
+│       │                           password-generator
+│       ├── inspect.js            ← shared HTML fetch/parse and personalized output
+│       └── audit.js              ← web-crawler-audit and seo-score-checker
 │
 ├── dist/                        ← GENERATED OUTPUT (deploy this folder)
-│   ├── index.html               ← Homepage: hero + search + all 18 tool cards
+│   ├── index.html               ← Homepage: hero + search + all 30 tool cards
 │   ├── seo-tools/index.html     ← Category hub pages (4 total)
 │   ├── ai-search-tools/
 │   ├── content-social-tools/
 │   ├── web-utility-tools/
-│   ├── tools/                   ← Tool money pages (18 total)
+│   ├── tools/                   ← Tool pages (30 total)
 │   │   ├── meta-tag-generator/index.html
 │   │   ├── open-graph-generator/index.html
 │   │   └── … (16 more)
@@ -110,7 +114,10 @@ Tools4market/
 │   │       ├── seo.js
 │   │       ├── ai-search.js
 │   │       ├── content.js
-│   │       └── web.js
+│   │       ├── web.js
+│   │       ├── inspect.js
+│   │       └── audit.js
+│   │   ├── inspect-strings.js   ← Build-time findings and labels for inspection runtimes
 │   ├── sitemap.xml              ← Auto-generated (all pages)
 │   ├── robots.txt               ← Allow-all + sitemap reference
 │   └── 404.html                 ← Custom 404 page
@@ -149,13 +156,22 @@ Tools4market/
 ┌─────────────────────────────────────────────────┐
 │  RUNTIME (visitor's browser)                    │
 │                                                  │
-│  HTML page loads → site.js boots →              │
+│  HTML loads scripts in dependency order:         │
+│  site.js → inspect strings → inspect.js →       │
+│  tool runtimes → audit.js → site.js boots →      │
 │  reads #tool-root[data-tool="slug"] →            │
 │  calls window.T4M_TOOLS["slug"](root) →          │
 │  tool initialises, listens for input events →    │
 │  live output updates on every keystroke          │
-│                                                  │
-│  No API calls. No server. No login. Zero data.  │
+└─────────────────────────────────────────────────┘
+                    │
+                    │ URL analysis only
+                    ▼
+┌─────────────────────────────────────────────────┐
+│  CLOUDFLARE /api/fetch                          │
+│  Retrieves entered public URLs and returns      │
+│  response HTML and metadata to the browser.     │
+│  No report database or saved analysis.          │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -239,14 +255,16 @@ After AdSense approval: replace `adSlot()` in `build.mjs` with real `<ins class=
 
 ```
 Route: GET /api/fetch?url=<encoded>
-  → fetches the target server-side, returns { ok, status, finalUrl, bytes, ms, body }
+  → fetches the target server-side, returns { ok, status, finalUrl, contentType, xRobotsTag, bytes, ms, body }
   → SSRF-guarded (blocks loopback / private / cloud-metadata hosts)
   → 1.5 MB response cap, 12 s timeout, http/https only
 ```
 
-It powers the **"analyze your own page first"** panel on every tool, plus the **Web Crawler Audit** and **SEO Ranking Score** tools. Client-side graceful degradation (so tools never hard-depend on it):
+It powers the shared page inspector on applicable tools, plus the **Web Crawler Audit** and **SEO Score Checker**. Client-side graceful degradation keeps pasted-HTML analysis available if remote fetch is unavailable:
 
-1. `/api/fetch` proxy → 2. direct browser fetch (CORS-open origins) → 3. **paste-HTML** (fully in-browser, nothing uploaded).
+1. `/api/fetch` proxy → 2. direct browser fetch (CORS-open origins) → 3. **paste-HTML** (fully in-browser).
+
+The five upgraded SEO tools share the same parsed page snapshot: the crawler audit checks the fetched response, Googlebot robots.txt rule, and declared/common sitemap paths; the score checker shows weighted on-page evidence while target phrase placement stays contextual; SERP and description tools prefill from fetched metadata and compare an optional phrase; the keyword checker counts exact phrase occurrences in extracted main text. These public-fetch findings do not expose Google’s index or Search Console data. The generated pages load `inspect-strings.js` and `inspect.js` before runtimes that depend on them.
 
 When deployed on Cloudflare Pages the proxy is live automatically. On a plain static host or `file://` preview, layer 3 keeps every feature functional.
 
@@ -269,7 +287,7 @@ Route: /api/og-check?url=…      → fetches OG tags from target URL server-sid
 Route: /api/ssl-check?host=…    → TLS certificate inspection
 ```
 
-This remains the only backend surface. All other tools stay 100% client-side forever.
+This remains the only backend surface. Tool generation and pasted-text analysis stay client-side; URL inspection uses this bounded fetch route.
 
 ---
 

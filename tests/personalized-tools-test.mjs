@@ -61,8 +61,14 @@ function response(url) {
   let contentType = 'text/html; charset=utf-8';
   let xRobotsTag = '';
   let status = 200;
-  if (target.pathname === '/robots.txt') { body = ROBOTS; contentType = 'text/plain; charset=utf-8'; }
-  else if (target.pathname === '/sitemap.xml') { body = SITEMAP; contentType = 'application/xml; charset=utf-8'; }
+  if (target.pathname === '/robots.txt') {
+    body = target.hostname === 'common.test' ? 'User-agent: *\n' : ROBOTS;
+    contentType = 'text/plain; charset=utf-8';
+  }
+  else if (target.pathname === '/sitemap.xml') {
+    body = target.hostname === 'common.test' ? SITEMAP.replace(PAGE_URL, 'https://common.test/page/') : SITEMAP;
+    contentType = 'application/xml; charset=utf-8';
+  }
   else if (target.pathname === '/blocked/') xRobotsTag = 'noindex';
   return { ok: true, status, finalUrl: target.href, contentType, xRobotsTag, bytes: Buffer.byteLength(body), ms: 17, truncated: false, body };
 }
@@ -91,6 +97,18 @@ async function boot(slug) {
   return { dom, win: dom.window, doc: dom.window.document, errors };
 }
 
+// The adjacent meta tag generator uses an honest user-input preview and avoids fixed Google limits.
+{
+  const { dom, win, doc, errors } = await boot('meta-tag-generator');
+  const pageCopy = doc.querySelector('.tool-content').textContent;
+  check('meta generator labels its preview as an estimate, not a Google result', pageCopy.includes('not a live Google result') && !pageCopy.includes('mimics a Google desktop search snippet'));
+  check('meta generator avoids fixed snippet length targets', !pageCopy.includes('120–158 characters') && pageCopy.includes('There is no fixed title or description length'));
+  setValue(win, 'mt-title', 'A page-specific title');
+  check('meta generator preview reflects the entered title', doc.getElementById('mt-prev-title').textContent === 'A page-specific title');
+  check('meta generator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 // Shared extractor and crawler-rule semantics.
 {
   const { dom, win, errors } = await boot('web-crawler-audit');
@@ -109,9 +127,8 @@ async function boot(slug) {
   const { dom, win, doc, errors } = await boot('serp-preview-tool');
   setValue(win, 'sp-query', QUERY);
   setValue(win, 'sp-url', PAGE_URL);
+  doc.querySelector('.inspect-url').value = PAGE_URL;
   doc.querySelector('.inspect-run').click();
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  console.log('SERP debug:', doc.querySelector('.inspect-status') && doc.querySelector('.inspect-status').textContent, errors.join(' | '));
   await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'SERP page snapshot');
   check('SERP title is prefilled from fetched page', doc.getElementById('sp-title').value === 'Technical SEO Audit for SaaS Teams');
   check('SERP description is prefilled from fetched page', doc.getElementById('sp-desc').value.startsWith('Technical SEO audit guidance'));
@@ -169,6 +186,17 @@ async function boot(slug) {
   await until(() => doc.getElementById('ca-out').textContent.includes('noindex directive'), 'noindex diagnosis');
   check('crawler identifies a response X-Robots-Tag noindex', doc.getElementById('ca-out').textContent.includes('noindex'));
   check('crawler tool has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// When robots.txt has no Sitemap line, the audit probes the common path and labels it as a fallback.
+{
+  const { dom, win, doc, errors } = await boot('web-crawler-audit');
+  setValue(win, 'ca-url', 'https://common.test/page/');
+  doc.getElementById('ca-run').click();
+  await until(() => doc.getElementById('ca-out').textContent.includes('Sitemap discovery'), 'common sitemap fallback');
+  check('crawler identifies sitemap found through common path fallback', doc.getElementById('ca-out').textContent.includes('found in a fetched sitemap via common /sitemap.xml path'));
+  check('common sitemap fallback has no JavaScript errors', errors.length === 0);
   dom.window.close();
 }
 

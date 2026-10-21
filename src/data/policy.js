@@ -7,11 +7,11 @@ export const POLICY = [
     metaDesc: 'Tools4Market offers free, browser-based marketing, SEO and AI-search tools. Learn who we are, our mission and how our tools work.',
     html: `
 <h1>About Tools4Market</h1>
-<p>Tools4Market is a collection of free, browser-based tools for marketers, bloggers, developers and webmasters. Every tool runs entirely on your device: the text you paste, the URLs you enter and the files you process never leave your browser — there is nothing to sign up for and nothing to install.</p>
+<p>Tools4Market is a collection of free browser-based tools for marketers, bloggers, developers and webmasters. Most tools process pasted input on your device. When you choose page analysis, the public URL is sent to our first-party fetch service so it can retrieve the page for your browser to inspect. There is no signup or software to install.</p>
 <h2>Why we exist</h2>
 <p>Most “free tool” websites bury the tool under ads and demand an email address before showing a result. We are building the opposite: a fast, honest toolbox where the tool is the first thing on the page and works the moment it loads. Our specialty is the toolkit of the AI-search era — meta tags, robots.txt, llms.txt, structured data and the utilities that keep a website healthy in front of both classic search engines and AI assistants.</p>
 <h2>How the tools work</h2>
-<p>All tools are built with plain HTML, CSS and JavaScript and execute locally in your browser. Nothing you type is transmitted to us or to any third party. This is not a marketing claim — you can disconnect from the internet after the page loads and the tools keep working.</p>
+<p>Tools are built with plain HTML, CSS and JavaScript. Pasted text and generated output are processed locally. Public URL analysis sends the URL to our first-party fetch service, which retrieves the public response and returns it to your browser for analysis. The app does not save the resulting report. Some tools need an internet connection to fetch a page or download a file.</p>
 <h2>How we keep it free</h2>
 <p>The site is supported by advertising (Google AdSense) and, on some pages, clearly disclosed affiliate links for tools we consider worth paying for. Ads never sit inside the tools themselves. If a page carries an affiliate link, the disclosure is on that page.</p>
 <h2>Contact</h2>
@@ -45,8 +45,9 @@ export const POLICY = [
 <h1>Privacy Policy</h1>
 <p>Last updated: 20 October 2026</p>
 <p>This Privacy Policy explains what information Tools4Market (“we”, “us”) collects when you use our website, and the choices you have.</p>
-<h2>1. Tool inputs never leave your browser</h2>
-<p>All tools on this site execute locally in your browser using JavaScript. Text you paste, URLs you enter, and passwords you generate are processed on your device and are never transmitted to us or stored on any server. We do not build profiles from tool usage.</p>
+<h2>1. Tool input and public URL analysis</h2>
+<p>Most tools process pasted text and generated output locally in your browser. If you choose “Analyze my page” or run a URL-based audit, the URL you enter is sent to our first-party <code>/api/fetch</code> service. It requests the public page, robots.txt or sitemap needed for that check and returns the response to your browser for analysis. The app does not save an analysis report or build profiles from tool usage. Our hosting provider may process standard request logs as described below, and the destination website receives a request for its public page.</p>
+<p>Do not enter private URLs or URLs containing access tokens or other secrets. Pasted text and HTML are analyzed in your browser; the public URL fetch is a separate network request.</p>
 <h2>2. Information we collect</h2>
 <ul>
 <li><strong>Usage analytics:</strong> we may use privacy-respecting analytics to count page views and understand which tools are popular. This data is aggregated and does not identify you.</li>
@@ -58,7 +59,7 @@ export const POLICY = [
 <p>You can accept all, reject non-essential cookies, or choose per category — analytics and ads are separate. Your choice is saved in your browser’s local storage and can be changed at any time via the <strong>“Cookie settings”</strong> link in the footer. Google Consent Mode v2 is used, which also passes ad-click identifiers through URLs without using cookies and redacts advertising data when ad storage is denied.</p>
 <p>You may also opt out of personalised advertising at any time via <a href="https://www.google.com/settings/ads" rel="noopener nofollow" target="_blank">Google Ads Settings</a> or <a href="https://www.aboutads.info" rel="noopener nofollow" target="_blank">www.aboutads.info</a>. Where required by law (e.g. EU/UK), we do not set non-essential cookies before you consent.</p>
 <h2>4. Log data</h2>
-<p>Like most websites, our hosting provider records standard log data (IP address, browser type, pages requested) for security and performance purposes. This is retained by the hosting provider under its own policy.</p>
+<p>Like most websites, our hosting provider records standard log data (IP address, browser type, pages requested) for security and performance purposes. Requests to the public-page fetch endpoint can include the target URL in the request query. This information is retained by the hosting provider under its own policy.</p>
 <h2>5. Children</h2>
 <p>This site is not directed at children under 13 and we do not knowingly collect personal information from them.</p>
 <h2>6. Your rights</h2>
