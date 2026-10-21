@@ -48,12 +48,13 @@ The build also warns if any page's `<title>` exceeds 60 characters or its meta d
 
 ```
 dist/
-├── index.html                     ← homepage: hero + live search + all 30 tools
+├── index.html                     ← homepage: job-first hero + editor's pick + live search + all 30 tools
 ├── seo-tools/  ai-search-tools/
 │   content-social-tools/  web-utility-tools/    ← 4 category hubs
-├── tools/{slug}/index.html        ← 20 tool pages (the money pages)
+├── tools/{slug}/index.html        ← 30 tool pages (the money pages)
 ├── about/ contact/ privacy-policy/ terms/ disclaimer/
 ├── assets/                        ← style.css, site.js, runtime/*.js, inspect-strings.js, favicon.svg
+├── favicon.ico                    ← generated (PNG-in-ICO from the 192px icon) — the root request used to 404
 ├── sitemap.xml  robots.txt  404.html
 ```
 
@@ -166,9 +167,10 @@ The site itself has **zero dependencies**, so the test tooling is installed sepa
 npm i --no-save jsdom      # test-only
 npm run build
 npm test                   # tests/smoke.mjs — every tool page boots, responds, zero console errors
-npm run test:seo           # tests/seo-audit.mjs — site-wide SEO definition audit (1 400+ checks)
+npm run test:seo           # tests/seo-audit.mjs — site-wide SEO definition audit (1 500+ checks)
 npm run test:consent       # tests/consent-test.mjs — consent mode behaviour
 npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (DNS, sitemap, every URL, backend, assets, Google tag on every page)
+npm run indexnow           # scripts/indexnow.mjs — submit new/updated URLs to IndexNow (needs INDEXNOW_KEY)
 ```
 
 `npm test` drives all 30 tool pages in a real DOM (jsdom): every input, select, checkbox and button is exercised, and the run fails on any console error, uncaught exception, missing tool registration or missing output.
@@ -290,6 +292,10 @@ Everything optional is switched by an environment variable at build time — the
 | `GTM_ID` | Google Tag Manager container (default `GTM-P6P4FLGB`). Injected on every page — head script + noscript iframe — and gated by the cookie-consent banner (Consent Mode v2). |
 | `ADSENSE_CLIENT` | Swaps the `.ad-slot` placeholders for real `<ins class="adsbygoogle">` units and writes `ads.txt` with your publisher id |
 | `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` | Per-position AdSense ad-unit ids (falls back to one shared slot) |
+| `BING_VERIFY` | Bing Webmaster Tools verification id (default set) — also shipped as `/BingSiteAuth.xml` |
+| `GOOGLE_SITE_VERIFY` | Google Search Console verification token → `<meta name="google-site-verification">`. Empty by default: the domain property is verified via a DNS TXT record |
+| `INDEXNOW_KEY` | IndexNow key (generate one 32-char hex string once). The build then publishes `/{key}.txt` so `npm run indexnow` can submit changed URLs to Bing/Yandex/Seznam. **The key must be stable across builds** |
+| `CONSENT_MODE` | `basic` (default: denied in EEA/UK/CH, granted elsewhere) or `advanced` (denied for everyone until the banner is answered) |
 
 In Cloudflare Pages: **Settings → Environment variables → Production** (and Preview). Example: `GA_ID = G-XXXXXXXXXX`, `ADSENSE_CLIENT = ca-pub-0000000000000000`.
 
@@ -300,8 +306,10 @@ In Cloudflare Pages: **Settings → Environment variables → Production** (and 
 | `dist/_headers` | Cache policy (`/assets/*` immutable 1y, HTML revalidate 5 min) + security headers (nosniff, referrer-policy, frame-options, permissions-policy) |
 | `dist/_redirects` | Comment-only on Workers (host-level redirects are rejected with error 100324). Set `SITE_REDIRECTS_PAGES=1` to emit the www→apex rule when deploying to Pages; on Workers use a zone-level Cloudflare Redirect Rule instead |
 | `dist/manifest.webmanifest` | PWA/installability + mobile theme colour, with 192/512 icons |
+| `dist/favicon.ico` | Legacy/root favicon (the 192px PNG wrapped in an ICO container). Browsers and crawlers request `/favicon.ico` by default — it must exist at the domain root |
+| `dist/<INDEXNOW_KEY>.txt` | IndexNow key file (written only when `INDEXNOW_KEY` is set) |
 | `dist/ads.txt` | AdSense publisher id (written only when `ADSENSE_CLIENT` is set) |
-| `dist/robots.txt`, `dist/sitemap.xml` | Crawl directives + a **sitemap index** (`sitemap.xml` → `sitemap-pages.xml` with home/categories/policy + `sitemap-tools.xml` with all 30 tools), auto-pointed at `SITE_URL`; `lastmod` is omitted unless real per-page modification dates are tracked |
+| `dist/robots.txt`, `dist/sitemap.xml` | Crawl directives + a **sitemap index** (`sitemap.xml` → `sitemap-pages.xml` with home/categories/policy + `sitemap-tools.xml` with all 30 tools + `sitemap-blog.xml` with the guides), auto-pointed at `SITE_URL`. `<lastmod>` is emitted only where a real date exists — the guides carry their publish/update date; tool and page URLs have none |
 | `functions/api/fetch.js` | The backend route — deployed as a Pages Function on Path B, or served by `worker.js` on Path A |
 
 

@@ -1,20 +1,32 @@
 # Tools4Market — Design System
 
-*Version: 2.0 · 20 Oct 2026 · Implemented in `src/style.css`*
+*Version: 2.1 "Classic Editorial Utility" · 22 Oct 2026 · Implemented in `src/style.css`*
 
 ---
 
-## 1. Design philosophy — "Human Tool Aesthetic"
+## 1. Design philosophy — a classic, ownable utility brand
 
-This site must **not** look AI-generated or like a bootstrap template. Every decision is deliberate:
+The 22 Oct 2026 audit found the site "clean and usable, but closer to a well-made
+tool directory than a classic, ownable brand". v2.1 keeps everything that worked
+(warm neutrals, real depth, micro-personality, generous spacing) and gives it an
+identity you could pick out of a screenshot:
 
-1. **Outfit + Inter** — editorial combination: Outfit (Google Fonts, geometric weight for headings) pairs with Inter (neutral, readable for body). Never system fonts alone.
-2. **Warm neutrals, not cold grays** — background `#f5f4f0` (cream-tinted), text `#1a1917` (near-black with warmth). Cold `#f9fafb` grays read as "template."
-3. **Organic gradients** — hero uses diagonal blobs placed by eye (12% left, 88% right), not symmetric center-burst gradients.
-4. **Gradient text headline** — the H1 on hero uses `-webkit-background-clip: text` for a warm-to-violet sweep. One deliberate statement; not used elsewhere.
-5. **Micro-personality** — tool cards have a 3px left accent bar that appears on hover. The footer has a 3px brand gradient bar at the top. These details are invisible at a glance but register subconsciously.
-6. **Real depth** — four shadow levels (`--shadow-xs` through `--shadow-hover`) used contextually, not one universal shadow copied everywhere.
-7. **Glassmorphism header** — `backdrop-filter: blur(12px)` on sticky header reads as modern/premium, not generic.
+1. **Ink navy on warm paper** — text `#182338` on `#f8f5ee`. Print-like, calm,
+   and it makes the brass accent read as deliberate rather than decorative.
+2. **Serif display + restrained sans UI** — Fraunces (with its optical size
+   axis) for `h1`/`h2`, the wordmark and the editorial numerals; Outfit stays for
+   UI sub-heads, labels and card titles; Inter for body. Headlines get a point of
+   view; controls stay neutral.
+3. **Brass, used sparingly** — eyebrow rules, "used for" lines, the editor's-pick
+   clip, numbered markers. Never large fills, never body text.
+4. **Thin warm rules instead of shadows everywhere** — `#d8d1c4` hairlines,
+   a `3px double` rule under the hero masthead, one `4px` brass edge on the
+   feedback band. Depth (`--shadow-*`) is reserved for things that genuinely lift.
+5. **Editorial hierarchy** — every homepage section starts with a mono eyebrow +
+   rule, then a serif title. Numbers (`01`–`04`) order the categories and jobs.
+6. **Proof beside the promise** — the hero's right column is the editor's pick:
+   the tool, why it matters this week, and a real output preview. No empty
+   atmospheric space.
 
 ---
 
@@ -26,50 +38,54 @@ All defined as CSS custom properties in `:root` of `src/style.css`.
 
 | Token | Value | Use |
 |---|---|---|
-| `--c-bg` | `#f5f4f0` | Page background (warm cream, not cold gray) |
+| `--c-bg` | `#f8f5ee` | Page background (warm paper) |
 | `--c-surface` | `#ffffff` | Cards, inputs, header |
-| `--c-surface-2` | `#faf9f7` | Output head, section backgrounds |
+| `--c-surface-2` | `#f3efe6` | Output heads, tinted panels |
 
 ### Text
 
 | Token | Value | Use |
 |---|---|---|
-| `--c-text` | `#1a1917` | Headings, primary body |
-| `--c-text-2` | `#3d3b38` | Body paragraphs, secondary content |
-| `--c-muted` | `#6b6760` | Captions, labels, descriptions |
+| `--c-text` | `#182338` | Headings, primary body (ink navy) |
+| `--c-text-2` | `#2b3854` | Body paragraphs, secondary content |
+| `--c-muted` | `#65707c` | Captions, labels, descriptions |
 
 ### Brand
 
 | Token | Value | Use |
 |---|---|---|
-| `--c-primary` | `#5b4fff` | Buttons, links, active states (warmer violet, not indigo) |
-| `--c-primary-2` | `#4a3fe6` | Hover state |
-| `--c-primary-3` | `#3730d4` | Active/pressed |
-| `--c-primary-soft` | `#edeaff` | Pill eyebrow, focus rings |
-| `--c-primary-xsoft` | `#f5f3ff` | Nav hover, tool-note background |
+| `--c-primary` | `#243b63` | Links, buttons, focus rings (deep blue) |
+| `--c-primary-2` | `#1a2c4c` | Hover |
+| `--c-primary-3` | `#132139` | Active/pressed |
+| `--c-primary-soft` | `#e2e7ef` | Soft blue backgrounds |
+| `--c-primary-xsoft` | `#eef1f6` | Nav hover, tool-note background |
 
-### Accent
+### Accent (brass)
 
 | Token | Value | Use |
 |---|---|---|
-| `--c-accent` | `#0ea47a` | Paired with primary in gradients (logo, footer bar) |
-| `--c-accent-soft` | `#e6f7f2` | Accent backgrounds |
+| `--c-accent` | `#96682c` | Brass for text/icon accents (4.87:1 on white) |
+| `--c-accent-light` | `#e7b45e` | Decorative brass (the pick-card clip) |
+| `--c-accent-soft` | `#f4e9d5` | Brass tint backgrounds |
 
 ### Borders
 
 | Token | Value | Use |
 |---|---|---|
-| `--c-border` | `#e2e0db` | Default borders (warm tint) |
-| `--c-border-2` | `#d0cdc7` | Inputs, stronger separators |
+| `--c-border` | `#d8d1c4` | Default hairlines (warm rule) |
+| `--c-border-2` | `#c5bda9` | Inputs, stronger separators |
 
-### Semantic
+### Semantic & code
 
-| Token | Value | Use |
-|---|---|---|
-| `--c-success / --c-success-soft` | `#166534 / #dcfce7` | Chip: good |
-| `--c-warn / --c-warn-soft` | `#92400e / #fef3c7` | Chip: warn |
-| `--c-danger / --c-danger-soft` | `#991b1b / #fee2e2` | Chip: bad |
-| `--c-code-bg / --c-code-text` | `#16141f / #e8e3f8` | Code output blocks |
+| Token | Value |
+|---|---|
+| `--c-success / --c-success-soft` | `#166534 / #dcfce7` |
+| `--c-warn / --c-warn-soft` | `#92400e / #fef3c7` |
+| `--c-danger / --c-danger-soft` | `#991b1b / #fee2e2` |
+| `--c-code-bg / --c-code-text` | `#182338 / #e9edf5` (navy code blocks) |
+
+**Measured contrast (all ≥ 4.5:1):** text/paper 14.43 · muted/paper 4.63 ·
+accent/white 4.87 · primary/white 11.17 · footer link/navy 6.31.
 
 ---
 
@@ -78,100 +94,94 @@ All defined as CSS custom properties in `:root` of `src/style.css`.
 ### Fonts
 
 ```css
---font-head: 'Outfit', -apple-system, 'Segoe UI', Arial, sans-serif;
---font-body: 'Inter', -apple-system, 'Segoe UI', Arial, sans-serif;
---font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+--font-display: 'Fraunces', Georgia, 'Times New Roman', serif;   /* h1, h2, logo, numerals */
+--font-head:    'Outfit', -apple-system, 'Segoe UI', Arial, sans-serif;  /* UI sub-heads, labels */
+--font-body:    'Inter', -apple-system, 'Segoe UI', Arial, sans-serif;   /* body */
+--font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;     /* eyebrows, code */
 ```
 
-**Loaded via Google Fonts** (`@import` at top of style.css):
-```css
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
-```
+Loaded via one Google Fonts `@import` (Fraunces 600/700 with the `opsz` axis,
+Outfit 400–700, Inter 400–600).
 
 ### Type scale
 
 | Element | Size | Weight | Font | Note |
 |---|---|---|---|---|
-| Hero h1 | `clamp(2rem, 4.5vw, 3rem)` | 800 | Outfit | Gradient text |
-| h1 (tool pages) | `clamp(1.75rem, 3.5vw, 2.4rem)` | 800 | Outfit | |
-| h2 | `1.4rem` | 700 | Outfit | `margin-top: 1.8em` |
+| Hero h1 | `clamp(2.1rem, 4.6vw, 3.1rem)` | 700 | Fraunces | Outcome-led, `line-height: 1.08` |
+| h1 (tool pages) | `clamp(1.8rem, 3.6vw, 2.5rem)` | 700 | Fraunces | |
+| h2 / section title | `1.45rem` / `1.7rem` | 600 | Fraunces | `margin-top: 1.8em` in prose |
 | h3 | `1.1rem` | 600 | Outfit | |
 | Body | `1rem / 1.65` | 400 | Inter | |
-| Labels | `.85rem` | 600 | Inter | `letter-spacing: .005em` |
-| Captions / chips | `.75–.82rem` | 600–700 | Inter | |
-| Code | `.84–.87rem / 1.6` | 400 | Mono | |
+| Eyebrows (mono) | `.72–.74rem` | 400 | Mono | UPPERCASE, `.14em` tracking, brass |
+| Labels / chips | `.75–.85rem` | 600–700 | Inter | |
+| Code / samples | `.73–.87rem / 1.55–1.65` | 400 | Mono | |
 
 ---
 
 ## 4. Border radius & shadows
 
-### Radius
+Radius: `--radius: 14px` (cards, shells) · `--radius-sm: 9px` (inputs, buttons) ·
+`--radius-xs: 6px` (copy button, code chips).
 
-| Token | Value | Use |
-|---|---|---|
-| `--radius` | `14px` | Cards, tool shell, policy box |
-| `--radius-sm` | `9px` | Inputs, output blocks, buttons |
-| `--radius-xs` | `6px` | Copy button, btn-icon |
-
-### Shadows (four levels)
+Shadows (rgba now keyed to ink navy):
 
 ```css
---shadow-xs:    0 1px 2px rgba(26,25,23,.05)
---shadow-sm:    0 1px 3px rgba(26,25,23,.07), 0 1px 6px rgba(26,25,23,.05)
---shadow:       0 2px 6px rgba(26,25,23,.08), 0 4px 16px rgba(26,25,23,.06)
---shadow-md:    0 4px 12px rgba(26,25,23,.10), 0 8px 28px rgba(26,25,23,.08)
---shadow-hover: 0 6px 20px rgba(91,79,255,.14), 0 2px 6px rgba(26,25,23,.08)
+--shadow-xs:    0 1px 2px rgba(24,35,56,.05)
+--shadow-sm:    0 1px 3px rgba(24,35,56,.07), 0 1px 6px rgba(24,35,56,.05)
+--shadow:       0 2px 6px rgba(24,35,56,.08), 0 4px 16px rgba(24,35,56,.06)
+--shadow-md:    0 4px 12px rgba(24,35,56,.10), 0 8px 28px rgba(24,35,56,.08)
+--shadow-hover: 0 6px 20px rgba(36,59,99,.16), 0 2px 6px rgba(24,35,56,.08)
 ```
-
-**Usage map:**
-- `--shadow-xs` → tool cards (resting), side-box, output
-- `--shadow-sm` → tool shell, hero search input, policy box
-- `--shadow-hover` → tool card on hover (coloured glow)
 
 ---
 
 ## 5. Component inventory
 
 ### Header
-- Sticky, `backdrop-filter: blur(12px)` on white 92% opacity background
-- Logo: `logo-mark` = 34×34px rounded square with diagonal violet-to-green gradient + shadow
-- Nav: muted links, hover = `--c-primary-xsoft` bg pill
+Sticky, `backdrop-filter: blur(12px)` on white 92%. Wordmark in Fraunces; the
+`logo-mark` is a 34px navy→brass gradient tile. Nav hover = soft blue pill.
 
-### Hero (homepage only)
-- Layered gradient background: cream→light violet→mint (diagonal, 160deg)
-- Three `radial-gradient` blobs via `::before` pseudo-element (hand-placed offsets)
-- Eyebrow pill: `hero-eyebrow` — primary color, soft background, border
-- H1: gradient text (violet-to-green sweep via `-webkit-background-clip`)
-- Stats strip: `hero-stats` → 4 `hero-stat` items with large number + uppercase label
+### Hero (homepage only) — `.hero-grid`
+Two columns (`1.15fr / .85fr`, single column ≤1024px): copy + task search left,
+`.pick-card` right. Paper background, one hand-placed brass glow, `3px double`
+rule at the bottom (the print masthead detail). No stats strip — the hint line
+(`30 tools · 4 categories · free forever`) carries the numbers quietly.
+
+### Editor's pick card (`.pick-card`)
+White card, brass `::before` clip at the top-left, mono "Editor's pick" label,
+serif tool name, one-sentence use case (`.pick-why`), a real output preview in a
+navy `.pick-sample` block, category + "used for" meta, and a CTA. The tool
+rotates weekly from `EDITOR_PICKS` in `src/data/index.js` (week number picks the
+entry, so it changes without a redeploy).
+
+### Job cards (`.job-card`) and outcome cards (`.outcome-card`)
+Homepage "start with your job" paths (with brass `01`–`04` numerals) and the four
+outcome categories (larger outlined numerals). Both lift on hover like tool cards.
 
 ### Tool card (`.tool-card`)
-- Resting: white surface, `--c-border` border, `--shadow-xs`
-- Hover: lift 3px, `--shadow-hover`, slightly violet border
-- `::before` pseudo: 3px left accent bar (violet→green gradient) fades in on hover
-- Transition: `cubic-bezier(.22, 1, .36, 1)` — slightly springy
+Unchanged geometry, new third line: `.tool-used` — a brass italic "for …" line
+describing the job the tool does (data field `usedFor`).
 
-### Category section header (`.cat-header`)
-- Flex row: h2 + count pill (`.cat-count`) + right-aligned "View all →" (`.cat-view-all`)
+### Tool meta strip (`.tool-meta`)
+Under the H1 on every tool page: `USED FOR … · LAST UPDATED 22 October 2026`
+(mono brass labels). `updated` is only rendered for pages with a real content
+update recorded in their data file.
 
-### Tool shell (`.tool-shell`)
-- White surface, `--c-border`, `--radius`, `--shadow-sm`
-- Inputs: `1.5px` border in `--c-border-2`, focus ring = `3.5px rgba(91,79,255,.12)`
-- Select: custom chevron SVG via `background-image`
+### Numbered category headers (`.cat-num`)
+Directory sections carry a brass serif `01`–`04` before the category name.
 
-### Output block
-- Header bar: `--c-surface-2` background, `--font-head` uppercase label
-- Body: `--c-code-bg` dark background, `--c-code-text` light text
-- Copy button: primary → accent on copied state
+### Feedback band (`.home-cta`)
+White band with a `4px` brass left edge: "Missing a tool? Found a bug?" and two
+CTAs into `/contact/`.
 
-### FAQ (`.tool-faq details`)
-- Native `<details>` / `<summary>` — zero JS
-- Custom `+` / `−` indicator via `::after`, no default marker
-- Open state: box-shadow appears
+### Cookie banner — deliberately quiet
+Slimmer bar (11px padding, `.84rem` text, softer shadow) and `body.ck-open`
+reserves bottom padding (118px desktop / 240px mobile) so it never covers the
+next section. Removed the moment a choice is stored.
 
-### Footer (`.site-footer`)
-- Background: `#100f0e` (warmer than pure `#000`)
-- Top accent bar: `footer-brand-bar` — 3px linear-gradient(90deg, #5b4fff, #0ea47a)
-- Link color: `#8a8480`, hover: `#f0ece4`
+### Footer
+Ink navy (`--c-text`) instead of near-black, warm-paper headings, muted blue-gray
+links, navy→brass `footer-brand-bar`.
 
 ---
 
@@ -179,46 +189,45 @@ All defined as CSS custom properties in `:root` of `src/style.css`.
 
 | Breakpoint | Behaviour |
 |---|---|
-| `> 1024px` | Tool page: 2-col grid `1fr 300px` (main + sticky sidebar) |
-| `≤ 1024px` | Tool sidebar collapses to full-width below main; footer 2-col |
-| `≤ 720px` | Hero shrinks, field-row stacks to 1 col, dynamic rows simplify |
-| `≤ 480px` | Nav spacing tightens, footer 1-col, tool shell padding reduces |
+| `> 1024px` | Tool page: 2-col `1fr 300px`; hero: copy + pick side by side |
+| `≤ 1024px` | Hero stacks (copy first); tool sidebar full-width below main; footer 2-col |
+| `≤ 720px` | Hero type shrinks, pick card padding tightens, cookie banner stacks |
+| `≤ 480px` | Nav tightens, footer 1-col, tool shell padding reduces |
 
-- Max content width: `1180px`, centered
-- Card grid: `repeat(auto-fill, minmax(255px, 1fr))`
-- Transition easing: `--ease: cubic-bezier(.22, 1, .36, 1)`
+Max content width `1180px`; card grids `repeat(auto-fill, minmax(255px, 1fr))`;
+easing `--ease: cubic-bezier(.22, 1, .36, 1)`.
 
 ---
 
 ## 7. Accessibility rules
 
-- Every input has a bound `<label>` with matching `for`/`id`
-- Buttons use real `<button>` semantics
-- Focus-visible ring: `2px solid var(--c-primary)`, `outline-offset: 3px`
-- Colour contrast ≥ 4.5:1 for all text on backgrounds
-- Status colours always paired with text label (never colour alone)
-- `aria-live="polite"` on all `<pre>` and `.output-area` output regions
-- `aria-hidden="true"` on all decorative emoji spans
+- Every input has a bound `<label>`; buttons use real `<button>` semantics.
+- Focus-visible ring: `2px solid var(--c-primary)`, `outline-offset: 3px`.
+- Contrast ≥ 4.5:1 for all text (measured in §2), including brass-on-white.
+- Status colours always paired with a text label.
+- `aria-live="polite"` on output regions; `aria-hidden="true"` on decorative
+  numerals and emoji; the pick card is an `<aside>` with an accessible name.
 
 ---
 
 ## 8. AdSense / UX guardrails
 
-- `.ad-slot` placeholders reserve layout space (no CLS on activation)
-- Never inside the interactive tool area
-- No fake download buttons, no auto-refresh, no dark patterns
-- Ads at three positions only: top banner (above tool), sidebar, below FAQ
+Unchanged from v2.0: `.ad-slot` placeholders reserve layout space (no CLS), ads
+never sit inside the tool interaction area, no fake download buttons, no dark
+patterns. Three positions only: top banner, sidebar, below FAQ.
 
 ---
 
-## 9. Anti-AI-template checklist
+## 9. Anti-template checklist
 
-Before shipping any design change, verify:
+Verify before shipping any design change:
 
-- [ ] Background is warm (`#f5f4f0`), not cold (`#f9fafb` / `#f3f4f6`)
-- [ ] Primary is `#5b4fff` (warmer violet), not `#4f46e5` (Tailwind indigo)
-- [ ] Hero gradient is diagonal with asymmetric blobs, not centered radial
-- [ ] At least one personality detail is present (accent bar, gradient text, brand bar)
-- [ ] Tool cards have the `::before` hover accent, not just border-color change
-- [ ] Footer is dark with warm near-black (`#100f0e`), not blue-gray (`#1e293b`)
-- [ ] Typography uses Outfit for headings, not system font or Roboto
+- [ ] Background is warm paper (`#f8f5ee`), not cold gray (`#f9fafb` / `#f3f4f6`)
+- [ ] Primary is deep blue `#243b63`, not Tailwind indigo `#4f46e5`
+- [ ] Headlines are Fraunces; UI labels are Outfit/Inter — no third sans
+- [ ] Brass appears only as accents (eyebrows, numerals, rules, one band edge)
+- [ ] Every homepage section opens with a mono eyebrow + rule
+- [ ] The hero's right column carries proof (editor's pick + output), not decoration
+- [ ] Tool cards keep the `::before` hover accent bar and their "used for" line
+- [ ] The cookie banner is slim and reserves page space while visible
+- [ ] Footer is ink navy with the navy→brass brand bar

@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 21 Oct 2026 (page-aware tool upgrades and site-wide SEO pass).*
+*Living tracker — update after every session. Last updated: 22 Oct 2026 (30-day audit & growth plan implemented — design v2.1, homepage IA, favicon, GA4 events, IndexNow hook).*
 
 ## 👤 User actions required — **these block launch**
 
@@ -8,6 +8,8 @@
 - [x] ~~Verify Google Search Console property~~ — DONE per user; sitemap submitted/monitoring started
 - [x] ~~Start Bing Webmaster Tools~~ — DONE per user; Bing crawling/index monitoring started
 - [ ] GA4 property (optional; set `GA_ID` after confirming the property)
+- [ ] **Set `INDEXNOW_KEY` in Cloudflare Pages env** (any random string, e.g. `openssl rand -hex 16`) → the build publishes `/{key}.txt`; then `npm run indexnow` pings Bing/IndexNow on each deploy
+- [ ] **After the next deploy:** resubmit the sitemap in Search Console (blog now carries real `lastmod`; tool/pages deliberately have none) and check Coverage for new-indexed pages
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
@@ -50,6 +52,7 @@
 
 ## 📅 Phase 2 — in progress (started 20 Oct 2026, user go-ahead given)
 - [x] **Site-wide SEO definition pass (21 Oct)** — all 30 tools and homepage checked for metadata, headings, keyword placement, content depth, FAQs, schema, internal links, HTML hygiene and duplicates. `tests/seo-audit.mjs`: **1,254 passed, 0 failed**. Utility-page focus terms and repeated FAQ wording corrected locally; deploy remains a separate step.
+- [x] **30-day audit & growth plan implemented (22 Oct)** — design system v2.1 "Classic Editorial Utility", job-focused homepage with weekly Editor's pick, `usedFor`/`updated` metadata on tools, favicon.ico, honest sitemap `lastmod` (blog only), GA4 growth events, `INDEXNOW_KEY` + `GOOGLE_SITE_VERIFY` hooks, `npm run indexnow`. `tests/seo-audit.mjs`: **1,529 passed, 0 failed**; full suite green (smoke 30/30, consent 30/30, personalized 84/84). **Pending:** deploy, Search Console re-submission, IndexNow key.
 - [x] **Google AdSense connected (21 Oct 2026)** — publisher `ca-pub-1509697031230558`: loader in every `<head>` (site-ownership verification), `ads.txt` generated at the domain root, preconnect for the ad server, ad slots keep their reserved height (no CLS) and switch to real `<ins>` units as soon as `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` ad-unit ids are set. Consent-aware: EEA/UK/CH get limited non-personalised ads until the visitor accepts. **Next:** create the three ad units in the AdSense console → set the env vars → tick "I've placed the code" → request review.
 
 ### ✅ Guides section + Google tag verification (21–22 Oct 2026)
@@ -58,6 +61,8 @@
 - [x] **Google tag (GA4 `G-6B4GGFC96K`) verified on every published page** — byte-identical to Google's snippet, exactly one per page, always after the Consent Mode v2 defaults. Proved locally across every built page and live across every URL in all three sitemaps
 - [x] **GTM container `GTM-P6P4FLGB` audited** — it contains no GA4 measurement id, so there is no double counting with the direct Google tag
 - [ ] **AdSense verdict** — review submitted; if it returns "low content", the cure is more guides (the same work that ranks for the head terms)
+- [ ] **Deploy the 22 Oct audit work** (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hook) — all committed locally; production not modified
+- [ ] **Distribution plan** — tool directories, Quora/Reddit cadence, Pinterest, 1 YouTube Short/week (was listed under Phase 3; start now per the audit plan)
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
 - [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")
 - [x] ~~OG image (1200×630 PNG) for social sharing~~ — done (branded PNG + twitter:card=summary_large_image)

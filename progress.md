@@ -270,3 +270,23 @@
 **Verification:** build produced 44 pages with no length warnings; all 30 tool pages passed smoke checks; personalized tool harness passed 84 checks; consent suite passed 30 checks; site-wide SEO audit passed 1,254 checks with zero failures; `git diff --check` is clean. The locally generated sitemap lists all 43 indexable HTML pages exactly once across three child files (404 excluded). In the local browser, the sitemap tool fetched the public Tools4Market homepage and same-host robots/sitemap files, then populated 40 URLs from the current production sitemap. A deterministic case also confirms an index plus all three child maps can be imported. Public fetches confirm source signals only; they do not confirm index status or Search Console performance.
 
 **Pending:** capture a representative 390×844 mobile pass and deploy the local changes when publication is authorized. Production was not modified.
+
+## 2026-10-22 — 30-day audit & growth plan implementation
+
+**Source:** `~/Downloads/tools4market-30-day-audit-and-growth-plan.md` — every actionable item implemented locally.
+
+**Design system v2.1 "Classic Editorial Utility":** ink navy `#182338` on warm paper `#f8f5ee`, deep blue `#243b63` primary, brass accent `#96682c`/`#e7b45e`; Fraunces serif for h1/h2/logo, Outfit for UI, Inter for body. `design.md` rewritten; contrast re-verified (all pairs ≥4.5:1). New components: `.pick-card`, `.job-card`, `.outcome-card`, `.tool-used`, `.tool-meta`, `.home-cta`, `.section-eyebrow`, `.cat-num`; fixed undefined `--radius-md` on `.blog-card`.
+
+**Homepage rebuilt around jobs & outcomes:** hero with rotating **Editor's pick** card (`EDITOR_PICKS` × `weekIndex()`, 4 tools carry `pickWhy`/`pickSample`) → "I need to…" job cards → outcome cards → featured guides → full directory → contact CTA → SEO prose.
+
+**Data + metadata:** all 30 tools got `usedFor` (surfaced as a `.tool-used` strip); the 10 priority tools got honest `updated: '2026-10-22'` (drives `article:modified_time`); tool pages got how-to/expected-outcome prose blocks.
+
+**Infrastructure hooks:** `favicon.ico` generated at build (192px PNG wrapped in ICO container — no binary committed); sitemap `lastmod` emitted **only** for blog posts (real dates — tools/pages get none, honesty over guesswork); `GOOGLE_SITE_VERIFY` + `INDEXNOW_KEY` env vars (both default empty; key file served when set); `scripts/indexnow.mjs` + `npm run indexnow`; theme-color `#243b63`.
+
+**Analytics:** `track()` helper in `site.js` + GA4 events `tool_open`, `tool_run`, `copy_output`, `download_output`, `blog_cta_click`, `contact_click` (gated on consent); `body.ck-open` class so the cookie banner no longer overlaps the footer.
+
+**Tests:** `tests/seo-audit.mjs` extended with ~42 audit-action checks → **1,529 passed, 0 failed**. Full suite green: build 52 pages, smoke 30/30, consent 30/30, personalized 84/84; `git diff --check` clean; GA4 events + favicon 200 + IndexNow key publish verified in jsdom.
+
+**Docs:** `Architecture.md` §12 (robots.txt open-crawlers position, date policy, verification gates), `README.md` (env var table, integration files, new test counts).
+
+**Not done (separate steps):** deployment to tools4market.online; Search Console re-submission + IndexNow (needs `INDEXNOW_KEY` set); distribution plan execution; visual screenshot pass (browser not connected).

@@ -33,6 +33,16 @@ export const TOOLS_AI = [
     cat: 'ai',
     icon: '🤖',
     card: 'Generate robots.txt with AI-crawler presets (GPTBot, ClaudeBot…).',
+    usedFor: 'for setting a deliberate crawler policy',
+    updated: '2026-10-22',
+    pickWhy: 'Set a deliberate crawler policy in one file: keep the search engines, decide on AI training bots and AI search assistants one by one, and attach your sitemap.',
+    pickSample: `User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://example.com/sitemap.xml`,
     keywords: 'robots txt generator ai crawler gptbot claudebot block',
     focus: 'robots.txt generator',
     h1: 'Free Robots.txt Generator — No Signup, No Limits',
@@ -65,6 +75,7 @@ ${note('Copy the output into a file named <strong>robots.txt</strong> and upload
     cat: 'ai',
     icon: '🛡️',
     card: 'One click to block every major AI bot in robots.txt.',
+    usedFor: 'for opting out of AI training in one click',
     keywords: 'block ai crawlers gptbot blocker robots txt ai bots',
     focus: 'ai crawler blocker',
     h1: 'Free AI Crawler Blocker — No Signup, No Limits',
@@ -101,6 +112,8 @@ ${outputBlock('ab-out', 'robots.txt')}`,
     cat: 'ai',
     icon: '📄',
     card: 'Create an llms.txt file so AI models find your best pages.',
+    usedFor: 'for mapping your best pages for answer engines',
+    updated: '2026-10-22',
     keywords: 'llms txt generator ai search geo answer engine optimization',
     focus: 'llms.txt generator',
     h1: 'Free llms.txt Generator — No Signup, No Limits',

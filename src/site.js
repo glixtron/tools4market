@@ -3,6 +3,19 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
 (function () {
   'use strict';
 
+  // GA4 events (consent-gated by construction: the page sets Consent Mode v2
+  // defaults to "denied" before gtag loads, so nothing is stored or sent for a
+  // visitor who has not accepted analytics). Events: tool_open, tool_run,
+  // copy_output, download_output, blog_cta_click, contact_click.
+  function track(name, params) {
+    if (typeof window.gtag !== 'function') return;
+    try { window.gtag('event', name, params || {}); } catch (e) { /* never break the UI for analytics */ }
+  }
+  function toolSlugOf(el) {
+    var root = el && el.closest ? el.closest('#tool-root') : null;
+    return root ? root.getAttribute('data-tool') : 'shell';
+  }
+
   function copyText(text, btn) {
     if (!text) return;
     const done = () => {
@@ -36,6 +49,7 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
         const el = document.querySelector(sel);
         if (el) text = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') ? el.value : el.textContent;
       }
+      if (text) track('copy_output', { tool_slug: toolSlugOf(b) });
       copyText(text, b);
     });
   }
@@ -48,6 +62,7 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
       const el = spec[0] && document.querySelector(spec[0]);
       const text = el ? (el.textContent || '') : '';
       if (!text) return;
+      track('download_output', { tool_slug: toolSlugOf(b), file_name: spec[1] || 'download.txt' });
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -84,14 +99,40 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
   function initTool() {
     const root = document.getElementById('tool-root');
     if (!root) return;
-    const fn = window.T4M_TOOLS[root.getAttribute('data-tool')];
+    const slug = root.getAttribute('data-tool');
+    const fn = window.T4M_TOOLS[slug];
     if (typeof fn === 'function') {
       try { fn(root); } catch (err) { if (window.console) console.error('Tool init failed:', err); }
     }
+    track('tool_open', { tool_slug: slug });
+    // Tools compute live as you type, so the first interaction inside the shell
+    // is the "run". Fires once per page view.
+    let ran = false;
+    const markRun = () => { if (ran) return; ran = true; track('tool_run', { tool_slug: slug }); };
+    root.addEventListener('input', markRun);
+    root.addEventListener('change', markRun);
     // "Analyze your own page first" panel — injected after the tool so its fields exist.
     if (window.T4M_INSPECT && window.T4M_INSPECT.mount) {
-      try { window.T4M_INSPECT.mount(root, root.getAttribute('data-tool')); } catch (err) { /* non-fatal */ }
+      try { window.T4M_INSPECT.mount(root, slug); } catch (err) { /* non-fatal */ }
     }
+  }
+
+  // Guide→tool CTA clicks and contact/feedback clicks (the growth loop's
+  // guide-to-tool click-through rate is measured from these).
+  function initEvents() {
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest ? e.target.closest('a') : null;
+      if (!a) return;
+      const href = a.getAttribute('href') || '';
+      let url = null;
+      try { url = new URL(href, window.location.href); } catch (err) { return; }
+      if (url.pathname.indexOf('/contact/') === 0) {
+        track('contact_click', { link_text: (a.textContent || '').trim().slice(0, 60) });
+        return;
+      }
+      const m = url.pathname.match(/^\/tools\/([a-z0-9-]+)\/$/);
+      if (m && a.closest('.article')) track('blog_cta_click', { tool_slug: m[1] });
+    });
   }
 
   function initYear() {
@@ -145,8 +186,9 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
       write(state);
       push(state.analytics, state.ads);
       banner.hidden = true;
+      document.body.classList.remove('ck-open');
     }
-    function showBanner() { banner.hidden = false; }
+    function showBanner() { banner.hidden = false; document.body.classList.add('ck-open'); }
     function openPanel() {
       var stored = read() || { analytics: false, ads: false };
       if (analyticsBox) analyticsBox.checked = !!stored.analytics;
@@ -199,7 +241,7 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     };
   }
 
-  function boot() { initCopy(); initDownload(); initSearch(); initTool(); initYear(); initConsent(); }
+  function boot() { initCopy(); initDownload(); initSearch(); initTool(); initEvents(); initYear(); initConsent(); }
 
   // In a deferred script readyState is already "interactive" and DOMContentLoaded is imminent:
   // boot via the event. Only boot immediately when the document is fully done (late injection).

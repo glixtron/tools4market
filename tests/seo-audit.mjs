@@ -256,6 +256,73 @@ for (const t of TOOLS) {
   ok('home: no noindex', !/content="noindex"/i.test(html));
 }
 
+// ---------- 22 Oct 2026 audit actions: identity, favicon, homepage IA,
+// ---------- internal-link graph, sitemap honesty, crawler policy
+{
+  // --- favicon + app icons (/favicon.ico used to answer 404)
+  const ico = readFileSync(path.join(DIST, 'favicon.ico'));
+  ok('favicon.ico: exists at the domain root', ico.length > 0);
+  ok('favicon.ico: valid ICO header (icon type, one image)', ico.readUInt16LE(2) === 1 && ico.readUInt16LE(4) === 1);
+  ok('favicon.ico: wraps a PNG payload', ico.slice(22, 26).toString('hex') === '89504e47');
+  for (const page of ['index.html', 'tools/meta-tag-generator/index.html', 'blog/index.html', '404.html']) {
+    const html = read(page);
+    ok(`${page}: links the SVG favicon`, html.includes('rel="icon" type="image/svg+xml"'));
+    ok(`${page}: links the ICO fallback`, html.includes('rel="icon" type="image/x-icon"'));
+    ok(`${page}: apple-touch-icon + manifest + theme-color`, html.includes('rel="apple-touch-icon"') && html.includes('rel="manifest"') && /name="theme-color"/.test(html));
+  }
+  ok('manifest.webmanifest: exists at the root', read('manifest.webmanifest').includes('Tools4Market'));
+
+  // --- homepage: task-led messaging + editorial hierarchy
+  const home = read('index.html');
+  ok('home: outcome-led H1', home.includes('<h1>Find the right tool. Finish the job.</h1>'));
+  ok('home: task-language search placeholder', home.includes('Search tools by task'));
+  ok('home: editor pick card links a live tool', /<aside class="pick-card"[\s\S]{0,600}?<a href="tools\/[a-z0-9-]+\/">/.test(home));
+  ok('home: pick card shows a real output preview', home.includes('class="pick-sample"'));
+  ok('home: four "start with your job" paths', home.includes('id="start-with-your-job"') && (home.match(/class="job-card"/g) || []).length === 4);
+  ok('home: four numbered outcome categories', (home.match(/class="outcome-card"/g) || []).length === 4);
+  ok('home: guides framed as "show the work"', home.includes('Guides that show the work'));
+  ok('home: contact / feedback CTA', home.includes('Suggest a tool') && home.includes('Report a bug') && /href="contact\/"/.test(home));
+  ok('home: cookie banner reserves page space (body.ck-open)', read('assets/style.css').includes('body.ck-open'));
+
+  // --- used-for line + last-updated labels
+  const noUsedFor = TOOLS.filter((t) => !t.usedFor || !/^for /.test(t.usedFor));
+  ok('tools: every tool defines a "used for" line', noUsedFor.length === 0, noUsedFor.map((t) => t.slug).join(','));
+  const noStrip = TOOLS.filter((t) => !read('tools/' + t.slug + '/index.html').includes('class="tool-meta"'));
+  ok('tools: every tool page renders the meta strip', noStrip.length === 0, noStrip.map((t) => t.slug).join(','));
+  const priority = ['meta-tag-generator', 'open-graph-generator', 'schema-markup-generator', 'robots-txt-generator', 'llms-txt-generator', 'web-crawler-audit', 'seo-score-checker', 'utm-link-builder', 'sitemap-generator', 'keyword-density-checker'];
+  const noUpd = priority.filter((s) => !read('tools/' + s + '/index.html').includes('Last updated'));
+  ok('priority tools: visible "Last updated" label', noUpd.length === 0, noUpd.join(','));
+  ok('guides: published date rendered as a <time> element', ARTICLES.every((a) => read('blog/' + a.slug + '/index.html').includes('Published <time')));
+
+  // --- internal-link graph: every priority tool reaches a guide
+  const noGuide = priority.filter((s) => !read('tools/' + s + '/index.html').includes('From the guides'));
+  ok('priority tools: each links to a guide', noGuide.length === 0, noGuide.join(','));
+  // (category-hub linking is already asserted per tool above via resolved paths)
+
+  // --- homepage links the ten priority tools directly
+  const homeHrefs = new Set([...home.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/').pathname; } catch (e) { return ''; } }));
+  ok('home: links all ten priority tools', priority.every((s) => homeHrefs.has('/tools/' + s + '/')), priority.filter((s) => !homeHrefs.has('/tools/' + s + '/')).join(','));
+
+  // --- sitemap lastmod: real dates only (guides carry them, tools do not)
+  const blogMap2 = read('sitemap-blog.xml');
+  ok('sitemap-blog.xml: every guide entry carries its real date', ARTICLES.every((a) => blogMap2.includes(`<loc>https://tools4market.online/blog/${a.slug}/</loc><lastmod>${a.updated || a.date}</lastmod>`)));
+  ok('sitemap-tools.xml: no synthetic lastmod on tool URLs', !read('sitemap-tools.xml').includes('<lastmod>'));
+  ok('sitemap-pages.xml: no synthetic lastmod on page URLs', !read('sitemap-pages.xml').includes('<lastmod>'));
+
+  // --- crawler policy: search + AI crawlers allowed by default (deliberate,
+  //     documented choice — the robots.txt generator is where blocking happens)
+  const robots = read('robots.txt');
+  ok('robots.txt: default policy allows every crawler', robots.includes('User-agent: *') && robots.includes('Allow: /') && !/User-agent:\s+(GPTBot|ClaudeBot|PerplexityBot|Google-Extended)/.test(robots));
+
+  // --- measurement hooks for the 30-day plan (GA4 events + verification hooks)
+  const siteJs = read('assets/site.js');
+  for (const ev of ['tool_open', 'tool_run', 'copy_output', 'download_output', 'blog_cta_click', 'contact_click']) {
+    ok(`site.js: GA4 event "${ev}" wired`, siteJs.includes(`'${ev}'`));
+  }
+  ok('site.js: every event goes through the consent-gated gtag helper', !/dataLayer\.push\(\{?\s*event:\s*'(tool_|copy_|download_|blog_|contact_)/.test(siteJs));
+}
+
+
 // ---------- site-wide duplicates
 const kwStrings = new Map();
 for (const t of TOOLS) add(kwStrings, t.keywords, t.slug);

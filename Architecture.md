@@ -309,3 +309,73 @@ The shared inspector in `src/runtime/inspect.js` keeps a single fetched HTML sna
 The page-prefill map now also uses observed values for existing hreflang and supported JSON-LD fields, robots sitemap declarations, sitemap lists, llms.txt link suggestions, headings and extracted main text. It does not invent missing locale/schema facts. Page-independent tools (for example password, Base64, UUID, JWT and lorem ipsum) skip the unrelated page-analysis panel. The homepage FAQ and privacy policy explain that sitemap/crawler checks may fetch `robots.txt` and sitemap files on the same public host.
 
 Standalone utility changes remain browser-side: password strings use unbiased rejection sampling conditioned on selected character sets, and the strength estimate accounts for that constraint; JWT output summarizes registered time and identity claims while explicitly remaining decode-only; the user-agent parser starts with the current browser string; and calendar output uses RFC 5545 VERSION:2.0 with explicit floating-local or UTC interpretation. These tools do not send pasted values to the page-analysis fetch service.
+
+---
+
+## 12. Audit-driven restructure: identity, homepage IA and distribution hooks (22 Oct 2026)
+
+Implements the actionable code items from the 22 Oct 2026 full-site audit (visual
+identity, task-focused homepage, internal linking, favicon, structured landing
+pages, measurement hooks). Production was **not** touched by that audit — this
+section describes what the repo now builds; deploying it is a separate step.
+
+### Homepage information architecture (`homeBody()` in `build.mjs`)
+
+Order is now job-first instead of inventory-first:
+
+1. **Hero** — outcome-led H1 ("Find the right tool. Finish the job."), task-language
+   search placeholder, and the **editor's pick** card in the right column.
+2. **Start with your job** — four high-intent paths (`JOBS` in `src/data/index.js`),
+   one per category, each landing on a priority tool.
+3. **Four outcome categories** — numbered `01`–`04`, each with its top three tools.
+4. **Guides that show the work** — three newest guides, framed as tool-adjacent.
+5. **Full tool directory** — all tools, numbered category sections, still the
+   search filter's domain (`.tool-card` + `.cat-section` behaviour unchanged).
+6. **Contact / feedback band** — "Suggest a tool" / "Report a bug" → `/contact/`.
+7. Existing SEO prose block + homepage FAQs (FAQPage schema).
+
+The editor's pick rotates weekly: `EDITOR_PICKS` × `weekIndex()` picks the entry,
+so the card changes on its own every Monday. Each pick tool carries `pickWhy`
+(the use case) and `pickSample` (a real output preview) in its data file.
+
+### Tool landing pages
+
+- Every tool defines `usedFor` (rendered on its card as a brass "for …" line and
+  in the tool-page meta strip). The ten priority tools also carry a real
+  `updated` date, rendered as a visible `Last updated` label and used as
+  `dateModified`/`lastmod` where applicable.
+- The guide sidebar falls back to same-task-cluster guides when no guide names the
+  tool directly, so no priority tool is a dead end in the guide graph.
+
+### Identity & assets
+
+- Design system **v2.1 "Classic Editorial Utility"** (see `design.md`): ink navy
+  on warm paper, Fraunces display serif, brass accents, numbered sections.
+- `/favicon.ico` is generated at build time (the 192px PNG icon wrapped in an ICO
+  container) and linked after the SVG favicon — the root request used to 404.
+
+### Measurement & distribution hooks
+
+- **GA4 events** (consent-gated through the existing Consent Mode v2 flow, via a
+  single `track()` helper in `src/site.js`): `tool_open`, `tool_run` (first
+  interaction inside the tool shell), `copy_output`, `download_output`,
+  `blog_cta_click` (guide → tool), `contact_click`.
+- **Sitemap `<lastmod>`** is emitted only where a real date exists: guide entries
+  carry their publish/update date from `src/data/blog.js`; tool and page entries
+  stay without `lastmod` (a build date is not a modification date).
+- **IndexNow** — set `INDEXNOW_KEY` and the build publishes `/{key}.txt`;
+  `npm run indexnow` submits new/updated URLs to the participating engines
+  (Bing et al.). Google is not an IndexNow participant — Search Console +
+  sitemap submission remains the Google path.
+- **Google site verification** — `GOOGLE_SITE_VERIFY` emits the
+  `google-site-verification` meta tag when a property needs the HTML method (the
+  domain property is already verified via DNS TXT, so it defaults to empty).
+
+### Crawler policy (deliberate, per the audit's open question)
+
+The site's own `robots.txt` allows every crawler, including AI crawlers. This is
+the product position: Tools4Market *sells* crawler-policy decisions (the Robots.txt
+Generator / AI Crawler Blocker make them per site), so the host itself stays fully
+open. Blocking AI bots is a per-customer choice, not this site's default. If that
+decision ever changes, change `robots.txt` in `build.mjs` and the copy in the
+homepage FAQ together.

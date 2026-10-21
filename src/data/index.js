@@ -69,6 +69,52 @@ export const CATEGORIES = {
 export const TOOLS = [...TOOLS_SEO, ...TOOLS_AI, ...TOOLS_CONTENT, ...TOOLS_WEB];
 export { POLICY };
 
+// ---------------------------------------------------------------------------
+// Homepage "start with your job" paths (22 Oct 2026 audit: lead with a job,
+// not with the full inventory). One high-intent entry point per category.
+// ---------------------------------------------------------------------------
+export const JOBS = [
+  {
+    title: 'Make a page ready for search',
+    blurb: 'Write the meta tags, preview the snippet and check the signals search engines read first.',
+    path: '/tools/meta-tag-generator/',
+    cta: 'Start with the Meta Tag Generator',
+  },
+  {
+    title: 'Decide what AI crawlers may do',
+    blurb: 'Allow, block or filter AI bots deliberately — then publish an llms.txt map for answer engines.',
+    path: '/tools/robots-txt-generator/',
+    cta: 'Start with the Robots.txt Generator',
+  },
+  {
+    title: 'Tag a campaign so GA4 can read it',
+    blurb: 'Build UTM links with consistent naming that groups cleanly in your reports.',
+    path: '/tools/utm-link-builder/',
+    cta: 'Start with the UTM Link Builder',
+  },
+  {
+    title: 'Audit a live site before launch',
+    blurb: 'Fetch any URL and read its status, canonical, robots rules and discovery signals.',
+    path: '/tools/web-crawler-audit/',
+    cta: 'Start with the Web Crawler Audit',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Editor's pick — rotates weekly (the week number picks the entry, so the card
+// changes on its own every Monday). Swap or reorder this list to re-curate.
+// Each tool carries `pickWhy` (the use case) and `pickSample` (a real-looking
+// output preview) in its own data file.
+// ---------------------------------------------------------------------------
+export const EDITOR_PICKS = ['web-crawler-audit', 'meta-tag-generator', 'robots-txt-generator', 'utm-link-builder'];
+
+// ISO-ish week index of the current date (1-based; used for the weekly rotation)
+export const weekIndex = (d = new Date()) => {
+  const start = new Date(d.getFullYear(), 0, 1);
+  const days = Math.floor((d - start) / 86400000);
+  return Math.ceil((days + start.getDay() + 1) / 7);
+};
+
 // Homepage FAQ — rendered as visible <details> blocks and as FAQPage JSON-LD.
 export const HOME_FAQS = [
   {

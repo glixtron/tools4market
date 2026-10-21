@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 // Tools4Market — static site generator. Run: node build.mjs
-import { rm, mkdir, writeFile, copyFile, readdir } from 'node:fs/promises';
+import { rm, mkdir, writeFile, copyFile, readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { TOOLS, CATEGORIES, POLICY, HOME_FAQS } from './src/data/index.js';
+import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, weekIndex } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
 import { ARTICLES } from './src/data/blog.js';
 
 const R = fileURLToPath(new URL('.', import.meta.url));
 const YEAR = new Date().getFullYear();
+
+// "22 October 2026" for the visible Last-updated labels (ISO date → long form)
+const fmtDate = (iso) => {
+  const d = new Date(iso + 'T00:00:00Z');
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+};
 
 const SITE = {
   name: 'Tools4Market',
@@ -32,6 +39,17 @@ const CONSENT_MODE = (process.env.CONSENT_MODE || 'basic').trim().toLowerCase();
 // Consent types (v2) + the region that requires a banner before anything is stored.
 const CONSENT_TYPES = ['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'];
 const CONSENT_REGION = ['AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'GB', 'CH'];
+// Google Search Console site-verification token (HTML-method verification).
+// The domain property is already verified via a DNS TXT record, so this stays
+// empty by default; set it when a second property needs the meta tag.
+const GOOGLE_VERIFY = (process.env.GOOGLE_SITE_VERIFY || '').trim();
+// IndexNow key (a stable 32-char hex string you generate once). When set, the
+// build publishes /{key}.txt so participating engines can verify the host, and
+// `npm run indexnow` can submit changed URLs.
+const INDEXNOW_KEY = (process.env.INDEXNOW_KEY || '').trim();
+if (INDEXNOW_KEY && !/^[a-zA-Z0-9-]{8,128}$/.test(INDEXNOW_KEY)) {
+  throw new Error('INDEXNOW_KEY must be 8–128 letters/digits/dashes (got: ' + INDEXNOW_KEY + ')');
+}
 // Per-position AdSense ad unit ids (falls back to a single shared slot)
 const AD_SLOTS = {
   'top banner': (process.env.AD_SLOT_TOP || '').trim(),
@@ -208,16 +226,18 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${SITE.url}/assets/og-image.png">
 ${BING_VERIFY ? `<meta name="msvalidate.01" content="${esc(BING_VERIFY)}">` : ''}
+${GOOGLE_VERIFY ? `<meta name="google-site-verification" content="${esc(GOOGLE_VERIFY)}">` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${ADSENSE_CLIENT ? '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' : ''}
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
+<link rel="icon" type="image/x-icon" href="${rel(path, '/favicon.ico')}">
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
 <link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
 <link rel="alternate" type="text/plain" href="${rel(path, '/llms.txt')}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name} — Guides" href="/feed.xml">
-<meta name="theme-color" content="#5b4fff">
+<meta name="theme-color" content="#243b63">
 <link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
 ${ld.map(ldTag).join('\n')}
 </head>
@@ -277,9 +297,9 @@ ${consentBanner(path)}
 </html>`;
 }
 
-const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords).toLowerCase())}">
+const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords + ' ' + (t.usedFor || '')).toLowerCase())}">
   <span class="tool-icon" aria-hidden="true">${t.icon}</span>
-  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span></span>
+  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span>${t.usedFor ? `<span class="tool-used">${esc(t.usedFor)}</span>` : ''}</span>
 </a>`;
 
 // Ad slot. Renders a real AdSense unit only when an ad-unit id is configured
@@ -316,31 +336,95 @@ function homeLd() {
   ];
 }
 
+// Editor's pick of the week — rotates through EDITOR_PICKS (src/data/index.js)
+// every Monday, so the hero card never goes stale without a redeploy.
+const PICK = TOOLS.find((t) => t.slug === EDITOR_PICKS[weekIndex() % EDITOR_PICKS.length]) || TOOLS[0];
+
 function homeBody() {
   const path = '/';
   const cats = Object.values(CATEGORIES);
+  const pickCat = CATEGORIES[PICK.cat];
+  const latest = [...ARTICLES].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3);
   return `<section class="hero">
-  <div class="container">
-    <div class="hero-eyebrow">&#10022; Browser-based tools &mdash; public-page checks included</div>
-    <h1>Free Marketing, SEO &amp; AI-Search Tools</h1>
-    <p class="hero-sub">${TOOLS.length}+ tools, most of which process input in your browser. Optional page analysis fetches a public URL through our first-party proxy. No signup, no limits.</p>
-    <div class="hero-search">
-      <input type="search" id="tool-search" placeholder="Search ${TOOLS.length} tools&hellip; try &ldquo;meta&rdquo;, &ldquo;robots&rdquo;, &ldquo;password&rdquo;" aria-label="Search tools">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Browser-based tools &mdash; no signup, no limits</p>
+      <h1>Find the right tool. Finish the job.</h1>
+      <p class="hero-sub">Browser-based utilities for SEO, AI-search visibility, content operations and everyday web work. Most tools process your input in your browser, and the core tools need no signup.</p>
+      <div class="hero-search">
+        <input type="search" id="tool-search" placeholder="Search tools by task: meta, robots, UTM&hellip;" aria-label="Search tools by task">
+      </div>
+      <p class="hero-hint">${TOOLS.length} tools &middot; ${cats.length} categories &middot; free forever</p>
     </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><span class="hero-stat-num">${TOOLS.length}+</span><span class="hero-stat-label">Free Tools</span></div>
-      <div class="hero-stat"><span class="hero-stat-num">${Object.keys(CATEGORIES).length}</span><span class="hero-stat-label">Categories</span></div>
-      <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-label">Signups needed</span></div>
-      <div class="hero-stat"><span class="hero-stat-num">Most</span><span class="hero-stat-label">processing stays local</span></div>
-    </div>
+    <aside class="pick-card" aria-label="Editor&#39;s pick of the week">
+      <p class="pick-label">Editor&rsquo;s pick &middot; this week</p>
+      <h2 class="pick-name"><a href="${rel(path, '/tools/' + PICK.slug + '/')}">${esc(PICK.name)}</a></h2>
+      <p class="pick-why">${esc(PICK.pickWhy || PICK.card)}</p>
+      ${PICK.pickSample ? `<pre class="pick-sample">${esc(PICK.pickSample)}</pre>` : ''}
+      <p class="pick-meta"><span class="pick-cat">${pickCat.icon} ${pickCat.nav}</span>${PICK.usedFor ? `<span class="pick-used">${esc(PICK.usedFor)}</span>` : ''}</p>
+      <a class="pick-cta" href="${rel(path, '/tools/' + PICK.slug + '/')}">Open the ${esc(PICK.name)} &rarr;</a>
+    </aside>
   </div>
 </section>
 <div class="container">
   <p id="search-empty" class="search-empty" style="display:none">No tool matches that search &mdash; try a different keyword.</p>
-  ${cats.map((c) => {
+
+  <section class="cat-section jobs" id="start-with-your-job">
+    <p class="section-eyebrow">Start with your job</p>
+    <h2 class="section-title">What are you trying to finish?</h2>
+    <div class="job-grid">
+      ${JOBS.map((j, i) => `<a class="job-card" href="${rel(path, j.path)}">
+        <span class="job-num" aria-hidden="true">0${i + 1}</span>
+        <strong>${esc(j.title)}</strong>
+        <span class="job-blurb">${esc(j.blurb)}</span>
+        <span class="job-cta">${esc(j.cta)} &rarr;</span>
+      </a>`).join('')}
+    </div>
+  </section>
+
+  <section class="cat-section cat-outcomes" id="categories">
+    <p class="section-eyebrow">Four outcome categories</p>
+    <h2 class="section-title">Everything grouped by the job it does</h2>
+    <div class="outcome-grid">
+      ${cats.map((c, i) => {
+        const list = TOOLS.filter((t) => t.cat === c.id);
+        return `<div class="outcome-card">
+          <p class="outcome-num" aria-hidden="true">0${i + 1}</p>
+          <h3><a href="${rel(path, '/' + c.slug + '/')}">${esc(c.name)}</a></h3>
+          <p class="outcome-desc">${c.homeDesc}</p>
+          <p class="outcome-links">${list.slice(0, 3).map((t) => `<a href="${rel(path, '/tools/' + t.slug + '/')}">${esc(t.name)}</a>`).join('<span aria-hidden="true"> &middot; </span>')}</p>
+          <a class="outcome-all" href="${rel(path, '/' + c.slug + '/')}">All ${list.length} tools &rarr;</a>
+        </div>`;
+      }).join('')}
+    </div>
+  </section>
+
+  <section class="cat-section" id="guides">
+    <div class="cat-header">
+      <h2><a href="${rel(path, '/blog/')}">Guides that show the work</a></h2>
+      <span class="cat-count">${ARTICLES.length} guides</span>
+      <a class="cat-view-all" href="${rel(path, '/blog/')}">View all &rarr;</a>
+    </div>
+    <p class="cat-desc">Each guide answers one question, walks through the procedure, then hands you the tool that does it.</p>
+    <div class="blog-list">
+      ${latest.map((a) => `<a class="blog-card" href="${rel(path, '/blog/' + a.slug + '/')}">
+        <span class="blog-date">${esc(a.date)}</span>
+        <strong>${esc(a.title)}</strong>
+        <span>${esc(a.intro.slice(0, 160))}&hellip;</span>
+      </a>`).join('\n      ')}
+    </div>
+  </section>
+
+  <section class="home-section" id="tools">
+    <p class="section-eyebrow">Full tool directory</p>
+    <h2 class="section-title">All ${TOOLS.length} tools</h2>
+    <p class="section-sub">Filter with the search box at the top, or browse every category below.</p>
+  </section>
+  ${cats.map((c, i) => {
     const list = TOOLS.filter((t) => t.cat === c.id);
     return `<section class="cat-section" id="${c.slug}">
       <div class="cat-header">
+        <span class="cat-num" aria-hidden="true">0${i + 1}</span>
         <h2><a href="${rel(path, '/' + c.slug + '/')}">${c.icon} ${c.name}</a></h2>
         <span class="cat-count">${list.length} tools</span>
         <a class="cat-view-all" href="${rel(path, '/' + c.slug + '/')}">View all &rarr;</a>
@@ -349,18 +433,14 @@ function homeBody() {
       <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
     </section>`;
   }).join('')}
-  <section class="cat-section" id="guides">
-    <div class="cat-header">
-      <h2><a href="${rel(path, '/blog/')}">Guides and how-tos</a></h2>
-      <span class="cat-count">${ARTICLES.length} guides</span>
-      <a class="cat-view-all" href="${rel(path, '/blog/')}">View all &rarr;</a>
+  <section class="home-cta">
+    <div class="cta-copy">
+      <h2>Missing a tool? Found a bug?</h2>
+      <p>Tell us what you were trying to finish. Tool suggestions shape the roadmap; bug reports get fixed first.</p>
     </div>
-    <div class="blog-list">
-      ${[...ARTICLES].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3).map((a) => `<a class="blog-card" href="${rel(path, '/blog/' + a.slug + '/')}">
-        <span class="blog-date">${esc(a.date)}</span>
-        <strong>${esc(a.title)}</strong>
-        <span>${esc(a.intro.slice(0, 160))}…</span>
-      </a>`).join('\n      ')}
+    <div class="cta-actions">
+      <a class="btn" href="${rel(path, '/contact/')}" data-cta="contact">Suggest a tool</a>
+      <a class="btn btn-secondary" href="${rel(path, '/contact/')}" data-cta="contact">Report a bug</a>
     </div>
   </section>
   <section class="tool-content home-content">
@@ -370,7 +450,7 @@ function homeBody() {
     <h2>Why run your tools in the browser?</h2>
     <p>Most tools process pasted text and generated output in your browser. If you choose page analysis, the entered public URL is sent to our first-party fetch service, which retrieves the page and returns its response for local analysis. The app does not save a report. This keeps everyday text tools fast while making URL-based checks useful against a real page. See the <a href="${rel(path, '/privacy-policy/')}">privacy policy</a> for details.</p>
     <h2>How it works</h2>
-    <p>Pick a tool from the grids above or search from the box at the top. Fill in the fields — or paste your own page URL where the tool offers a live check — then copy or download the result. Output is validated as you go, so the first result is usually the final one. Every tool page also carries a short how-to, honest FAQs and links to related tools, so you can go deeper without another round of search results.</p>
+    <p>Start from a job above, search by task, or pick a tool from the grids. Fill in the fields — or paste your own page URL where the tool offers a live check — then copy or download the result. Output is validated as you go, so the first result is usually the final one. Every tool page also carries a short how-to, honest FAQs and links to related tools, so you can go deeper without another round of search results.</p>
     <h2>Frequently asked questions</h2>
     ${HOME_FAQS.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n    ')}
   </section>
@@ -434,7 +514,14 @@ function toolPage(t) {
     ...TOOLS.filter((x) => x.cat !== t.cat).slice(0, 5),
   ].slice(0, 5);
   // guides that reference this tool — the blog↔tool link is two-way
-  const guides = ARTICLES.filter((a) => (a.relatedTools || []).includes(t.slug)).slice(0, 3);
+  let guides = ARTICLES.filter((a) => (a.relatedTools || []).includes(t.slug)).slice(0, 3);
+  // Fallback internal link: when no guide names this tool directly, borrow the
+  // guides that cover its related tools (same task cluster) so no tool page is
+  // a dead end in the guide graph.
+  if (!guides.length) {
+    const cluster = new Set(selected.map((x) => x.slug));
+    guides = ARTICLES.filter((a) => (a.relatedTools || []).some((s) => cluster.has(s))).slice(0, 2);
+  }
   const ld = [
     {
       '@context': 'https://schema.org', '@type': 'WebApplication',
@@ -463,6 +550,7 @@ ${adSlot('top banner')}
   <article class="tool-main">
     <h1>${esc(t.h1)}</h1>
     <p class="lead">${esc(t.intro)}</p>
+    ${(t.usedFor || t.updated) ? `<p class="tool-meta">${t.usedFor ? `<span class="tm-item"><span class="tm-label">Used for</span> ${esc(t.usedFor.replace(/^for /, ''))}</span>` : ''}${t.usedFor && t.updated ? '<span class="tm-sep" aria-hidden="true">&middot;</span>' : ''}${t.updated ? `<span class="tm-item"><span class="tm-label">Last updated</span> <time datetime="${esc(t.updated)}">${fmtDate(t.updated)}</time></span>` : ''}</p>` : ''}
     <div id="tool-root" data-tool="${t.slug}" class="tool-shell">
 ${t.html}
     </div>
@@ -506,7 +594,7 @@ function articlePage(a) {
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/blog/')}">Guides</a> <span class="breadcrumb-sep">/</span> <span>${esc(a.title)}</span></nav>
   <article class="policy article">
     <h1>${esc(a.title)}</h1>
-    <p class="article-meta">Published ${esc(a.date)} · By ${esc(a.author)}${a.reviewer ? ' · Reviewed by ' + esc(a.reviewer) : ''} · ${words} words</p>
+    <p class="article-meta">Published <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.updated && a.updated !== a.date ? ` &middot; Updated <time datetime="${esc(a.updated)}">${fmtDate(a.updated)}</time>` : ''} &middot; By ${esc(a.author)}${a.reviewer ? ' &middot; Reviewed by ' + esc(a.reviewer) : ''} &middot; ${words} words</p>
     <p class="lead">${rich(a.intro)}</p>
     ${a.sections.map((s) => `<h2>${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}`).join('\n')}
     ${a.links && a.links.length ? `<h2>Sources and further reading</h2>\n<ul>${a.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener nofollow" target="_blank">${esc(l.label)}</a></li>`).join('\n')}</ul>` : ''}
@@ -540,7 +628,7 @@ function articleLd(a) {
     {
       '@context': 'https://schema.org', '@type': 'BlogPosting',
       headline: a.title, description: a.metaDesc, url: SITE.url + path,
-      datePublished: a.date, dateModified: a.date,
+      datePublished: a.date, dateModified: a.updated || a.date,
       author: { '@type': 'Organization', name: a.author },
       publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/og-image.png' } },
       image: SITE.url + '/assets/og-image.png',
@@ -637,12 +725,15 @@ const run = async () => {
   const pagePaths = ['/', '/blog/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
   const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
   // Do not emit synthetic lastmod values: a build date is not the page's
-  // significant content-modification date. Google ignores priority/changefreq.
-  const entry = (p) => `  <url><loc>${SITE.url}${p}</loc></url>`;
-  const urlset = (paths) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(entry).join('\n')}\n</urlset>\n`;
-  await writeFile(R + 'dist/sitemap-pages.xml', urlset(pagePaths));
-  await writeFile(R + 'dist/sitemap-tools.xml', urlset(toolPaths));
-  await writeFile(R + 'dist/sitemap-blog.xml', urlset(ARTICLES.map((a) => '/blog/' + a.slug + '/')));
+  // significant content-modification date. Guides carry a real one (their
+  // publish/update date from src/data/blog.js); tool and page URLs have no
+  // tracked modification date, so they ship without <lastmod>. Google ignores
+  // priority/changefreq and advises that lastmod be accurate and verifiable.
+  const entry = ([p, lastmod]) => `  <url><loc>${SITE.url}${p}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
+  const urlset = (entries) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.map(entry).join('\n')}\n</urlset>\n`;
+  await writeFile(R + 'dist/sitemap-pages.xml', urlset(pagePaths.map((p) => [p])));
+  await writeFile(R + 'dist/sitemap-tools.xml', urlset(toolPaths.map((p) => [p])));
+  await writeFile(R + 'dist/sitemap-blog.xml', urlset(ARTICLES.map((a) => ['/blog/' + a.slug + '/', a.updated || a.date])));
   const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml', '/sitemap-blog.xml'];
   await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 
@@ -738,7 +829,28 @@ ${feedItems}
     ';window.T4M_SCORE=' + JSON.stringify(SCORE) + ';\n';
   await writeFile(R + 'dist/assets/inspect-strings.js', stringsJs);
 
-  await writeFile(R + 'dist/assets/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b4fff"/><stop offset="1" stop-color="#0ea47a"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="42" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#fff" text-anchor="middle">T4</text></svg>\n`);
+  await writeFile(R + 'dist/assets/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#243b63"/><stop offset="1" stop-color="#96682c"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="42" font-family="Georgia,serif" font-size="26" font-weight="700" fill="#f8f5ee" text-anchor="middle">T4</text></svg>\n`);
+  // /favicon.ico — legacy browsers and several crawlers request it from the
+  // domain root by default (it used to answer 404). An ICO is just a small
+  // container around a PNG, so wrap the 192px brand icon instead of checking a
+  // binary blob into the repo.
+  {
+    const png = await readFile(R + 'src/assets/icon-192.png');
+    const icoHeader = Buffer.alloc(6);
+    icoHeader.writeUInt16LE(0, 0);   // reserved
+    icoHeader.writeUInt16LE(1, 2);   // type: icon
+    icoHeader.writeUInt16LE(1, 4);   // one image
+    const icoEntry = Buffer.alloc(16);
+    icoEntry.writeUInt8(192, 0);     // width (values >256 are stored as 0)
+    icoEntry.writeUInt8(192, 1);     // height
+    icoEntry.writeUInt8(0, 2);       // palette colour count
+    icoEntry.writeUInt8(0, 3);       // reserved
+    icoEntry.writeUInt16LE(1, 4);    // colour planes
+    icoEntry.writeUInt16LE(32, 6);   // bits per pixel
+    icoEntry.writeUInt32LE(png.length, 8);  // image data size
+    icoEntry.writeUInt32LE(22, 12);  // image data offset (6 + 16)
+    await writeFile(R + 'dist/favicon.ico', Buffer.concat([icoHeader, icoEntry, png]));
+  }
   // social share image (og:image / twitter:image) — pre-rendered, brand palette
   await copyFile(R + 'src/assets/og-image.png', R + 'dist/assets/og-image.png');
   for (const ic of ['icon-192.png', 'icon-512.png']) {
@@ -752,8 +864,8 @@ ${feedItems}
     start_url: '/',
     scope: '/',
     display: 'standalone',
-    background_color: '#f5f4f0',
-    theme_color: '#5b4fff',
+    background_color: '#f8f5ee',
+    theme_color: '#243b63',
     icons: [
       { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
@@ -793,6 +905,9 @@ ${feedItems}
     const pub = ADSENSE_CLIENT.replace(/^ca-/, '');
     await writeFile(R + 'dist/ads.txt', `google.com, ${pub}, DIRECT, f08c47fec0942fa0\n`);
   }
+  // IndexNow key file — lets Bing, Yandex, Seznam et al. verify the host before
+  // `npm run indexnow` submits changed URLs. No key → no file (unchanged site).
+  if (INDEXNOW_KEY) await writeFile(R + 'dist/' + INDEXNOW_KEY + '.txt', INDEXNOW_KEY + '\n');
 
   const pageCount = pages.length;
   console.log(`\u2714 Built ${pageCount} HTML pages (${TOOLS.length} tools, ${Object.keys(CATEGORIES).length} categories, ${POLICY.length} policy pages) + sitemap.xml, robots.txt, 404.html, assets.`);
