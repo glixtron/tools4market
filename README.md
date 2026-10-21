@@ -166,12 +166,20 @@ The site itself has **zero dependencies**, so the test tooling is installed sepa
 npm i --no-save jsdom      # test-only
 npm run build
 npm test                   # tests/smoke.mjs — every tool page boots, responds, zero console errors
-npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (DNS, sitemap, all URLs, backend, assets)
+npm run test:seo           # tests/seo-audit.mjs — site-wide SEO definition audit (1 400+ checks)
+npm run test:consent       # tests/consent-test.mjs — consent mode behaviour
+npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (DNS, sitemap, every URL, backend, assets, Google tag on every page)
 ```
 
 `npm test` drives all 30 tool pages in a real DOM (jsdom): every input, select, checkbox and button is exercised, and the run fails on any console error, uncaught exception, missing tool registration or missing output.
 
-`npm run test:live` verifies what Googlebot actually sees: authoritative DNS, the sitemap index + children, **every URL in the sitemap** (200 + self-referencing canonical + indexable), `robots.txt`, the `/api/fetch` backend (including the SSRF guard), the Bing/Google verification files, and all assets. The last full run is recorded in [`launch-verification.md`](launch-verification.md) and [`qcreport.md`](qcreport.md).
+`npm run test:seo` audits the whole site against the SEO definition: every tool declares a `focus` target phrase that must appear in its title, description, intro, a heading and two FAQs; plus title/description/H1 length and uniqueness, 430–600-word sections, FAQ quality, structured-data completeness (WebApplication + FAQPage + BreadcrumbList + BlogPosting), internal linking, HTML hygiene, site-wide duplicate detection — **and a check that every built page carries exactly one Google tag with the consent default before it**.
+
+`npm run test:live` verifies what Googlebot actually sees: authoritative DNS, the sitemap index + children, **every URL in every sitemap** (200 + self-referencing canonical + indexable), `robots.txt`, the `/api/fetch` backend (including the SSRF guard), the Bing verification file, the AdSense loader + `ads.txt`, and the Google tag on every published page. The last full run is recorded in [`launch-verification.md`](launch-verification.md) and [`qcreport.md`](qcreport.md).
+
+### Guides (`/blog/`)
+
+Ten how-to guides covering the queries our tools sit next to: robots.txt for search engines and AI crawlers, the website launch SEO checklist, how to block GPTBot, an llms.txt guide, appearing in ChatGPT search, checking whether AI crawlers can reach your site, noindex vs robots.txt, why a site is not indexed, UTM naming conventions, and schema markup for AI search. Each guide is a real page — `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author and reviewer, cited sources, and links into the tools it discusses. Articles live in `src/data/blog.js`; the build generates the hub, the article pages, the schema and `sitemap-blog.xml`.
 
 ### Analytics & cookies (Google Tag Manager + GA4 + Consent Mode v2)
 

@@ -275,7 +275,7 @@ export const ARTICLES = [
     reviewer: 'Tools4Market',
     metaTitle: 'How to Appear in ChatGPT Search Results (2026)',
     metaDesc: 'How to appear in ChatGPT search results: allow the right OpenAI bots, write quotable pages, and check your visibility today.',
-    intro: 'ChatGPT search is now a referral channel that shows up in analytics as chatgpt.com — and like every search surface, it rewards sites it can crawl, understand and quote. Here is how to appear in ChatGPT search results in three concrete steps: let the right bots in, write pages worth citing, and stay findable in the places ChatGPT learns from.',
+    intro: 'ChatGPT search is now a referral channel that shows up in analytics as chatgpt.com, and like every search surface it rewards sites it can crawl, understand and quote. Here is how to appear in ChatGPT search results: let the right bots in, write pages worth citing, and stay findable.',
     sections: [
       {
         h: 'How to appear in ChatGPT search results: three gates',
@@ -296,6 +296,7 @@ export const ARTICLES = [
         p: [
           'Answer engines assemble responses by extracting passages. Pages that get quoted share habits: a direct answer in the first paragraph, question-shaped headings, exact numbers and dates, short definitional sentences, and clean structure without walls of meandering intro. A page that answers "what is X" in one crisp sentence near the top gets lifted far more often than one that buries the definition in paragraph five.',
           'Also make the content reachable without interaction: content that only appears after a click, a login, or heavy JavaScript may never be read. The same fundamentals Google describes for AI features — crawlable pages, helpful people-first content — are what these engines use too.',
+          'Dates matter more than most writers expect. Answer engines are asked constantly about "current" or "best" options, and a page that states when its facts were last checked gives the model a reason to trust and cite it over an undated competitor. Put the year in the title only when the content genuinely changes with the year — and keep the on-page date honest when you update.',
         ],
       },
       {
@@ -303,6 +304,7 @@ export const ARTICLES = [
         p: [
           'ChatGPT\'s search layer draws on established search indexes and the open web, so classic visibility work pays twice: rank in Google, get listed in relevant directories, have your product discussed in the communities your audience reads. Brand mentions across independent sites are the corroboration that makes a recommendation safe for a model to make.',
           'This is slow work and nobody enjoys hearing it, but it is the part that compounds. A site that is cited around the web keeps earning AI mentions; a site that only optimizes its own pages plateaus fast.',
+          'Measure it the same way you measure any channel: referrers first (chatgpt.com, perplexity.ai), then branded-search lift, then citations in a fixed weekly prompt set. Volume is still small for most sites — the point of starting now is that the compounders (crawl access, structure, mentions) all take months, and the sites that built them before the channel matured are the ones that inherit it.',
         ],
       },
       {
