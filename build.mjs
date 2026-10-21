@@ -215,6 +215,7 @@ ${ADSENSE_CLIENT ? '<link rel="preconnect" href="https://pagead2.googlesyndicati
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
 <link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
+<link rel="alternate" type="text/plain" href="${rel(path, '/llms.txt')}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name} — Guides" href="/feed.xml">
 <meta name="theme-color" content="#5b4fff">
 <link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
@@ -670,6 +671,37 @@ const run = async () => {
     '',
   ];
   await writeFile(R + 'dist/llms.txt', llmsLines.join('\n'));
+
+  // ---- llms-full.txt: the same map with the guides' full text and each tool's
+  // intro + FAQ answers, so answer engines can quote us instead of guessing.
+  const llmsFull = [
+    ...llmsLines,
+    '',
+    '---',
+    '',
+    '# Full text',
+    '',
+    ...ARTICLES.flatMap((a) => [
+      '## ' + a.title,
+      '',
+      a.intro,
+      '',
+      ...a.sections.flatMap((s2) => ['### ' + s2.h, '', ...s2.p.map((p) => p.replace(/\*\*/g, '') + '\n')]),
+      '### FAQ',
+      '',
+      ...a.faqs.flatMap((f) => ['**' + f.q + '**', '', f.a.replace(/\*\*/g, ''), '']),
+      '',
+    ]),
+    ...TOOLS.flatMap((t) => [
+      '## ' + t.name,
+      '',
+      t.intro,
+      '',
+      ...t.faqs.flatMap((f) => ['**' + f.q + '**', '', f.a.replace(/\*\*/g, ''), '']),
+      '',
+    ]),
+  ];
+  await writeFile(R + 'dist/llms-full.txt', llmsFull.join('\n'));
 
   // ---- RSS 2.0 feed for the guides (discovery + freshness signal)
   const rfc822 = (d) => new Date(d + 'T00:00:00Z').toUTCString();

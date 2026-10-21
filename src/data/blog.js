@@ -351,6 +351,7 @@ export const ARTICLES = [
         p: [
           'Open `https://yourdomain.com/robots.txt` in a private browser window. Confirm three things: it returns **200**, it renders as **plain text** (not an HTML error page), and you can locate the group that would apply to each AI bot you care about — `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`, `Bytespider`.',
           'Apply the matching rules the way a parser does: a bot uses the **most specific matching user-agent group**, or — if none names it — the `User-agent: *` group. If neither exists, the bot is allowed everything. Within a group, `Disallow: /` blocks the whole site, and an empty `Disallow:` means nothing is blocked.',
+          'Save yourself the parsing mistakes: copy the file into a plain-text editor and read it top to bottom once. The rules that catch people out are almost always ordering and inheritance — a wildcard group at the bottom still applies to bots with no named group of their own, and a `Disallow: /` under a named bot is not undone by a later Allow in the wildcard group. Ten lines is a five-minute read; a hundred-line generated file deserves the same five minutes before you trust it.',
         ],
       },
       {
@@ -364,7 +365,8 @@ export const ARTICLES = [
         h: 'Layer 3: confirm the page answers with real content',
         p: [
           'Fetch one of your key pages with a plain HTTP client — no browser, no JavaScript. If the HTML that comes back contains your title, headings and body text, crawlers can read you. If the meaningful content is missing, it is injected by client-side JavaScript or trapped behind an interaction, and many fetchers will see an empty shell.',
-          'Our **Web Crawler Audit** automates exactly this: it fetches the page like a crawler, checks the robots.txt rules that apply to Googlebot, verifies sitemap evidence, and reports indexability signals — a fast way to catch layer-1 and layer-3 failures without touching a terminal.',
+          'Watch one silent failure here: soft blocks that return 200 with a challenge page inside. Some configurations serve an HTTP 200 whose body is a JavaScript puzzle or a login screen — robots.txt looks fine, the CDN log looks clean, and the crawler still gets nothing. The plain-fetch test catches this because you read the body, not just the status code.',
+          'Our **Web Crawler Audit** automates the important part of this: it fetches the page like a crawler, checks the robots.txt rules that apply to Googlebot, verifies sitemap evidence, and reports indexability signals — a fast way to catch layer-1 and layer-3 failures without touching a terminal.',
         ],
       },
       {
@@ -376,9 +378,9 @@ export const ARTICLES = [
       },
     ],
     faqs: [
-      { q: 'How do I check which AI crawlers are blocked?', a: 'Fetch your /robots.txt as plain text, find each bot\'s user-agent group (GPTBot, ClaudeBot, PerplexityBot and so on), and apply its Disallow rules; if a bot has no group, the User-agent: * rules apply. Then check your CDN or WAF logs, because network-level blocks apply even when robots.txt allows a bot.' },
+      { q: 'How do I check if AI crawlers can access your site?', a: 'Fetch /robots.txt as plain text, find each bot\'s user-agent group (GPTBot, ClaudeBot, PerplexityBot and so on), and apply its rules — bots with no named group fall under User-agent: *. Then confirm access with a plain fetch of a real page, and check your CDN or WAF logs, because network-level blocks refuse access even when robots.txt allows the bot.' },
       { q: 'Why does robots.txt look correct but AI crawlers still never visit?', a: 'Almost always an edge block: a CDN bot-protection toggle, an AI-bot blocking feature, a managed challenge or a rate limit returning 403/429 before your page is ever served. These ignore robots.txt entirely and must be fixed in the CDN or firewall settings.' },
-      { q: 'Is blocking AI crawlers bad for SEO?', a: 'No. Google rankings depend on Googlebot access, not on GPTBot or ClaudeBot. Blocking training crawlers only affects AI-side training and, if you block the search-side bots too, your visibility inside those AI answers.' },
+      { q: 'Is blocking AI crawlers bad for SEO?', a: 'No. Your site\'s Google rankings depend on Googlebot access, not on GPTBot or ClaudeBot. Blocking AI crawlers only affects AI-side training and, if you block the search-side bots too, your visibility inside those AI answers.' },
       { q: 'Do AI crawlers respect robots.txt?', a: 'The major ones — GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended — document that they do. Respecting robots.txt is voluntary by design, so keep anything truly private behind authentication rather than relying on a Disallow line.' },
       { q: 'How often should I re-check crawler access?', a: 'After every robots.txt or CDN change, and quarterly otherwise. New AI crawlers appear regularly, and a routine CDN setting change can silently start challenging bots you meant to allow.' },
     ],
@@ -404,6 +406,7 @@ export const ARTICLES = [
         p: [
           '**robots.txt controls fetching.** `Disallow: /private/` asks crawlers not to request those URLs at all. **noindex controls showing.** A `noindex` meta tag (or `X-Robots-Tag` header) lets the crawler fetch the page and asks it not to include the URL in search results.',
           'Same goal, opposite mechanics — and the mechanics are why the two cannot be combined on the same URL.',
+          'The asymmetry trips people because both files live in the same project and both talk about search. A useful mental model: robots.txt is a door sign on the building ("staff only beyond this point"); noindex is a note inside the room ("do not list this room in the directory"). A visitor who never opens the door never reads the note inside — and a directory that already listed the room keeps the listing until someone inside tells it otherwise.',
         ],
       },
       {
@@ -418,13 +421,15 @@ export const ARTICLES = [
         p: [
           'Use disallow for URLs you want **never crawled**, not URLs you want hidden from results: internal search results, faceted filter combinations, calendar pages with infinite parameters, staging hosts, and crawl-budget heavy sections that add no indexable value.',
           'These pages are fine to appear nowhere because nobody searches for them — you are just saving crawl budget. That is exactly what disallow is for.',
+          'One more legitimate use: hosting-level cost control. If a bot is hammering an expensive endpoint, disallow it in robots.txt first — respectful crawlers back off immediately, which buys time to add real rate limiting. Just record why the rule exists; mystery disallows inherited from a previous team are how sitemaps and checkouts end up blocked for years without anyone noticing.',
         ],
       },
       {
         h: 'When noindex is the right tool',
         p: [
           'Use noindex for pages that **are crawled and linked but should not rank**: thin tag archives, thank-you and confirmation pages, expired but still-linked content, internal-only pages behind no login. Keep them crawlable so Google can see the directive and drop the URL on its own.',
-          'For non-HTML files — PDFs, spreadsheets, videos — use the `X-Robots-Tag: noindex` HTTP header instead of a meta tag. Our **Meta Tag Generator** emits a correct robots meta block, and the **Web Crawler Audit** reports response-level noindex detection when you fetch a URL.',
+          'For non-HTML files — PDFs, spreadsheets, videos — use the `X-Robots-Tag: noindex` HTTP header instead of a meta tag. The header form supports the same directives as the meta tag (nofollow, none, unavailable_after), so it is not a reduced version — and it can be scoped per file type in most servers. Verify with `curl -I`: the header must appear on the actual response, not just in the config. Our **Meta Tag Generator** emits a correct robots meta block for HTML pages.',
+          'Audit noindexed pages occasionally, because thank-you pages and expired archives have a way of accumulating years past their usefulness. A page kept out of the index still burns a crawl every time Google rechecks it, so delete what you can rather than hiding what you forgot.',
         ],
       },
       {
@@ -471,6 +476,7 @@ export const ARTICLES = [
         p: [
           'Check these first because they nullify everything else: a `Disallow` in robots.txt that is broader than you meant; a leftover `noindex` meta tag from staging; pages with no internal links pointing to them and no sitemap listing; server errors or chronic slowness; a site whose core content only appears with JavaScript on.',
           'Fetch your own `robots.txt` in a browser, fetch your homepage with JavaScript off, and make sure your key URLs appear both in your sitemap and in at least one internal link. Our **Web Crawler Audit** runs most of these checks on any URL in one pass.',
+          'New sites have one extra catch: zero backlinks means zero discovery paths outside your own sitemap. That is survivable — sitemaps work — but it makes the internal-linking structure carry all the weight. A homepage linking to a hub, a hub linking to every page, and each page linking back is the minimum graph that lets a crawler treat the site as one body of work rather than isolated files.',
         ],
       },
       {
@@ -485,6 +491,7 @@ export const ARTICLES = [
         p: [
           'One: remove blocks — robots.txt disallows and noindex tags on pages you actually want indexed. Two: give every important page at least one crawlable internal link from an indexed page. Three: publish an accurate XML sitemap (our **Sitemap Generator** builds one) and submit it once in Search Console. Four: strengthen thin pages with genuinely useful content instead of submitting them again. Five: use URL Inspection → Request indexing for a handful of key URLs after fixes — it nudges a recrawl, it does not force indexing.',
           'Then wait. Re-crawls of a small site typically happen within days, but index selection is Google\'s decision and re-submitting an unchanged sitemap changes nothing.',
+          'Set the expectation with the report, not the calendar: check the Page indexing report weekly, note which state each important URL is in, and act on state changes rather than dates. "Discovered" means fix discovery (links, sitemap); "Crawled" means fix the page\'s value; "Blocked" means fix the rule. Chasing individual URLs by hand before the state is diagnosed is how a week turns into a month of nothing.',
         ],
       },
       {
@@ -496,7 +503,7 @@ export const ARTICLES = [
       },
     ],
     faqs: [
-      { q: 'How long does Google take to index a new site?', a: 'Anywhere from a few days to several weeks. A correct sitemap, a couple of internal links and a healthy robots.txt speed it up; requesting indexing on key URLs after those checks can nudge the first crawl. There is no guaranteed timeline.' },
+      { q: 'How long does Google take to index a new site?', a: 'Anywhere from a few days to several weeks. A correct sitemap, a couple of internal links and a healthy robots.txt speed it up; requesting indexing on key URLs after those checks can nudge the first crawl. There is no guaranteed timeline for when a new site gets indexed.' },
       { q: 'Does submitting a sitemap guarantee indexing?', a: 'No. A sitemap is a discovery hint. Google still decides whether to crawl and index each URL, and repeatedly resubmitting an unchanged sitemap has no effect.' },
       { q: 'Why does Search Console say "Crawled — currently not indexed"?', a: 'Google fetched the page and chose not to include it — usually thin or duplicate value, a noindex directive, a canonical elsewhere, or a soft-404-like experience. Improve the page\'s distinct value and its internal links; the status updates after the next crawl.' },
       { q: 'Can robots.txt stop my site from being indexed?', a: 'Yes — a broad Disallow blocks crawling, and for a new site that means no content is ever seen. For pages already indexed, blocking robots.txt can leave them listed anyway, which is why noindex (kept crawlable) is the right tool for de-indexing.' },
@@ -532,6 +539,7 @@ export const ARTICLES = [
         p: [
           '`utm_source` **where** the link lives: `newsletter`, `linkedin`, `youtube`, `partner-name`. One word, the platform, not the campaign. `utm_medium` **what kind** of channel: `email`, `social`, `cpc`, `referral`, `affiliate`. `utm_campaign` the **name** you and your team call it: `spring-launch-2026`. `utm_content` the **variant** — banner, footer, story-3 — for A/B comparisons. `utm_term` the **keyword**, used almost only for paid search.',
           'Keep source and medium boring and standardized — they drive GA4\'s channel grouping. Put the creativity in campaign and content, where it fragments nothing.',
+          'A worked example holds it together better than a definition table. A link in the October newsletter, button variant B, promoting the spring launch: `utm_source=newsletter`, `utm_medium=email`, `utm_campaign=spring-launch-2026`, `utm_content=button-b`. The same link on LinkedIn becomes `utm_source=linkedin`, `utm_medium=social` — only source and medium change, and campaign and content stay identical, so both placements roll up under one campaign row.',
         ],
       },
       {
@@ -539,6 +547,7 @@ export const ARTICLES = [
         p: [
           'One: **lowercase everything**, always. Two: **no spaces** — use hyphens, never `%20`. Three: no ampersands, apostrophes or commas; they break URLs or render badly in exports. Four: keep values under about 40 characters so tables stay readable. Five: one shared naming sheet that everyone copies from — no memory-typed values. Six: never tag internal links between your own pages; that overwrites the real referrer and poisons session source. Seven: decide the paid-brand convention once (`google` / `cpc` / `brand-spring-2026`) and never deviate.',
           'Write the seven rules into the same document as your campaign calendar, and link it every time someone asks "how do I tag this?"',
+          'The naming sheet deserves one more property: it ships with copy-paste examples. The most common convention failure is not disagreement, it is improvisation under time pressure — and a sheet with a filled example for each of email, social, paid search and partner links removes the improvisation. Keep the sheet next to the campaign calendar, link it from every launch checklist, and version it like any other document.',
         ],
       },
       {
@@ -552,15 +561,16 @@ export const ARTICLES = [
         h: 'Build links with a tool, not by hand',
         p: [
           'Hand-built query strings are where conventions die — a typo\'s chance on every keystroke. Our **UTM Link Builder** enforces lowercase on GA4\'s case-sensitive fields, validates the destination URL, warns on missing parameters and gives you the finished link ready to share, so the convention is applied by the tool instead of by memory.',
-          'Pair it with a quarterly audit: list every source/medium in GA4, diff it against your naming sheet, and delete or merge stray values going forward.',
+          'One habit closes the loop: test every finished link in a private browser window before it ships, and watch the landing page\'s real-time analytics light up with the expected source and medium. Thirty seconds per link catches the redirect that strips parameters — the single most common way a correctly tagged link still reports as direct traffic.',
+          'Pair the habit with a quarterly audit: list every source and medium in GA4, diff it against your naming sheet, and delete or merge stray values going forward.',
         ],
       },
     ],
     faqs: [
-      { q: 'Are UTM parameters case-sensitive in GA4?', a: 'Yes. GA4 treats values as exact, case-sensitive strings, so Newsletter and newsletter become separate campaign values. Lowercasing every UTM value is the single highest-value naming convention.' },
+      { q: 'Are UTM parameters case-sensitive in GA4?', a: 'Yes. GA4 treats values as exact, case-sensitive strings, so Newsletter and newsletter become separate campaign values. Of all the utm naming conventions, lowercasing every value is the single highest-value habit.' },
       { q: 'What is the difference between utm_source and utm_medium?', a: 'utm_source is the platform the link lives on (newsletter, linkedin, youtube); utm_medium is the marketing channel type (email, social, cpc, referral). Source answers "where", medium answers "what kind".' },
       { q: 'Why is my tagged traffic showing as "(direct)" in GA4?', a: 'The most common causes are a broken or missing utm_source, parameters stripped by a redirect between the click and the final page, or links pasted into apps that drop query strings. Tag the final destination URL and test one link end-to-end.' },
-      { q: 'Should I add UTM tags to internal site links?', a: 'No. Tagging internal links overwrites the session\'s original source and makes attribution worse. Tag only links on external surfaces that point into your site.' },
+      { q: 'Should I add UTM tags to internal site links?', a: 'No. Tagging internal links overwrites the session\'s original source and makes attribution worse. Good utm naming conventions cover external links only — the site\'s own navigation needs no tagging.' },
       { q: 'How long should UTM values be?', a: 'Keep each value short and readable — under about 40 characters. Long values do not break tracking, but they wreck report readability and invite inconsistent abbreviations.' },
     ],
     relatedTools: ['utm-link-builder', 'url-encoder-decoder', 'case-converter'],
@@ -578,13 +588,14 @@ export const ARTICLES = [
     reviewer: 'Tools4Market',
     metaTitle: 'Schema Markup for AI Search: What Actually Helps',
     metaDesc: 'Schema markup for AI search: what structured data really does for AI Overviews and citations, and the types worth adding first.',
-    intro: 'Every week someone sells "AI search schema" as a magic visibility switch. The truth is more useful: schema markup for AI search genuinely helps machines understand your pages, Google has said plainly that AI features need no special markup, and a short honest list of schema types earns almost all of the real value. Here is that list, in priority order.',
+    intro: 'Every week someone sells "AI search schema" as a magic visibility switch. The truth: schema markup for AI search genuinely helps machines understand your pages, Google says AI features need no special markup, and a short honest list of schema types earns almost all the real value.',
     sections: [
       {
         h: 'What schema markup for AI search can actually do',
         p: [
           'Structured data is a vocabulary — schema.org in JSON-LD — for stating what a page **is**: an article, a product with a price, an FAQ with answers, a step in a breadcrumb trail. It removes guesswork for any system that reads the page: search engines, and the retrieval pipelines behind answer engines.',
           'What it does not do is act as a ranking switch. Google\'s own guidance for AI features says there is nothing special to implement — no new markup, no new protocol — beyond letting pages be crawled and serving people-first content. Structured data supports understanding; it does not substitute for a page that genuinely answers the question.',
+          'The distinction shows up concretely in retrieval. When a system assembles an answer, it must first choose candidate pages, then extract a passage from one. Structured data strengthens the first step — a Product with price and availability or an Article with dates is easier to shortlist correctly — while the extraction step runs on your prose. Optimizing only the markup optimizes half the pipeline.',
         ],
       },
       {
@@ -612,6 +623,7 @@ export const ARTICLES = [
         h: 'Validate, and keep it truthful',
         p: [
           'Every page type above can be generated and validated in minutes: Google\'s Rich Results Test confirms eligibility per feature, and the schema.org validator checks syntax. Validate once when the markup ships and again after any template change — broken JSON-LD fails silently.',
+          'Treat schema like code, not content: template-level changes propagate to every page at once, which is its power and its risk. One wrong property in a template ships to a thousand pages in the next deploy, and a validator run on a single sample page will not catch a template that broke for a subset of products. Spot-check one page per template after every structural change.',
           'Our **Schema Markup Generator** outputs clean JSON-LD for FAQ, Article, Product, Breadcrumb and more, escaped and copy-ready, and refuses markup that describes content that is not on the page — the same honesty rule this guide follows.',
         ],
       },
