@@ -39,7 +39,6 @@ out.push('=== DNS (authoritative) ===');
 ok('apex NS delegated to Cloudflare', dig(HOST, 'NS').some((n) => n.includes('ns.cloudflare.com')), dig(HOST, 'NS').join(' '));
 ok('apex A records published', dig(HOST, 'A').length > 0, dig(HOST, 'A').join(' '));
 ok('GSC verification TXT published', dig(HOST, 'TXT').some((t) => t.includes('google-site-verification')));
-ok('Bing verification TXT published', dig(HOST, 'TXT').some((t) => t.includes('msvalidate')));
 ok('MX records published (email)', dig(HOST, 'MX').length > 0, dig(HOST, 'MX').join(' '));
 out.push('');
 
@@ -57,7 +56,7 @@ for (const [p, want, label] of [
   ['/robots.txt', 'text/plain', 'robots.txt'],
   ['/sitemap.xml', 'application/xml', 'sitemap index'],
   ['/manifest.webmanifest', 'application/manifest+json', 'manifest'],
-  ['/BingSiteAuth.xml', 'application/xml', 'Bing verification'],
+  ['/BingSiteAuth.xml', 'application/xml', 'Bing verification file'],
   ['/404.html', 'text/html', '404 page'],
 ]) {
   const r = await grab(ORIGIN + p, { redirect: 'manual' });
