@@ -44,7 +44,7 @@ ${outputBlock('sl-out', 'Slugs')}`,
     card: 'Tag campaign links for clean attribution in GA4 — with presets.',
     keywords: 'utm builder campaign url builder ga4 tracking links',
     h1: 'Free UTM Link Builder — No Signup, No Limits',
-    metaTitle: 'Free UTM Builder — Campaign URL Builder for GA4',
+    metaTitle: 'Free UTM Link Builder — Campaign URL Builder for GA4',
     metaDesc: 'Build UTM-tagged campaign URLs for GA4 with presets for common sources and mediums. Consistent tracking, zero spreadsheet errors. Free UTM link builder.',
     intro: 'Build UTM-tagged URLs that land cleanly in GA4 reports — with a source/medium preset list that keeps your team’s naming consistent.',
     sections: [

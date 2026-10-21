@@ -5,6 +5,9 @@
   "name": "tools4market",
   "main": "worker.js",
   "compatibility_date": "2026-10-19",
+  "routes": [
+    { "pattern": "www.tools4market.online/*", "zone_name": "tools4market.online" }
+  ],
   "assets": {
     "directory": "dist",
     "binding": "ASSETS",

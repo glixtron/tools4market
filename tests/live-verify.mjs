@@ -57,7 +57,6 @@ for (const [p, want, label] of [
   ['/sitemap.xml', 'application/xml', 'sitemap index'],
   ['/manifest.webmanifest', 'application/manifest+json', 'manifest'],
   ['/BingSiteAuth.xml', 'application/xml', 'Bing verification file'],
-  ['/404.html', 'text/html', '404 page'],
 ]) {
   const r = await grab(ORIGIN + p, { redirect: 'manual' });
   ok(`${label}: 200 + ${want}`, r.status === 200 && ct(r) === want, 'status ' + r.status + ' ct ' + ct(r) + ' ' + (r.error || ''));
@@ -65,6 +64,8 @@ for (const [p, want, label] of [
 const robots = (await grab(ORIGIN + '/robots.txt')).body;
 ok('robots.txt allows crawling', /User-agent:\s*\*/.test(robots) && /Allow:\s*\/\s*$/m.test(robots));
 ok('robots.txt points at our sitemap', robots.includes('Sitemap: ' + ORIGIN + '/sitemap.xml'));
+const missing = await grab(ORIGIN + '/seo-audit-missing-page-check/');
+ok('unknown URL returns branded, noindex 404', missing.status === 404 && missing.body.includes('Page not found') && /<meta name="robots" content="noindex"/.test(missing.body), 'status ' + missing.status);
 out.push('');
 
 // ---- sitemap integrity
@@ -86,16 +87,21 @@ out.push('');
 // ---- every page
 out.push('=== Every sitemap URL ===');
 const bad = [];
+const badCrumbs = [];
 for (const u of all) {
   const r = await grab(u, { redirect: 'manual' });
   const canon = (r.body.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
-  const title = (r.body.match(/<title>([^<]+)<\/title>/) || [])[1] || '';
+  const title = ((r.body.match(/<title>([^<]+)<\/title>/) || [])[1] || '').replace(/&amp;/g, '&');
+  const desc = ((r.body.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '').replace(/&amp;/g, '&');
   const robots = (r.body.match(/<meta name="robots" content="([^"]+)"/) || [])[1] || '';
-  if (!(r.status === 200 && canon === u && title.length > 10 && !/noindex/i.test(robots))) {
+  const isHome = new URL(u).pathname === '/';
+  if (!isHome && (!r.body.includes('class="breadcrumb"') || !r.body.includes('"@type":"BreadcrumbList"'))) badCrumbs.push(u.replace(ORIGIN, ''));
+  if (!(r.status === 200 && canon === u && title.length > 10 && title.length <= 60 && desc.length > 0 && desc.length <= 158 && !/noindex/i.test(robots))) {
     bad.push(u.replace(ORIGIN, '') + ' [status ' + r.status + ', canonical ' + canon + ']');
   }
 }
 ok(`all ${all.length} URLs: 200 + self-referencing canonical + indexable`, bad.length === 0, bad.length ? bad.slice(0, 4).join(' ;; ') : all.length + '/' + all.length);
+ok('all non-home sitemap pages have visible + JSON-LD breadcrumbs', badCrumbs.length === 0, badCrumbs.length ? badCrumbs.join(', ') : 'all breadcrumb trails present');
 out.push('');
 
 // ---- backend

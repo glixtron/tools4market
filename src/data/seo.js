@@ -60,7 +60,7 @@ ${outputBlock('mt-out', 'Head HTML')}`,
     card: 'Make links unfurl beautifully on Facebook, LinkedIn and WhatsApp.',
     keywords: 'open graph generator og tags facebook preview linkedin',
     h1: 'Free Open Graph Generator — No Signup, No Limits',
-    metaTitle: 'Free Open Graph Generator — OG Tags + Live Preview',
+    metaTitle: 'Free Open Graph Tag Generator — OG Tags + Live Preview',
     metaDesc: 'Generate Open Graph (og:) meta tags with a live Facebook-style preview. Control how your links look when shared on Facebook, LinkedIn and WhatsApp.',
     intro: 'Create perfect og: tags and see exactly how your link card will look when someone shares it on Facebook, LinkedIn, WhatsApp or Slack — before you publish.',
     sections: [
@@ -377,7 +377,7 @@ ${outputArea('ca-fixes', 'Fix these first')}
     card: 'Score any page\u2019s on-page SEO 0\u2013100 with a letter grade and a fix list.',
     keywords: 'seo score checker rank page grade audit on-page optimization rating',
     h1: 'Free SEO Ranking Score \u2014 No Signup, No Limits',
-    metaTitle: 'Free SEO Ranking Score \u2014 Rate Any Page 0\u2013100',
+    metaTitle: 'Free SEO Score Checker — On-Page Score & Fixes',
     metaDesc: 'Score any page\u2019s on-page SEO from 0 to 100 with a letter grade, weighted factors and a prioritized fix list. Free online SEO ranking checker, no signup.',
     intro: 'Enter a URL and get a single 0\u2013100 on-page SEO score with a letter grade \u2014 built from the weighted factors that actually move rankings, plus the specific fixes that would raise your score fastest.',
     sections: [

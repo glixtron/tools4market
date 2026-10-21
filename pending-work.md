@@ -1,16 +1,19 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 21 Oct 2026 (private repo + MIT licence + Cloudflare frontend/backend integration layer).*
+*Living tracker — update after every session. Last updated: 21 Oct 2026 (indexability and breadcrumb audit).*
 
 ## 👤 User actions required — **these block launch**
 
 - [x] ~~**Buy domain**~~ — DONE: **`tools4market.online`** (canonical host = apex) · `SITE.url` = `https://tools4market.online`, `SITE.email` = `support@tools4market.online`, all dist URLs verified (0 old-host references) · `www` must 301 → apex via a zone-level Cloudflare Redirect Rule (not `_redirects` — Workers reject host rules)
-- [ ] Create Google account assets: Search Console property, GA4 property (after deploy)
+- [x] ~~Verify Google Search Console property~~ — DONE per user; sitemap submitted/monitoring started
+- [x] ~~Start Bing Webmaster Tools~~ — DONE per user; Bing crawling/index monitoring started
+- [ ] GA4 property (optional; set `GA_ID` after confirming the property)
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
-- [ ] **Deploy to Cloudflare** — build `npm run build` · deploy `npm run deploy` (the deploy script runs the build first, so `dist/` can never be missing). *Deploy failed twice so far: (1) `Invalid _redirects configuration` — host-level redirects are rejected by Workers Static Assets, fixed by making `_redirects` Workers-safe and adding a Worker-level `www → apex` 301; (2) `assets.directory does not exist: /opt/buildhome/repo/dist` — the Cloudflare **build command had been cleared**, so `dist/` was never produced. **Fixed in the repo** (`npm run deploy` = build + wrangler deploy, plus a `postinstall` build) — **set the Cloudflare Deploy command to `npm run deploy`**.*
-- [ ] **Attach the custom domain** — Worker → Settings → Domains & Routes → Add Custom Domain → `tools4market.online` (canonical host). Then zone-level Redirect Rule: hostname `www.tools4market.online` → dynamic 301 to `concat("https://tools4market.online", http.request.uri.path)`; point the domain's nameservers at Cloudflare; verify `https://tools4market.online/api/fetch?url=https://example.com` returns `{"ok":true,…}`
+- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** deploy this audit's breadcrumb/sitemap/metadata updates.
+- [x] ~~Attach canonical apex domain~~ — DONE: `https://tools4market.online` serves the site and is used in canonicals/sitemaps.
+- [ ] **Fix `www` canonical redirect** — live fetch currently gets HTTP 403 on `https://www.tools4market.online/`, instead of the required one-hop 301 to apex. The Worker already implements the redirect and a `www` route is now declared in `wrangler.jsonc`; deploy it and check Cloudflare Zero Trust/Access or zone redirect settings if 403 remains. Historical `launch-verification.md` recorded an Access policy on `www`.
 - [ ] **Set integration env vars in Cloudflare Pages** (Settings → Environment variables → Production): `GA_ID` (GA4), `ADSENSE_CLIENT` + `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` (AdSense; also writes `ads.txt`). `SITE_URL` / `SITE_EMAIL` are optional overrides — the defaults already point at the live domain.
 - [ ] **Point DNS to Cloudflare** (nameservers at the registrar) → add `www.tools4market.online` as a custom domain → verify `https://www.tools4market.online/api/fetch?url=https://example.com` returns `{"ok":true,…}`
 

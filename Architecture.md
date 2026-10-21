@@ -212,8 +212,8 @@ if (typeof fn === 'function') fn(root);
 
 - Unique `<title>` ≤60 chars + `<meta name="description">` ≤158 chars
 - `<link rel="canonical">` + Open Graph + Twitter Card tags
-- **Tool pages only:** JSON-LD for `WebApplication` + `FAQPage` + `BreadcrumbList`
-- Auto-generated `sitemap.xml` (priority: `/` = 1.0, tool pages = 0.8, others = 0.7)
+- **Tool pages:** JSON-LD for `WebApplication` + `FAQPage` + `BreadcrumbList`; category and policy pages also carry `BreadcrumbList`
+- Auto-generated sitemap index and child sitemaps; omit `lastmod` unless reliable per-page modification dates are available (Google ignores `priority`/`changefreq`)
 - `robots.txt` (allow-all + sitemap reference)
 - One `<h1>` per page, semantic `<h2>/<h3>`, breadcrumb trail, 3–5 related tool links
 - Build-time SEO length warnings (title >60 or desc >158 logged to console)

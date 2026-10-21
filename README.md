@@ -239,7 +239,7 @@ In Cloudflare Pages: **Settings → Environment variables → Production** (and 
 | `dist/_redirects` | Comment-only on Workers (host-level redirects are rejected with error 100324). Set `SITE_REDIRECTS_PAGES=1` to emit the www→apex rule when deploying to Pages; on Workers use a zone-level Cloudflare Redirect Rule instead |
 | `dist/manifest.webmanifest` | PWA/installability + mobile theme colour, with 192/512 icons |
 | `dist/ads.txt` | AdSense publisher id (written only when `ADSENSE_CLIENT` is set) |
-| `dist/robots.txt`, `dist/sitemap.xml` | Crawl directives + a **sitemap index** (`sitemap.xml` → `sitemap-pages.xml` with home/categories/policy + `sitemap-tools.xml` with all 30 tools), all auto-pointed at `SITE_URL` with accurate `lastmod` |
+| `dist/robots.txt`, `dist/sitemap.xml` | Crawl directives + a **sitemap index** (`sitemap.xml` → `sitemap-pages.xml` with home/categories/policy + `sitemap-tools.xml` with all 30 tools), auto-pointed at `SITE_URL`; `lastmod` is omitted unless real per-page modification dates are tracked |
 | `functions/api/fetch.js` | The backend route — deployed as a Pages Function on Path B, or served by `worker.js` on Path A |
 
 

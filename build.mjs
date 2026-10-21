@@ -7,7 +7,6 @@ import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
 
 const R = fileURLToPath(new URL('.', import.meta.url));
 const YEAR = new Date().getFullYear();
-const TODAY = new Date().toISOString().slice(0, 10);
 
 const SITE = {
   name: 'Tools4Market',
@@ -45,6 +44,14 @@ function rel(from, to) {
 }
 
 const ldTag = (obj) => '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, '\\u003c') + '</script>';
+
+const breadcrumbLd = (items) => ({
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem', position: index + 1, name: item.name,
+    ...(index < items.length - 1 ? { item: SITE.url + item.path } : {}),
+  })),
+});
 
 function layout({ path, title, desc, body, ld = [], noindex = false }) {
   const url = SITE.url + path;
@@ -231,7 +238,40 @@ function categoryBody(cat, list) {
 function toolPage(t) {
   const path = '/tools/' + t.slug + '/';
   const cat = CATEGORIES[t.cat];
-  const related = [
+  const RELATED = {
+    'meta-tag-generator': ['serp-preview-tool', 'meta-description-checker', 'open-graph-generator'],
+    'open-graph-generator': ['twitter-card-generator', 'meta-tag-generator', 'serp-preview-tool'],
+    'twitter-card-generator': ['open-graph-generator', 'meta-tag-generator'],
+    'canonical-tag-generator': ['hreflang-tag-generator', 'web-crawler-audit', 'sitemap-generator'],
+    'hreflang-tag-generator': ['canonical-tag-generator', 'schema-markup-generator'],
+    'schema-markup-generator': ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
+    'serp-preview-tool': ['meta-description-checker', 'meta-tag-generator', 'seo-score-checker'],
+    'meta-description-checker': ['serp-preview-tool', 'meta-tag-generator'],
+    'web-crawler-audit': ['seo-score-checker', 'sitemap-generator', 'robots-txt-generator'],
+    'seo-score-checker': ['web-crawler-audit', 'meta-description-checker', 'keyword-density-checker'],
+    'robots-txt-generator': ['ai-crawler-blocker', 'llms-txt-generator', 'sitemap-generator'],
+    'ai-crawler-blocker': ['robots-txt-generator', 'llms-txt-generator'],
+    'llms-txt-generator': ['robots-txt-generator', 'ai-crawler-blocker', 'sitemap-generator'],
+    'url-slug-generator': ['keyword-density-checker', 'case-converter'],
+    'utm-link-builder': ['hashtag-generator', 'url-encoder-decoder'],
+    'keyword-density-checker': ['reading-time-calculator', 'seo-score-checker', 'url-slug-generator'],
+    'hashtag-generator': ['utm-link-builder', 'case-converter'],
+    'htaccess-redirect-generator': ['canonical-tag-generator', 'sitemap-generator', 'web-crawler-audit'],
+    'sitemap-generator': ['web-crawler-audit', 'robots-txt-generator', 'htaccess-redirect-generator'],
+    'password-generator': ['uuid-generator', 'base64-encoder-decoder'],
+    'base64-encoder-decoder': ['url-encoder-decoder', 'jwt-decoder'],
+    'url-encoder-decoder': ['base64-encoder-decoder', 'utm-link-builder'],
+    'uuid-generator': ['password-generator', 'ics-calendar-generator'],
+    'jwt-decoder': ['base64-encoder-decoder', 'user-agent-parser'],
+    'user-agent-parser': ['web-crawler-audit', 'jwt-decoder'],
+    'ics-calendar-generator': ['uuid-generator', 'url-encoder-decoder'],
+    'case-converter': ['duplicate-line-remover', 'lorem-ipsum-generator'],
+    'duplicate-line-remover': ['case-converter', 'url-encoder-decoder'],
+    'lorem-ipsum-generator': ['reading-time-calculator', 'case-converter'],
+    'reading-time-calculator': ['keyword-density-checker', 'lorem-ipsum-generator'],
+  };
+  const selected = (RELATED[t.slug] || []).map((slug) => TOOLS.find((x) => x.slug === slug)).filter(Boolean);
+  const related = selected.length ? selected : [
     ...TOOLS.filter((x) => x.cat === t.cat && x.slug !== t.slug).slice(0, 4),
     ...TOOLS.filter((x) => x.cat !== t.cat).slice(0, 5),
   ].slice(0, 5);
@@ -337,10 +377,20 @@ const run = async () => {
     { path: '/', title: `${SITE.name} — Free Marketing & SEO Tools, No Signup`, desc: `${TOOLS.length}+ free browser-based marketing, SEO, AI-search and web tools. Nothing uploaded, no signup, no limits. Run them right in your browser.`, body: homeBody(), ld: homeLd() },
     ...Object.values(CATEGORIES).map((c) => {
       const list = TOOLS.filter((t) => t.cat === c.id);
-      return { path: '/' + c.slug + '/', title: `Free ${c.name} — No Signup, No Limits`, desc: c.metaDesc, body: categoryBody(c, list) };
+      const path = '/' + c.slug + '/';
+      return {
+        path, title: `Free ${c.name} — No Signup, No Limits`, desc: c.metaDesc, body: categoryBody(c, list),
+        ld: [breadcrumbLd([{ name: 'Home', path: '/' }, { name: c.name, path }])],
+      };
     }),
     ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t) })),
-    ...POLICY.map((p) => ({ path: '/' + p.slug + '/', title: p.metaTitle, desc: p.metaDesc, body: policyPage(p) })),
+    ...POLICY.map((p) => {
+      const path = '/' + p.slug + '/';
+      return {
+        path, title: p.metaTitle, desc: p.metaDesc, body: policyPage(p),
+        ld: [breadcrumbLd([{ name: 'Home', path: '/' }, { name: p.title, path }])],
+      };
+    }),
     { path: '/404.html', title: '404 — Page not found', desc: 'Page not found.', body: notFoundBody(), noindex: true },
   ];
 
@@ -359,20 +409,17 @@ const run = async () => {
 
   // ---- sitemaps: a sitemap INDEX + two children (pages, tools) ---------
   // An index keeps room to grow (a blog/content sitemap later) and lets crawlers
-  // fetch only the slice they need. Both children carry accurate lastmod.
+  // fetch only the slice they need.
   const pagePaths = ['/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
   const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
-  const isPolicy = (p) => POLICY.some((x) => p === '/' + x.slug + '/');
-  const entry = (p) => {
-    const priority = p === '/' ? '1.0' : p.includes('/tools/') ? '0.8' : isPolicy(p) ? '0.4' : '0.7';
-    const changefreq = p === '/' ? 'daily' : p.includes('/tools/') ? 'weekly' : isPolicy(p) ? 'yearly' : 'weekly';
-    return `  <url><loc>${SITE.url}${p}</loc><lastmod>${TODAY}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
-  };
+  // Do not emit synthetic lastmod values: a build date is not the page's
+  // significant content-modification date. Google ignores priority/changefreq.
+  const entry = (p) => `  <url><loc>${SITE.url}${p}</loc></url>`;
   const urlset = (paths) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(entry).join('\n')}\n</urlset>\n`;
   await writeFile(R + 'dist/sitemap-pages.xml', urlset(pagePaths));
   await writeFile(R + 'dist/sitemap-tools.xml', urlset(toolPaths));
   const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml'];
-  await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc><lastmod>${TODAY}</lastmod></sitemap>`).join('\n')}\n</sitemapindex>\n`);
+  await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 
   const robots = `# Tools4Market robots.txt\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE.url}/sitemap.xml\n`;
   await writeFile(R + 'dist/robots.txt', robots);
