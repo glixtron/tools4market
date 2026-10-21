@@ -133,6 +133,9 @@ const toolPage = (await grab(ORIGIN + '/tools/case-converter/')).body;
 ok('tool pages also carry GTM + consent UI', /GTM-P6P4FLGB/.test(toolPage) && /id="ck-banner"/.test(toolPage));
 const privacy = (await grab(ORIGIN + '/privacy-policy/')).body;
 ok('privacy policy documents cookies/consent', /Cookie settings/.test(privacy) && /Consent Mode/i.test(privacy));
+ok('AdSense loader present with the publisher id', /adsbygoogle\.js\?client=ca-pub-1509697031230558/.test(home));
+ok('ads.txt served with the publisher id', (await grab(ORIGIN + '/ads.txt')).body.includes('pub-1509697031230558'));
+ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(home) && !/data-ad-slot=""/.test(home));
 for (const a of ['/assets/style.css', '/assets/og-image.png', '/assets/icon-192.png', '/assets/site.js', '/assets/runtime/inspect.js', '/assets/runtime/audit.js', '/assets/inspect-strings.js']) {
   const r = await grab(ORIGIN + a, { redirect: 'manual' });
   ok('asset ' + a, r.status === 200, 'status ' + r.status);

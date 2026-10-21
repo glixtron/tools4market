@@ -19,7 +19,7 @@ const SITE = {
 // GA4 measurement id, e.g. G-ABC123XYZ
 const GA_ID = (process.env.GA_ID || 'G-6B4GGFC96K').trim();
 // AdSense publisher id, e.g. ca-pub-0000000000000000
-const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || '').trim();
+const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || 'ca-pub-1509697031230558').trim();
 // Bing Webmaster Tools site-verification id (also shipped as /BingSiteAuth.xml)
 const BING_VERIFY = (process.env.BING_VERIFY || '77EFF8B735065A945570BBFD566B0530').trim();
 // Google Tag Manager container id (analytics). Consent-gated: nothing is stored
@@ -162,6 +162,9 @@ function layout({ path, title, desc, body, ld = [], noindex = false }) {
 
   gtag('config', '${esc(GA_ID)}', {anonymize_ip:true});
 </script>` : '';
+  const adsenseLoader = ADSENSE_CLIENT ? `<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(ADSENSE_CLIENT)}"
+     crossorigin="anonymous"></script>` : '';
   const gtmHead = GTM_ID ? `<!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -178,7 +181,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-${consentDefaults}${gaTag}${gtmHead}
+${consentDefaults}${gaTag}${gtmHead}${adsenseLoader}
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical" href="${url}">
@@ -198,6 +201,7 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 ${BING_VERIFY ? `<meta name="msvalidate.01" content="${esc(BING_VERIFY)}">` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+${ADSENSE_CLIENT ? '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' : ''}
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
@@ -266,11 +270,14 @@ const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' 
   <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span></span>
 </a>`;
 
+// Ad slot. Renders a real AdSense unit only when an ad-unit id is configured
+// (AD_SLOT_TOP / AD_SLOT_CONTENT / AD_SLOT_SIDEBAR); until then the slot keeps
+// its reserved height so enabling ads never shifts the layout (no CLS).
 const adSlot = (label) => {
-  if (!ADSENSE_CLIENT) {
-    return `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space &mdash; live after AdSense approval${label ? ' &middot; ' + label : ''}</div>`;
+  const slot = AD_SLOTS[label] || '';
+  if (!ADSENSE_CLIENT || !slot) {
+    return `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space${label ? ' &middot; ' + label : ''}</div>`;
   }
-  const slot = AD_SLOTS[label] || AD_SLOTS.sidebar || ADSENSE_CLIENT;
   return `<div class="ad-slot" role="complementary" aria-label="Advertisement">
   <ins class="adsbygoogle" style="display:block" data-ad-client="${esc(ADSENSE_CLIENT)}" data-ad-slot="${esc(slot)}" data-ad-format="auto" data-full-width-responsive="true"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
