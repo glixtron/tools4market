@@ -155,9 +155,26 @@ Confirm the build warns nothing, then test in a browser before declaring it done
 
 ---
 
+## Testing & verification
+
+The site itself has **zero dependencies**, so the test tooling is installed separately (never committed, never deployed):
+
+```bash
+npm i --no-save jsdom      # test-only
+npm run build
+npm test                   # tests/smoke.mjs — every tool page boots, responds, zero console errors
+npm run test:live          # tests/live-verify.mjs — checks the PUBLIC site (DNS, sitemap, all URLs, backend, assets)
+```
+
+`npm test` drives all 30 tool pages in a real DOM (jsdom): every input, select, checkbox and button is exercised, and the run fails on any console error, uncaught exception, missing tool registration or missing output.
+
+`npm run test:live` verifies what Googlebot actually sees: authoritative DNS, the sitemap index + children, **every URL in the sitemap** (200 + self-referencing canonical + indexable), `robots.txt`, the `/api/fetch` backend (including the SSRF guard), the Bing/Google verification files, and all assets. The last full run is recorded in [`launch-verification.md`](launch-verification.md) and [`qcreport.md`](qcreport.md).
+
+---
+
 ## Deploying to Cloudflare
 
-### Path A — Workers (the current pipeline: GitHub → `npx wrangler deploy`)
+### Path A — Workers (the current pipeline: GitHub → `npm run deploy`)
 
 `wrangler.jsonc` is committed, so wrangler never runs its interactive setup wizard on the build server — the deploy is one command.
 
@@ -235,24 +252,24 @@ In Cloudflare Pages: **Settings → Environment variables → Production** (and 
 
 If you deploy to a non-Cloudflare host and want live URL checks, port `functions/api/fetch.js` to that host's equivalent serverless function (Vercel/Netlify functions) — it is the only backend file in the project.
 
-### ⚠️ Before deploying for real: update the site URL
+### The site URL (already set for the live domain)
 
-`SITE.url` in `build.mjs` is a placeholder. Every canonical, Open Graph, schema and sitemap URL is derived from it:
+`SITE.url` in `build.mjs` is the canonical origin — every canonical tag, Open Graph URL, JSON-LD `url` field, sitemap entry and the `robots.txt` sitemap line is derived from it:
 
 ```js
 const SITE = {
   name: 'Tools4Market',
-  url: 'https://www.tools4market.online',
+  url: (process.env.SITE_URL || 'https://tools4market.online').replace(/\/+$/, ''),
+  email: process.env.SITE_EMAIL || 'support@tools4market.online',
   tagline: 'Free Marketing, SEO & AI-Search Tools',
-  email: 'hello@tools4market.online',
 };
 ```
 
-```bash
-grep -rn "TODO-DOMAIN" .     # find every placeholder before launch
-```
+The live domain is **https://tools4market.online** (the apex is canonical; `www` 301s to it). If the host ever changes, set the `SITE_URL` env var in Cloudflare and rebuild — no code edit, and nothing else to update (canonical, sitemap, robots.txt, OG URLs all follow).
 
-Update `url` and `email` to the real domain, then **rebuild** — wrong canonicals + wrong sitemap URLs tank indexing.
+```bash
+grep -rn "TODO-DOMAIN" .     # must return nothing
+```
 
 ---
 
@@ -289,16 +306,20 @@ Also update the **Privacy Policy** in `src/data/policy.js` with the real publish
 
 Run this in order — each step depends on the previous one.
 
-- [x] ~~**Buy the domain**~~ — DONE: `www.tools4market.online` (wired into `SITE.url`/`SITE.email`, rebuilt, all URLs verified)
-- [ ] **Update `SITE.url` + `SITE.email`** in `build.mjs` — `grep -rn "TODO-DOMAIN" .`
-- [ ] **Rebuild:** `node build.mjs` — confirm canonicals, OG URLs, schema and `sitemap.xml` all carry the real domain
-- [ ] **Deploy to Cloudflare Pages** (build `node build.mjs`, output `dist`) and verify on the `*.pages.dev` URL
-- [ ] **Attach the custom domain** (nameservers → Cloudflare, SSL automatic)
-- [ ] **Search Console:** create the property, verify domain, submit `https://<domain>/sitemap.xml`
-- [ ] **GA4:** create the property and add the measurement snippet (Phase 2/3 extension point, Architecture.md §9)
-- [ ] **Content:** publish the first 20–30 long-tail articles linking to their tools (Phase 2)
+- [x] ~~**Buy the domain**~~ — DONE: `tools4market.online` (apex is canonical; `SITE.url`/`SITE.email` wired, all URLs verified, nameservers → Cloudflare, live on the Worker)
+- [x] ~~**Update `SITE.url` + `SITE.email`**~~ — DONE: `https://tools4market.online` / `support@tools4market.online` (`grep -rn "TODO-DOMAIN" .` returns nothing)
+- [x] ~~**Rebuild**~~ — DONE: 41 pages, 0 warnings, canonical + OG + schema + sitemaps all on the live domain
+- [x] ~~**Deploy to Cloudflare**~~ — DONE: Workers project `tools4market` (frontend assets + `/api/fetch` backend), build `npm run build`, deploy `npm run deploy`
+- [x] ~~**Attach the custom domain**~~ — DONE: `tools4market.online` on the Worker (SSL automatic); `www` → apex 301 handled by the Worker
+- [ ] **Cloudflare build settings** — Build command `npm run build`, Deploy command `npm run deploy` (the deploy script builds first, so `dist/` can never be missing)
+- [x] ~~**Search Console**~~ — DONE: property verified via DNS TXT; submit `https://tools4market.online/sitemap.xml` (index → pages + tools children)
+- [x] ~~**Bing Webmaster Tools**~~ — DONE: `/BingSiteAuth.xml` served at the root + `msvalidate.01` meta on every page
+- [ ] **GA4** — set the `GA_ID` env var in Cloudflare (the snippet is already built into every page)
+- [ ] **AdSense** — set `ADSENSE_CLIENT` + `AD_SLOT_TOP/CONTENT/SIDEBAR` env vars (units are already wired into the reserved slots)
+- [ ] **Content:** publish the first 20–30 long-tail articles linking to their tools
 - [ ] **AdSense application** — only after tools + policy pages + articles + initial traffic
-- [ ] **After approval:** swap `.ad-slot` for real `<ins>` units, add the loader script, update Privacy Policy with the publisher ID
+- [ ] **Indexing:** request indexing for the 40 URLs in batches of ~10/day, and add the site to Bing Webmaster Tools
+- [ ] **Visual QA:** 390×844 mobile pass (blocked on the desktop browser connection)
 
 ---
 

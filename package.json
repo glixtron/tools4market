@@ -9,6 +9,8 @@
     "postinstall": "node build.mjs || true",
     "serve": "node serve-dev.mjs",
     "deploy": "node build.mjs && npx wrangler deploy",
-    "preview": "npx wrangler dev"
+    "preview": "npx wrangler dev",
+    "test": "node tests/smoke.mjs",
+    "test:live": "node tests/live-verify.mjs"
   }
 }
