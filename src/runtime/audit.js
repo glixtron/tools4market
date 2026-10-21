@@ -22,7 +22,20 @@
       .replace(/\{status\}/g, o.status != null ? o.status : '')
       .replace(/\{ms\}/g, o.ms != null ? o.ms : '')
       .replace(/\{bytes\}/g, o.bytes != null ? o.bytes : '')
+      .replace(/\{type\}/g, o.type != null ? o.type : '')
+      .replace(/\{url\}/g, o.url != null ? o.url : '')
       .replace(/\{detail\}/g, o.detail != null ? o.detail : '');
+  }
+  function fetchedStatus(r, requestedUrl) {
+    var copy = ((window.T4M_ISTR || {}).pageStatus || {});
+    var finalUrl = r.finalUrl || requestedUrl;
+    var result = fill(copy.fetched || 'Fetched {url} · HTTP {status} · {bytes} · {ms} · {type}.', {
+      url: finalUrl, status: r.status || 'unknown', bytes: fmtBytes(r.bytes) || 'size unavailable',
+      ms: r.ms ? r.ms + ' ms' : 'timing unavailable', type: r.contentType || 'content type unavailable'
+    });
+    if (finalUrl !== requestedUrl) result += ' ' + fill(copy.redirected || 'Final response redirected to {url}.', { url: finalUrl });
+    if (r.truncated) result += ' ' + (copy.truncated || 'This is a partial snapshot.');
+    return result;
   }
   function origin(u) { try { return new URL(u).origin; } catch (e) { return ''; } }
   function normalizeUrl(u) {
@@ -42,45 +55,49 @@
   function crawlContext(url, includeSitemaps) {
     var robotsUrl = origin(url) + '/robots.txt';
     return INSP.fetchPage(robotsUrl, { allowText: true }).then(function (rb) {
-      var ctx = { robots: rb, rules: null, sitemapUrls: [], sitemapStatus: 'unverified', sitemapFound: null, sitemapSampled: 0 };
-      if (!rb.ok) {
-        // A 404 robots.txt means no published rules; other failures mean unknown.
-        if (rb.status === 404) ctx.rules = { allowed: true, matched: null, sitemapUrls: [] };
-        return ctx;
+      var ctx = { robots: rb, rules: null, sitemapUrls: [], sitemapDeclared: false,
+        sitemapSource: '', sitemapStatus: 'unverified', sitemapFound: false,
+        sitemapSampled: 0, sitemapFetchedFiles: 0, sitemapValidFiles: 0,
+        sitemapFailures: 0 };
+      if (rb.ok) ctx.rules = INSP.parseRobotsTxt(rb.html, url, 'googlebot');
+      // A 404 robots.txt means no published rules; other failures mean unknown.
+      else if (rb.status === 404) ctx.rules = { allowed: true, matched: null, sitemapUrls: [] };
+      var declared = ctx.rules && ctx.rules.sitemapUrls || [];
+      ctx.sitemapDeclared = declared.length > 0;
+      ctx.sitemapUrls = declared.length ? declared.slice(0, 3) : [origin(url) + '/sitemap.xml'];
+      ctx.sitemapSource = declared.length ? 'robots.txt declaration' : 'common /sitemap.xml path (not declared in robots.txt)';
+      if (!includeSitemaps) { ctx.sitemapStatus = 'not-checked'; return ctx; }
+
+      function inspectMap(m, childMaps) {
+        if (!m.response.ok) { ctx.sitemapFailures++; return; }
+        ctx.sitemapFetchedFiles++;
+        var parsed = sitemapLocs(m.response.html, m.response.finalUrl || m.url);
+        if (!parsed.ok) { ctx.sitemapFailures++; return; }
+        ctx.sitemapValidFiles++;
+        if (parsed.index) childMaps.push.apply(childMaps, parsed.locs);
+        else {
+          ctx.sitemapSampled++;
+          if (parsed.locs.some(function (loc) { return normalizeUrl(loc) === normalizeUrl(url); })) ctx.sitemapFound = true;
+        }
       }
-      ctx.rules = INSP.parseRobotsTxt(rb.html, url, 'googlebot');
-      ctx.sitemapUrls = ctx.rules.sitemapUrls.slice(0, 3);
-      if (!includeSitemaps) { ctx.sitemapStatus = ctx.sitemapUrls.length ? 'not-checked' : 'undeclared'; return ctx; }
-      if (!ctx.sitemapUrls.length) { ctx.sitemapStatus = 'undeclared'; return ctx; }
       return Promise.all(ctx.sitemapUrls.map(function (s) {
         return INSP.fetchPage(s, { allowText: true }).then(function (r) { return { url: s, response: r }; });
       })).then(function (maps) {
         var childMaps = [];
-        maps.forEach(function (m) {
-          if (!m.response.ok) return;
-          var parsed = sitemapLocs(m.response.html, m.response.finalUrl || m.url);
-          if (!parsed.ok) return;
-          if (parsed.index) childMaps = childMaps.concat(parsed.locs);
-          else {
-            ctx.sitemapSampled++;
-            if (parsed.locs.some(function (loc) { return normalizeUrl(loc) === normalizeUrl(url); })) ctx.sitemapFound = true;
-          }
-        });
+        maps.forEach(function (m) { inspectMap(m, childMaps); });
         return Promise.all(childMaps.slice(0, 3).map(function (s) {
           return INSP.fetchPage(s, { allowText: true }).then(function (r) { return { url: s, response: r }; });
         })).then(function (children) {
-          children.forEach(function (m) {
-            if (!m.response.ok) return;
-            var parsed = sitemapLocs(m.response.html, m.response.finalUrl || m.url);
-            if (!parsed.ok || parsed.index) return;
-            ctx.sitemapSampled++;
-            if (parsed.locs.some(function (loc) { return normalizeUrl(loc) === normalizeUrl(url); })) ctx.sitemapFound = true;
-          });
-          ctx.sitemapStatus = maps.some(function (m) { return m.response.ok; }) ? 'fetched' : 'failed';
+          children.forEach(function (m) { inspectMap(m, []); });
+          ctx.sitemapStatus = !ctx.sitemapFetchedFiles ? 'failed'
+            : (!ctx.sitemapValidFiles ? 'invalid'
+              : (ctx.sitemapFailures ? 'partial' : 'checked'));
           return ctx;
         });
       });
-    }).catch(function () { return { robots: null, rules: null, sitemapUrls: [], sitemapStatus: 'unverified', sitemapFound: null, sitemapSampled: 0 }; });
+    }).catch(function () { return { robots: null, rules: null, sitemapUrls: [], sitemapDeclared: false,
+      sitemapSource: '', sitemapStatus: 'unverified', sitemapFound: false, sitemapSampled: 0,
+      sitemapFetchedFiles: 0, sitemapValidFiles: 0, sitemapFailures: 0 }; });
   }
 
   // ---------------------------------------------------------- Web Crawler Audit
@@ -133,9 +150,14 @@
           return dl ? { level: 'pass', v: fill(c.pass, { n: dl }) } : { level: 'none', v: c.none };
         case 'sitemap':
           if (!ctx.sitemapUrls || !ctx.sitemapUrls.length) return { level: 'none', v: c.none };
-          if (ctx.sitemapStatus === 'failed') return { level: 'warn', v: fill(c.warn, { v: 'HTTP/network error for ' + ctx.sitemapUrls.join(', ') }) };
-          if (ctx.sitemapFound) return { level: 'pass', v: c.pass };
-          return { level: 'none', v: 'Fetched ' + ctx.sitemapSampled + ' sitemap file(s), but this URL was not found in the checked set. Membership is a discovery hint, not an indexing requirement.' };
+          if (ctx.sitemapFound) return { level: 'pass', v: fill(c.pass, { v: ctx.sitemapSource }) };
+          if (ctx.sitemapStatus === 'failed' || ctx.sitemapStatus === 'invalid' || ctx.sitemapStatus === 'partial') {
+            var detail = ctx.sitemapUrls.join(', ') + ' (' + ctx.sitemapStatus + ')';
+            return ctx.sitemapDeclared
+              ? { level: 'warn', v: fill(c.warn, { v: detail }) }
+              : { level: 'none', v: fill(c.none, { v: 'No sitemap URL is declared in robots.txt; the common /sitemap.xml path could not be verified. Sitemap submissions made only in Search Console are not visible to this check.' }) };
+          }
+          return { level: 'none', v: fill(c.none, { v: 'Fetched ' + ctx.sitemapSampled + ' sitemap file(s) via ' + ctx.sitemapSource + ', but this URL was not found.' }) };
         case 'structured':
           return snap.schemaTypes.length ? { level: 'none', v: fill(c.pass, { v: snap.schemaTypes.join(', ') }) } : { level: 'none', v: c.none };
         case 'images':
@@ -150,7 +172,7 @@
     function audit() {
       var u = (($(root, 'ca-url') || {}).value || '').trim();
       if (!/^https?:\/\//i.test(u)) { status.textContent = 'Enter a full URL, e.g. https://your-site.com/page'; return; }
-      status.textContent = 'Fetching page\u2026';
+      status.textContent = ((window.T4M_ISTR || {}).pageStatus || {}).fetching || 'Fetching the page response…';
       runBtn.disabled = true;
       // also fetch robots.txt (the crawler's entry point) to check the sitemap line
       INSP.fetchPage(u).then(function (r) {
@@ -162,8 +184,9 @@
         var snap;
         try { snap = INSP.parse(r.html, r.finalUrl || u); } catch (e) { status.textContent = 'Could not parse that page.'; runBtn.disabled = false; return; }
         snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes; snap.finalUrl = r.finalUrl || u; snap.requestedUrl = u;
+        snap.contentType = r.contentType || ''; snap.truncated = !!r.truncated;
         if (r.xRobotsTag) snap.robots = [snap.robots, r.xRobotsTag].filter(Boolean).join('; ');
-        status.textContent = 'Fetched HTTP ' + r.status + ' · ' + fmtBytes(r.bytes) + ' · ' + (r.ms || '<100') + 'ms' + (snap.finalUrl !== u ? ' · redirected to ' + snap.finalUrl : '');
+        status.textContent = fetchedStatus(r, u);
         return crawlContext(snap.finalUrl).then(function (ctx) {
           render(snap, ctx);
           runBtn.disabled = false;
@@ -266,11 +289,10 @@
       var tl = snap.title.length, dl = snap.desc.length;
       switch (f.id) {
         case 'query': {
-          if (!query) return { level: 'none', v: S.summary.noQuery };
+          if (!query) return { level: 'none', v: f.none || S.summary.noQuery };
           var areas = [snap.title, snap.h1s[0] || '', snap.desc, snap.mainText];
           var found = areas.filter(function (v) { return INSP.phraseCount(v, query) > 0; }).length;
-          var level = found >= 3 ? 'pass' : found > 0 ? 'warn' : 'fail';
-          return { level: level, v: fill(f[level], { n: found }) };
+          return { level: 'none', v: fill(f.info, { n: found }) };
         }
         case 'title':
           if (!tl) return { level: 'fail', v: f.fail };
@@ -319,7 +341,7 @@
     function score() {
       var u = (($(root, 'sc2-url') || {}).value || '').trim();
       if (!/^https?:\/\//i.test(u)) { status.textContent = 'Enter a full URL, e.g. https://your-site.com/page'; return; }
-      status.textContent = 'Fetching page\u2026';
+      status.textContent = ((window.T4M_ISTR || {}).pageStatus || {}).fetching || 'Fetching the page response…';
       runBtn.disabled = true;
       INSP.fetchPage(u).then(function (r) {
         runBtn.disabled = false;
@@ -328,8 +350,9 @@
         try { snap = INSP.parse(r.html, r.finalUrl || u); } catch (e) { status.textContent = 'Could not parse that page.'; return; }
         snap.status = r.status; snap.ms = r.ms; snap.bytes = r.bytes; snap.finalUrl = r.finalUrl || u; snap.requestedUrl = u;
         snap.contentType = r.contentType || '';
+        snap.truncated = !!r.truncated;
         if (r.xRobotsTag) snap.robots = [snap.robots, r.xRobotsTag].filter(Boolean).join('; ');
-        status.textContent = 'Fetched ' + snap.finalUrl + ' · HTTP ' + r.status + ' · ' + fmtBytes(r.bytes) + ' · ' + (r.ms || '<100') + 'ms';
+        status.textContent = fetchedStatus(r, u);
         return crawlContext(snap.finalUrl, false).then(function (ctx) {
           render(snap, ctx);
         });

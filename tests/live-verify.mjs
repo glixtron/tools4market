@@ -125,7 +125,7 @@ ok('GTM container script in head', /googletagmanager\.com\/gtm\.js/.test(home) &
 ok('GTM noscript iframe in body', /ns\.html\?id=GTM-P6P4FLGB/.test(home));
 ok('exactly one Google tag (gtag.js) on the page', (home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length === 1, String((home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length));
 ok('gtag consent default is denied', /gtag\('consent',\s*'default'/.test(home) && /analytics_storage:\s*'denied'/.test(home));
-ok('consent region scoping (EEA/UK/CH)', /region:\s*\[/.test(home) && /'GB'/.test(home));
+ok('consent region scoping (EEA/UK/CH)', /var REGION = \[/.test(home) && /"GB"/.test(home) && /"DE"/.test(home) && /region = REGION/.test(home));
 ok('consent wait_for_update + url_passthrough + ads_data_redaction', /wait_for_update/.test(home) && /url_passthrough/.test(home) && /ads_data_redaction/.test(home));
 ok('consent defaults deny analytics/ads', /default_consent/.test(home) && /analytics_storage:\s*'denied'/.test(home) && /ad_storage:\s*'denied'/.test(home));
 ok('cookie consent banner + preferences present', /id="ck-banner"/.test(home) && /id="ck-panel"/.test(home) && /id="ck-accept"/.test(home) && /id="ck-reject"/.test(home));

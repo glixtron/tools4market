@@ -96,7 +96,7 @@
       var tableEl = el('table');
       var thead = el('thead');
       var hr = el('tr');
-      ['Phrase', 'Count', 'Density'].forEach(function (h) { var th = el('th', null, h); hr.appendChild(th); });
+      ['Phrase', 'Count', 'Share of phrase rows'].forEach(function (h) { var th = el('th', null, h); hr.appendChild(th); });
       thead.appendChild(hr);
       tableEl.appendChild(thead);
       var tbody = el('tbody');
@@ -175,7 +175,7 @@
 
       out.textContent = '';
       if (!words.length) {
-        out.appendChild(el('p', null, 'Paste your text above — everything is analysed locally, nothing is uploaded.'));
+        out.appendChild(el('p', null, copy.pastedText || 'Paste text here; analysis runs in your browser.'));
         return;
       }
       if (!singleWords.length && stop) {

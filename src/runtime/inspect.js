@@ -499,11 +499,6 @@
       if (s.split(/\s+/).length >= 7 && s.toLowerCase() !== lead.toLowerCase()) { first = s; break; }
     }
     var candidate = (lead + (first ? '. ' + first : '.')).replace(/\s+/g, ' ').trim();
-    if (candidate.length > 155) {
-      candidate = candidate.slice(0, 155);
-      var end = candidate.lastIndexOf(' ');
-      if (end > 90) candidate = candidate.slice(0, end).replace(/[,:;—-]+$/, '') + '…';
-    }
     return candidate;
   }
   function appendPersonalized(box, slug, snap, root) {
