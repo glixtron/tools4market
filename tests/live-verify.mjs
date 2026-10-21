@@ -140,7 +140,8 @@ const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
 ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(toolHtml) && !/data-ad-slot=""/.test(toolHtml) && !/data-ad-slot="ca-pub/.test(toolHtml));
 // blog / guides
 const blogIndex = (await grab(ORIGIN + '/blog/')).body;
-ok('blog index reachable with article links', blogIndex.length > 0 && /\/blog\/[a-z0-9-]+\//.test(blogIndex));
+const blogLinks = new Set([...blogIndex.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], ORIGIN + '/blog/').pathname; } catch (e) { return ''; } }));
+ok('blog index reachable with article links', blogIndex.length > 0 && [...blogLinks].some((u) => /^\/blog\/[a-z0-9-]+\/$/.test(u)), [...blogLinks].join(' ').slice(0, 80));
 const article = (await grab(ORIGIN + '/blog/robots-txt-for-search-and-ai-crawlers/')).body;
 ok('article page has BlogPosting + FAQPage + Breadcrumb schema', /"@type":"BlogPosting"/.test(article) && /"@type":"FAQPage"/.test(article) && /"@type":"BreadcrumbList"/.test(article));
 ok('article links into its matching tools', /\/tools\/robots-txt-generator\//.test(article) && /\/tools\/ai-crawler-blocker\//.test(article));
