@@ -56,7 +56,7 @@ export const ARTICLES = [
     ],
     faqs: [
       { q: 'Does robots.txt stop a page from appearing in Google?', a: 'No. robots.txt controls crawling, not indexing. A page that is blocked from crawling can still be indexed from external links. To remove a page from results, use a noindex directive and make sure the page stays crawlable so the crawler can read it.' },
-      { q: 'Should I block GPTBot and other AI training crawlers?', a: 'It depends on your business. Blocking training crawlers protects your content from being used to train models; allowing answer-engine fetchers such as PerplexityBot or ChatGPT-User keeps you visible in AI answers, where many readers now arrive first. Both are defensible — just decide deliberately rather than copying a template.' },
+      { q: 'Should I block GPTBot and other AI training crawlers?', a: 'It depends on your business. Blocking training crawlers protects your content from being used to train models; allowing answer-engine fetchers such as PerplexityBot or ChatGPT-User keeps you visible in AI answers. Both are defensible — decide deliberately rather than copying a template.' },
       { q: 'Does blocking Google-Extended hurt my Google rankings?', a: 'No. Google-Extended is Google\'s separate opt-out for Gemini training and Vertex AI grounding. It is not Googlebot, and blocking it does not affect your search rankings or indexing in Google.' },
       { q: 'Where should the robots.txt file live?', a: 'At the root of the domain, with the exact path https://yourdomain.com/robots.txt. Sub-domain or sub-folder locations are not read by crawlers.' },
       { q: 'How long does it take for a robots.txt change to take effect?', a: 'Crawlers re-read the file on their next visit, often within days, but there is no guaranteed deadline. Google caches it for roughly 24 hours, and other crawlers may take longer. Search Console\'s robots.txt report shows when Google last read your file.' },
@@ -124,7 +124,7 @@ export const ARTICLES = [
       },
     ],
     faqs: [
-      { q: 'How long does it take for a new site to rank?', a: 'There is no fixed timeline. Technical fixes are picked up in days to weeks, and meaningful traffic usually takes months of consistent content and links. Small, focused sites can rank within weeks for long-tail queries; competitive head terms take far longer. Treat the website launch SEO checklist as day-one work, not a week-one project.' },
+      { q: 'How long does it take for a new site to rank?', a: 'There is no fixed timeline. Technical fixes are picked up in days to weeks, while meaningful traffic takes months of content and links. Small, focused sites can rank within weeks for long-tail queries; competitive head terms take far longer. Treat the website launch SEO checklist as day-one work.' },
       { q: 'Do I need a sitemap if my site is small?', a: 'A sitemap helps crawlers find every page, especially on a new site with few internal links. It is cheap to generate and it lets you submit URLs directly, so yes — keep one. It is item four of this website launch SEO checklist for a reason.' },
       { q: 'Should my staging site be indexed?', a: 'No. Password-protect it or use a robots.txt disallow on the staging hostname, and make sure the disallow is not carried over to the live domain — that mistake can de-index a launch.' },
       { q: 'What is the most common launch mistake?', a: 'Copying the staging robots.txt or canonical settings to the live domain, which leaves the site blocked or pointing canonicals at the wrong host. Check both files again on launch day.' },
@@ -173,6 +173,7 @@ export const ARTICLES = [
           'Blocking GPTBot stops OpenAI\'s training fetches of your site. It does **not** remove your pages from ChatGPT. Answers in ChatGPT search are assembled from a search index and live page fetches, so a page that is allowed to OAI-SearchBot and ChatGPT-User can still be found, quoted and cited even with GPTBot fully blocked.',
           'It also has no effect on Google. Googlebot does not care about your GPTBot rules, and Google\'s rankings are unaffected by which AI company\'s bots you allow or block.',
           'There is also a middle path most sites never consider: block nothing, but keep the content that trains models deliberately chosen. Public documentation, pricing pages and marketing copy are what teach a model what your product is; unpublished drafts and internal material should never be public in the first place. The sites that regret AI crawling are almost always sites that published something they should not have — and the fix for that is deletion, not a robots.txt rule.',
+          'Two details catch people out when they write the rule by hand. A group applies only to the bot it names, so GPTBot stays blocked while OAI-SearchBot and ChatGPT-User keep working — that separation is the point of the split. And a User-agent: * group further down the file does not override a named group, so a leftover wildcard Disallow cannot undo the allow rules you set for the search bots.',
         ],
       },
       {
@@ -212,7 +213,7 @@ export const ARTICLES = [
     reviewer: 'Tools4Market',
     metaTitle: 'llms.txt Explained: Who Reads It, Who Ignores It',
     metaDesc: 'What llms.txt is, which AI tools fetch it, why Google ignores it, and an honest test for deciding whether your site needs one at all.',
-    intro: 'llms.txt is a proposed markdown file at the root of your domain that curates what an AI model should read first. It is also one of the most over-sold files in SEO right now, so this guide separates what llms.txt is, who actually fetches it, and when one is worth publishing.',
+    intro: 'llms.txt is a proposed markdown file at the root of your domain that curates what an AI model should read first. It is also one of the most over-sold files in SEO right now, so this guide separates what the file is, who actually fetches it, and when one is worth publishing.',
     sections: [
       {
         h: 'What llms.txt is',
@@ -378,7 +379,7 @@ export const ARTICLES = [
       },
     ],
     faqs: [
-      { q: 'How do I check if AI crawlers can access your site?', a: 'Fetch /robots.txt as plain text, find each bot\'s user-agent group (GPTBot, ClaudeBot, PerplexityBot and so on), and apply its rules — bots with no named group fall under User-agent: *. Then confirm access with a plain fetch of a real page, and check your CDN or WAF logs, because network-level blocks refuse access even when robots.txt allows the bot.' },
+      { q: 'How do I check if AI crawlers can access your site?', a: 'Fetch /robots.txt as plain text, find each bot\'s user-agent group (GPTBot, ClaudeBot, PerplexityBot and so on) and apply its rules. Then fetch a real page without a browser and check your CDN logs, because network-level blocks refuse access even when robots.txt allows the bot.' },
       { q: 'Why does robots.txt look correct but AI crawlers still never visit?', a: 'Almost always an edge block: a CDN bot-protection toggle, an AI-bot blocking feature, a managed challenge or a rate limit returning 403/429 before your page is ever served. These ignore robots.txt entirely and must be fixed in the CDN or firewall settings.' },
       { q: 'Is blocking AI crawlers bad for SEO?', a: 'No. Your site\'s Google rankings depend on Googlebot access, not on GPTBot or ClaudeBot. Blocking AI crawlers only affects AI-side training and, if you block the search-side bots too, your visibility inside those AI answers.' },
       { q: 'Do AI crawlers respect robots.txt?', a: 'The major ones — GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended — document that they do. Respecting robots.txt is voluntary by design, so keep anything truly private behind authentication rather than relying on a Disallow line.' },
@@ -525,7 +526,7 @@ export const ARTICLES = [
     reviewer: 'Tools4Market',
     metaTitle: 'UTM Naming Conventions for Clean GA4 Reports',
     metaDesc: 'utm naming conventions that keep GA4 clean: lowercase rules, a source/medium vocabulary and the mistakes that create "(direct)" traffic.',
-    intro: 'Broken UTM naming conventions do not fail loudly — they fail quietly, by splitting one campaign into five rows in GA4 and sending real traffic to "(direct)". A small set of utm naming conventions, applied every time, prevents almost all of it. Here are the rules, the vocabulary, and the template.',
+    intro: 'Broken UTM naming conventions do not fail loudly — they fail quietly, by splitting one campaign into five rows in GA4 and sending real traffic to "(direct)". A small set of rules, applied every time, prevents almost all of it. Here are the conventions, the vocabulary, and the template.',
     sections: [
       {
         h: 'Why utm naming conventions matter more than the tags themselves',
