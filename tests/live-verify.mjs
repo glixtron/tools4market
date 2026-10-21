@@ -44,7 +44,7 @@ out.push('');
 
 // ---- redirects
 out.push('=== Redirects ===');
-const www = await grab('https://www.' + HOST + '/');
+const www = await grab('https://www.' + HOST + '/', { redirect: 'manual' });
 ok('www redirects to the canonical host', www.status === 301 || www.status === 308, 'status ' + www.status + ' location ' + (www.headers.get('location') || www.error || ''));
 const apex = await grab(ORIGIN + '/', { redirect: 'manual' });
 ok('apex serves 200 without redirect', apex.status === 200, 'status ' + apex.status + ' ' + (apex.error || ''));

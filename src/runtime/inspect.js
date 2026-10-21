@@ -19,14 +19,20 @@
   // Returns { ok, html, url, finalUrl, status, ms, bytes } or { ok:false, reason }.
   function fetchPage(url) {
     if (typeof fetch !== 'function') return Promise.resolve({ ok: false, reason: 'cors' });
+    // Same-origin pages are already fetchable by the browser. Avoid sending a
+    // request through our own Worker proxy, which can recurse at the edge.
+    try {
+      if (new URL(url, window.location.href).origin === window.location.origin) return tryDirect(url);
+    } catch (e) {}
     var proxy = '/api/fetch?url=' + encodeURIComponent(url);
     return fetch(proxy)
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (j && j.ok) {
+        if (j && j.ok && j.status >= 200 && j.status < 400 && typeof j.body === 'string' && j.body.trim()) {
           return { ok: true, html: j.body, url: url, finalUrl: j.finalUrl || url,
-                   status: j.status, ms: j.ms, bytes: j.bytes };
+                   status: j.status, ms: j.ms, bytes: j.bytes, xRobotsTag: j.xRobotsTag || '' };
         }
+        if (j && j.ok && j.status >= 400) return { ok: false, reason: 'http', status: j.status };
         return tryDirect(url);
       })
       .catch(function () { return tryDirect(url); });
@@ -35,9 +41,12 @@
   function tryDirect(url) {
     return fetch(url, { mode: 'cors', credentials: 'omit' })
       .then(function (r) {
+        if (!r.ok) return { ok: false, reason: 'http', status: r.status };
         return r.text().then(function (t) {
+          if (!t.trim()) return { ok: false, reason: 'empty', status: r.status };
           return { ok: true, html: t, url: url, finalUrl: r.url || url,
-                   status: r.status, ms: 0, bytes: t.length };
+                   status: r.status, ms: 0, bytes: t.length,
+                   xRobotsTag: r.headers.get('x-robots-tag') || '' };
         });
       })
       .catch(function () { return { ok: false, reason: 'cors' }; });
@@ -312,6 +321,7 @@
       var snap;
       try { snap = parse(html, meta.url); }
       catch (e) { status.textContent = 'Could not parse that HTML.'; return; }
+      if (meta.xRobotsTag) snap.robots = [snap.robots, meta.xRobotsTag].filter(Boolean).join('; ');
       if (meta.status) { snap.status = meta.status; snap.ms = meta.ms; snap.bytes = meta.bytes; }
       var rows = summarize(snap);
       status.textContent = String(P.signals || 'Read {n} on-page signals from').replace('{n}', rows.length) + ' ' + (meta.url || 'pasted HTML') +
