@@ -50,6 +50,7 @@
 
 ## 6. Process rules
 
+- **End-of-task ritual (mandatory):** before finishing any task, open `suggest.md` and `pendingcommit.md`, understand any pending development recorded there, cross-verify it (build + tests), then commit and push it along with your own work. If either file is missing, create/initialize it rather than skipping the step.
 - Every structural decision lands in Architecture.md; every feature change updates pending-work.md + progress.md.
 - After any change to `src/`, run `node build.mjs` — `dist/` is never hand-edited.
 - Test in browser before declaring a tool done (browser-use skill).
