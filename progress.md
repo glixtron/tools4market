@@ -2,6 +2,12 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-22 — Browser-local image optimization pilot
+
+Added the Image Compressor & Optimizer at `/tools/image-compressor/` as one focused extension of the webmaster tools. It accepts up to ten JPEG, PNG, WebP or AVIF files (20 MB each, 50 MB per batch, 50 megapixels per image), exports WebP/JPEG/PNG, supports adjustable lossy quality and a max-width resize, reports measured dimensions and file-size change, and creates per-file downloads. Processing stays in the browser; the page explains format tradeoffs, JPEG transparency, possible metadata removal, and cases where output can be larger.
+
+Connected the new page to the Web & Utility category and related audit/SEO tools, and updated the privacy and About copy, README, architecture, sitemap generation inputs and active pending-work tracker. The local build has not been deployed. No test suites were run in this change.
+
 ## 2026-10-21 — Google AdSense connected + site-wide SEO definition pass (target phrase per page)
 
 **AdSense (publisher `ca-pub-1509697031230558`)** — wired into the build, nothing to paste by hand:

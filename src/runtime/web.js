@@ -603,4 +603,261 @@
     root.addEventListener('change', update);
     update();
   };
+
+  // ---------------------------------------------------------- local image compressor
+  T['image-compressor'] = function (root) {
+    var fileInput = $(root, 'ic-files');
+    var dropButton = $(root, 'ic-drop');
+    var selection = $(root, 'ic-selection');
+    var format = $(root, 'ic-format');
+    var quality = $(root, 'ic-quality');
+    var qualityValue = $(root, 'ic-quality-value');
+    var qualityHint = $(root, 'ic-quality-hint');
+    var widthInput = $(root, 'ic-width');
+    var optimizeButton = $(root, 'ic-optimize');
+    var clearButton = $(root, 'ic-clear');
+    var status = $(root, 'ic-note');
+    var summary = $(root, 'ic-summary');
+    var resultsEl = $(root, 'ic-results');
+    var MAX_FILES = 10;
+    var MAX_FILE_BYTES = 20 * 1024 * 1024;
+    var MAX_BATCH_BYTES = 50 * 1024 * 1024;
+    var MAX_INPUT_PIXELS = 50000000;
+    var MAX_DIMENSION = 8000;
+    var selectedFiles = [];
+    var results = [];
+    var busy = false;
+
+    function revokeResults() {
+      results.forEach(function (item) { if (item.url) URL.revokeObjectURL(item.url); });
+      results = [];
+      resultsEl.textContent = '';
+      summary.textContent = '';
+    }
+    function setStatus(message, kind) {
+      status.textContent = '';
+      status.appendChild(kind ? chip(kind, message) : document.createTextNode(message));
+    }
+    function bytes(value) {
+      if (value < 1024) return value + ' B';
+      if (value < 1024 * 1024) return (value / 1024).toFixed(1) + ' KB';
+      return (value / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+    function safeName(name) {
+      return String(name || 'image').replace(/\.[^.]*$/, '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').slice(0, 100) || 'image';
+    }
+    function extensionFor(mime) {
+      return mime === 'image/jpeg' ? '.jpg' : (mime === 'image/png' ? '.png' : '.webp');
+    }
+    function allowedFile(file) {
+      var type = String(file.type || '').toLowerCase();
+      var name = String(file.name || '').toLowerCase();
+      return /^image\/(jpeg|png|webp|avif)$/.test(type) || /\.(jpe?g|png|webp|avif)$/.test(name);
+    }
+    function drawSelected() {
+      optimizeButton.disabled = busy || selectedFiles.length === 0;
+      clearButton.disabled = busy || (selectedFiles.length === 0 && results.length === 0);
+      if (!selectedFiles.length) {
+        selection.textContent = 'Your files stay in this browser. Select images to begin.';
+        return;
+      }
+      var total = selectedFiles.reduce(function (sum, file) { return sum + file.size; }, 0);
+      selection.textContent = selectedFiles.length + (selectedFiles.length === 1 ? ' image selected' : ' images selected') +
+        ' · ' + bytes(total) + ' total · original files are unchanged.';
+    }
+    function setFiles(fileList) {
+      var incoming = Array.prototype.slice.call(fileList || []);
+      revokeResults();
+      if (incoming.length > MAX_FILES) {
+        selectedFiles = [];
+        fileInput.value = '';
+        drawSelected();
+        setStatus('Choose up to ' + MAX_FILES + ' images at a time.', 'warn');
+        return;
+      }
+      var incomingBytes = incoming.reduce(function (sum, file) { return sum + file.size; }, 0);
+      if (incomingBytes > MAX_BATCH_BYTES) {
+        selectedFiles = [];
+        fileInput.value = '';
+        drawSelected();
+        setStatus('The selected batch is larger than 50 MB. Choose fewer or smaller images.', 'warn');
+        return;
+      }
+      selectedFiles = incoming;
+      drawSelected();
+      if (incoming.length) setStatus('Ready to optimize. Choose a format and review the resize and quality settings.', 'good');
+      else setStatus('Select images to start.');
+    }
+    function loadImage(file) {
+      return new Promise(function (resolve, reject) {
+        var sourceUrl = URL.createObjectURL(file);
+        var image = new Image();
+        image.onload = function () { URL.revokeObjectURL(sourceUrl); resolve(image); };
+        image.onerror = function () { URL.revokeObjectURL(sourceUrl); reject(new Error('This browser could not decode the image. Try a supported JPEG, PNG, WebP or AVIF file.')); };
+        image.src = sourceUrl;
+      });
+    }
+    function encode(canvas, mime, q) {
+      return new Promise(function (resolve, reject) {
+        if (!canvas.toBlob) { reject(new Error('This browser does not support canvas image export. Try a recent browser.')); return; }
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('The browser could not create an image. Try a smaller file or another format.')); return; }
+          if (blob.type !== mime) { reject(new Error('This browser cannot export ' + mime.replace('image/', '').toUpperCase() + '. Choose another output format.')); return; }
+          resolve(blob);
+        }, mime, q);
+      });
+    }
+    async function optimizeFile(file, mime, q, requestedWidth) {
+      if (!allowedFile(file)) throw new Error('Unsupported file type. Choose JPEG, PNG, WebP or AVIF.');
+      if (file.size > MAX_FILE_BYTES) throw new Error('This file is larger than 20 MB. Choose a smaller image.');
+      if (!file.size) throw new Error('This image file is empty.');
+      var image = await loadImage(file);
+      var sourceWidth = image.naturalWidth || image.width;
+      var sourceHeight = image.naturalHeight || image.height;
+      if (!sourceWidth || !sourceHeight) throw new Error('The browser could not read this image’s dimensions.');
+      if (sourceWidth * sourceHeight > MAX_INPUT_PIXELS) throw new Error('This image is larger than 50 megapixels. Resize it before using this browser tool.');
+      var scale = Math.min(1, requestedWidth ? requestedWidth / sourceWidth : 1, MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
+      var outputWidth = Math.max(1, Math.round(sourceWidth * scale));
+      var outputHeight = Math.max(1, Math.round(sourceHeight * scale));
+      var canvas = document.createElement('canvas');
+      canvas.width = outputWidth;
+      canvas.height = outputHeight;
+      var context = canvas.getContext('2d', { alpha: mime !== 'image/jpeg' });
+      if (!context) throw new Error('The browser could not create an image canvas.');
+      if (mime === 'image/jpeg') {
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, outputWidth, outputHeight);
+      }
+      context.drawImage(image, 0, 0, outputWidth, outputHeight);
+      var blob;
+      try { blob = await encode(canvas, mime, mime === 'image/png' ? undefined : q); }
+      finally { canvas.width = 0; canvas.height = 0; }
+      var outputName = safeName(file.name) + '-optimized' + extensionFor(mime);
+      return {
+        fileName: file.name,
+        outputName: outputName,
+        sourceBytes: file.size,
+        outputBytes: blob.size,
+        sourceWidth: sourceWidth,
+        sourceHeight: sourceHeight,
+        outputWidth: outputWidth,
+        outputHeight: outputHeight,
+        blob: blob,
+        url: URL.createObjectURL(blob),
+      };
+    }
+    function renderResults() {
+      resultsEl.textContent = '';
+      var good = results.filter(function (item) { return !item.error; });
+      var originalTotal = good.reduce(function (sum, item) { return sum + item.sourceBytes; }, 0);
+      var outputTotal = good.reduce(function (sum, item) { return sum + item.outputBytes; }, 0);
+      if (good.length) {
+        var saved = originalTotal - outputTotal;
+        var summaryText = good.length + (good.length === 1 ? ' image processed' : ' images processed') +
+          ' · ' + bytes(originalTotal) + ' → ' + bytes(outputTotal);
+        if (saved > 0) summaryText += ' · ' + (saved / originalTotal * 100).toFixed(1) + '% smaller overall';
+        else if (saved < 0) summaryText += ' · output is ' + (-saved / originalTotal * 100).toFixed(1) + '% larger overall';
+        else summaryText += ' · same total size';
+        summary.textContent = summaryText;
+      }
+      results.forEach(function (item) {
+        var card = el('article', 'img-result');
+        var info = el('div', 'img-result-info');
+        var title = el('h3', null, item.fileName);
+        info.appendChild(title);
+        if (item.error) {
+          info.appendChild(el('p', 'img-result-error', item.error));
+        } else {
+          var preview = el('img', 'img-result-preview');
+          preview.src = item.url;
+          preview.alt = 'Optimized preview of ' + item.outputName;
+          preview.loading = 'lazy';
+          var dimensions = item.sourceWidth + ' × ' + item.sourceHeight + ' → ' + item.outputWidth + ' × ' + item.outputHeight;
+          var delta = item.sourceBytes - item.outputBytes;
+          var sizeText = bytes(item.sourceBytes) + ' → ' + bytes(item.outputBytes);
+          if (delta > 0) sizeText += ' · ' + (delta / item.sourceBytes * 100).toFixed(1) + '% smaller';
+          else if (delta < 0) sizeText += ' · ' + (-delta / item.sourceBytes * 100).toFixed(1) + '% larger';
+          else sizeText += ' · same size';
+          info.appendChild(el('p', 'img-result-dimensions', dimensions + ' px'));
+          info.appendChild(el('p', 'img-result-size', sizeText));
+          var download = el('a', 'btn btn-secondary', 'Download ' + item.outputName);
+          download.href = item.url;
+          download.download = item.outputName;
+          info.appendChild(download);
+          card.appendChild(preview);
+        }
+        card.appendChild(info);
+        resultsEl.appendChild(card);
+      });
+    }
+    function updateQuality() {
+      qualityValue.textContent = quality.value + '%';
+      var isPng = format.value === 'image/png';
+      quality.disabled = isPng || busy;
+      qualityHint.textContent = isPng ? 'PNG uses lossless encoding; the quality slider does not apply.' : 'Lower quality can reduce file size; compare the visual result.';
+    }
+    function setBusy(value) {
+      busy = value;
+      fileInput.disabled = value;
+      dropButton.disabled = value;
+      format.disabled = value;
+      widthInput.disabled = value;
+      optimizeButton.disabled = value || selectedFiles.length === 0;
+      clearButton.disabled = value || (selectedFiles.length === 0 && results.length === 0);
+      updateQuality();
+    }
+    async function run() {
+      if (busy || !selectedFiles.length) return;
+      var requestedWidth = null;
+      if (widthInput.value.trim()) {
+        requestedWidth = Number(widthInput.value);
+        if (!Number.isInteger(requestedWidth) || requestedWidth < 1 || requestedWidth > MAX_DIMENSION) {
+          setStatus('Maximum width must be a whole number from 1 to ' + MAX_DIMENSION + ', or leave it blank.', 'warn');
+          widthInput.focus();
+          return;
+        }
+      }
+      revokeResults();
+      setBusy(true);
+      var mime = format.value;
+      var q = Number(quality.value) / 100;
+      var completed = 0;
+      for (var i = 0; i < selectedFiles.length; i++) {
+        var file = selectedFiles[i];
+        setStatus('Optimizing image ' + (i + 1) + ' of ' + selectedFiles.length + '…');
+        try { results.push(await optimizeFile(file, mime, q, requestedWidth)); }
+        catch (error) { results.push({ fileName: file.name, error: error && error.message ? error.message : 'This image could not be processed.' }); }
+        completed++;
+        renderResults();
+      }
+      setBusy(false);
+      var failures = results.filter(function (item) { return !!item.error; }).length;
+      setStatus(completed + (completed === 1 ? ' file finished' : ' files finished') + (failures ? ' · ' + failures + (failures === 1 ? ' could not be processed' : ' could not be processed') : ''), failures ? 'warn' : 'good');
+      drawSelected();
+    }
+    function clear() {
+      if (busy) return;
+      selectedFiles = [];
+      fileInput.value = '';
+      revokeResults();
+      drawSelected();
+      setStatus('Selection cleared. Your original files were not changed.');
+    }
+
+    fileInput.addEventListener('change', function () { setFiles(fileInput.files); });
+    dropButton.addEventListener('click', function () { fileInput.click(); });
+    dropButton.addEventListener('dragover', function (event) { event.preventDefault(); dropButton.classList.add('is-dragover'); });
+    dropButton.addEventListener('dragleave', function () { dropButton.classList.remove('is-dragover'); });
+    dropButton.addEventListener('drop', function (event) {
+      event.preventDefault();
+      dropButton.classList.remove('is-dragover');
+      setFiles(event.dataTransfer && event.dataTransfer.files);
+    });
+    format.addEventListener('change', updateQuality);
+    quality.addEventListener('input', updateQuality);
+    optimizeButton.addEventListener('click', run);
+    clearButton.addEventListener('click', clear);
+    updateQuality();
+    drawSelected();
+  };
 })();

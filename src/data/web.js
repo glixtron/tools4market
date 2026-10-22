@@ -348,4 +348,69 @@ ${f.textarea('ics-desc', 'Description (optional)', 'Agenda, dial-in link, notes�
 ${outputBlock('ics-out', 'event.ics')}
 <div class="btn-row"><button type="button" class="btn" data-download="#ics-out|event.ics">Download event.ics</button></div>`,
   },
+
+  // ---------------------------------------------------------- 10
+  {
+    slug: 'image-compressor',
+    name: 'Image Compressor & Optimizer',
+    cat: 'web',
+    icon: '🖼️',
+    card: 'Resize, compress and convert images for websites, with before-and-after file sizes.',
+    keywords: 'image compressor optimize images online webp converter image resizer reduce image size',
+    focus: 'image compressor',
+    h1: 'Free Image Compressor & Optimizer — No Signup',
+    metaTitle: 'Free Image Compressor & Optimizer — WebP, JPG, PNG',
+    metaDesc: 'Compress and resize images in your browser with this free image compressor — convert JPG, PNG and WebP, and compare file sizes before downloading.',
+    intro: 'Use this image compressor to resize and re-encode common image files for web pages, compare the actual file sizes, then download each optimized copy.',
+    sections: [
+      { h: 'What this image compressor changes', p: ['This image compressor reads JPEG, PNG, WebP and AVIF files your browser can decode, then exports WebP, JPEG or PNG. WebP and JPEG use a quality setting that trades detail for size. PNG uses lossless encoding, so the quality slider does not apply. Results show the original and output sizes, pixel dimensions and size difference; some already-optimized files may grow instead of shrink.', 'Set a maximum width to resize large images without changing their proportions. The default is 2400 pixels; clear the field to skip width resizing. An 8000-pixel maximum-side safety cap still applies, and images are never enlarged. JPEG has no transparency, so transparent areas become white. WebP and PNG can retain transparency.'] },
+      { h: 'How to use the image compressor', p: ['Choose or drop up to ten images (50 MB total), select an output format, adjust quality for JPEG or WebP, and set a maximum width if needed. Select Optimize images to process files one at a time. Each result shows the original and exported sizes and dimensions, whether it became smaller or larger, and a download link. The original files on your device are not changed.', 'Use WebP for compact web images when your site supports it, JPEG for photographs when compatibility matters, or PNG for lossless output and transparency. Lower quality may reduce file size but can introduce visible artifacts. Start near the default, inspect the preview at its intended display size, and raise quality if detail suffers.'] },
+      { h: 'Privacy and image metadata', p: ['Image decoding, resizing and encoding happen in your browser using local file and canvas APIs. This tool does not send image bytes to our server, and it needs no account. Results use temporary browser download links. Batches are limited to ten files and 50 MB total, then processed sequentially to reduce memory use. Very large files may take longer on older phones or computers.', 'Re-encoding may remove EXIF details such as camera, location and timestamp data, or alter color profiles. That can help avoid sharing metadata, but may remove information your workflow needs. Keep the original when metadata matters. Browser support varies, so an accepted AVIF or other image may still fail if the browser cannot decode it.'] },
+      { h: 'Image size is only one part of page speed', p: ['Smaller image downloads can reduce transfer size, particularly for large hero images and galleries. They do not guarantee a faster page or better rankings: displayed dimensions, caching, network, scripts and server response also matter. Optimize the actual assets, then check the live page on mobile and measure its performance.', 'Keep enough quality for the job. Text in screenshots and diagrams needs crisp edges; photos may need a higher setting; transparent graphics need PNG or WebP. Compare file size and appearance, and keep the original if the export is larger or visibly worse. Pair image work with the Web Crawler Audit or SEO Score Checker for a broader page review.'] },
+    ],
+    faqs: [
+      { q: 'Are my files uploaded when I use this image compressor?', a: 'No. Image decoding and compression run in your browser. The tool does not send the selected image bytes to our server.' },
+      { q: 'Which image formats can this image compressor export?', a: 'Choose WebP, JPEG or PNG. The browser must support decoding the source format; AVIF input support varies by browser.' },
+      { q: 'Why did the image compressor make my file larger?', a: 'Some images are already optimized or do not suit the selected format. Try another output format or quality, compare the reported sizes, and keep the original if it is smaller.' },
+      { q: 'Does the image compressor preserve transparency and EXIF data?', a: 'WebP and PNG can preserve transparency; JPEG fills transparent areas with white. Re-encoding may remove EXIF metadata, so keep the original if those details matter.' },
+    ],
+    html: `
+<div class="img-compressor">
+  <button type="button" class="img-drop" id="ic-drop" aria-controls="ic-files">
+    <span class="img-drop-icon" aria-hidden="true">＋</span>
+    <strong>Choose images or drop them here</strong>
+    <span>JPEG, PNG, WebP or AVIF · up to 10 files · 20 MB each · 50 MB total</span>
+  </button>
+  <input id="ic-files" class="img-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple aria-label="Choose images to compress">
+  <p class="tool-note" id="ic-selection" aria-live="polite">Your files stay in this browser. Select images to begin.</p>
+  <div class="img-controls">
+    <div class="field">
+      <label for="ic-format">Output format</label>
+      <select id="ic-format">
+        <option value="image/webp" selected>WebP — smaller web images</option>
+        <option value="image/jpeg">JPEG — broad photo compatibility</option>
+        <option value="image/png">PNG — lossless, supports transparency</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ic-quality">Quality: <strong id="ic-quality-value">82%</strong></label>
+      <input id="ic-quality" type="range" min="30" max="95" value="82" step="1">
+      <span class="field-hint" id="ic-quality-hint">Used for WebP and JPEG; PNG ignores this setting.</span>
+    </div>
+    <div class="field">
+      <label for="ic-width">Maximum width (pixels)</label>
+      <input id="ic-width" type="number" min="1" max="8000" value="2400" inputmode="numeric">
+      <span class="field-hint">Optional: clear to skip width resizing. An 8,000px max-side safety cap still applies.</span>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn" id="ic-optimize" disabled>Optimize images</button>
+    <button type="button" class="btn btn-secondary" id="ic-clear" disabled>Clear selection</button>
+  </div>
+  <p class="stat-line" id="ic-note" role="status" aria-live="polite">Select images to start.</p>
+  <div class="img-summary" id="ic-summary" aria-live="polite"></div>
+  <div class="img-results" id="ic-results" aria-label="Optimized image results"></div>
+  ${note('Re-encoding may remove EXIF metadata. Keep the originals and check each download before replacing a live asset.')}
+</div>`,
+  },
 ];

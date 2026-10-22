@@ -1,27 +1,27 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 21 Oct 2026 (page-aware tool upgrades and site-wide SEO pass).*
+*Living tracker — update after every session. Last updated: 22 Oct 2026 (post-launch keyword and CBO review).*
 
-## 👤 User actions required — **these block launch**
+## 👤 Owner follow-ups — launch and growth
 
 - [x] ~~**Buy domain**~~ — DONE: **`tools4market.online`** (canonical host = apex) · `SITE.url` = `https://tools4market.online`, `SITE.email` = `support@tools4market.online`, all dist URLs verified (0 old-host references) · `www` must 301 → apex via a zone-level Cloudflare Redirect Rule (not `_redirects` — Workers reject host rules)
 - [x] ~~Verify Google Search Console property~~ — DONE per user; sitemap submitted/monitoring started
 - [x] ~~Start Bing Webmaster Tools~~ — DONE per user; Bing crawling/index monitoring started
-- [ ] GA4 property (optional; set `GA_ID` after confirming the property)
-- [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
+- [x] **Google tag / GA4 tag present** — latest live verification found exactly one `G-6B4GGFC96K` tag on every published page, after Consent Mode defaults. Check collected traffic in GA4 separately; tag presence alone does not prove reporting attribution is configured correctly.
+- [ ] **Check AdSense site/review status** — Google's readiness guidance focuses on unique, relevant content, clear navigation and user experience; it does not publish a fixed article-count threshold. Resolve any specific status/rejection findings before applying or reapplying.
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
-- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** deploy the local SEO diagnostics and copy improvements from 21 Oct.
+- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** publish the local SEO diagnostics/copy improvements and the new image optimizer after review.
 - [x] ~~Attach canonical apex domain~~ — DONE: `https://tools4market.online` serves the site and is used in canonicals/sitemaps.
-- [ ] **Fix `www` canonical redirect** — live fetch currently gets HTTP 403 on `https://www.tools4market.online/`, instead of the required one-hop 301 to apex. The Worker already implements the redirect and a `www` route is now declared in `wrangler.jsonc`; deploy it and check Cloudflare Zero Trust/Access or zone redirect settings if 403 remains. Historical `launch-verification.md` recorded an Access policy on `www`.
-- [ ] **Set integration env vars in Cloudflare Pages** (Settings → Environment variables → Production): `GA_ID` (GA4), `ADSENSE_CLIENT` + `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` (AdSense; also writes `ads.txt`). `SITE_URL` / `SITE_EMAIL` are optional overrides — the defaults already point at the live domain.
-- [ ] **Point DNS to Cloudflare** (nameservers at the registrar) → add `www.tools4market.online` as a custom domain → verify `https://www.tools4market.online/api/fetch?url=https://example.com` returns `{"ok":true,…}`
+- [x] ~~**Fix `www` canonical redirect**~~ — latest `launch-verification.md` records `https://www.tools4market.online/` returning a one-hop 301 to `https://tools4market.online/`.
+- [ ] **Finish AdSense ad-unit setup** — publisher loader and `ads.txt` are live. Create ad units and set `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR`, then finish the AdSense review flow. `SITE_URL` / `SITE_EMAIL` are optional overrides; defaults already point at the live domain.
+- [x] ~~**Point DNS / verify `/api/fetch`**~~ — latest live verification records Cloudflare DNS, apex + www canonical routing, live sitemap and a working public-page fetch proxy with the loopback SSRF probe blocked.
 
 ## ✅ Phase 1 — complete (20 Oct 2026)
 
 - [x] build.mjs static site generator — clean build, no SEO length warnings
 - [x] style.css design system + site.js shell
-- [x] Tool definitions with copy + runtime implementations (now 30 tools — see below)
+- [x] Tool definitions with copy + runtime implementations (now 31 tools — see below)
 - [x] Policy pages (About, Contact, Privacy, Terms, Disclaimer)
 - [x] sitemap.xml + robots.txt + 404
 - [x] **Full tool functional audit — 236/236 checks passed** (real DOM via jsdom driving actual `dist/` HTML + production scripts; realistic inputs, edge cases, injection attempts, zero JS errors)
@@ -50,16 +50,19 @@
 
 ## 📅 Phase 2 — in progress (started 20 Oct 2026, user go-ahead given)
 - [x] **Site-wide SEO definition pass (21 Oct)** — all 30 tools and homepage checked for metadata, headings, keyword placement, content depth, FAQs, schema, internal links, HTML hygiene and duplicates. `tests/seo-audit.mjs`: **1,254 passed, 0 failed**. Utility-page focus terms and repeated FAQ wording corrected locally; deploy remains a separate step.
-- [x] **Google AdSense connected (21 Oct 2026)** — publisher `ca-pub-1509697031230558`: loader in every `<head>` (site-ownership verification), `ads.txt` generated at the domain root, preconnect for the ad server, ad slots keep their reserved height (no CLS) and switch to real `<ins>` units as soon as `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` ad-unit ids are set. Consent-aware: EEA/UK/CH get limited non-personalised ads until the visitor accepts. **Next:** create the three ad units in the AdSense console → set the env vars → tick "I've placed the code" → request review.
+- [x] **Google AdSense connected (21 Oct 2026)** — publisher `ca-pub-1509697031230558`: loader in every `<head>` (site-ownership verification), `ads.txt` generated at the domain root, preconnect for the ad server, ad slots keep their reserved height (no CLS) and switch to real `<ins>` units once `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` ids are configured. Consent-aware: EEA/UK/CH get limited non-personalised ads until the visitor accepts. **Next:** confirm review status, create/verify ad units and set the slot ids as needed.
 
 ### ✅ Guides section + Google tag verification (21–22 Oct 2026)
 
 - [x] **Ten full guides published** at `/blog/` — each with `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author/reviewer/date, cited sources, and links into the tools it discusses: robots.txt for search engines and AI crawlers · the website launch SEO checklist · how to block GPTBot · llms.txt guide · how to appear in ChatGPT search results · check whether AI crawlers can access your site · noindex vs robots.txt · why is my site not indexed · UTM naming conventions · schema markup for AI search
 - [x] **Google tag (GA4 `G-6B4GGFC96K`) verified on every published page** — byte-identical to Google's snippet, exactly one per page, always after the Consent Mode v2 defaults. Proved locally across every built page and live across every URL in all three sitemaps
 - [x] **GTM container `GTM-P6P4FLGB` audited** — it contains no GA4 measurement id, so there is no double counting with the direct Google tag
-- [ ] **AdSense verdict** — review submitted; if it returns "low content", the cure is more guides (the same work that ranks for the head terms)
+- [ ] **AdSense verdict** — confirm the current status in the console. If declined, fix the specific findings and strengthen original utility, guidance and navigation; do not add articles to meet an invented count.
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
-- [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")
+- [x] **Image Compressor & Optimizer pilot (22 Oct)** — added locally at `/tools/image-compressor/`: browser-local JPEG/PNG/WebP/AVIF input, WebP/JPEG/PNG export, resize and quality controls, per-file size/dimension comparison, and separate downloads. Limits batches to 10 files/50 MB total and each image to 20 MB/50 MP. Image bytes are not uploaded; EXIF/metadata caveats are disclosed. **Not deployed yet.**
+- [x] **Post-launch keyword and CBO review (22 Oct)** — refreshed [KEYWORD-RESEARCH-AND-SEO-PLAN.md](KEYWORD-RESEARCH-AND-SEO-PLAN.md) with a competitor/product scan, intent-led priorities, verified positioning, current Google/Bing research workflow and a 30/60/90-day plan. The 1,040 phrases remain hypotheses; no connected GSC/Bing export or keyword-volume data was available in this workspace.
+- [ ] **Collect the first GSC and Bing query exports** after enough data accrues; compare queries and landing pages by impressions, clicks, CTR, position, country and device before expanding the keyword/page inventory.
+- [x] **Content cadence reset (22 Oct)** — 10 guides are already published. Pause the 3–5-posts/week target; update or add a guide only when GSC/Bing queries or user questions reveal a useful gap.
 - [x] ~~OG image (1200×630 PNG) for social sharing~~ — done (branded PNG + twitter:card=summary_large_image)
 - [x] ~~Minify assets at build (CSS/JS), add cache headers via `_headers` file~~ — `_headers` DONE (1-year immutable assets + 5-min HTML revalidate + security headers); minification still open (optional — keep readable source for the Cloudflare build)
 - [x] ~~Extend URL diagnostics with robots.txt and sitemap evidence~~ — Web Crawler Audit checks the matching Googlebot rule, up to three declared sitemap files (plus up to three nested child maps), and falls back to `/sitemap.xml` when no sitemap is declared. Findings identify unverified data and do not claim Google index status.
@@ -71,7 +74,7 @@
 - [ ] Distribution: tool directories, Quora/Reddit cadence, Pinterest, 1 YouTube Short/week
 
 ## 📅 Monetization milestones
-- [ ] Month 2 end: AdSense application
+- [ ] AdSense: finish or re-submit review when the site's unique content, navigation, policy pages and ad implementation are ready; there is no fixed article-count target in Google's published readiness guidance.
 - [ ] Month 3–4: affiliate links live
 - [ ] 50K sessions/mo: apply Mediavine/Raptive
 
