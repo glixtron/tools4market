@@ -302,3 +302,5 @@
 **Also fixed by this deploy:** `https://www.tools4market.online/` now 301s one-hop to the apex (was 403) — the Worker route in `wrangler.jsonc` handles it; item closed in pending-work.md.
 
 **Still pending (user/post-deploy):** set `INDEXNOW_KEY` + optionally `GOOGLE_SITE_VERIFY` in Cloudflare env → redeploy → `npm run indexnow`; resubmit sitemap in Search Console; AdSense env vars; distribution plan.
+
+**IndexNow live (22 Oct):** generated a stable 32-char key (`48794bab…701d`), stored in gitignored local `.env` (documented in README), rebuilt + redeployed so `/{key}.txt` is published (verified 200 + correct body), then `npm run indexnow` submitted **51 URLs → HTTP 202**. Bing/Yandex ingestion is asynchronous — verify in Bing Webmaster Tools → IndexNow; no crawl/index guarantee.

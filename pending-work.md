@@ -8,7 +8,7 @@
 - [x] ~~Verify Google Search Console property~~ — DONE per user; sitemap submitted/monitoring started
 - [x] ~~Start Bing Webmaster Tools~~ — DONE per user; Bing crawling/index monitoring started
 - [ ] GA4 property (optional; set `GA_ID` after confirming the property)
-- [ ] **Set `INDEXNOW_KEY` in Cloudflare Pages env** (any random string, e.g. `openssl rand -hex 16`) → the build publishes `/{key}.txt`; then `npm run indexnow` pings Bing/IndexNow on each deploy
+- [x] ~~**Set `INDEXNOW_KEY` in Cloudflare Pages env**~~ — DONE 22 Oct: key `48794bab…701d` generated, stored in local `.env` (gitignored; build reads it), `/{key}.txt` published and verified live (200), **51 URLs submitted to IndexNow (HTTP 202)**. Re-run `npm run indexnow` after each deploy.
 - [ ] **After the next deploy:** resubmit the sitemap in Search Console (blog now carries real `lastmod`; tool/pages deliberately have none) and check Coverage for new-indexed pages
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting

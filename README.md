@@ -294,7 +294,7 @@ Everything optional is switched by an environment variable at build time — the
 | `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` | Per-position AdSense ad-unit ids (falls back to one shared slot) |
 | `BING_VERIFY` | Bing Webmaster Tools verification id (default set) — also shipped as `/BingSiteAuth.xml` |
 | `GOOGLE_SITE_VERIFY` | Google Search Console verification token → `<meta name="google-site-verification">`. Empty by default: the domain property is verified via a DNS TXT record |
-| `INDEXNOW_KEY` | IndexNow key (generate one 32-char hex string once). The build then publishes `/{key}.txt` so `npm run indexnow` can submit changed URLs to Bing/Yandex/Seznam. **The key must be stable across builds** |
+| `INDEXNOW_KEY` | IndexNow key (generate one 32-char hex string once). The build then publishes `/{key}.txt` so `npm run indexnow` can submit changed URLs to Bing/Yandex/Seznam. **The key must be stable across builds**. Locally, put it in a gitignored `.env` file at the repo root (`INDEXNOW_KEY=…`) and `source .env` before building/deploying — the live key is already published |
 | `CONSENT_MODE` | `basic` (default: denied in EEA/UK/CH, granted elsewhere) or `advanced` (denied for everyone until the banner is answered) |
 
 In Cloudflare Pages: **Settings → Environment variables → Production** (and Preview). Example: `GA_ID = G-XXXXXXXXXX`, `ADSENSE_CLIENT = ca-pub-0000000000000000`.
