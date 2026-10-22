@@ -80,34 +80,60 @@ export const JOBS = [
     blurb: 'Write the meta tags, preview the snippet and check the signals search engines read first.',
     path: '/tools/meta-tag-generator/',
     cta: 'Start with the Meta Tag Generator',
+    icon: 'page-search',
   },
   {
     title: 'Decide what AI crawlers may do',
     blurb: 'Allow, block or filter AI bots deliberately — then publish an llms.txt map for answer engines.',
     path: '/tools/robots-txt-generator/',
     cta: 'Start with the Robots.txt Generator',
+    icon: 'antenna',
   },
   {
     title: 'Tag a campaign so GA4 can read it',
     blurb: 'Build UTM links with consistent naming that groups cleanly in your reports.',
     path: '/tools/utm-link-builder/',
     cta: 'Start with the UTM Link Builder',
+    icon: 'link-tag',
   },
   {
     title: 'Audit a live site before launch',
     blurb: 'Fetch any URL and read its status, canonical, robots rules and discovery signals.',
     path: '/tools/web-crawler-audit/',
     cta: 'Start with the Web Crawler Audit',
+    icon: 'browser-check',
   },
 ];
+
+// Example searches shown as one-click chips under the hero search field.
+// They double as an empty-state suggestion when nothing matches.
+export const SEARCH_EXAMPLES = ['meta', 'robots', 'UTM', 'schema', 'audit'];
 
 // ---------------------------------------------------------------------------
 // Editor's pick — rotates weekly (the week number picks the entry, so the card
 // changes on its own every Monday). Swap or reorder this list to re-curate.
-// Each tool carries `pickWhy` (the use case) and `pickSample` (a real-looking
+// Each entry carries a `note` ("why this week" editorial line) and points at a
+// tool that carries `pickWhy` (the use case) and `pickSample` (a real-looking
 // output preview) in its own data file.
 // ---------------------------------------------------------------------------
-export const EDITOR_PICKS = ['web-crawler-audit', 'meta-tag-generator', 'robots-txt-generator', 'utm-link-builder'];
+export const EDITOR_PICKS = [
+  {
+    slug: 'web-crawler-audit',
+    note: 'Launch week is when crawl mistakes get expensive — this reads the live signals before your visitors do.',
+  },
+  {
+    slug: 'meta-tag-generator',
+    note: 'The fastest path from a blank page head to a previewed, complete set of meta tags.',
+  },
+  {
+    slug: 'robots-txt-generator',
+    note: 'AI crawler rules shift month to month — the presets here track the current bot list.',
+  },
+  {
+    slug: 'utm-link-builder',
+    note: 'Every campaign report is only as clean as the links that feed it.',
+  },
+];
 
 // ISO-ish week index of the current date (1-based; used for the weekly rotation)
 export const weekIndex = (d = new Date()) => {

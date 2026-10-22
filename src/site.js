@@ -77,7 +77,7 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
   function initSearch() {
     const inp = document.getElementById('tool-search');
     if (!inp) return;
-    const cards = Array.prototype.slice.call(document.querySelectorAll('.tool-card'));
+    const cards = Array.prototype.slice.call(document.querySelectorAll('.tool-card[data-search]'));
     const empty = document.getElementById('search-empty');
     inp.addEventListener('input', () => {
       const q = inp.value.trim().toLowerCase();
@@ -89,11 +89,60 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
         if (show) visible++;
       });
       document.querySelectorAll('.cat-section').forEach((s) => {
-        const any = Array.prototype.some.call(s.querySelectorAll('.tool-card'), (c) => c.style.display !== 'none');
+        const any = Array.prototype.some.call(s.querySelectorAll('.tool-card[data-search]'), (c) => c.style.display !== 'none');
         s.style.display = any ? '' : 'none';
       });
       if (empty) empty.style.display = (q && visible === 0) ? '' : 'none';
     });
+    // Example chips ("meta", "robots", "UTM", "schema", "audit") fill the
+    // field and run the filter — a one-tap path for task-first visitors.
+    document.querySelectorAll('.sx-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        inp.value = chip.getAttribute('data-q') || '';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        inp.focus();
+      });
+    });
+  }
+
+  // Recently-used marker — tool pages record their slug here; the homepage
+  // highlights those cards with a brass "recently used" rule. Local-only.
+  function rememberTool(slug) {
+    try {
+      var rec = JSON.parse(window.localStorage.getItem('t4m_recent') || '[]');
+      rec = rec.filter(function (s) { return s !== slug; });
+      rec.unshift(slug);
+      window.localStorage.setItem('t4m_recent', JSON.stringify(rec.slice(0, 6)));
+    } catch (e) { /* private mode: skip */ }
+  }
+  function markRecentCards() {
+    var cards = document.querySelectorAll('.tool-card[data-slug]');
+    if (!cards.length) return;
+    var recent;
+    try { recent = JSON.parse(window.localStorage.getItem('t4m_recent') || '[]'); } catch (e) { return; }
+    if (!recent || !recent.length) return;
+    var set = {};
+    recent.forEach(function (s) { set[s] = 1; });
+    Array.prototype.forEach.call(cards, function (c) {
+      if (set[c.getAttribute('data-slug')]) {
+        c.classList.add('tool-card--recent');
+        var b = document.createElement('span');
+        b.className = 'tool-recent-tag';
+        b.textContent = 'recently used';
+        c.appendChild(b);
+      }
+    });
+  }
+
+  // Hero entrance — a short fade-and-rise, once per session (a return visit in
+  // the same tab skips it). CSS guards on prefers-reduced-motion.
+  function initHeroAnim() {
+    try {
+      if (!window.sessionStorage.getItem('t4m_hero')) {
+        window.sessionStorage.setItem('t4m_hero', '1');
+        document.body.classList.add('hero-anim');
+      }
+    } catch (e) { /* private mode: no animation */ }
   }
 
   function initTool() {
@@ -105,6 +154,7 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
       try { fn(root); } catch (err) { if (window.console) console.error('Tool init failed:', err); }
     }
     track('tool_open', { tool_slug: slug });
+    rememberTool(slug);
     // Tools compute live as you type, so the first interaction inside the shell
     // is the "run". Fires once per page view.
     let ran = false;
@@ -241,7 +291,17 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     };
   }
 
-  function boot() { initCopy(); initDownload(); initSearch(); initTool(); initEvents(); initYear(); initConsent(); }
+  function boot() {
+    initHeroAnim();
+    initCopy();
+    initDownload();
+    initSearch();
+    markRecentCards();
+    initTool();
+    initEvents();
+    initYear();
+    initConsent();
+  }
 
   // In a deferred script readyState is already "interactive" and DOMContentLoaded is imminent:
   // boot via the event. Only boot immediately when the document is fully done (late injection).

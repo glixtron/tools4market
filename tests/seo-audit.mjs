@@ -322,6 +322,60 @@ for (const t of TOOLS) {
   ok('site.js: every event goes through the consent-gated gtag helper', !/dataLayer\.push\(\{?\s*event:\s*'(tool_|copy_|download_|blog_|contact_)/.test(siteJs));
 }
 
+// ---------- 22 Oct 2026 human-first design refinement:
+// ---------- task-led search, job icons, guide→tool links, SERP-safe H1s,
+// ---------- processing notes, motion + reduced-motion, editorial hierarchy
+{
+  const home = read('index.html');
+  const css = read('assets/style.css');
+  const siteJs = read('assets/site.js');
+
+  // --- task-oriented search: example chips + a helpful (not blank) empty state
+  const chips = (home.match(/class="sx-chip"/g) || []).length;
+  ok('home: five example search chips (meta/robots/UTM/schema/audit)', chips === 5, chips + ' chips');
+  ok('home: chips wired to the search field (data-q)', home.includes('data-q="meta"') && home.includes('data-q="audit"'));
+  ok('home: search empty state offers concrete suggestions', home.includes('id="search-empty"') && /try .{0,12}meta/i.test(home) && home.includes('robots'));
+  ok('site.js: example chips run the search filter', siteJs.includes('.sx-chip'));
+
+  // --- editor's pick: "why this week" note + last-updated label
+  ok('home: pick card carries a "why this week" note', home.includes('class="pick-week"'));
+  ok('home: pick card shows a last-updated label', /class="pick-updated">Updated <time/.test(home));
+
+  // --- job cards use the 1.5px line-icon family (no emoji in primary UI)
+  const jobIcons = (home.match(/class="job-icon"/g) || []).length;
+  ok('home: four job cards carry line icons', jobIcons === 4, jobIcons + ' icons');
+  ok('job icons: 1.5px stroke, rounded caps, currentColor', (home.match(/stroke-width="1.5"/g) || []).length >= 4);
+
+  // --- guide cards: editorial date + topic label + "use this tool" bridge
+  const blogTools = (home.match(/class="blog-tool"/g) || []).length;
+  ok('home: guide cards link to a tool ("use this tool")', blogTools >= 3, blogTools + ' tool links');
+  ok('home: guide cards show topic label + <time> date', home.includes('class="blog-topic"') && /class="blog-meta"><time/.test(home));
+
+  // --- SERP-safe: no emoji inside any category H1 (kept as a decorative mark)
+  for (const c of Object.values(CATEGORIES)) {
+    const h1 = (read(c.slug + '/index.html').match(/<h1>([^<]+)<\/h1>/) || [])[1] || '';
+    ok(`/${c.slug}/: H1 has no emoji`, !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(h1), h1);
+  }
+
+  // --- tool cards: honest, varied processing note + recently-used marker
+  ok('home: tool cards carry a processing note', home.includes('class="tool-proc"'));
+  ok('site.js: records + marks recently-used tools (localStorage)', siteJs.includes('t4m_recent') && siteJs.includes('tool-card--recent'));
+
+  // --- accessibility: header active-state + keyboard-friendly focus
+  ok('build: nav marks the current section (aria-current)', read('blog/index.html').includes('aria-current="page"'));
+  ok('css: reduced-motion disables animation + transform churn', /@media \(prefers-reduced-motion: reduce\)/.test(css) && css.includes('animation-duration: .01ms !important'));
+
+  // --- motion tokens + once-per-session hero entrance
+  ok('css: motion tokens defined', css.includes('--motion-fast') && css.includes('--motion-base') && css.includes('--motion-slow'));
+  ok('site.js: hero entrance runs once per session', siteJs.includes('t4m_hero') && siteJs.includes('hero-anim'));
+
+  // --- footer exposes contact + guides (not just legal)
+  ok('home: footer links Contact + Guides', /<h4>Company<\/h4>[\s\S]{0,400}href="contact\/"/.test(home) && /<h4>Company<\/h4>[\s\S]{0,200}href="blog\/"/.test(home));
+
+  // --- outcome categories are an editorial two-column list, not a repeated grid
+  ok('css: outcome grid is a 2-col editorial list on desktop', /\.outcome-grid\s*{[^}]*repeat\(2/.test(css));
+}
+
 
 // ---------- site-wide duplicates
 const kwStrings = new Map();

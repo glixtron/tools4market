@@ -67,6 +67,10 @@
 
   /* Transitions */
   --ease: cubic-bezier(.22, 1, .36, 1);
+  /* Motion tokens — short, once-per-view, never decorative loops */
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 360ms;
 }
 
 /* ---------- Base reset ---------- */
@@ -114,6 +118,16 @@ p { margin: 0 0 1em; }
   outline: 2px solid var(--c-primary);
   outline-offset: 3px;
   border-radius: 5px;
+}
+
+/* Reduced motion — kill transforms/animations, keep instant state changes */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ================================================================
@@ -192,6 +206,12 @@ p { margin: 0 0 1em; }
   color: var(--c-text);
   background: var(--c-primary-xsoft);
   text-decoration: none;
+}
+.site-nav a[aria-current="page"] {
+  color: var(--c-text);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--c-accent);
+  border-radius: 8px 8px 0 0;
 }
 
 /* ================================================================
@@ -287,6 +307,56 @@ p { margin: 0 0 1em; }
   letter-spacing: .01em;
 }
 
+/* Example search chips — one-tap task phrases under the field */
+.search-examples {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  max-width: 520px;
+}
+.sx-label {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--c-muted);
+}
+.sx-chip {
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  letter-spacing: .02em;
+  color: var(--c-text-2);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  padding: 4px 13px;
+  cursor: pointer;
+  transition: border-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);
+}
+.sx-chip:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+  background: rgba(231, 180, 94, .08);
+}
+
+/* Hero entrance — a short fade-and-rise, added once per session by site.js.
+   Skipped entirely for prefers-reduced-motion (global rule above). */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+body.hero-anim .hero-copy > *,
+body.hero-anim .pick-card {
+  animation: hero-rise var(--motion-slow) var(--ease) both;
+}
+body.hero-anim .hero-copy > *:nth-child(2) { animation-delay: 40ms; }
+body.hero-anim .hero-copy > *:nth-child(3) { animation-delay: 80ms; }
+body.hero-anim .hero-copy > *:nth-child(4) { animation-delay: 120ms; }
+body.hero-anim .hero-copy > *:nth-child(5) { animation-delay: 150ms; }
+body.hero-anim .pick-card { animation-delay: 90ms; }
+
 /* Editor's pick card — the proof beside the promise */
 .pick-card {
   position: relative;
@@ -346,6 +416,32 @@ p { margin: 0 0 1em; }
 .pick-used { font-style: italic; }
 .pick-cta { font-size: .9rem; font-weight: 600; }
 
+/* "Why this week" note — the editorial reason this pick is featured now */
+.pick-week {
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  background: rgba(231, 180, 94, .1);
+  border-left: 3px solid var(--c-accent-light);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  font-size: .84rem;
+  line-height: 1.55;
+  color: var(--c-text-2);
+}
+.pick-week-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: .66rem;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  color: var(--c-accent);
+  margin-bottom: 3px;
+}
+.pick-updated {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .01em;
+}
+
 /* ================================================================
    HOME SECTIONS — eyebrow rule + serif title, then the grids
    ================================================================ */
@@ -367,6 +463,13 @@ p { margin: 0 0 1em; }
   height: 1px;
   background: var(--c-accent);
   flex: none;
+}
+.sec-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .82rem;
+  letter-spacing: .06em;
+  color: var(--c-border-2);
 }
 .section-title { font-size: 1.7rem; margin: 0 0 22px; }
 .section-sub { color: var(--c-muted); margin: -12px 0 12px; max-width: 720px; }
@@ -402,6 +505,17 @@ p { margin: 0 0 1em; }
   letter-spacing: .06em;
   color: var(--c-accent);
 }
+/* 1.5px line icon — one consistent family, no emoji */
+.job-icon {
+  display: inline-flex;
+  color: var(--c-primary);
+  margin: 2px 0 4px;
+}
+.job-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 1.5;
+}
 .job-card strong {
   font-family: var(--font-display);
   font-size: 1.08rem;
@@ -411,21 +525,19 @@ p { margin: 0 0 1em; }
 .job-blurb { color: var(--c-muted); font-size: .87rem; line-height: 1.55; }
 .job-cta { margin-top: 4px; font-size: .83rem; font-weight: 600; color: var(--c-primary); }
 
-/* Four outcome categories */
+/* Four outcome categories — editorial two-column rows, not another card grid */
 .outcome-grid {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 36px;
 }
 .outcome-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius);
-  padding: 20px 22px;
-  box-shadow: var(--shadow-xs);
+  padding: 20px 4px 22px;
+  border-top: 1px solid var(--c-border);
 }
 .outcome-num {
   margin: 0;
@@ -438,8 +550,19 @@ p { margin: 0 0 1em; }
 .outcome-card h3 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
 .outcome-card h3 a { color: var(--c-text); }
 .outcome-card h3 a:hover { color: var(--c-primary); text-decoration: none; }
+
+@media (max-width: 720px) {
+  .outcome-grid { grid-template-columns: minmax(0, 1fr); }
+}
 .outcome-desc { margin: 0; color: var(--c-muted); font-size: .87rem; line-height: 1.55; }
 .outcome-links { margin: 0; font-size: .82rem; color: var(--c-text-2); }
+.outcome-count {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--c-muted);
+}
 .outcome-all { margin-top: auto; padding-top: 6px; font-size: .84rem; font-weight: 600; }
 
 /* numbered category headers in the directory */
@@ -599,6 +722,34 @@ p { margin: 0 0 1em; }
   letter-spacing: .01em;
   margin-top: 2px;
 }
+/* Processing note — honest, per-tool: runs locally or can fetch a live page */
+.tool-proc {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--c-muted);
+  opacity: .85;
+  margin-top: 3px;
+}
+
+/* "Recently used" marker — set from localStorage, brass top rule */
+.tool-card--recent {
+  border-top: 3px solid var(--c-accent-light);
+}
+.tool-recent-tag {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font-mono);
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--c-accent);
+  background: rgba(231, 180, 94, .14);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
 
 /* ================================================================
    BREADCRUMB + LEAD
@@ -621,6 +772,13 @@ p { margin: 0 0 1em; }
   font-size: 1.04rem;
   max-width: 740px;
   line-height: 1.7;
+}
+
+/* Category page decorative mark — emoji lives here, not in the H1 (SERP-safe) */
+.cat-mark {
+  margin: 10px 0 2px;
+  font-size: 1.7rem;
+  line-height: 1;
 }
 
 /* Tool page meta strip — "Used for … · Last updated …" */
@@ -1362,12 +1520,14 @@ p { margin: 0 0 1em; }
    bottom padding while it is up so it never covers content.
    ============================================================ */.ck-banner {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
-  background: var(--c-surface);
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid var(--c-border);
-  box-shadow: 0 -4px 18px rgba(24, 35, 56, .08);
-  padding: 11px 0;
+  box-shadow: 0 -2px 10px rgba(24, 35, 56, .05);
+  padding: 9px 0;
 }
-body.ck-open { padding-bottom: 118px; }
+body.ck-open { padding-bottom: 104px; }
 .ck-banner[hidden], .ck-modal[hidden] { display: none !important; }
 .ck-inner {
   display: flex; gap: 16px; align-items: center;
@@ -1422,10 +1582,35 @@ body.ck-open { padding-bottom: 118px; }
   background: var(--c-surface); color: var(--c-text); text-decoration: none;
   transition: border-color .18s, transform .18s, box-shadow .18s;
 }
-.blog-card:hover { border-color: var(--c-primary); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(20, 18, 15, .07); }
+a.blog-card:hover, .blog-card:hover { border-color: var(--c-primary); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(20, 18, 15, .07); }
 .blog-card strong { font-size: 1.02rem; line-height: 1.35; }
+.blog-card strong a { color: var(--c-text); }
+.blog-card strong a:hover { color: var(--c-primary); text-decoration: none; }
 .blog-card span { color: var(--c-muted); font-size: .9rem; }
 .blog-date { color: var(--c-primary); font-size: .78rem; font-weight: 600; letter-spacing: .02em; }
+/* Guide card meta row: editorial date + topic label */
+.blog-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--c-muted);
+}
+.blog-meta time { color: var(--c-primary); font-weight: 600; }
+.blog-topic {
+  color: var(--c-accent);
+  border: 1px solid rgba(231, 180, 94, .5);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.blog-dek { color: var(--c-muted); font-size: .88rem; line-height: 1.55; }
+/* "Use this tool" — the guide → tool bridge on every card */
+.blog-tool { margin-top: auto; padding-top: 8px; font-size: .82rem; color: var(--c-muted); }
+.blog-tool a { font-weight: 600; color: var(--c-primary); }
 .article-meta { color: var(--c-muted); font-size: .88rem; margin: -6px 0 26px; }
 .article .lead { margin-bottom: 26px; }
 .article code { font-family: var(--font-mono); font-size: .9em; background: rgba(150, 104, 44, .12); padding: 1px 5px; border-radius: 4px; }

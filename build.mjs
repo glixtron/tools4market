@@ -2,7 +2,7 @@
 // Tools4Market — static site generator. Run: node build.mjs
 import { rm, mkdir, writeFile, copyFile, readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, weekIndex } from './src/data/index.js';
+import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, SEARCH_EXAMPLES, weekIndex } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
 import { ARTICLES } from './src/data/blog.js';
 
@@ -247,10 +247,10 @@ ${gtmBody}
   <div class="container header-inner">
     <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
     <nav class="site-nav" aria-label="Main">
-      ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}">${c.nav}</a>`).join('')}
-      <a href="${rel(path, '/blog/')}">Guides</a>
-      <a href="${rel(path, '/about/')}">About</a>
-      <a href="${rel(path, '/contact/')}">Contact</a>
+      ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}\"${path.startsWith('/' + c.slug + '/') ? ' aria-current="page"' : ''}>${c.nav}</a>`).join('')}
+      <a href="${rel(path, '/blog/')}\"${path.startsWith('/blog/') ? ' aria-current="page"' : ''}>Guides</a>
+      <a href="${rel(path, '/about/')}\"${path.startsWith('/about/') ? ' aria-current="page"' : ''}>About</a>
+      <a href="${rel(path, '/contact/')}\"${path.startsWith('/contact/') ? ' aria-current="page"' : ''}>Contact</a>
     </nav>
   </div>
 </header>
@@ -270,6 +270,7 @@ ${body}
     </div>
     <div>
       <h4>Company</h4>
+      <a href="${rel(path, '/blog/')}">Guides</a>
       ${POLICY.map((p) => `<a href="${rel(path, '/' + p.slug + '/')}">${p.title}</a>`).join('')}
     </div>
     <div>
@@ -297,9 +298,9 @@ ${consentBanner(path)}
 </html>`;
 }
 
-const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords + ' ' + (t.usedFor || '')).toLowerCase())}">
+const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-slug="${esc(t.slug)}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords + ' ' + (t.usedFor || '')).toLowerCase())}">
   <span class="tool-icon" aria-hidden="true">${t.icon}</span>
-  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span>${t.usedFor ? `<span class="tool-used">${esc(t.usedFor)}</span>` : ''}</span>
+  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span>${t.usedFor ? `<span class="tool-used">${esc(t.usedFor)}</span>` : ''}<span class="tool-proc">${procNote(t)}</span></span>
 </a>`;
 
 // Ad slot. Renders a real AdSense unit only when an ad-unit id is configured
@@ -338,7 +339,28 @@ function homeLd() {
 
 // Editor's pick of the week — rotates through EDITOR_PICKS (src/data/index.js)
 // every Monday, so the hero card never goes stale without a redeploy.
-const PICK = TOOLS.find((t) => t.slug === EDITOR_PICKS[weekIndex() % EDITOR_PICKS.length]) || TOOLS[0];
+const PICK_ENTRY = EDITOR_PICKS[weekIndex() % EDITOR_PICKS.length];
+const PICK = TOOLS.find((t) => t.slug === PICK_ENTRY.slug) || TOOLS[0];
+
+// Processing note per tool — an honest, varied label that tells the visitor
+// what actually happens to their input. "Local" tools never leave the browser;
+// the rest can also fetch a public page through our proxy. Shown on tool cards
+// so cards don't all repeat the same sentence pattern.
+const LOCAL_TOOLS = new Set([
+  'password-generator', 'base64-encoder-decoder', 'uuid-generator', 'jwt-decoder',
+  'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
+]);
+const procNote = (t) => (LOCAL_TOOLS.has(t.slug) ? 'Runs in your browser' : 'Live page check available');
+
+// Small line icons for the homepage job cards — one consistent 1.5px family,
+// rounded caps, no emoji (emoji stay on tool cards as a friendly secondary
+// label per the design system).
+const JOB_ICONS = {
+  'page-search': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="M14 3l5 5v2"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M19 19l2.5 2.5"/></svg>',
+  antenna: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8"/><path d="M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>',
+  'link-tag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7L11.2 6"/><path d="M14 11a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7L12.8 18"/></svg>',
+  'browser-check': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M6.5 6.5h.01"/><path d="M9 6.5h.01"/><path d="M8.5 14l2.5 2.5 4.5-5"/></svg>',
+};
 
 function homeBody() {
   const path = '/';
@@ -352,29 +374,35 @@ function homeBody() {
       <h1>Find the right tool. Finish the job.</h1>
       <p class="hero-sub">Browser-based utilities for SEO, AI-search visibility, content operations and everyday web work. Most tools process your input in your browser, and the core tools need no signup.</p>
       <div class="hero-search">
-        <input type="search" id="tool-search" placeholder="Search tools by task: meta, robots, UTM&hellip;" aria-label="Search tools by task">
+        <input type="search" id="tool-search" placeholder="Search tools by task: ${SEARCH_EXAMPLES.join(', ')}&hellip;" aria-label="Search tools by task" aria-describedby="hero-hint">
       </div>
-      <p class="hero-hint">${TOOLS.length} tools &middot; ${cats.length} categories &middot; free forever</p>
+      <div class="search-examples" role="group" aria-label="Example searches">
+        <span class="sx-label">Try:</span>
+        ${SEARCH_EXAMPLES.map((q) => `<button type="button" class="sx-chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}
+      </div>
+      <p class="hero-hint" id="hero-hint">${TOOLS.length} tools &middot; ${cats.length} categories &middot; free forever</p>
     </div>
     <aside class="pick-card" aria-label="Editor&#39;s pick of the week">
       <p class="pick-label">Editor&rsquo;s pick &middot; this week</p>
       <h2 class="pick-name"><a href="${rel(path, '/tools/' + PICK.slug + '/')}">${esc(PICK.name)}</a></h2>
       <p class="pick-why">${esc(PICK.pickWhy || PICK.card)}</p>
       ${PICK.pickSample ? `<pre class="pick-sample">${esc(PICK.pickSample)}</pre>` : ''}
-      <p class="pick-meta"><span class="pick-cat">${pickCat.icon} ${pickCat.nav}</span>${PICK.usedFor ? `<span class="pick-used">${esc(PICK.usedFor)}</span>` : ''}</p>
+      ${PICK_ENTRY.note ? `<p class="pick-week"><span class="pick-week-label">Why this week</span> ${esc(PICK_ENTRY.note)}</p>` : ''}
+      <p class="pick-meta"><span class="pick-cat">${pickCat.icon} ${pickCat.nav}</span>${PICK.usedFor ? `<span class="pick-used">${esc(PICK.usedFor)}</span>` : ''}${PICK.updated ? `<span class="pick-updated">Updated <time datetime="${esc(PICK.updated)}">${fmtDate(PICK.updated)}</time></span>` : ''}</p>
       <a class="pick-cta" href="${rel(path, '/tools/' + PICK.slug + '/')}">Open the ${esc(PICK.name)} &rarr;</a>
     </aside>
   </div>
 </section>
 <div class="container">
-  <p id="search-empty" class="search-empty" style="display:none">No tool matches that search &mdash; try a different keyword.</p>
+  <p id="search-empty" class="search-empty" role="status" style="display:none">Nothing matches that search yet &mdash; try &ldquo;meta&rdquo;, &ldquo;robots&rdquo;, &ldquo;UTM&rdquo;, &ldquo;schema&rdquo; or &ldquo;audit&rdquo;, or browse all ${TOOLS.length} tools below.</p>
 
   <section class="cat-section jobs" id="start-with-your-job">
-    <p class="section-eyebrow">Start with your job</p>
+    <p class="section-eyebrow"><span class="sec-num">01</span> Start with your job</p>
     <h2 class="section-title">What are you trying to finish?</h2>
     <div class="job-grid">
       ${JOBS.map((j, i) => `<a class="job-card" href="${rel(path, j.path)}">
         <span class="job-num" aria-hidden="true">0${i + 1}</span>
+        <span class="job-icon" aria-hidden="true">${JOB_ICONS[j.icon] || ''}</span>
         <strong>${esc(j.title)}</strong>
         <span class="job-blurb">${esc(j.blurb)}</span>
         <span class="job-cta">${esc(j.cta)} &rarr;</span>
@@ -383,7 +411,7 @@ function homeBody() {
   </section>
 
   <section class="cat-section cat-outcomes" id="categories">
-    <p class="section-eyebrow">Four outcome categories</p>
+    <p class="section-eyebrow"><span class="sec-num">02</span> Four outcome categories</p>
     <h2 class="section-title">Everything grouped by the job it does</h2>
     <div class="outcome-grid">
       ${cats.map((c, i) => {
@@ -393,6 +421,7 @@ function homeBody() {
           <h3><a href="${rel(path, '/' + c.slug + '/')}">${esc(c.name)}</a></h3>
           <p class="outcome-desc">${c.homeDesc}</p>
           <p class="outcome-links">${list.slice(0, 3).map((t) => `<a href="${rel(path, '/tools/' + t.slug + '/')}">${esc(t.name)}</a>`).join('<span aria-hidden="true"> &middot; </span>')}</p>
+          <span class="outcome-count">${list.length} tools</span>
           <a class="outcome-all" href="${rel(path, '/' + c.slug + '/')}">All ${list.length} tools &rarr;</a>
         </div>`;
       }).join('')}
@@ -407,16 +436,21 @@ function homeBody() {
     </div>
     <p class="cat-desc">Each guide answers one question, walks through the procedure, then hands you the tool that does it.</p>
     <div class="blog-list">
-      ${latest.map((a) => `<a class="blog-card" href="${rel(path, '/blog/' + a.slug + '/')}">
-        <span class="blog-date">${esc(a.date)}</span>
-        <strong>${esc(a.title)}</strong>
-        <span>${esc(a.intro.slice(0, 160))}&hellip;</span>
-      </a>`).join('\n      ')}
+      ${latest.map((a) => {
+        const primary = (a.relatedTools || [])[0];
+        const pt = primary && TOOLS.find((t) => t.slug === primary);
+        return `<div class="blog-card">
+        <span class="blog-meta"><time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.focus ? `<span class="blog-topic">${esc(a.focus)}</span>` : ''}</span>
+        <strong><a href="${rel(path, '/blog/' + a.slug + '/')}">${esc(a.title)}</a></strong>
+        <span class="blog-dek">${esc(a.intro.slice(0, 150))}&hellip;</span>
+        ${pt ? `<span class="blog-tool">Use the <a href="${rel(path, '/tools/' + pt.slug + '/')}">${esc(pt.name)}</a> &rarr;</span>` : ''}
+      </div>`;
+      }).join('\n      ')}
     </div>
   </section>
 
   <section class="home-section" id="tools">
-    <p class="section-eyebrow">Full tool directory</p>
+    <p class="section-eyebrow"><span class="sec-num">03</span> Full tool directory</p>
     <h2 class="section-title">All ${TOOLS.length} tools</h2>
     <p class="section-sub">Filter with the search box at the top, or browse every category below.</p>
   </section>
@@ -425,7 +459,7 @@ function homeBody() {
     return `<section class="cat-section" id="${c.slug}">
       <div class="cat-header">
         <span class="cat-num" aria-hidden="true">0${i + 1}</span>
-        <h2><a href="${rel(path, '/' + c.slug + '/')}">${c.icon} ${c.name}</a></h2>
+        <h2><a href="${rel(path, '/' + c.slug + '/')}">${esc(c.name)}</a></h2>
         <span class="cat-count">${list.length} tools</span>
         <a class="cat-view-all" href="${rel(path, '/' + c.slug + '/')}">View all &rarr;</a>
       </div>
@@ -462,7 +496,8 @@ function categoryBody(cat, list) {
   const others = Object.values(CATEGORIES).filter((c) => c.id !== cat.id);
   return `<div class="container">
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>${cat.name}</span></nav>
-  <h1>${cat.icon} ${cat.name}</h1>
+  <p class="cat-mark" aria-hidden="true">${cat.icon}</p>
+  <h1>${cat.name}</h1>
   <p class="lead">${cat.pageDesc}</p>
   <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
   <section class="cat-more">
@@ -551,7 +586,7 @@ ${adSlot('top banner')}
   <article class="tool-main">
     <h1>${esc(t.h1)}</h1>
     <p class="lead">${esc(t.intro)}</p>
-    ${(t.usedFor || t.updated) ? `<p class="tool-meta">${t.usedFor ? `<span class="tm-item"><span class="tm-label">Used for</span> ${esc(t.usedFor.replace(/^for /, ''))}</span>` : ''}${t.usedFor && t.updated ? '<span class="tm-sep" aria-hidden="true">&middot;</span>' : ''}${t.updated ? `<span class="tm-item"><span class="tm-label">Last updated</span> <time datetime="${esc(t.updated)}">${fmtDate(t.updated)}</time></span>` : ''}</p>` : ''}
+    <p class="tool-meta">${procNote(t)}${(t.usedFor || t.updated) ? `<span class="tm-sep" aria-hidden="true">&middot;</span>` : ''}${t.usedFor ? `<span class="tm-item"><span class="tm-label">Used for</span> ${esc(t.usedFor.replace(/^for /, ''))}</span>` : ''}${t.usedFor && t.updated ? '<span class="tm-sep" aria-hidden="true">&middot;</span>' : ''}${t.updated ? `<span class="tm-item"><span class="tm-label">Last updated</span> <time datetime="${esc(t.updated)}">${fmtDate(t.updated)}</time></span>` : ''}</p>
     <div id="tool-root" data-tool="${t.slug}" class="tool-shell">
 ${t.html}
     </div>

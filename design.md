@@ -1,6 +1,50 @@
 # Tools4Market — Design System
 
-*Version: 2.1 "Classic Editorial Utility" · 22 Oct 2026 · Implemented in `src/style.css`*
+*Version: 2.2 "Human-First Refinement" · 22 Oct 2026 · Implemented in `src/style.css`*
+
+---
+
+## 0. What changed in v2.2 (Human-First refinement)
+
+v2.1 established the editorial identity; v2.2 answers the Human-First Design
+System brief — make the site feel *edited* rather than *generated*, without
+losing speed or accessibility:
+
+1. **Task-led search, not a blank box** — five one-tap example chips
+   (`meta`, `robots`, `UTM`, `schema`, `audit`) sit under the field and run the
+   filter on click; the empty state names concrete terms to try instead of
+   "no results".
+2. **Job cards carry real icons** — a single 1.5px line family (rounded caps,
+   `currentColor`): page+search, antenna, link+tag, browser+check. No emoji in
+   the primary card UI.
+3. **Editor's pick grew a reason** — a brass "Why this week" note plus a
+   `Last updated` label, so the card reads like a curator's choice with a
+   timestamp, not a random feature tile.
+4. **Guides bridge to tools** — every guide card shows an editorial date, a
+   topic label, and a "Use this tool →" link to its primary tool (closes the
+   guide→tool loop the audit asked for).
+5. **Processing notes on tool cards** — an honest mono label: *"Runs in your
+   browser"* (8 local tools) vs *"Live page check available"* (23). Varies the
+   card copy and tells the visitor what actually happens to their input.
+6. **Recently-used marker** — tool pages record their slug in `localStorage`;
+   the homepage marks those cards with a brass top rule + "recently used" tag.
+   Local-only, no PII.
+7. **SERP-safe category H1s** — the emoji moved out of `<h1>` into a decorative
+   `.cat-mark` (the crawl showed `🚀 SEO & Meta Tools` in results; H1s are now
+   clean text).
+8. **Outcome categories became an editorial list** — a two-column ruled index
+   (not a third four-column card grid), so the homepage stops repeating the
+   same card pattern four times.
+9. **Header + footer** — nav marks the current section (`aria-current` +
+   brass underline); the footer Company column now exposes Guides alongside the
+   legal pages and contact.
+10. **Motion with consent** — `--motion-fast/base/slow` tokens, a
+    once-per-session hero fade-and-rise (gated by `sessionStorage`), and a
+    global `prefers-reduced-motion` block that neutralises every animation and
+    transform.
+11. **Cookie banner slimmed** — lighter shadow, tighter padding, translucent
+    blurred bar on desktop; `body.ck-open` still reserves the space so it never
+    covers content on mobile.
 
 ---
 
