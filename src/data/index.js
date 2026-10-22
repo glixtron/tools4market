@@ -55,13 +55,14 @@ export const CATEGORIES = {
     nav: 'Web Tools',
     name: 'Web & Utility Tools',
     icon: '🛠️',
-    homeDesc: 'Sitemaps, .htaccess redirects and cryptographically random passwords — the utilities every webmaster needs eventually.',
-    pageDesc: 'The webmaster’s utility belt: valid XML sitemaps, correct .htaccess redirect and HTTPS rules, and genuinely random passwords generated on your device.',
-    metaDesc: 'Free browser-based web tools: XML sitemap and .htaccess redirect generators, secure password generator and practical utilities.',
+    homeDesc: 'Sitemaps, .htaccess redirects, image optimization and cryptographically random passwords — useful tools for web work.',
+    pageDesc: 'Webmaster utilities for XML sitemaps, .htaccess redirects, image compression for faster pages, and secure passwords generated on your device.',
+    metaDesc: 'Free browser-based web tools: optimize images for websites, generate XML sitemaps and .htaccess redirects, and create secure passwords.',
     pageExtra: [
       'The webmaster’s utility belt: a standards-valid XML sitemap generated from a URL list, .htaccess rules for the redirects, canonicalisation and HTTPS moves you eventually have to make, and a password generator that uses your browser’s cryptographically secure randomness instead of a predictable seed.',
+      'Preparing images for a website is part of the same workflow. The image compressor can resize and re-encode common raster images as WebP, JPEG or PNG, then report the actual before-and-after file sizes. It runs on the selected files in your browser, with no file upload to our service.',
       'The belt has grown to carry the daily decoders and generators as well: Base64 and URL percent-encoding in both directions, a bulk v4 UUID generator, a JWT decoder that shows claims and expiry dates without pretending to verify signatures, a user-agent parser for puzzling log lines, and an ICS generator that turns a simple form into a valid, downloadable calendar file.',
-      'These are the tools you reach for during a migration, an audit or a 2 a.m. incident, so they are deliberately zero-friction: no account, no queue, no file uploaded to a third party. Generate, copy, verify the output yourself, and move on.',
+      'These are the tools you reach for during a migration, an audit or a 2 a.m. incident, so they are deliberately zero-friction: no account, no queue and no file upload for browser-based tools. Generate, copy, verify the output yourself, and move on.',
     ],
   },
 };
@@ -123,7 +124,7 @@ export const HOME_FAQS = [
   },
   {
     q: 'Do the tools upload the text I paste?',
-    a: 'Most tools process what you paste entirely in your browser — the text never leaves your device. The optional page-analysis tools are the exception: if you ask a tool to check a public page, that URL is sent to our first-party fetch service, which retrieves the page and, for sitemap or crawler tools, may also retrieve that host’s robots.txt and sitemap files. Responses are handed back to your browser for analysis. We do not store a report. Never enter private URLs or links containing access tokens.',
+    a: 'Text and selected image files are processed in your browser and are not uploaded by those tools. The optional page-analysis tools are different: if you ask a tool to check a public page, that URL is sent to our first-party fetch service, which retrieves the page and, for sitemap or crawler tools, may also retrieve that host’s robots.txt and sitemap files. Responses are handed back to your browser for analysis. We do not store a report. Never enter private URLs or links containing access tokens.',
   },
   {
     q: 'Can I use these tools for client work?',

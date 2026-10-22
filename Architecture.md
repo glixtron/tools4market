@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.1 · 21 Oct 2026 · 30 tools, 44 generated HTML pages*
+*Version: 2.2 · 22 Oct 2026 · 31 tools, 53 generated HTML pages*
 
 ---
 
@@ -96,7 +96,7 @@ Tools4market/
 │       └── audit.js              ← web-crawler-audit and seo-score-checker
 │
 ├── dist/                        ← GENERATED OUTPUT (deploy this folder)
-│   ├── index.html               ← Homepage: hero + search + all 30 tool cards
+│   ├── index.html               ← Homepage: hero + search + all 31 tool cards
 │   ├── seo-tools/index.html     ← Category hub pages (4 total)
 │   ├── ai-search-tools/
 │   ├── content-social-tools/

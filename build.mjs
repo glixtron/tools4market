@@ -105,7 +105,7 @@ function consentBanner(path) {
     <p class="ck-note">Choose what we may store on your device. Essential cookies keep the site working and are always on.</p>
     <label class="ck-row">
       <input type="checkbox" id="ck-analytics" checked>
-      <span><strong>Analytics</strong><span class="ck-desc">Google Tag Manager — anonymous measurement of how the tools are used. Our tools never upload your input.</span></span>
+      <span><strong>Analytics</strong><span class="ck-desc">Google Tag Manager measures site use. Pasted text and image files stay in your browser; page checks send the URL you ask us to inspect.</span></span>
     </label>
     <label class="ck-row">
       <input type="checkbox" id="ck-ads">
@@ -503,6 +503,7 @@ function toolPage(t) {
     'jwt-decoder': ['base64-encoder-decoder', 'user-agent-parser'],
     'user-agent-parser': ['web-crawler-audit', 'jwt-decoder'],
     'ics-calendar-generator': ['uuid-generator', 'url-encoder-decoder'],
+    'image-compressor': ['web-crawler-audit', 'seo-score-checker', 'open-graph-generator'],
     'case-converter': ['duplicate-line-remover', 'lorem-ipsum-generator'],
     'duplicate-line-remover': ['case-converter', 'url-encoder-decoder'],
     'lorem-ipsum-generator': ['reading-time-calculator', 'case-converter'],

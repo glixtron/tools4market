@@ -1,76 +1,111 @@
 # Tools4Market SEO Keyword Research & 90-Day Growth Plan
 
-**Prepared:** 21 October 2026  
+**Prepared:** 21 October 2026 · **Research refresh:** 22 October 2026
 **Site:** https://tools4market.online  
-**Scope:** 1,040 keyword candidates mapped to current tool pages and proposed guides.
+**Scope:** 1,040 historical keyword candidates, refreshed post-launch query priorities, competitor positioning and a 30/60/90-day CBO plan.
+
+## 22 October post-launch research and CBO decision
+
+### What the evidence says today
+
+- The latest production verification in `launch-verification.md` records **51 indexable sitemap URLs**: 30 tool pages, 10 guides and 11 site/category pages. The local source now has a 31st tool, Image Compressor & Optimizer, but `pending-work.md` says that tool is **not deployed**. Search users cannot discover or use that new page until it is published and the live sitemap is updated.
+- Google Search Console and Bing Webmaster Tools are configured per the owner. I do not have a connected account export in this workspace, so this refresh does **not** claim actual impressions, search volume, CTR, ranking difficulty or conversions. Google Search Console's performance data can lag by a few days; the site launched yesterday, so today is too early to call winners or losers.
+- The old 1,040-row inventory is a **phrase backlog, not 1,040 validated opportunities**. Many rows are template variations (for example, “best free,” “no signup,” “for marketers,” and “how to use”) that should not become separate pages. Keep the list as a query-mining checklist; group synonyms by intent and target one useful URL per cluster.
+- A current public product scan confirms that broad head terms are crowded. Ahrefs offers free keyword, SERP, backlink, site-audit and AI-visibility tools. TinyPNG combines image compression, format conversion, website image analysis and integrations. Squoosh already offers local processing and visual comparison. Current image-compressor results also include several newer browser-local batch tools with ZIP downloads or target-size modes. Therefore **“free,” “no signup,” and “no upload” alone are not defensible differentiators**.
+
+The evidence supports a focused strategy: compete on **specific task intent, observed page evidence, accurate diagnosis and a smooth tool workflow**. Do not try to beat Ahrefs on breadth or TinyPNG/Squoosh on image-encoder depth in the first month.
+
+### Competitor and product-gap read
+
+| Market | What searchers can already get | Tools4Market advantage we can prove | Gap to close / decision |
+|---|---|---|---|
+| Broad “free SEO tools” | Ahrefs groups keyword research, backlinks, SERPs, traffic estimates, site audits and AI visibility in one recognized free-tools hub. | A smaller, no-login browser suite with practical generators and page-level diagnostics. | Do not lead with “all-in-one SEO platform.” Use the category hub for navigation; win specific tool tasks first. |
+| Image compression | TinyPNG has upload-based compression/conversion and a website image analyzer; Squoosh has local processing and visual comparison. Newer results advertise bulk local processing, ZIP export and exact-size output. | Our new tool combines local processing, batches up to 10 files, up to 20 MB per file / 50 MB per batch, resize, format choice and actual before/after file-size reporting. | No ZIP batch download, target-size mode or visual before/after preview today. Privacy is a shared category feature. Publish only after browser QA; consider ZIP export and a target-size *aim* before building more file tools. |
+| On-page SEO audit | Established platforms compete on broad site crawling, backlink data and Search Console integrations; lightweight tools compete on instant one-page checks. | The shared inspector reads a public page and can prefill supported tools; checks display page evidence and prioritized fixes. | State clearly that it audits one fetched page and does not reveal Google/Bing's actual index status, rankings, backlinks or a full-domain crawl. Make the evidence source and limitation visible beside each result. |
+| AI crawler controls | Robots and AI-bot policies are increasingly common in specialist tools. | The robots generator and crawler blocker translate selected bot rules into a usable file, inside a broader webmaster workflow. | Avoid promises of “AI rankings.” Google's current guidance says its AI Search features use normal Search eligibility and do not need special AI markup or `llms.txt`; position `llms.txt` as an optional convention for systems that choose to use it. |
+
+### Keyword cohorts to work first
+
+These are **intent-led targets**, not volume or difficulty claims. Keep close variants on the same canonical page. Add variants to copy only when they accurately describe the controls or answer a real user question.
+
+| Priority | Query cluster / examples | Destination | Why this is the next test |
+|---|---|---|---|
+| P1 | `robots.txt generator`, `robots.txt generator for AI crawlers`, `GPTBot robots.txt rules` | `/tools/robots-txt-generator/` and `/tools/ai-crawler-blocker/` | Strong product fit; the pages can help users make an actual crawler-policy file. Keep access-control limits explicit. |
+| P1 | `website SEO checker`, `on-page SEO audit`, `page crawlability checker`, `SEO score checker` | `/tools/web-crawler-audit/` and `/tools/seo-score-checker/` | High user value if the result stays evidence-based and page-level. Do not imply a score predicts Google rankings. |
+| P1 | `meta tag generator`, `meta title generator`, `open graph tag generator`, `meta description checker`, `SERP snippet preview` | Existing meta / OG / description / preview tools | Clear generator/checker intent; related tools form a coherent workflow. Avoid making a separate URL for each word-order variant. |
+| P1 | `XML sitemap generator`, `canonical tag generator`, `schema markup generator JSON-LD`, `hreflang generator` | Existing sitemap / canonical / schema / hreflang tools | Specific implementation tasks with useful output. Examples and valid copy-ready output are the product proof. |
+| P2 | `image compressor online`, `batch image compressor`, `compress images in browser`, `resize and compress images for website`, `JPG to WebP converter` | `/tools/image-compressor/` (once live) | Adjacent to the webmaster audience, but the generic and privacy-led SERPs are crowded. Use feature-accurate copy and differentiate through workflow, limits and honest size results. |
+| P2, feature-gated | `compress image to 100 KB`, `compress image under 200 KB`, `bulk image compressor ZIP` | Same image page, only after the feature exists | These describe a precise outcome and appear in current product positioning. Do not target them as promises until target-size output and batch download work. |
+| P2 | `UTM link builder`, `keyword density checker`, `URL slug generator`, `hashtag generator` | Existing content/social tools | Keep these tied to an actual marketing job; let GSC/Bing show which pages attract relevant queries before adding more content. |
+| P3 / maintain | `password generator`, `UUID generator`, `Base64 encoder`, `URL encoder`, `JWT decoder`, `case converter`, `duplicate line remover` | Existing utility pages | Useful suite retention and long-tail discovery, but generic utility SERPs are crowded and less central to the website-owner positioning. Maintain quality; do not add many unrelated utilities now. |
+
+### Why visitors should choose Tools4Market
+
+Our strongest defensible promise is: **“Get a useful webmaster or marketing task done quickly, with clear evidence about your own page and no account required.”** The proof points in the current product are:
+
+1. **Page-aware rather than empty-form-only:** the inspector can fetch a public page, extract observed metadata/content signals, prefill related tool fields and offer contextual checks. The diagnostic must name the observed element and show exactly what to change.
+2. **Action after diagnosis:** users can move from a page finding to a related generator (for example, missing canonical → canonical generator; sitemap discovery → sitemap/robots tools).
+3. **Privacy clarity:** text/image processing is browser-local; live-page analysis sends the public URL through the site's fetch endpoint. Explain this difference near the tool, not only in the privacy policy.
+4. **Honest limits:** no fabricated “Google rank,” no guarantee of indexing, no fixed universal title length, and no unsupported security or AI visibility promise.
+
+These are product strengths, **not exclusive market claims**. A stronger moat would come from a genuinely useful local Search Console/Bing CSV opportunity analyzer: import a user's export in the browser, group actual queries by page, flag impressions with weak CTR or relevant positions, and recommend which existing tool/guide to improve. That would use the user's own data without uploading it and would be more personalized than another generic checker. Build it only after the first real exports clarify the workflow.
+
+### CBO decision: grow the focused webmaster suite before broadening
+
+- **Do next:** resolve local ship readiness for the image tool, deploy it only after QA, add it to the live sitemap, and check its production URL. Then spend the next few weeks improving the existing SEO/crawler pages and collecting real Search Console/Bing query data.
+- **Do not build next:** a generic PDF converter or generic file converter. These are broad, established categories with a different user job and high feature expectations. The current image pilot is a more coherent test because website owners already need image optimization. Revisit PDF only if first-party query data, user requests or a focused use case (such as a privacy-first, exact-size PDF compressor) demonstrates demand and the team can support the full workflow.
+- **Do not publish keyword doorway pages:** one focused page can satisfy related phrasings. Google says creating pages for every query variation primarily to manipulate visibility is not an effective strategy and can fall under scaled content abuse.
+- **Keep monetization subordinate to the task:** use reserved, non-disruptive ad placements; do not put an interstitial between the visitor and the result. Later paid features should solve recurring jobs (saved projects, scheduled monitoring, exports or multi-page history), not gate basic utility.
+
+### 30/60/90-day operating plan
+
+| Window | Work | Decision signal |
+|---|---|---|
+| Days 1–7 | Treat the launch as a baseline. Verify sitemap processing and representative live URLs in GSC/Bing. Keep the current 51-page production baseline separate from the 31st local image tool until deployed. Annotate each content/deploy change. | Sitemap success, indexed vs discovered URLs, crawl errors, live response/canonical, and first query impressions when available. A blank report after one day is not a failure. |
+| Days 8–30 | Review GSC/Bing queries weekly, not by rewriting pages daily. Export query, landing page, country, device, impressions, clicks, CTR and average position. Compare 7-day and 28-day windows once enough data exists. Manually sample live SERPs in the US, UK, Canada, Australia and India for the few query clusters that actually appear. | Prioritize impressions tied to a page but wrong intent, repeated query/page mismatches, and high-impression snippets with weak CTR. Distinguish a content problem from a crawl/indexing problem. |
+| Days 31–60 | Improve one or two proven pages per week with a tested example, clearer output, contextual links, screenshots where useful, and more direct answers. Build the local GSC/Bing export analyzer only if exports show a repeated analysis job. | Change one meaningful element at a time and annotate it. Look for query/page fit, qualified clicks and successful tool use, not a guaranteed rank jump. |
+| Days 61–90 | Reassess page clusters and audience split. Merge or prune genuinely overlapping content; add a tool only where observed queries or user requests reveal a missing task. Decide whether the image tool earns continued product investment. | Non-brand impressions/clicks, qualified tool starts/completions, tool-to-tool navigation, returning users and revenue per 1,000 eligible sessions. |
+
+### Keyword data and weekly decision rules
+
+- Google Search Console is the primary first-party source for the site's impressions, clicks, CTR, position, query/page, country and device breakdowns. Google says Search Console data is not necessarily immediate; the API guidance says performance data is typically available after 2–3 days. Bing Webmaster Tools offers its own performance and keyword-research views; use both, and keep platform datasets separate.
+- Google Ads Keyword Planner may add **directional, location-specific search demand**. Its “Competition” value is competition among advertisers, **not organic SEO difficulty**. Do not label an opportunity low-difficulty based on that column.
+- Group queries by intent and URL. If a query lands on the wrong page, improve internal links and clarify page purpose before creating a new URL.
+- High impressions + weak CTR: review title/snippet relevance and the actual result type; do not promise fixed CTR gains.
+- Relevant impressions at positions around 8–30: improve the page's actual answer, examples and internal links; avoid keyword repetition.
+- Many impressions but irrelevant users/tool use: reconsider intent fit and positioning rather than celebrating raw visibility.
+- No impressions: check index/crawl status and whether the page is live/canonical; do not use search-volume guesses to claim that Google owes the page impressions.
+
+### Current guidance and sources
+
+- Google Search Console exposes query/page/country performance and indexing reports; its performance API notes a normal 2–3 day data delay: [Search Console setup and reports](https://developers.google.com/search/docs/monitor-debug/search-console-start), [Performance API data guidance](https://developers.google.com/webmaster-tools/v1/how-tos/all-your-data).
+- Google says AI Search inclusion uses normal Search eligibility and people-first SEO; no special AI markup or `llms.txt` is required for Google AI features: [AI features and your website](https://developers.google.com/search/docs/appearance/ai-features), [Google's generative AI optimization guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide).
+- Google recommends original, useful content and warns against pages made for every query variation: [People-first content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content), [Spam policies](https://developers.google.com/search/docs/essentials/spam-policies).
+- Keyword Planner search averages depend on the selected geography/time period; advertiser competition is not an organic ranking-difficulty metric: [Keyword Planner historical metrics](https://support.google.com/google-ads/answer/3022575?hl=en).
+- Google's AdSense readiness guidance focuses on unique, relevant content, clear navigation and user experience rather than a published fixed article count; ad placements must not interfere with navigation/downloads: [AdSense site readiness](https://support.google.com/adsense/answer/7299563?hl=en), [Ad placement guidance](https://support.google.com/adsense/answer/1282097?hl=en).
+- Competitor product scans: [Ahrefs free SEO tools](https://ahrefs.com/free-seo-tools), [TinyPNG compressor](https://tinypng.com/), [Squoosh](https://squoosh.app/). Search samples for browser-based compressors also surfaced [LionPress](https://lionpress.app/), [Compress Picture](https://compress-picture.com/) and [PixSmith](https://pixsmith.online/tools/compress-image/); those pages show why local processing and batch support alone are not unique. This is a product/positioning scan, not a country-specific rank or search-volume report.
 
 ## Research summary and limitations
 
-I reviewed `README.md`, `rules.md`, `RESEARCH-AND-PLAN.md`, `Architecture.md`, `pending-work.md`, and the actual tool definitions in `src/data/`. Tools4Market is a 30-tool browser-first suite across SEO/meta, AI crawler controls, content/social, and web utilities. Its static pages, categories, and sitemap are generated from source definitions. The project tracker still calls out Search Console/GA4 verification and production deployment/domain checks.
+Repository review covered `README.md`, `rules.md`, `Architecture.md`, `progress.md`, `pending-work.md`, the latest `launch-verification.md`, source tool definitions and the earlier keyword inventory. The verified live baseline is 30 tools and 51 sitemap URLs; the newer image optimizer is only in the local source and is not part of that live baseline.
 
-A live market scan found direct competition from established tool suites and newer sites with overlapping free generators and previews (including SEOKit, SerpGem, NitroSERP, and Backlinko’s SERP simulator). Generic queries such as “SEO tools” are therefore highly competitive. Compete with a working tool above the fold, accurate output, privacy clarity, examples, edge-case handling, and useful guidance. Older internal notes contain unsubstantiated volume, CPM, traffic, and competition claims; this document does not rely on them.
+The public scan supports a qualitative competitor and intent assessment, not a rank-tracker report. No connected Search Console/Bing query export or Keyword Planner output was available, and the domain launched yesterday. As a result, the target phrases below are hypotheses for page/intent mapping, not measured search demand. No search volume, CPC, organic difficulty or expected impression figures are claimed.
 
-**The 1,040 phrases below are hypotheses, not volume-validated keywords.** Search results do not provide reliable volume/difficulty data. No search volume, CPC, or ranking guarantee is claimed. Validate with Google Search Console after launch, Google Ads Keyword Planner for country-specific directional ranges, and manual SERP review. Group close variants under one page; do not publish 1,040 pages.
+The inventory contains 1,040 candidates, but the count overstates opportunity because many rows are predictable modifiers of the same query. Keep only variants that add a distinct user need. The keyword table is a **query-mining checklist**; it is not a page creation plan.
 
-### Research sources
+## Deployment and targeting rules
 
-- Sitemap submission is a hint and does not guarantee crawling/indexing: [Google sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).
-- Recrawl requests do not guarantee inclusion or instant indexing: [Google recrawl guidance](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl).
-- Google emphasizes useful, unique content and clear titles: [SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide).
-- Doorway pages and scaled low-value content are spam risks: [Google spam policies](https://developers.google.com/search/docs/essentials/spam-policies).
-- Search Console reports impressions, clicks, CTR, position, and queries to inform iteration: [Performance report](https://support.google.com/webmasters/answer/7042828?hl=en).
-- Competitor examples reviewed: [SEOKit](https://seobox.dev/), [SerpGem](https://serpgem.com/), [NitroSERP](https://www.nitroserp.com/), and [Backlinko SERP Simulator](https://backlinko.com/tools/serp-simulator).
+- Treat the production verification as the baseline. The image compressor becomes a search opportunity only after its page is deployed and present in the live sitemap.
+- Give each current intent one canonical page. Map close synonyms to it; use guides for complete informational tasks rather than a thin variant landing page.
+- Keep the tool above the fold, show an example or sample result, state limitations next to the output, and link to the next helpful tool.
+- Describe exactly what a one-page audit observes. A public HTML fetch cannot confirm Google's index database, rankings, backlinks or every JavaScript-rendered element.
+- Use Search Console and Bing Webmaster reports for the site's own search terms. Use Keyword Planner only for directional demand by country; do not call its advertiser-competition value organic SEO difficulty.
+- The existing ten guides already cover the initial planned subjects. Pause the 3–5-posts-per-week target until query data or user questions show what needs a guide update or a new answer.
+- Don't paste keyword lists into page copy or create a separate URL for every modifier. Update content only when it improves the page for a real visitor.
 
-## How we can outperform
+## Weekly KPI review
 
-1. Show a real, usable result quickly; keep the tool visible and explain inputs, output, and limitations with original examples.
-2. Make the truthful differentiator clear: most tools process inputs in-browser without an account or upload. Explain when URL analysis uses the first-party fetch endpoint.
-3. Be precise where competitors are vague: robots.txt is not access control; sitemap submission does not ensure indexing; decoded JWT claims are not signature-verified; schema output does not guarantee rich results.
-4. Publish practical guides that solve a complete task, include tested examples and authoritative citations, and link naturally to the matching tool.
-5. Build relevant discovery through genuinely useful templates/resources and thoughtful participation in webmaster/developer communities; avoid link spam.
-6. Measure search snippets and tool usage. Improve high-impression, low-CTR results and pages with relevant impressions but weak positions.
-
-## Deployment rules and priority
-
-- **P1 (tool intent):** map each current tool cluster below to its existing tool page. Improve these pages before building more URLs.
-- **P2 (informational):** proposed guide queries may be served by a guide only when it provides substantial original help beyond the tool.
-- **P3 (broad/category):** serve with category pages and site navigation; do not make thin landing pages.
-- One page per search intent. Include relevant variants naturally in title/H1/body/FAQ. Never paste a keyword list into visible or hidden page copy.
-- Review live SERPs for target country and query before committing. Avoid overlapping tool pages competing for the same intent.
-
-## 90-day plan
-
-### Days 1–3: technical discovery and baseline
-
-- Verify production canonical host, HTTPS, apex/www redirect, robots.txt, sitemap index and child sitemaps, canonical tags, status codes, no accidental `noindex`, and mobile rendering.
-- Verify Google Search Console domain property, submit sitemap once, inspect homepage/category/tool URLs, and request indexing for a small set of priority URLs. Submission is not an indexing promise.
-- Connect GA4 if appropriate; use Search Console for organic query visibility. Record sitemap status, indexed URL count, clicks/impressions, and country/device baseline.
-- Inspect all 30 tool and 4 category URLs; fix canonical, rendering, internal-link, or content gaps before adding pages.
-
-### Days 4–14: tune existing tool pages
-
-- Prioritize the 30 P1 clusters in the inventory. Manually review the US, UK, Canada, Australia, and India SERPs for the first 10 pages; record result types, competitor strengths, and missing examples/features.
-- Improve the first-screen explanation, examples, limitations, accurate FAQs, and internal links while keeping the working tool prominent.
-- Link related tools from their category hubs and from relevant tool-page sections.
-- Log title/snippet/content change dates so Search Console comparisons remain interpretable.
-
-### Days 15–45: publish 6–8 useful guides
-
-Recommended first guides: website launch SEO checklist; robots.txt for search and AI crawlers; schema markup examples; UTM naming conventions; Google SERP title/description preview; XML sitemap troubleshooting; canonical tags and duplicate URLs; safe JWT inspection. Each needs tested examples, original visuals when useful, author/reviewer, authoritative links, and a relevant tool CTA. Publish one or two substantial guides weekly; quality and usefulness matter more than cadence.
-
-### Days 46–90: follow observed demand
-
-- Export Search Console query/page/country/device data weekly. Map new queries to the best existing URL before considering a new one.
-- Relevant impressions around positions 8–30: improve intent fit, examples, snippet and internal links. High impressions with low CTR: test a clearer title/snippet. Queries landing on the wrong URL: clarify intent and link architecture; consolidate overlap.
-- For discovered/crawled but not indexed pages, inspect distinct value, duplication, canonical, rendering and internal discovery; repeatedly resubmitting an unchanged sitemap is not a fix.
-- Earn relevant mentions by making a useful resource and contacting appropriate webmaster educators without spam tactics.
-- At day 90, keep, revise, consolidate or defer clusters based on evidence; expand only where query data reveals real gaps.
-
-## Weekly routine and KPIs
-
-**Monday:** compare Search Console last 7 vs prior 7 and last 28 vs prior 28; inspect queries/pages/countries/devices/indexing. **Tuesday:** choose one or two query opportunities and one support topic. **Wednesday–Thursday:** improve a tool page or complete an original guide. **Friday:** check links, canonicals, sitemap, CTR and tool events; annotate changes. Monthly, check cannibalization and consolidate overlapping content.
-
-Track sitemap/indexed counts, Googlebot discovery, impressions by page/query/country, non-brand impressions, CTR, position trend, tool starts/completions/copies, guide-to-tool clicks, broken links and canonical/noindex errors. Do not send user-entered content to analytics.
+Once data is available, review the last 7 days against the previous 7 and the last 28 days against the previous 28. Track query/page impressions, clicks, CTR, average position, country/device, indexing exclusions, successful tool starts/completions, related-tool clicks and revenue per 1,000 eligible sessions. Annotate significant page changes and do not send user-entered text, URLs or files into analytics events.
 
 ## 1,040 keyword candidates
 

@@ -49,6 +49,7 @@ for (const slug of slugs) {
   const registered = !!dom.window.T4M_TOOLS && typeof dom.window.T4M_TOOLS[slug] === 'function';
   for (const el of doc.querySelectorAll('#tool-root input, #tool-root textarea, #tool-root select')) {
     try {
+      if (el.type === 'file') continue; // Local file pickers require a real browser interaction.
       if (el.type === 'checkbox') el.checked = !el.checked;
       else if (el.tagName === 'SELECT') { if (el.options.length > 1) el.selectedIndex = 1; }
       else if (el.type === 'number' || el.type === 'range') el.value = '25';
