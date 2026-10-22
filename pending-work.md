@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 22 Oct 2026 (30-day audit & growth plan implemented — design v2.1, homepage IA, favicon, GA4 events, IndexNow hook).*
+*Living tracker — update after every session. Last updated: 22 Oct 2026 — audit/growth-plan release **deployed to production** (Worker `9d8d8e00`), live-verify 58/58.*
 
 ## 👤 User actions required — **these block launch**
 
@@ -13,9 +13,9 @@
 - [ ] Apply for AdSense (NOT before: 20–30 articles + some traffic — see monetization milestones)
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
-- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Pending:** deploy the local SEO diagnostics and copy improvements from 21 Oct.
+- [x] ~~Deploy baseline to Cloudflare~~ — DONE; current production site is live. **Deployed 22 Oct:** audit/growth-plan release (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hooks) live as Worker version `9d8d8e00-d9a7-4b60-a238-af5d3dffb96e` via `npm run deploy` from this machine (wrangler OAuth now authenticated locally).
 - [x] ~~Attach canonical apex domain~~ — DONE: `https://tools4market.online` serves the site and is used in canonicals/sitemaps.
-- [ ] **Fix `www` canonical redirect** — live fetch currently gets HTTP 403 on `https://www.tools4market.online/`, instead of the required one-hop 301 to apex. The Worker already implements the redirect and a `www` route is now declared in `wrangler.jsonc`; deploy it and check Cloudflare Zero Trust/Access or zone redirect settings if 403 remains. Historical `launch-verification.md` recorded an Access policy on `www`.
+- [x] ~~**Fix `www` canonical redirect**~~ — FIXED and verified live 22 Oct: `https://www.tools4market.online/` → 301 → `https://tools4market.online/` (one hop, via the Worker route `www.tools4market.online/*` now deployed in `wrangler.jsonc`).
 - [ ] **Set integration env vars in Cloudflare Pages** (Settings → Environment variables → Production): `GA_ID` (GA4), `ADSENSE_CLIENT` + `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` (AdSense; also writes `ads.txt`). `SITE_URL` / `SITE_EMAIL` are optional overrides — the defaults already point at the live domain.
 - [ ] **Point DNS to Cloudflare** (nameservers at the registrar) → add `www.tools4market.online` as a custom domain → verify `https://www.tools4market.online/api/fetch?url=https://example.com` returns `{"ok":true,…}`
 
@@ -61,7 +61,7 @@
 - [x] **Google tag (GA4 `G-6B4GGFC96K`) verified on every published page** — byte-identical to Google's snippet, exactly one per page, always after the Consent Mode v2 defaults. Proved locally across every built page and live across every URL in all three sitemaps
 - [x] **GTM container `GTM-P6P4FLGB` audited** — it contains no GA4 measurement id, so there is no double counting with the direct Google tag
 - [ ] **AdSense verdict** — review submitted; if it returns "low content", the cure is more guides (the same work that ranks for the head terms)
-- [ ] **Deploy the 22 Oct audit work** (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hook) — all committed locally; production not modified
+- [x] **Deploy the 22 Oct audit work** (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hook) — DEPLOYED 22 Oct via `npm run deploy`; live-verify suite **58/58** against production
 - [ ] **Distribution plan** — tool directories, Quora/Reddit cadence, Pinterest, 1 YouTube Short/week (was listed under Phase 3; start now per the audit plan)
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
 - [ ] Content engine: 3–5 blog posts/week (first 30 posts targeting long-tail: "how to block GPTBot", "llms.txt vs robots.txt", "meta tags checklist 2026", "UTM naming conventions")

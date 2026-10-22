@@ -290,3 +290,15 @@
 **Docs:** `Architecture.md` §12 (robots.txt open-crawlers position, date policy, verification gates), `README.md` (env var table, integration files, new test counts).
 
 **Not done (separate steps):** deployment to tools4market.online; Search Console re-submission + IndexNow (needs `INDEXNOW_KEY` set); distribution plan execution; visual screenshot pass (browser not connected).
+
+### Deploy — 22 Oct 2026 (audit/growth-plan release)
+
+**Auth:** wrangler was never authenticated on this machine (all prior logged deploys were dry-runs). Completed `wrangler login` (OAuth, Node 24 via nvm — the system Node 18 is below wrangler's minimum and caused the first silent timeout).
+
+**Deployed:** `npm run deploy` (build + `wrangler deploy`) → Worker `tools4market`, version `9d8d8e00-d9a7-4b60-a238-af5d3dffb96e`, 58 assets uploaded (19 deduped), route `www.tools4market.online/*` live.
+
+**Production verification (`tests/live-verify.mjs`): 58/58 passed.** Confirmed live: all 51 sitemap URLs 200 + self-canonical + indexable; `/favicon.ico` → 200 `image/vnd.microsoft.icon`; `.tool-meta` strip with "Used for" + `<time datetime="2026-10-22">` on priority tools; homepage pick-card (new IA); Fraunces/Outfit in served CSS; `site.js` GA4 track events; blog sitemap 10× `lastmod`, tools sitemap 0; `/api/fetch` OK + SSRF guard live; llms.txt/llms-full.txt/RSS correct; exactly one Google tag per page with consent-first ordering.
+
+**Also fixed by this deploy:** `https://www.tools4market.online/` now 301s one-hop to the apex (was 403) — the Worker route in `wrangler.jsonc` handles it; item closed in pending-work.md.
+
+**Still pending (user/post-deploy):** set `INDEXNOW_KEY` + optionally `GOOGLE_SITE_VERIFY` in Cloudflare env → redeploy → `npm run indexnow`; resubmit sitemap in Search Console; AdSense env vars; distribution plan.
