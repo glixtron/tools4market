@@ -1,7 +1,25 @@
 # Pending Commit
 
-**Prepared:** 22 October 2026
-**Status:** ✅ Two entries. (1) The image-optimizer commit `5837fb7` is committed and pushed to `origin/main`. (2) The v2.2 Human-First design refinement is committed on `audit-growth-plan-v2.1` (see below) — committed + pushed same day.
+**Prepared:** 23 October 2026
+**Status:** ✅ Three entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` (below) — committed + pushed same day, `main` fast-forwarded.
+
+## Entry 3 — v2.3 analyze-anywhere + AI fix suggestions
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed and pushed. Cross-verified before commit: build 53 pages / 31 tools, smoke **31/31**, SEO audit **1610/1610** (18 new assertions), consent **30/30**, personalized **107/107** (23 new checks), new suggest-api suite **24/24**. Real Workers AI call validated end-to-end in `wrangler dev` (description + title drafts returned; 403 cross-origin / 405 GET guards verified). One live issue found and fixed during validation: the planned default model `@cf/meta/llama-3.1-8b-instruct` was deprecated (May 2026) — default switched to the current `@cf/meta/llama-3.1-8b-instruct-fp8`.
+
+**Subject:** `feat: analyze-anywhere + AI fix suggestions (v2.3) — two-mode input, gap list, consent-gated /api/suggest`
+
+**Summary (v2.3):**
+- Two-mode input on all 24 fetch-capable tools: segmented toggle (Analyze my page default | Enter manually), manual form always one click away; 7 pure-local tools keep their "Runs in your browser" label.
+- Deterministic "What to add to this page" gap list per tool after any analysis — prioritized fail → warn → info, capped at 6, exposed as `T4M_INSPECT.recommend`; no network/AI needed.
+- Consent-gated AI fix suggestions on 5 copy tools: fixable gap items carry "Suggest a fix with AI" → `POST /api/suggest` (new `functions/api/suggest.js` + `worker.js` route + `AI` binding in `wrangler.jsonc` — Cloudflare Workers AI, keyless). Compact snapshot only (URL/title/H1/description/≤700 chars text, never the raw page); draft lands in the tool field labelled review-only; pre-consent the control is a lock note + settings path, and `t4m:consent` re-renders controls in place.
+- Web Crawler Audit + SEO Score Checker moved onto the shared panel; their report renders from the same snapshot (verified one page fetch per analysis), native URL row/paste reappear in manual mode.
+- Privacy policy §1 documents `/api/suggest` (what is sent, processor, nothing stored, consent requirement, no ranking promise); `ai_suggest` GA4 event via the consent-gated helper; live-verify extended with a real-model POST check.
+
+**Files in this commit:** `functions/api/suggest.js`, `worker.js`, `wrangler.jsonc`, `src/data/inspect.js`, `src/data/policy.js`, `src/runtime/inspect.js`, `src/runtime/audit.js`, `src/site.js`, `src/style.css`, `tests/suggest-api-test.mjs`, `tests/personalized-tools-test.mjs`, `tests/seo-audit.mjs`, `tests/live-verify.mjs`, `README.md`, `design.md`, `progress.md`.
+
+**Not deployed:** production still serves v2.1 + image-compressor. Next `npm run deploy` publishes v2.2 + image-compressor + v2.3 (AI binding goes live with it), then `npm run indexnow` and `npm run test:live`.
 
 ## Entry 2 — v2.2 Human-First design refinement
 

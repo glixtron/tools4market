@@ -12,6 +12,12 @@
   var P = TXT.panel || {};
   var V = TXT.verdicts || {};
   var ERR = TXT.errors || {};
+  var G = TXT.gaps || {};
+  var GI = G.items || {};
+  var GA = G.ai || {};
+  // The page last analyzed on this screen — used to re-render when the
+  // visitor's consent choice changes (AI controls follow that choice).
+  var ACTIVE = null;
   function $(root, id) { return root.querySelector('#' + id); }
 
   // ---------------------------------------------------------------- fetch
@@ -633,6 +639,15 @@
     },
     'user-agent-parser': function (snap, root) {
       setVal(root, 'ua-text', navigator.userAgent);
+    },
+    // The audit tools analyze the URL in the shared panel, then render their
+    // own report from the same snapshot (root.__t4mAuditFromSnapshot) — the
+    // native URL row is only shown in manual mode.
+    'web-crawler-audit': function (snap, root) {
+      setVal(root, 'ca-url', snap.finalUrl || snap.url);
+    },
+    'seo-score-checker': function (snap, root) {
+      setVal(root, 'sc2-url', snap.finalUrl || snap.url);
     }
   };
 
@@ -644,11 +659,11 @@
     return e;
   }
 
-  // Page analysis belongs on tools that can use page evidence. Keep it off
+  // Page analysis belongs on tools that can use page evidence. The two audit
+  // tools used to skip the panel — they now share it (their native URL row and
+  // paste block are shown only in "Enter manually" mode). Keep it off
   // independent utilities so it does not distract from unrelated local input.
   var SKIP_PANEL = {
-    'web-crawler-audit': 1,
-    'seo-score-checker': 1,
     'password-generator': 1,
     'base64-encoder-decoder': 1,
     'uuid-generator': 1,
@@ -664,12 +679,31 @@
     var panel = el('div', 'inspect');
     panel.setAttribute('data-inspect', '1');
 
+    // Input-mode toggle: analyze (fetch + auto-fill, default) vs manual entry.
+    // Both paths always exist one click apart; nothing is ever taken away.
+    var modes = el('div', 'inspect-modes');
+    modes.setAttribute('role', 'group');
+    modes.setAttribute('aria-label', P.modeLabel || 'Choose how to start');
+    var bA = el('button', 'mode-btn is-on', P.modeAnalyze || P.analyzeBtn || 'Analyze my page');
+    bA.type = 'button';
+    bA.setAttribute('aria-pressed', 'true');
+    var bB = el('button', 'mode-btn', P.modeManual || 'Enter manually');
+    bB.type = 'button';
+    bB.setAttribute('aria-pressed', 'false');
+    modes.appendChild(bA);
+    modes.appendChild(bB);
+    panel.appendChild(modes);
+
+    // Everything below the toggle lives in one body we can hide for manual mode.
+    var bodyWrap = el('div', 'inspect-body');
+    panel.appendChild(bodyWrap);
+
     // head
     var head = el('div', 'inspect-head');
     head.appendChild(el('span', 'inspect-badge', '\u2726'));
     head.appendChild(el('strong', 'inspect-title', P.title || 'Analyze your own page first'));
-    panel.appendChild(head);
-    panel.appendChild(el('p', 'inspect-sub', P.subtitle || ''));
+    bodyWrap.appendChild(head);
+    bodyWrap.appendChild(el('p', 'inspect-sub', P.subtitle || ''));
 
     // url row
     var row = el('div', 'inspect-row');
@@ -681,7 +715,7 @@
     btn.type = 'button';
     row.appendChild(inp);
     row.appendChild(btn);
-    panel.appendChild(row);
+    bodyWrap.appendChild(row);
 
     // paste disclosure
     var det = el('details', 'inspect-paste');
@@ -694,19 +728,43 @@
     var pbtn = el('button', 'btn btn-ghost inspect-paste-run', P.pasteBtn || 'Analyze pasted HTML');
     pbtn.type = 'button';
     det.appendChild(pbtn);
-    panel.appendChild(det);
+    bodyWrap.appendChild(det);
 
     // status + result
     var status = el('div', 'inspect-status');
     status.setAttribute('role', 'status');
     status.setAttribute('aria-live', 'polite');
-    panel.appendChild(status);
+    bodyWrap.appendChild(status);
     var result = el('div', 'inspect-result');
     result.hidden = true;
-    panel.appendChild(result);
+    bodyWrap.appendChild(result);
 
     // insert panel at the very top of the tool shell
     root.insertBefore(panel, root.firstChild);
+
+    // Manual mode on the audit tools must surface their own URL row + paste
+    // block (they duplicate the panel, so analyze mode hides them there).
+    var manualNodes = [];
+    if (slug === 'web-crawler-audit' || slug === 'seo-score-checker') {
+      var nativeUrl = root.querySelector(slug === 'web-crawler-audit' ? '#ca-url' : '#sc2-url');
+      if (nativeUrl && nativeUrl.parentNode && !panel.contains(nativeUrl.parentNode)) manualNodes.push(nativeUrl.parentNode);
+      Array.prototype.forEach.call(root.querySelectorAll('details.inspect-paste'), function (d) {
+        if (!panel.contains(d)) manualNodes.push(d);
+      });
+    }
+    function setMode(mode) {
+      var manual = mode === 'manual';
+      bodyWrap.hidden = manual;
+      bA.classList.toggle('is-on', !manual);
+      bB.classList.toggle('is-on', manual);
+      bA.setAttribute('aria-pressed', manual ? 'false' : 'true');
+      bB.setAttribute('aria-pressed', manual ? 'true' : 'false');
+      manualNodes.forEach(function (n) { n.hidden = manual ? false : true; });
+      panel.classList.toggle('is-manual', manual);
+    }
+    bA.addEventListener('click', function () { setMode('analyze'); });
+    bB.addEventListener('click', function () { setMode('manual'); });
+    setMode('analyze');
 
     function analyze(html, meta) {
       var snap;
@@ -733,6 +791,12 @@
       result.hidden = false;
       var apply = APPLY[slug];
       if (apply) { try { apply(snap, root); } catch (e) {} }
+      // The audit tools render their full report from THIS snapshot (one
+      // fetch total — no second round trip for the same URL).
+      if (typeof root.__t4mAuditFromSnapshot === 'function') {
+        try { root.__t4mAuditFromSnapshot(snap); } catch (e) {}
+      }
+      ACTIVE = { root: root, slug: slug };
       bindPersonalizedTarget(root, slug);
       refreshPersonalized(root, slug);
     }
@@ -771,6 +835,229 @@
     });
   }
 
+  // ---------------------------------------------------------------- gaps
+  // Deterministic "What to add to this page" — the honest, always-on layer
+  // that works with no AI and no network. Each tool gets the items that match
+  // its concern; fixable items can additionally be drafted with AI
+  // (POST /api/suggest, consent-gated) via the button rendered underneath.
+  var GAP_TOOLS = {
+    'meta-description-checker': 1, 'meta-tag-generator': 1, 'serp-preview-tool': 1,
+    'open-graph-generator': 1, 'twitter-card-generator': 1, 'canonical-tag-generator': 1,
+    'hreflang-tag-generator': 1, 'schema-markup-generator': 1, 'robots-txt-generator': 1,
+    'ai-crawler-blocker': 1, 'llms-txt-generator': 1, 'sitemap-generator': 1,
+    'keyword-density-checker': 1
+  };
+  // Whole-page copy tools also get the shared page-level items
+  // (noindex / viewport / lang) — they are what those tools exist to fix.
+  var PAGE_LEVEL_GAPS = {
+    'meta-description-checker': 1, 'meta-tag-generator': 1, 'serp-preview-tool': 1,
+    'keyword-density-checker': 1
+  };
+  var SCHEMA_SUPPORTED = ['Article', 'NewsArticle', 'BlogPosting', 'TechArticle', 'Product',
+    'LocalBusiness', 'Store', 'Restaurant', 'ProfessionalService', 'Organization',
+    'Corporation', 'EducationalOrganization', 'NGO', 'BreadcrumbList', 'FAQPage'];
+
+  function gapFill(tpl, o) {
+    return String(tpl || '')
+      .replace(/\{n\}/g, o.n == null ? '' : o.n)
+      .replace(/\{m\}/g, o.m == null ? '' : o.m)
+      .replace(/\{v\}/g, o.v == null ? '' : o.v)
+      .replace(/\{types\}/g, o.types || '');
+  }
+  function gapPush(items, level, text, fix) {
+    if (text) items.push({ level: level, text: text, fix: fix || null });
+  }
+
+  function recommend(snap, slug) {
+    if (!GAP_TOOLS[slug]) return null;
+    var out = [];
+    var tl = snap.title.length, dl = snap.desc.length;
+    switch (slug) {
+      case 'meta-description-checker':
+        if (!dl) gapPush(out, 'fail', GI.descMissing, { kind: 'description', field: 'md-text' });
+        else if (dl < 70) gapPush(out, 'warn', gapFill(GI.descShort, { n: dl }), { kind: 'description', field: 'md-text' });
+        else if (dl > 160) gapPush(out, 'warn', gapFill(GI.descLong, { n: dl }), { kind: 'description', field: 'md-text' });
+        if (!snap.h1s.length) gapPush(out, 'warn', GI.h1Missing);
+        break;
+      case 'meta-tag-generator':
+        if (!tl) gapPush(out, 'fail', GI.titleMissing, { kind: 'title', field: 'mt-title' });
+        else if (tl > 70) gapPush(out, 'warn', gapFill(GI.titleLong, { n: tl }), { kind: 'title', field: 'mt-title' });
+        else if (tl < 20) gapPush(out, 'warn', gapFill(GI.titleShort, { n: tl }), { kind: 'title', field: 'mt-title' });
+        if (!dl) gapPush(out, 'warn', GI.descMissing, { kind: 'description', field: 'mt-desc' });
+        else if (dl > 160) gapPush(out, 'warn', gapFill(GI.descLong, { n: dl }), { kind: 'description', field: 'mt-desc' });
+        if (!snap.canonical) gapPush(out, 'info', GI.canonicalMissing);
+        break;
+      case 'serp-preview-tool':
+        if (!tl) gapPush(out, 'fail', GI.titleMissing, { kind: 'title', field: 'sp-title' });
+        else if (tl > 70) gapPush(out, 'warn', gapFill(GI.titleLong, { n: tl }), { kind: 'title', field: 'sp-title' });
+        if (!dl) gapPush(out, 'warn', GI.descMissing, { kind: 'description', field: 'sp-desc' });
+        else if (dl > 160) gapPush(out, 'warn', gapFill(GI.descLong, { n: dl }), { kind: 'description', field: 'sp-desc' });
+        if (!snap.h1s.length) gapPush(out, 'warn', GI.h1Missing);
+        break;
+      case 'open-graph-generator':
+        if (!snap.og.title) gapPush(out, 'warn', GI.ogTitleMissing, { kind: 'title', field: 'og-title' });
+        if (!snap.og.desc) gapPush(out, 'warn', GI.ogDescMissing, { kind: 'description', field: 'og-desc' });
+        if (!snap.og.image) gapPush(out, 'info', GI.ogImageMissing);
+        if (!snap.og.url) gapPush(out, 'info', GI.ogUrlMissing);
+        break;
+      case 'twitter-card-generator':
+        if (!snap.twitter.card) gapPush(out, 'warn', GI.twCardMissing);
+        if (!(snap.twitter.title || snap.og.title)) gapPush(out, 'warn', GI.twTitleMissing, { kind: 'title', field: 'tw-title' });
+        if (!(snap.twitter.desc || snap.og.desc)) gapPush(out, 'warn', GI.twDescMissing, { kind: 'description', field: 'tw-desc' });
+        if (!(snap.twitter.image || snap.og.image)) gapPush(out, 'info', GI.twImageMissing);
+        break;
+      case 'canonical-tag-generator':
+        if (!snap.canonical) gapPush(out, 'info', GI.canonicalMissing);
+        else if (snap.canonicalCount > 1) gapPush(out, 'fail', gapFill(GI.canonicalMultiple, { n: snap.canonicalCount }));
+        else if (/^https?:\/\//i.test(snap.canonical) &&
+          snap.canonical.replace(/\/+$/, '') !== String(snap.finalUrl || snap.url || '').replace(/\/+$/, '')) {
+          gapPush(out, 'warn', gapFill(GI.canonicalMismatch, { v: snap.canonical }));
+        }
+        break;
+      case 'hreflang-tag-generator':
+        if (!snap.hreflangs.length) {
+          gapPush(out, 'info', GI.hreflangMissing);
+        } else {
+          var badLang = snap.hreflangs.filter(function (h) {
+            var l = String(h.lang || '');
+            return l.toLowerCase() !== 'x-default' && !/^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i.test(l);
+          })[0];
+          if (badLang) gapPush(out, 'warn', gapFill(GI.hreflangInvalid, { v: badLang.lang }));
+        }
+        break;
+      case 'schema-markup-generator':
+        if (!snap.schemaTypes.length) {
+          gapPush(out, 'info', GI.schemaMissing);
+        } else {
+          var supportedType = snap.schemaTypes.filter(function (t) { return SCHEMA_SUPPORTED.indexOf(t) !== -1; })[0];
+          if (!supportedType) gapPush(out, 'info', gapFill(GI.schemaUnsupported, { types: snap.schemaTypes.slice(0, 4).join(', ') }));
+        }
+        break;
+      case 'robots-txt-generator':
+      case 'ai-crawler-blocker':
+        if (/noindex/i.test(snap.robots)) gapPush(out, 'fail', GI.noindex);
+        if (snap.siteRobots && snap.siteRobots.ok) {
+          if (!snap.siteRobots.sitemapUrls.length) gapPush(out, 'warn', GI.robotsNoSitemap);
+        } else gapPush(out, 'info', GI.robotsTxtMissing);
+        break;
+      case 'llms-txt-generator':
+        if (!(snap.mainLinks || []).length) gapPush(out, 'warn', GI.llmsNoPages);
+        if (!dl) gapPush(out, 'info', GI.descMissing);
+        break;
+      case 'sitemap-generator':
+        if (!(snap.siteSitemap && snap.siteSitemap.found)) gapPush(out, 'warn', GI.sitemapMissing);
+        if (snap.siteRobots && snap.siteRobots.ok && !snap.siteRobots.sitemapUrls.length) gapPush(out, 'warn', GI.robotsNoSitemap);
+        if (!snap.canonical) gapPush(out, 'info', GI.canonicalMissing);
+        break;
+      case 'keyword-density-checker':
+        if (snap.words && snap.words < 250) gapPush(out, 'warn', gapFill(GI.thinContent, { n: snap.words }));
+        if (!snap.h2s.length && !snap.h3s.length) gapPush(out, 'warn', GI.noSubheads);
+        if (snap.images.missingAlt) gapPush(out, 'info', gapFill(GI.imagesAlt, { n: snap.images.total, m: snap.images.missingAlt }));
+        break;
+    }
+    if (PAGE_LEVEL_GAPS[slug]) {
+      if (/noindex/i.test(snap.robots)) gapPush(out, 'fail', GI.noindex);
+      if (!snap.viewport) gapPush(out, 'warn', GI.viewportMissing);
+      if (!snap.lang) gapPush(out, 'warn', GI.langMissing);
+    }
+    // Prioritized: fail > warn > info; a stable index tiebreak keeps the
+    // tool-specific items ahead of shared page-level ones inside each level.
+    var order = { fail: 0, warn: 1, info: 2 };
+    out = out.map(function (it, i) { return { it: it, i: i }; })
+      .sort(function (a, b) { return (order[a.it.level] - order[b.it.level]) || (a.i - b.i); })
+      .map(function (x) { return x.it; });
+    return out.slice(0, 6);
+  }
+
+  function consentGranted() {
+    return !!(window.T4M_CONSENT && typeof window.T4M_CONSENT.granted === 'function' && window.T4M_CONSENT.granted());
+  }
+
+  function appendAiControl(body, item, root, slug, snap) {
+    var line = el('div', 'gap-ai-row');
+    if (!consentGranted()) {
+      // Consent-gated: no page data leaves the browser before the visitor
+      // allows processing. Offer the settings path instead of the call.
+      line.appendChild(el('span', 'gap-ai-note', GA.locked || ''));
+      var manage = el('button', 'btn btn-ghost gap-ai-manage', GA.manage || 'Open consent settings');
+      manage.type = 'button';
+      manage.addEventListener('click', function () {
+        var link = document.querySelector('[data-ck-settings]');
+        if (link) link.click();
+      });
+      line.appendChild(manage);
+    } else {
+      var btn = el('button', 'btn btn-ghost gap-ai', GA.label || 'Suggest a fix with AI');
+      btn.type = 'button';
+      btn.addEventListener('click', function () { runSuggest(btn, item, root, slug, snap); });
+      line.appendChild(btn);
+    }
+    body.appendChild(line);
+  }
+
+  function runSuggest(btn, item, root, slug, snap) {
+    if (btn.disabled) return;
+    var line = btn.parentNode;
+    var note = line.querySelector('.gap-ai-result');
+    if (!note) { note = el('span', 'gap-ai-result'); line.appendChild(note); }
+    btn.disabled = true;
+    var label = btn.textContent;
+    btn.textContent = GA.pending || 'Drafting a suggestion…';
+    var payload = {
+      tool: slug,
+      kind: item.fix.kind,
+      issue: item.text,
+      page: {
+        url: snap.finalUrl || snap.url || '',
+        title: snap.title || '',
+        h1: (snap.h1s && snap.h1s[0]) || '',
+        description: snap.desc || '',
+        text: String(snap.mainText || snap.bodyText || '').slice(0, 700)
+      }
+    };
+    function done(ok, suggestion) {
+      btn.disabled = false;
+      btn.textContent = label;
+      if (ok && suggestion) {
+        setVal(root, item.fix.field, suggestion);
+        note.textContent = (GA.done || '') + ' ' + (GA.disclaimer || '');
+        if (window.T4M_TRACK) window.T4M_TRACK('ai_suggest', { tool_slug: slug, fix_kind: item.fix.kind });
+      } else {
+        note.textContent = GA.failed || '';
+      }
+    }
+    fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(!!(j && j.ok && j.suggestion), j && j.suggestion); })
+      .catch(function () { done(false); });
+  }
+
+  function appendGaps(box, slug, snap, root) {
+    var items = recommend(snap, slug);
+    if (!items) return;
+    var wrap = el('div', 'gap-block');
+    wrap.appendChild(el('p', 'gap-head', G.title || 'What to add to this page'));
+    if (!items.length) {
+      wrap.appendChild(el('p', 'gap-empty', G.empty || ''));
+    } else {
+      var list = el('ul', 'gap-list');
+      items.forEach(function (item) {
+        var li = el('li', 'gap-item sig-' + item.level);
+        li.appendChild(el('span', 'sig-dot', ''));
+        var body = el('span', 'sig-body');
+        body.appendChild(document.createTextNode(item.text));
+        if (item.fix) appendAiControl(body, item, root, slug, snap);
+        li.appendChild(body);
+        list.appendChild(li);
+      });
+      wrap.appendChild(list);
+    }
+    box.appendChild(wrap);
+  }
+
   function render(box, snap, slug, root, rows) {
     box.textContent = '';
     rows = rows || summarize(snap);
@@ -785,6 +1072,9 @@
       list.appendChild(li);
     });
     box.appendChild(list);
+
+    // the actionable "what to add" layer, straight after the signal readout
+    appendGaps(box, slug, snap, root);
 
     // tool-specific personalized tip
     var tip = tipFor(slug, snap);
@@ -980,6 +1270,16 @@
     return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
   }
 
+  // The visitor can flip consent at any time (banner or the footer's "Cookie
+  // settings"). Re-render the current analysis so AI controls appear/disappear
+  // with that choice without needing a fresh fetch.
+  document.addEventListener('t4m:consent', function () {
+    if (!ACTIVE) return;
+    var snap = ACTIVE.root.__t4mInspectSnap;
+    var box = ACTIVE.root.querySelector('.inspect-result');
+    if (snap && box) render(box, snap, ACTIVE.slug, ACTIVE.root);
+  });
+
   window.T4M_INSPECT = {
     mount: mount,
     parse: parse,
@@ -988,6 +1288,7 @@
     phraseCount: phraseCount,
     topicOverlap: topicOverlap,
     makeDescriptionDraft: makeDescriptionDraft,
-    parseRobotsTxt: parseRobotsTxt
+    parseRobotsTxt: parseRobotsTxt,
+    recommend: recommend
   };
 })();

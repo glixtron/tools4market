@@ -21,6 +21,9 @@ export const INSPECT_TEXT = {
     cleared: 'Analysis cleared.',
     redirected: 'The server redirected this URL to {url}. Findings below describe the final response.',
     truncated: 'The response exceeded the analysis size limit; content counts cover only the fetched portion.',
+    modeLabel: 'Choose how to start',
+    modeAnalyze: 'Analyze my page',
+    modeManual: 'Enter manually',
   },
   pageStatus: {
     fetching: 'Fetching the page response…',
@@ -32,6 +35,67 @@ export const INSPECT_TEXT = {
     badUrl: 'Enter a full URL, e.g. https://your-site.com/page',
     fetchFailed: 'Could not retrieve a successful HTML page. Check the URL and page access, or paste the HTML instead: View Source → copy → paste.',
     emptyPaste: 'Paste the page HTML first.',
+  },
+  // "What to add to this page" — the deterministic gap analysis the analysis
+  // panel renders per tool (runtime decides WHICH items apply; every string
+  // lives here). {n} {m} {v} {types} are filled by the runtime.
+  gaps: {
+    title: 'What to add to this page',
+    empty: 'No missing elements found for this tool. Refine the output below.',
+    items: {
+      // meta description
+      descMissing: 'No meta description on this page. Add one that states what the page offers — snippets commonly show about 150–160 characters.',
+      descShort: 'The meta description is only {n} characters — a single thin line. Say what the page offers and who it is for.',
+      descLong: 'The meta description is {n} characters; only about the first 160 typically show. Move the key point to the front.',
+      // title
+      titleMissing: 'No <title> tag found. Add one that names the page topic — result titles often show about 50–60 characters.',
+      titleShort: 'The title is only {n} characters. A fuller title usually describes the page better (results often show ~50–60).',
+      titleLong: 'The title is {n} characters; search results often truncate around 50–60. Lead with the topic.',
+      // headings
+      h1Missing: 'No H1 found. Add one visible main heading that names the page topic.',
+      // Open Graph
+      ogTitleMissing: 'No og:title. Add it so shared links carry a headline instead of guessing one.',
+      ogDescMissing: 'No og:description. Add one so link previews say what the page offers.',
+      ogImageMissing: 'No og:image. Social previews without an image get far less attention — add one around 1200×630.',
+      ogUrlMissing: 'No og:url. Add the canonical page URL so shares point to one address.',
+      // Twitter/X card
+      twCardMissing: 'No twitter:card tag. Add <meta name="twitter:card" content="summary_large_image"> so shares show an image preview.',
+      twTitleMissing: 'No social title (og:title / twitter:title). Add one so shared links show a proper headline.',
+      twDescMissing: 'No social description (og:description / twitter:description). Add one so previews explain the page.',
+      twImageMissing: 'No card image (twitter:image / og:image). Card previews need an image to stand out.',
+      // canonical
+      canonicalMissing: 'No canonical tag. Add one when duplicate or alternate URLs exist so the preferred address is explicit.',
+      canonicalMultiple: '{n} canonical tags in one head. Keep exactly one.',
+      canonicalMismatch: 'Canonical ({v}) does not match the fetched URL. Confirm this is intentional.',
+      // hreflang
+      hreflangMissing: 'No hreflang annotations. Add them only if you publish equivalent pages for other languages or regions.',
+      hreflangInvalid: 'Invalid hreflang code ({v}). Use formats like en, fr-FR or x-default.',
+      // structured data
+      schemaMissing: 'No JSON-LD structured data. Add a type that matches visible content (Article, Product, FAQ…).',
+      schemaUnsupported: 'Existing schema ({types}) is not a type this generator can prefill. Review it before adding more markup.',
+      // indexing
+      noindex: 'This page is marked noindex — search engines are told NOT to index it. Remove the directive if the page should appear in search.',
+      viewportMissing: 'No viewport meta. Add <meta name="viewport" content="width=device-width, initial-scale=1"> so the page works on phones.',
+      langMissing: 'No lang attribute on <html>. Add e.g. <html lang="en"> for accessibility and language signals.',
+      // robots.txt / sitemap
+      robotsTxtMissing: 'No robots.txt found on this host. Generate one so crawlers get explicit rules and a sitemap line.',
+      robotsNoSitemap: 'robots.txt has no Sitemap line. Add one so crawlers can discover your sitemap.',
+      sitemapMissing: 'No readable sitemap found on this host. Generate one and submit it after verifying every URL.',
+      // content
+      thinContent: 'About {n} words of main text were extracted. If that reflects the live page, expand it with genuinely useful copy.',
+      noSubheads: 'No H2/H3 subheadings found. Break long copy into scannable sections.',
+      imagesAlt: '{m} of {n} images are missing alt text. Describe informative images for readers and crawlers.',
+      llmsNoPages: 'No same-site content links were found to seed the llms.txt page list. Add your key resource URLs manually.',
+    },
+    ai: {
+      label: 'Suggest a fix with AI',
+      pending: 'Drafting a suggestion…',
+      done: 'Draft inserted — review it before using.',
+      failed: 'The AI suggestion service is unavailable right now. Write the fix manually, or use the deterministic draft button if one is offered.',
+      locked: 'AI suggestions are off until you allow analytics processing. If enabled, only this page’s title, heading and opening text are sent — never the full page.',
+      manage: 'Open consent settings',
+      disclaimer: 'AI draft — check it against your page before publishing. This is not a ranking prediction.',
+    },
   },
   // Per-signal verdicts. {n} = measured number, {v} = a value. Runtime picks
   // pass / warn / fail based on the measurement and does {n}/{v} replacement.

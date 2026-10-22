@@ -1,10 +1,49 @@
 # Tools4Market — Design System
 
-*Version: 2.2 "Human-First Refinement" · 22 Oct 2026 · Implemented in `src/style.css`*
+*Version: 2.3 "Analyze Anywhere + AI Fixes" · 23 Oct 2026 · Implemented in `src/style.css`*
 
 ---
 
-## 0. What changed in v2.2 (Human-First refinement)
+## 0. What changed in v2.3 (Analyze-anywhere + AI fixes)
+
+v2.2 refined the visual language; v2.3 upgrades the tool experience itself —
+every fetch-capable tool now behaves like the meta-description page's
+"Analyze my page" flow, with an explicit two-mode choice and an actionable
+outcome list:
+
+1. **Two-mode input on every fetch-capable tool (24 of 31)** — a segmented
+   toggle at the top of the analysis panel: **Analyze my page** (default:
+   fetch + auto-fill + report) | **Enter manually** (the plain form, one click
+   away — nothing is ever removed). Pure-local tools keep their honest
+   "Runs in your browser" note instead of the toggle.
+2. **"What to add to this page" gap list** — after any analysis, the panel
+   renders a prioritized, deterministic checklist for that tool's concern
+   (missing/short/long description, missing title/OG/Twitter/canonical/schema,
+   noindex, robots.txt without a Sitemap line, thin content, missing alt
+   text…), ordered fail → warn → info and capped at six items. This layer
+   needs no network and no AI — it is the honest baseline.
+3. **AI fix suggestions (opt-in, consent-gated)** — fixable gap items carry a
+   **Suggest a fix with AI** button. It POSTs a *compact* snapshot (URL, title,
+   H1, description, ≤700 chars of opening text — never the raw page) to the
+   first-party `/api/suggest` route (Cloudflare Workers AI binding, keyless)
+   and drops the draft into the tool's field with an explicit "review before
+   using · not a ranking prediction" label. Before consent, the button is
+   replaced by a lock note + "Open consent settings"; granting consent
+   re-renders the controls in place (no refetch).
+4. **The two audit tools joined the shared panel** — Web Crawler Audit and
+   SEO Score Checker now mount the same analyze panel; the report renders from
+   the *same* snapshot (one page fetch total), and their native URL row/paste
+   block reappears in manual mode.
+5. **Disclosure** — privacy policy §1 documents exactly what `/api/suggest`
+   receives, where it goes (Cloudflare Workers AI), that nothing is stored,
+   and that drafts carry no ranking promise.
+
+Design constraints held: no new colours or type (existing tokens only), the
+toggle reads as a slim editorial segmented control (paper/ink/primary, 6px
+radius), gap items reuse the `sig-*` signal palette so status is never
+colour-only, and all new copy lives in `src/data/inspect.js` (rules.md §3).
+
+### Previous: v2.2 changes (Human-First refinement)
 
 v2.1 established the editorial identity; v2.2 answers the Human-First Design
 System brief — make the site feel *edited* rather than *generated*, without
@@ -229,6 +268,22 @@ links, navy→brass `footer-brand-bar`.
 
 ---
 
+### Analysis panel — modes, gaps, AI (`.inspect-modes`, `.gap-block`)
+
+- **Mode toggle:** slim segmented control (paper bg, 1px border, `--radius-sm`);
+  active segment is primary navy with white text; `aria-pressed` reflects state.
+  Default = Analyze. Manual mode hides only the panel body — the tool form
+  below is never touched.
+- **Gap list:** `.gap-block` sits directly under the signal readout, separated
+  by a thin rule, headed by a small uppercase label ("What to add to this
+  page"). Items reuse the `.sig-*` fail/warn/info palette + dot.
+- **AI row (`.gap-ai-row`):** sits inside a fixable gap item; button is
+  `btn btn-ghost` (brass outline, .8rem). Consent-gated: locked state shows a
+  note + "Open consent settings" ghost button instead. Results append as a
+  muted `.gap-ai-result` line — always naming the draft as review-only.
+
+---
+
 ## 6. Layout & breakpoints
 
 | Breakpoint | Behaviour |
@@ -251,6 +306,9 @@ easing `--ease: cubic-bezier(.22, 1, .36, 1)`.
 - Status colours always paired with a text label.
 - `aria-live="polite"` on output regions; `aria-hidden="true"` on decorative
   numerals and emoji; the pick card is an `<aside>` with an accessible name.
+- The analysis-mode toggle is a labelled `role="group"` with `aria-pressed`
+  buttons; AI suggestion results land in an `aria-live`-adjacent note and are
+  never the only explanation (the gap item text stands alone).
 
 ---
 

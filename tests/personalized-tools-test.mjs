@@ -29,6 +29,9 @@ const ROBOTS = `User-agent: *\nDisallow: /private\nAllow: /private/public\nSitem
 const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${PAGE_URL}</loc></url></urlset>`;
 const INDEXED_ROBOTS = `User-agent: *\nSitemap: https://indexed.test/sitemap.xml\n`;
 const INDEXED_MAP = `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>https://indexed.test/sitemap-pages.xml</loc></sitemap><sitemap><loc>https://indexed.test/sitemap-tools.xml</loc></sitemap><sitemap><loc>https://indexed.test/sitemap-blog.xml</loc></sitemap></sitemapindex>`;
+// A deliberately bare page: no title, no description, no viewport, no lang —
+// used to exercise the gap analysis ("what to add") and the AI fix path.
+const THIN_HTML = `<!doctype html><html><head></head><body><h1>Thin page heading</h1><p>Short copy for the page.</p></body></html>`;
 
 class LocalLoader extends ResourceLoader {
   fetch(url) {
@@ -78,10 +81,11 @@ function response(url) {
   else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-pages.xml') body = SITEMAP.replace(PAGE_URL, INDEXED_URL);
   else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-tools.xml') body = SITEMAP.replace(PAGE_URL, 'https://indexed.test/tools/meta-tag-generator/');
   else if (target.hostname === 'indexed.test' && target.pathname === '/sitemap-blog.xml') body = SITEMAP.replace(PAGE_URL, 'https://indexed.test/blog/launch-guide/');
+  else if (target.hostname === 'thin.test') body = THIN_HTML;
   else if (target.pathname === '/blocked/') xRobotsTag = 'noindex';
   return { ok: true, status, finalUrl: target.href, contentType, xRobotsTag, bytes: Buffer.byteLength(body), ms: 17, truncated: false, body };
 }
-async function boot(slug) {
+async function boot(slug, opts = {}) {
   const rel = '/tools/' + slug + '/';
   const html = readFileSync(path.join(DIST, rel, 'index.html'), 'utf8');
   const errors = [];
@@ -93,10 +97,22 @@ async function boot(slug) {
     virtualConsole: vc, pretendToBeVisual: true,
     beforeParse(win) {
       win.HTMLCanvasElement.prototype.getContext = () => ({ font: '', measureText: (text) => ({ width: String(text).length * 8 }) });
-      win.fetch = (input) => {
+      // Optional pre-granted analytics consent (drives the AI fix controls).
+      if (opts.consent) win.localStorage.setItem('t4m_consent', JSON.stringify({ analytics: true, ads: false }));
+      // Every /api/fetch target is logged so tests can count round trips;
+      // /api/suggest answers with the scripted suggestion payload.
+      win.__fetchLog = [];
+      win.__lastSuggestBody = null;
+      win.fetch = (input, init) => {
         const request = new URL(typeof input === 'string' ? input : input.url, win.location.href);
+        if (request.pathname === '/api/suggest') {
+          win.__lastSuggestBody = init && init.body ? JSON.parse(init.body) : null;
+          const payload = typeof opts.suggest === 'function' ? opts.suggest(win.__lastSuggestBody) : (opts.suggest || { ok: false });
+          return Promise.resolve({ json: () => Promise.resolve(payload) });
+        }
         const target = request.searchParams.get('url');
         if (request.pathname !== '/api/fetch' || !target) return Promise.reject(new TypeError('Unexpected test fetch'));
+        win.__fetchLog.push(target);
         return Promise.resolve({ json: () => Promise.resolve(response(target)) });
       };
     },
@@ -367,6 +383,91 @@ for (const [slug, selector, expected] of [
   setValue(win, 'ics-etime', '22:00');
   check('ICS generator rejects a same-day event that ends before it starts', doc.getElementById('ics-out').textContent === '' && doc.getElementById('ics-note').textContent.includes('end time must be after'));
   check('ICS generator handles event fields without JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Two-mode input: analyze (fetch + auto-fill, default) vs enter manually —
+// present on every fetch-capable tool, one click apart, nothing removed.
+{
+  const { dom, doc, errors } = await boot('meta-tag-generator');
+  const modes = doc.querySelector('.inspect-modes');
+  check('mode toggle offers analyze + manual entry', !!modes && modes.textContent.includes('Analyze my page') && modes.textContent.includes('Enter manually'));
+  check('analyze mode is the default (panel body visible)', !doc.querySelector('.inspect-body').hidden && doc.querySelector('.mode-btn.is-on').textContent === 'Analyze my page');
+  const manualBtn = [...doc.querySelectorAll('.mode-btn')].find((b) => b.textContent === 'Enter manually');
+  manualBtn.click();
+  check('manual mode hides the analysis body and marks the control', doc.querySelector('.inspect-body').hidden === true && manualBtn.getAttribute('aria-pressed') === 'true');
+  doc.querySelectorAll('.mode-btn')[0].click();
+  check('switching back re-shows the analysis panel', doc.querySelector('.inspect-body').hidden === false);
+  check('mode toggle has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// Deterministic gap analysis — "What to add to this page".
+{
+  const { dom, doc, errors } = await boot('meta-description-checker');
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'meta gaps (complete page)');
+  const gaps = doc.querySelector('.gap-block');
+  check('complete page shows the gap section with an all-clear', !!gaps && gaps.textContent.includes('What to add to this page') && gaps.textContent.includes('No missing elements found'));
+  check('complete page yields no AI button (nothing fixable)', !doc.querySelector('.gap-ai'));
+  check('gap section sits inside the analysis panel', !!doc.querySelector('.inspect-result .gap-block'));
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('meta-description-checker');
+  doc.querySelector('.inspect-url').value = 'https://thin.test/page/';
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'meta gaps (thin page)');
+  const items = [...doc.querySelectorAll('.gap-item')];
+  check('missing description is flagged as the top gap', items.length > 0 && items[0].classList.contains('sig-fail') && items[0].textContent.includes('No meta description'));
+  const gapText = doc.querySelector('.gap-block').textContent;
+  check('page-level gaps (viewport, lang) are listed too', gapText.includes('viewport') && gapText.includes('lang attribute'));
+  check('consent not given → AI fix is locked with a settings path', !doc.querySelector('.gap-ai') && !!doc.querySelector('.gap-ai-manage') && doc.querySelector('.gap-ai-note').textContent.includes('until you allow analytics processing'));
+  // Granting consent re-renders the analysis in place — no refetch needed.
+  win.T4M_CONSENT.update(true, false);
+  check('granting consent re-renders the AI control without a refetch', !!doc.querySelector('.gap-ai') && doc.querySelector('.gap-ai').textContent.includes('Suggest a fix with AI'));
+  check('thin page gap analysis has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// AI fix suggestion: consented visitor gets a draft that lands in the tool
+// field, labelled for review, sent as a compact snapshot (never the full page).
+{
+  const { dom, win, doc, errors } = await boot('meta-description-checker', {
+    consent: true,
+    suggest: { ok: true, suggestion: 'A grounded replacement description for the thin page.' },
+  });
+  doc.querySelector('.inspect-url').value = 'https://thin.test/page/';
+  doc.querySelector('.inspect-run').click();
+  await until(() => !!doc.querySelector('#tool-root').__t4mPageMeta, 'AI suggestion page snapshot');
+  const aiBtn = doc.querySelector('.gap-ai');
+  check('consented visitors get the AI fix button directly', !!aiBtn && aiBtn.textContent.includes('Suggest a fix with AI'));
+  aiBtn.click();
+  await until(() => doc.getElementById('md-text').value.startsWith('A grounded replacement'), 'AI suggestion inserted');
+  check('AI result is labelled a draft to review', doc.querySelector('.gap-ai-result').textContent.includes('review it before using') && doc.querySelector('.gap-ai-result').textContent.includes('not a ranking prediction'));
+  const sent = win.__lastSuggestBody;
+  check('request carries only the compact snapshot (no full page html)', !!sent && sent.tool === 'meta-description-checker' && sent.kind === 'description' && !!sent.page && !('html' in sent.page) && sent.page.text.length <= 700 && sent.issue.includes('No meta description'));
+  check('AI suggestion flow has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
+// The crawler audit now shares the analyze panel: one fetch feeds both the
+// signal readout and the full report; manual mode restores its native row.
+{
+  const { dom, win, doc, errors } = await boot('web-crawler-audit');
+  check('crawler audit mounts the shared analyze panel', !!doc.querySelector('.inspect .inspect-url') && !!doc.querySelector('.inspect-modes'));
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => doc.getElementById('ca-out').textContent.includes('Sitemap discovery'), 'shared-panel crawler report');
+  const pageFetches = win.__fetchLog.filter((u) => u === PAGE_URL).length;
+  check('analysis fetches the page exactly once (report reuses the snapshot)', pageFetches === 1, pageFetches + ' fetches');
+  check('shared-panel analysis prefills the native URL field', doc.getElementById('ca-url').value === PAGE_URL);
+  check('native URL row is hidden while analyzing', doc.getElementById('ca-url').closest('.field').hidden === true);
+  const manualBtn = [...doc.querySelectorAll('.mode-btn')].find((b) => b.textContent === 'Enter manually');
+  manualBtn.click();
+  check('manual mode exposes the native URL row again', doc.getElementById('ca-url').closest('.field').hidden === false && doc.querySelector('.inspect-body').hidden === true);
+  check('shared-panel crawler flow has no JavaScript errors', errors.length === 0);
   dom.window.close();
 }
 

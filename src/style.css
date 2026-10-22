@@ -1483,6 +1483,50 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
 }
 .inspect-tip strong { color: var(--c-accent); }
 
+/* ---------- Input mode toggle (Analyze my page | Enter manually) ---------- */
+.inspect-modes {
+  display: inline-flex; gap: 4px; padding: 3px; margin-bottom: 12px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+}
+.mode-btn {
+  border: 0; background: transparent; font: inherit; font-size: .84rem;
+  font-weight: 600; color: var(--c-muted); padding: 6px 14px;
+  border-radius: var(--radius-xs); cursor: pointer;
+  transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+.mode-btn:hover { color: var(--c-text); background: var(--c-surface-2); }
+.mode-btn.is-on { background: var(--c-primary); color: #fff; }
+.mode-btn.is-on:hover { background: var(--c-primary-2); color: #fff; }
+.mode-btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.inspect.is-manual .inspect-body { display: none; }
+
+/* ---------- Gap analysis: "What to add to this page" ---------- */
+.gap-block {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--c-border);
+}
+.gap-head {
+  margin: 0 0 8px; font-family: var(--font-head); font-size: .78rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--c-muted);
+}
+.gap-empty { margin: 0; font-size: .86rem; color: var(--c-muted); }
+.gap-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.gap-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: .86rem; line-height: 1.45; padding: 7px 10px;
+  border-radius: var(--radius-xs);
+}
+.gap-ai-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 7px;
+}
+.gap-ai-row .btn { font-size: .8rem; padding: 5px 12px; }
+.gap-ai-note, .gap-ai-result { font-size: .78rem; line-height: 1.45; color: inherit; opacity: .85; }
+.gap-ai-result { display: block; width: 100%; }
+
+/* [hidden] must win over component display rules (mode toggle, audit rows). */
+[hidden] { display: none !important; }
+
 /* ---------- Score ring (crawler audit + SEO score) ---------- */
 .score-wrap { display: flex; align-items: center; gap: 18px; margin: 14px 0; }
 .score-ring {

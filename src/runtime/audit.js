@@ -262,6 +262,20 @@
       }
     }
 
+    // Shared-panel handoff: the "Analyze my page" panel already fetched and
+    // parsed this page, so the full report renders from THAT snapshot — one
+    // fetch total, and the report appears automatically after analysis.
+    root.__t4mAuditFromSnapshot = function (snap) {
+      var u = snap.finalUrl || snap.url || '';
+      status.textContent = fetchedStatus(snap, snap.requestedUrl || u);
+      if (!u) { render(snap, null); return; }
+      runBtn.disabled = true;
+      crawlContext(u).then(function (ctx) {
+        render(snap, ctx);
+        runBtn.disabled = false;
+      }).catch(function () { render(snap, null); runBtn.disabled = false; });
+    };
+
     runBtn.addEventListener('click', audit);
     $(root, 'ca-url').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); audit(); } });
     var caPasteBtn = $(root, 'ca-paste-run');
@@ -437,6 +451,19 @@
         fixes.appendChild(fl);
       }
     }
+
+    // Same shared-panel handoff as web-crawler-audit (score path skips the
+    // sitemap sampling, exactly like its own "Score this page" flow).
+    root.__t4mAuditFromSnapshot = function (snap) {
+      var u = snap.finalUrl || snap.url || '';
+      status.textContent = fetchedStatus(snap, snap.requestedUrl || u);
+      if (!u) { render(snap, null); return; }
+      runBtn.disabled = true;
+      crawlContext(u, false).then(function (ctx) {
+        render(snap, ctx);
+        runBtn.disabled = false;
+      }).catch(function () { render(snap, null); runBtn.disabled = false; });
+    };
 
     runBtn.addEventListener('click', score);
     $(root, 'sc2-url').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); score(); } });

@@ -5,6 +5,9 @@
   "name": "tools4market",
   "main": "worker.js",
   "compatibility_date": "2026-10-19",
+  // Workers AI binding — powers POST /api/suggest (AI fix suggestions).
+  // The model call stays server-side; no API key exists anywhere.
+  "ai": { "binding": "AI" },
   "routes": [
     { "pattern": "www.tools4market.online/*", "zone_name": "tools4market.online" }
   ],

@@ -114,6 +114,33 @@ let bj = {}; try { bj = JSON.parse(bad2.body); } catch {}
 ok('proxy blocks SSRF to loopback', bj.ok === false, (bad2.body || '').slice(0, 80));
 out.push('');
 
+// ---- backend /api/suggest (AI fix suggestions; the client only calls it
+// ---- after analytics consent — see consent-mode checks above)
+out.push('=== Backend /api/suggest ===');
+{
+  const sg = await fetch(ORIGIN + '/api/suggest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tool: 'meta-description-checker',
+      kind: 'description',
+      issue: 'No meta description on this page.',
+      page: { url: 'https://example.com/', title: 'Example Domain', h1: 'Example Domain', description: '', text: 'Example gives small teams one place to plan projects and ship on time.' },
+    }),
+  });
+  let sj = {}; try { sj = await sg.json(); } catch {}
+  ok('suggest: real Workers AI draft returns (binding live)', sg.status === 200 && sj.ok === true && typeof sj.suggestion === 'string' && sj.suggestion.length > 40, String(sj.suggestion || sj.reason || 'status ' + sg.status).slice(0, 90));
+  const gn = await fetch(ORIGIN + '/api/suggest');
+  ok('suggest: GET rejected (405)', gn.status === 405, 'status ' + gn.status);
+  const xo = await fetch(ORIGIN + '/api/suggest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'https://evil.test' },
+    body: '{}',
+  });
+  ok('suggest: cross-origin POST rejected (403)', xo.status === 403, 'status ' + xo.status);
+}
+out.push('');
+
 // ---- AI-search surfaces (llms.txt / llms-full.txt / RSS feed)
 {
   const llms = (await grab(ORIGIN + '/llms.txt')).body;

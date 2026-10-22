@@ -6,11 +6,13 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
   // GA4 events (consent-gated by construction: the page sets Consent Mode v2
   // defaults to "denied" before gtag loads, so nothing is stored or sent for a
   // visitor who has not accepted analytics). Events: tool_open, tool_run,
-  // copy_output, download_output, blog_cta_click, contact_click.
+  // copy_output, download_output, blog_cta_click, contact_click, ai_suggest.
   function track(name, params) {
     if (typeof window.gtag !== 'function') return;
     try { window.gtag('event', name, params || {}); } catch (e) { /* never break the UI for analytics */ }
   }
+  // Shared with the inspect runtime (AI suggestion events).
+  window.T4M_TRACK = track;
   function toolSlugOf(el) {
     var root = el && el.closest ? el.closest('#tool-root') : null;
     return root ? root.getAttribute('data-tool') : 'shell';
@@ -237,6 +239,8 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
       push(state.analytics, state.ads);
       banner.hidden = true;
       document.body.classList.remove('ck-open');
+      // Let interested UI (the analysis panel's AI controls) follow the choice.
+      try { document.dispatchEvent(new CustomEvent('t4m:consent')); } catch (e) { /* non-fatal */ }
     }
     function showBanner() { banner.hidden = false; document.body.classList.add('ck-open'); }
     function openPanel() {

@@ -2,6 +2,19 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-23 — Analyze-anywhere + AI fix suggestions (v2.3)
+
+Made every fetch-capable tool behave like the meta-description page's "Analyze my page" flow, then added the two things that turn analysis into action — a gap list and AI drafts.
+
+- **Two-mode input (24 of 31 tools):** a segmented toggle atop the shared panel — **Analyze my page** (default: fetch, read signals, auto-fill) | **Enter manually** (plain form, one click away; nothing removed). Pure-local tools keep their "Runs in your browser" label instead of the toggle. The 7 manual-only tools stay manual-only by design.
+- **"What to add to this page":** after any analysis the panel renders a deterministic, prioritized checklist for that tool's concern — missing/short/long meta description, missing/weak title, missing OG/Twitter/canonical/schema/hreflang, noindex, robots.txt without a Sitemap line, missing sitemap, thin content, no subheadings, missing alt text, no viewport/lang — ordered fail → warn → info, capped at six. Works with no network and no AI; exposed as `T4M_INSPECT.recommend` for tests.
+- **AI fix suggestions:** fixable gap items carry a consent-gated **Suggest a fix with AI** button → `POST /api/suggest` (new `functions/api/suggest.js`, routed in `worker.js`, `AI` binding added to `wrangler.jsonc` — Cloudflare Workers AI, default `@cf/meta/llama-3.1-8b-instruct-fp8`, `AI_MODEL` overridable). The client sends only a compact snapshot (URL, title, H1, description, ≤700 chars of opening text — never the raw page) and only after analytics consent; before consent the control is a lock note + "Open consent settings", and granting consent re-renders the controls in place (`t4m:consent` event). The draft lands in the tool's field labelled "review before using · not a ranking prediction", and the event `ai_suggest` goes through the consent-gated gtag helper. Same-origin POSTs only; no API key exists anywhere; graceful 503/502 degradation keeps the deterministic "Draft from this page" path.
+- **Audit tools joined the shared panel:** Web Crawler Audit + SEO Score Checker now mount the analyze panel; their report renders from the *same* snapshot (verified: exactly one page fetch per analysis), their native URL row + paste block reappear in manual mode.
+- **Disclosure:** privacy policy §1 documents `/api/suggest` (what is sent, Cloudflare Workers AI as processor, nothing stored, consent requirement, no ranking promise); date bumped to 23 Oct 2026.
+- **Tests:** new `tests/suggest-api-test.mjs` (24 checks — contract, guards, prompt shape, output cleaning, degradation); personalized suite extended 84 → **107** (mode toggle, empty + fixable gaps, consent lock → re-render, AI round trip incl. payload-shape assertion, shared-panel audit single-fetch); seo-audit extended 1592 → **1610** (backend wiring, keyless/consent/privacy assertions). Full run: build clean · smoke **31/31** · seo **1610/1610** · consent **30/30** · personalized **107/107** · suggest **24/24**.
+- **Docs:** README (second backend route, `/api/suggest` section, AI_MODEL row), design.md → v2.3 (toggle/gap/AI components + a11y bullets), this log.
+- Not yet deployed; live `wrangler dev`/production check of the real model call pending in the deploy step below.
+
 ## 2026-10-22 — Browser-local image optimization pilot
 
 Added the Image Compressor & Optimizer at `/tools/image-compressor/` as one focused extension of the webmaster tools. It accepts up to ten JPEG, PNG, WebP or AVIF files (20 MB each, 50 MB per batch, 50 megapixels per image), exports WebP/JPEG/PNG, supports adjustable lossy quality and a max-width resize, reports measured dimensions and file-size change, and creates per-file downloads. Processing stays in the browser; the page explains format tradeoffs, JPEG transparency, possible metadata removal, and cases where output can be larger.

@@ -10,6 +10,7 @@
 // Workers `fetch(request, env, ctx)` signature. One codebase, two hosts.
 
 import { onRequestGet } from './functions/api/fetch.js';
+import { handleSuggest } from './functions/api/suggest.js';
 
 // Canonical host. The apex serves the site; www is redirected here in one hop
 // (path + query preserved) so there is never a redirect chain or a loop, and
@@ -57,6 +58,18 @@ export default {
         return new Response(JSON.stringify({ ok: false, error: String((e && e.message) || e) }), {
           status: 502,
           headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+    }
+
+    // ---- backend: AI fix suggestions (Workers AI, consent-gated client) ---
+    if (url.pathname === '/api/suggest' || url.pathname === '/api/suggest/') {
+      try {
+        return await handleSuggest(request, env);
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String((e && e.message) || e) }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
     }

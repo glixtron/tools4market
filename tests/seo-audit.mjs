@@ -377,6 +377,44 @@ for (const t of TOOLS) {
 }
 
 
+// ---------- 23 Oct 2026 analyze-anywhere + AI fix suggestions:
+// ---------- two-mode input, per-tool gap list, consent-gated /api/suggest
+{
+  const css = read('assets/style.css');
+  const inspectJs = read('assets/runtime/inspect.js');
+  const auditJs = read('assets/runtime/audit.js');
+  const strings = read('assets/inspect-strings.js');
+  const privacy = read('privacy-policy/index.html');
+  const worker = readFileSync(path.join(ROOT, 'worker.js'), 'utf8');
+  const wrangler = readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8');
+  const suggestFn = readFileSync(path.join(ROOT, 'functions/api/suggest.js'), 'utf8');
+
+  // --- backend: /api/suggest on Workers AI, keyless, same-origin, degrades
+  ok('worker: routes POST /api/suggest', worker.includes('/api/suggest') && worker.includes('handleSuggest'));
+  ok('wrangler: Workers AI binding declared', /"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"\s*\}/.test(wrangler));
+  ok('suggest: model call runs server-side and degrades if unavailable', suggestFn.includes('env.AI.run') && suggestFn.includes("reason: 'unavailable'"));
+  ok('suggest: cross-origin posting rejected (same-origin only)', suggestFn.includes('Cross-origin requests are not allowed'));
+  ok('suggest: compact snapshot caps (no full-page intake)', suggestFn.includes('MAX_BODY') && suggestFn.includes('700'));
+  ok('suggest: no long-lived API key material', !/(sk-[A-Za-z0-9]{20,}|api[_-]?key\s*[:=]\s*['"][A-Za-z0-9]{16,})/.test(suggestFn));
+
+  // --- client: two-mode input + gap analysis strings (all copy in data)
+  ok('inspect strings: mode toggle copy present', strings.includes('Enter manually') && strings.includes('Analyze my page'));
+  ok('inspect strings: gap heading + description fix items', strings.includes('What to add to this page') && strings.includes('No meta description on this page'));
+  ok('inspect strings: AI labels, lock note + honest disclaimer', strings.includes('Suggest a fix with AI') && strings.includes('until you allow analytics processing') && strings.includes('not a ranking prediction'));
+  ok('inspect runtime: AI controls gated on consent before any request', inspectJs.includes('consentGranted()') && inspectJs.includes('window.T4M_CONSENT'));
+  ok('inspect runtime: AI request posts a compact snapshot only', inspectJs.includes("/api/suggest") && !inspectJs.includes('snap.html') && inspectJs.includes('slice(0, 700)'));
+  ok('inspect runtime: analyze/manual toggle on every fetch-capable tool', inspectJs.includes('inspect-modes') && inspectJs.includes("modeManual") && inspectJs.includes('setMode'));
+  ok('inspect runtime: audit tools no longer skip the shared panel', !/SKIP_PANEL = \{[^}]*web-crawler-audit/.test(inspectJs) && inspectJs.includes("'web-crawler-audit': function (snap, root)"));
+  ok('audit runtime: report renders from the shared snapshot (one fetch)', auditJs.includes('__t4mAuditFromSnapshot'));
+  ok('site.js: ai_suggest event goes through the consent-gated helper', inspectJs.includes("'ai_suggest'") && inspectJs.includes('T4M_TRACK'));
+  ok('css: mode toggle + gap list + AI row styled', css.includes('.mode-btn') && css.includes('.gap-block') && css.includes('.gap-ai-row'));
+
+  // --- disclosure
+  ok('privacy policy documents AI-assisted suggestions + /api/suggest', privacy.includes('AI-assisted suggestions') && privacy.includes('/api/suggest') && privacy.includes('Cloudflare Workers AI'));
+  ok('privacy policy: AI drafts labelled review-only, no ranking promise', privacy.includes('no ranking promise'));
+}
+
+
 // ---------- site-wide duplicates
 const kwStrings = new Map();
 for (const t of TOOLS) add(kwStrings, t.keywords, t.slug);

@@ -71,11 +71,12 @@ export const POLICY = [
     metaDesc: 'How Tools4Market handles data: tools run locally in your browser, cookie consent for analytics and advertising, and your rights.',
     html: `
 <h1>Privacy Policy</h1>
-<p>Last updated: 22 October 2026</p>
+<p>Last updated: 23 October 2026</p>
 <p>This Privacy Policy explains what information Tools4Market (“we”, “us”) collects when you use our website, and the choices you have.</p>
 <h2>1. Tool input and public URL analysis</h2>
 <p>Most tools process pasted text and generated output locally in your browser. If you choose “Analyze my page” or run a URL-based audit, the URL you enter is sent to our first-party <code>/api/fetch</code> service. It requests the public page, robots.txt or sitemap needed for that check and returns the response to your browser for analysis. The app does not save an analysis report or build profiles from tool usage. Our hosting provider may process standard request logs as described below, and the destination website receives a request for its public page.</p>
 <p>The Image Compressor also processes selected image files locally in your browser using the browser’s image and canvas APIs. The image bytes are not sent to our fetch service or uploaded by this tool. The converted download exists in the current page until you save it or close the page. Re-encoding can remove embedded image metadata such as EXIF; keep the original if that metadata matters.</p>
+<p><strong>AI-assisted suggestions.</strong> When a tool flags a fixable issue (for example a missing or weak meta description) and you press “Suggest a fix with AI”, your browser sends our first-party <code>/api/suggest</code> service a small summary of the analyzed page: its URL, title, main heading, meta description and up to about 700 characters of opening text — never the full page. The service asks Cloudflare Workers AI (our hosting provider’s model service, running in the same Worker as the fetch proxy) to draft replacement copy and returns the draft to your browser. We log nothing and store nothing from this exchange; the model call is stateless. The feature is offered only after you allow analytics processing on the consent banner, because it involves sending that summary for processing; you can change your choice at any time via “Cookie settings”. Every draft is labelled for review — it is machine-generated copy, not search-engine output, and carries no ranking promise.</p>
 <p>Do not enter private URLs or URLs containing access tokens or other secrets. Pasted text and HTML are analyzed in your browser; the public URL fetch is a separate network request.</p>
 <h2>2. Information we collect</h2>
 <ul>
