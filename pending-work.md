@@ -22,7 +22,7 @@
 ## 📈 Growth-plan follow-ups (from the 23 Oct 2026 plan review)
 
 - [x] ~~Build the plan's top missing tools~~ — DONE (v2.4): JSON Validator (local), Sitemap Validator + Robots.txt Tester (dual-mode). The plan's URL-encoder / UUID / Base64 rows already existed; llms.txt, FAQPage/Breadcrumb schema, GA4 events and the crawler-permissions work were also already shipped.
-- [ ] **Next tools from the matrix (when scheduled):** OG Image Tester (fetch a page → preview og:image/twitter:image at real dimensions) and Hreflang Checker (live-page annotation audit) — the remaining worthwhile rows; GTM Container Previewer and PDF-to-Text are deprioritised (niche effort, heavy dependency).
+- [ ] **Next tools from the matrix (when scheduled):** ~~OG Image Tester and Hreflang Checker~~ — shipped v2.5 (23 Oct). Remaining rows are all deprioritised: GTM Container Previewer and PDF-to-Text (niche effort, heavy dependency); no other high-volume gaps found in the matrix.
 - [x] ~~Programmatic doorway variants ("/tools/x-for-wordpress" ×100)~~ — **REJECTED for now**: scaled thin/variant pages are a documented spam-policy risk on a 0-authority, 3-day-old domain. Revisit only with genuine per-CMS value (real presets/screenshots) and enough authority to survive scrutiny.
 - [ ] **Owner decisions requested by the plan (still open):** budget for launch support ($50–100?), 1–2 h/day review commitment, brand-voice direction (keep honest/practitioner tone), geographic priority (India-first vs US/EU-first for RPM).
 - [ ] **Owner-side distribution:** Reddit value-first presence, Product Hunt launch (week-3 slot), LinkedIn/YouTube content, directory submissions — none of these are code tasks; the site-side prerequisites (llms.txt, schema, tools, guides) are done.

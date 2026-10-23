@@ -1065,6 +1065,21 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
   background: var(--c-surface);
   color: var(--c-text);
 }
+.output .output-area ul {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+.output .output-area li.hlc-issue {
+  color: var(--c-danger);
+}
+.ogit-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-2);
+}
 
 .btn-copy {
   background: var(--c-primary);

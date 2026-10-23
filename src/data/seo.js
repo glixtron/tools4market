@@ -454,4 +454,75 @@ ${outputArea('sc2-fixes', 'Fix these first')}
   <button type="button" class="btn btn-ghost" id="sc2-paste-run">Score pasted HTML</button>
 </details>`,
   },
+
+  // ---------------------------------------------------------- OG image tester
+  {
+    slug: 'og-image-tester',
+    name: 'OG Image Tester',
+    cat: 'seo',
+    icon: '🖼️',
+    card: 'Preview any og:image at real dimensions and see how social cards will crop it.',
+    usedFor: 'for social share previews',
+    updated: '2026-10-23',
+    keywords: 'og image tester open graph social share image size preview dimensions card',
+    focus: 'og image tester',
+    h1: 'Free OG Image Tester — Check Social Share Images',
+    metaTitle: 'Free OG Image Tester — Preview og:image Sizes',
+    metaDesc: 'Test your og:image before sharing with this free OG Image Tester — real pixel dimensions, card crop ratios and the mistakes that break previews. No signup.',
+    intro: 'Enter any og:image URL into this free OG Image Tester to preview it, read its real dimensions and see how Facebook, LinkedIn and X will crop it on large and small cards.',
+    sections: [
+      { h: 'What this OG image tester measures', p: ['The og:image tag is a promise a page makes to every platform that later renders a link — Facebook, LinkedIn, X, Slack, Discord and dozens of others read it when someone shares your URL, and each one fetches the image from its own servers, minutes or days after you published. That distance is what this tester prepares you for: it loads the image the way those crawlers do, measures the pixels that actually arrive, and reports the aspect ratio against the two crops every platform uses — roughly 1.91:1 for the large card and 1:1 for small avatars. An image at 1200×630 renders without surprise; a square or portrait one gets cut, and knowing where the crop lands matters before the designer signs off.', 'Dimensions are only half the story. A social image must be reachable without cookies, redirects or authentication, must keep a stable URL — signed URLs that expire are the classic production incident — and ideally declares its size in og:image:width and og:image:height tags so the platform reserves space instead of guessing. The tester measures what the URL returns today; the checklist side — absolute URL, stable host, declared dimensions — is the part you verify in the page itself.'] },
+      { h: 'How to use this OG image tester', p: ['Analyze mode is the fastest path: enter the page URL in the panel and the og:image it declares loads into the tester automatically — the Twitter card image is used as a fallback when no Open Graph image exists, which is exactly how the platforms behave. Manual mode takes any image URL directly: the design team’s latest candidate, a competitor’s card, the image a support ticket is complaining about. The preview renders at the file’s true size, capped by your browser window, and the status line reports the measured pixels and crop assessment.', 'Re-test whenever the card design changes — a seasonal banner, a new template, a resized export. And test the URL, not the file: what matters is what an unauthenticated crawler gets when it asks for that exact address, including the query string. If the preview here loads but a share preview shows a broken image, the difference is almost always the platform’s cache — Facebook’s sharing debugger and similar tools let you force a refetch after you fix the file.'] },
+      { h: 'Social image mistakes that kill previews', p: ['The failures repeat across sites. A relative URL in og:image — platforms ignore anything that is not absolute. An image behind auth or a firewall — the crawler has no session, so the share shows nothing. A signed or expiring URL from a CDN — the preview works the day you ship and 404s a week later, silently, because no visitor ever reports a broken share. And no og:image at all, where platforms fall back to the first image on the page, which might be a tiny avatar, a decorative divider or nothing predictable.', 'Then the sizing mistakes: images under a few hundred pixels, which most platforms upscale into blur; extreme crops that cut the subject out at 1.91:1; text baked so small it is unreadable on a phone card; and formats some crawlers handle inconsistently. The cheap insurance is a boring, reliable recipe — 1200×630, absolute stable URL, under a megabyte, subject centered with margin — saved once as a template and reused, with this tester confirming each new export before it ships.'] },
+    ],
+    faqs: [
+      { q: 'What size should an og:image be?', a: '1200×630 pixels is the widely supported target — it renders at full size on large cards and crops cleanly to the 1:1 avatar shape. Keep it under about 300 KB and never below 200×200, which many platforms skip entirely.' },
+      { q: 'Why does my og:image not appear when I share?', a: 'The usual causes: a relative URL, an image behind login or a firewall, an expired CDN link, or a platform cache holding the old head. Test the exact URL with this tester first, then force a refetch with the platform’s debugger tool.' },
+      { q: 'Does this OG image tester check the tags on my page?', a: 'It measures the image a URL serves — dimensions, ratio and loadability, which is what every platform displays. Tag presence and placement on the page are covered by analyzing the page itself in the panel above.' },
+      { q: 'What about twitter:image and LinkedIn?', a: 'X reads twitter:image and falls back to og:image; LinkedIn reads Open Graph only. When a page declares both with different files, analyze mode loads the Open Graph image — check the Twitter one separately if it differs.' },
+    ],
+    html: `
+${f.url('ogit-url', 'Image URL (og:image or any image)', 'https://example.com/social-card.png')}
+<div class="output">
+  <div class="output-head"><span>Preview</span></div>
+  <img id="ogit-preview" class="ogit-preview" alt="Social share image preview" hidden>
+</div>
+<p class="tool-note" id="ogit-stats"></p>
+<p class="tool-note" id="ogit-detail"></p>
+${note('The preview loads the image directly from its host — the same way social platforms fetch it. Nothing is uploaded.')}`,
+  },
+
+  // ---------------------------------------------------------- hreflang checker
+  {
+    slug: 'hreflang-checker',
+    name: 'Hreflang Checker',
+    cat: 'seo',
+    icon: '🌐',
+    card: 'Validate hreflang codes, duplicates and the required self-reference from any page HTML.',
+    usedFor: 'for multilingual site audits',
+    updated: '2026-10-23',
+    keywords: 'hreflang checker validate language tags locale codes self reference multilingual',
+    focus: 'hreflang checker',
+    h1: 'Free Hreflang Checker — Validate Language Annotations',
+    metaTitle: 'Free Hreflang Checker — Validate hreflang Tags Fast',
+    metaDesc: 'Validate every hreflang tag with this free hreflang checker — code formats, duplicates, required self-reference and reciprocity reminders from the HTML.',
+    intro: 'Paste a page’s HTML into this free hreflang checker to list every language annotation it declares, flag invalid codes and duplicates, and confirm the self-reference Google requires.',
+    sections: [
+      { h: 'What this hreflang checker validates', p: ['Hreflang is a reciprocity contract: each language version of a page declares every other version, including itself, and search engines swap the right URL into the right country’s results. The contract has three mechanical rules this checker verifies directly from the markup. Codes must be lowercase ISO 639 language with an optional UPPERCASE ISO 3166 region — en, fr-FR, zh-HK — plus x-default as the catch-all. Each hreflang value should be declared once; duplicates are discarded with only the last entry kept. And the page must reference itself, because a version that opts out of its own cluster tells crawlers it does not belong to it.', 'What one page cannot prove is the other half of the contract. Every alternate URL must return a working page, stay out of conflicts with canonical tags, and link back with the same complete set — a one-way annotation is ignored entirely. That verification means running this checker on each version and comparing the sets, which is exactly how the report above frames its output: definitive on what this page declares, explicit about what needs checking on the others.'] },
+      { h: 'How to use this hreflang checker', p: ['Analyze mode reads a live page: enter its URL in the panel, and every hreflang link it declares is loaded below as markup for validation, with the page’s canonical set as the self-reference to check against. Manual mode takes any HTML — the full page source or just the head section from a template, a staging environment or a client’s site — and the optional self-reference field accepts this page’s own URL so the required self-reference can be confirmed without a fetch.', 'Run it wherever hreflang is written: after a translation ships, during a template review, when a migration changes URL patterns, and before assuming a translated cluster is working. The most expensive hreflang bugs are invisible in any single page view — a cluster that quietly stopped matching after one side was renamed — so keep the sets small, documented and re-validated together rather than maintained by memory across a large site.'] },
+      { h: 'Hreflang mistakes that void the annotations', p: ['Case errors first: en-us with a lowercase region is invalid, and the annotation is dropped. Then structural ones — a self-reference missing from the set, the same language declared for two different URLs, hreflang pointing at redirect chains or non-200 responses, and pages that carry hreflang for other languages but canonically resolve to a single URL anyway, where the canonical wins and the annotations are ignored. Publishing hreflang on the home page only, or on one page of a section, is the same category of half-implementation: the contract needs both sides.', 'The strategic mistakes matter more. Do not invent regions you do not serve — annotations for languages you cannot maintain waste crawl attention and set user expectations the site cannot keep. Do not use hreflang as a substitute for canonical when two URLs serve identical content in one language; that is what the canonical tag is for. And remember the directives are hints, not guarantees: they shape which version of a page appears where, but they never substitute for content that actually serves the visitor’s language and market.'] },
+    ],
+    faqs: [
+      { q: 'What is the correct hreflang format?', a: 'Lowercase ISO 639 language, optional UPPERCASE ISO 3166 region: en, fr-FR, pt-BR, zh-HK. x-default marks the fallback version. Mixed case like En-us is invalid and the annotation is ignored.' },
+      { q: 'Why must a page reference itself in hreflang?', a: 'The self-reference marks the page as a member of the cluster; without it, search engines drop the whole set for that page. This hreflang checker confirms it whenever you supply the page’s own URL.' },
+      { q: 'Does this hreflang checker verify that alternates link back?', a: 'No — reciprocity can only be confirmed by reading each alternate page. The checker validates everything this page declares, then lists the URLs to compare, version by version.' },
+      { q: 'Do I need an x-default hreflang?', a: 'It is optional but recommended: it names the page shown to visitors whose language and location match nothing in the set — typically the language-selector or global version. Without it, platforms pick a default for you.' },
+    ],
+    html: `
+${f.textarea('hlc-src', 'Page HTML (full page or just the <head>)', '<link rel="alternate" hreflang="fr-FR" href="https://example.com/fr/page/">', 9)}
+${f.url('hlc-self', 'This page’s own URL (for the self-reference check)', 'https://example.com/page/')}
+<p class="tool-note" id="hlc-stats"></p>
+${outputArea('hlc-list', 'Annotations')}
+${note('Codes, duplicates and self-reference are validated in your browser; reciprocity must be confirmed on each alternate page.')}`,
+  },
 ];

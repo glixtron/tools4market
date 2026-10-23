@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.4 · 23 Oct 2026 · 34 tools, 56 generated HTML pages*
+*Version: 2.5 · 23 Oct 2026 · 36 tools, 58 generated HTML pages*
 
 ---
 
@@ -402,3 +402,25 @@ summary:
 - Local-only tools (`json-validator` included; 9 total) stay out of the panel
   via `SKIP_PANEL` and are labelled "Runs in your browser" on their cards via
   `LOCAL_TOOLS` in `build.mjs`.
+
+## 14. Social + hreflang checkers (v2.5 — OG image tester, hreflang checker)
+
+Two SEO checkers that follow the audit-tool pattern (§11): they are
+fetch-capable, but their analysis adds *no extra requests* — `APPLY` fills
+their native fields from snapshot data the panel fetch already produced:
+
+- **OG image tester** — `APPLY` sets the image field from `snap.og.image`
+  with `snap.twitter.image` as the fallback (the same precedence the
+  platforms use). The preview is a plain cross-origin `<img>`: the browser
+  loads the image exactly as a social crawler would (no cookies, no auth),
+  and the runtime measures `naturalWidth × naturalHeight` on load to report
+  the real pixels and assess them against the 1.91:1 large-card and 1:1
+  avatar crops. No canvas, no CORS — dimension reads don't require it.
+- **Hreflang checker** — `APPLY` renders `snap.hreflang` entries back into
+  `<link rel="alternate">` markup in the tool's textarea; the parser then
+  treats them exactly like pasted HTML (`DOMParser`), so the analyzed and
+  manual paths share one code path. Validations: ISO 639/3166 code format
+  (lowercase language, uppercase region, or `x-default`), duplicate values,
+  and the required self-reference against the page's canonical. Reciprocity
+  across alternates is explicitly out of scope for a single-page check and
+  the copy says so — the report lists the alternate URLs to verify by hand.

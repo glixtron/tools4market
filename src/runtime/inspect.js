@@ -620,6 +620,17 @@
         setVal(root, 'rt-robots', snap.raw);
       }
     },
+    'og-image-tester': function (snap, root) {
+      var img = (snap.og && snap.og.image) || (snap.twitter && snap.twitter.image) || '';
+      if (img) setVal(root, 'ogit-url', img);
+    },
+    'hreflang-checker': function (snap, root) {
+      if (snap.canonical || snap.url) setVal(root, 'hlc-self', snap.canonical || snap.url);
+      var tags = (snap.hreflangs || []).map(function (h) {
+        return '<link rel="alternate" hreflang="' + h.lang + '" href="' + h.href + '">';
+      });
+      if (tags.length) setVal(root, 'hlc-src', tags.join('\n'));
+    },
     'case-converter': function (snap, root) {
       setVal(root, 'cc-text', snap.h1s[0] || snap.title);
     },
@@ -1262,6 +1273,10 @@
         return tips.sitemapCheck;
       case 'robots-txt-tester':
         return tips.robotsCheck;
+      case 'og-image-tester':
+        return tips.ogImage;
+      case 'hreflang-checker':
+        return tips.hreflangCheck;
       case 'utm-link-builder':
         return 'Destination pre-filled with your page URL \u2014 just add source, medium and campaign.';
       case 'htaccess-redirect-generator':

@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-23 — Social + hreflang checkers (v2.5)
+
+Completed the last two worthwhile rows of the strategy plan's tool matrix, both SEO-category and both following the v2.3/v2.4 panel architecture (analyze → `APPLY` prefills from the same single snapshot fetch; manual mode one click away).
+
+- **New tool — OG Image Tester** (`og-image-tester`, seo, dual-mode): enter any `og:image` URL (or analyze a page — the panel loads `snap.og.image`, Twitter-card image as fallback, exactly the platform precedence) to preview the image and measure its real pixels client-side via `naturalWidth/naturalHeight`. Reports aspect ratio against the 1.91:1 large-card and 1:1 avatar crops and gives size guidance (1200×630 ideal → <200×200 usually skipped). Copy is honest that each platform picks its own crop and that caches need a debugger refetch, not a re-upload.
+- **New tool — Hreflang Checker** (`hreflang-checker`, seo, dual-mode): paste any page HTML (or analyze a live page — `snap.hreflangs` is rendered back into `<link>` markup in the textarea, so analyzed and manual paths share one `DOMParser` code path). Lists every annotation, validates code format (lowercase ISO 639 + optional UPPERCASE ISO 3166 region, or `x-default`), flags duplicates, and confirms the required self-reference against the page's canonical — with trailing-slash/query tolerance. Reciprocity is explicitly out of scope for a single-page check and the report says so, listing the alternate URLs to verify.
+- **Engine:** no new fetches — both tools render from snapshot data the panel already produced (same pattern as the audit tools); `og:image` preview is a plain cross-origin `<img>` (dimension reads need no CORS).
+- **Tests:** personalized 125 → **135** (manual correctness + analyze→prefill flows incl. self-reference-present/absent paths and the no-`og:image` leave-manual-intact case); seo-audit auto-extended → **1815/1815**; smoke **36/36**; consent 30/30; suggest 24/24. Two shape fixes caught mid-work: both new metaDescs trimmed to ≤158, one OG FAQ adjusted so ≥2 FAQs carry the primary keyword.
+- **Docs:** README counts (36 tools / 58 pages), Architecture.md §14, category copy (SEO hub names both checkers), this log, pendingcommit entry 5.
+
 ## 2026-10-23 — Growth-plan review + three new tools (v2.4)
 
 Analysed the externally written `3-MONTH-STRATEGIC-PLAN.md` / `SUGGESTIONS.md` (Desktop checkout) against live state: ~40% of its "quick wins" were already shipped (llms.txt at root with correct spec format, robots.txt AI content-signals, FAQPage + BreadcrumbList + WebApplication schema on all tool pages, GA4 events incl. `download_output`, GSC/Bing/IndexNow, URL encoder and UUID/Base64 tools it listed as "new"). Built the genuinely missing high-volume items from its tool matrix; rejected its programmatic doorway-variant pages ("…-for-wordpress" ×100) as scaled-thin-content risk on a 0-authority domain; distribution/email/affiliate items are owner-side.

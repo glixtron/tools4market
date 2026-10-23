@@ -469,4 +469,111 @@
     root.addEventListener('input', update);
     update();
   };
+
+  function tpl(str, map) {
+    var s = String(str);
+    Object.keys(map).forEach(function (k) { s = s.split('{' + k + '}').join(map[k]); });
+    return s;
+  }
+
+  // ---------------------------------------------------------- OG image tester
+  T['og-image-tester'] = function (root) {
+    var COPY = TOOLTXT.ogit || {};
+    var urlIn = root.querySelector('#ogit-url');
+    var stats = root.querySelector('#ogit-stats');
+    var detail = root.querySelector('#ogit-detail');
+    var preview = root.querySelector('#ogit-preview');
+
+    function update() {
+      var u = (urlIn.value || '').trim();
+      if (!/^https?:\/\//i.test(u)) {
+        preview.removeAttribute('src');
+        preview.setAttribute('hidden', '');
+        stats.textContent = COPY.empty || '';
+        detail.textContent = '';
+        return;
+      }
+      stats.textContent = tpl(COPY.loading || 'Loading the image from {v}…', { v: u });
+      detail.textContent = '';
+      preview.onload = function () {
+        var w = preview.naturalWidth, h = preview.naturalHeight;
+        preview.removeAttribute('hidden');
+        var ratio = h ? (w / h) : 0;
+        var ratioLine = ratio >= 1.7 && ratio <= 2.1 ? (COPY.ratioWide || '')
+          : (ratio >= 0.95 && ratio <= 1.05 ? (COPY.ratioSquare || '') : (COPY.ratioOther || ''));
+        var sizeLine = (w >= 1200 && h >= 630) ? (COPY.sizeGood || '')
+          : (w >= 600 ? (COPY.sizeMid || '') : (w >= 200 ? (COPY.sizeSmall || '') : (COPY.sizeTiny || '')));
+        stats.textContent = tpl(COPY.dims || 'Loaded: {w}×{h} pixels ({v}).', { w: w, h: h, v: u }) + ' ' +
+          tpl(COPY.ratio || 'Aspect ratio {r} — {v}', { r: ratio.toFixed(2) + ':1', v: ratioLine }) + ' ' + sizeLine;
+        detail.textContent = COPY.notePlatforms || '';
+      };
+      preview.onerror = function () {
+        preview.setAttribute('hidden', '');
+        stats.textContent = tpl(COPY.loadFail || 'The image could not be loaded from {v}.', { v: u });
+      };
+      preview.src = u;
+    }
+    root.addEventListener('input', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- hreflang checker
+  T['hreflang-checker'] = function (root) {
+    var COPY = TOOLTXT.hlc || {};
+    var src = root.querySelector('#hlc-src');
+    var selfIn = root.querySelector('#hlc-self');
+    var stats = root.querySelector('#hlc-stats');
+    var list = root.querySelector('#hlc-list');
+    var CODE = /^(x-default|[a-z]{2,3}(-[A-Z]{2})?)$/;
+
+    function update() {
+      list.textContent = '';
+      var text = src.value || '';
+      if (!text.trim()) { stats.textContent = COPY.empty || ''; return; }
+      var doc = null;
+      try { doc = new DOMParser().parseFromString(text, 'text/html'); } catch (e) {}
+      var links = doc ? Array.prototype.slice.call(doc.querySelectorAll('link[rel="alternate"][hreflang]')) : [];
+      if (!links.length) { stats.textContent = COPY.none || ''; return; }
+
+      var issues = [];
+      var seen = {};
+      var langs = [];
+      var refs = [];
+      var ul = document.createElement('ul');
+      ul.className = 'hlc-entries';
+      links.forEach(function (l, i) {
+        var lang = (l.getAttribute('hreflang') || '').trim();
+        var href = (l.getAttribute('href') || '').trim();
+        langs.push(lang);
+        refs.push(href.replace(/[?#].*$/, '').replace(/\/$/, ''));
+        if (!CODE.test(lang)) issues.push(tpl(COPY.invalidCode || '"{v}" is not a valid hreflang code.', { v: lang || '(empty)' }));
+        seen[lang] = (seen[lang] || 0) + 1;
+        var li = document.createElement('li');
+        li.textContent = tpl(COPY.entry || '{lang} → {url}', { lang: lang || '(empty)', url: href || '(missing href)' });
+        ul.appendChild(li);
+      });
+      Object.keys(seen).forEach(function (k) {
+        if (seen[k] > 1) issues.push(tpl(COPY.dupCode || '"{v}" is declared {n} times.', { v: k, n: seen[k] }));
+      });
+
+      var self = (selfIn.value || '').trim().replace(/[?#].*$/, '').replace(/\/$/, '');
+      var selfLine = !self ? (COPY.selfSkipped || '')
+        : (refs.indexOf(self) !== -1 ? (COPY.selfOk || '') : tpl(COPY.selfBad || 'No self-reference: none of the hreflang URLs matches {v}.', { v: self }));
+      stats.textContent = tpl(COPY.found || '{n} hreflang annotation(s) found.', { n: links.length }) + ' ' + selfLine;
+
+      list.appendChild(ul);
+      issues.forEach(function (msg) {
+        var li = document.createElement('li');
+        li.className = 'hlc-issue';
+        li.textContent = msg;
+        ul.appendChild(li);
+      });
+      var noteP = document.createElement('p');
+      noteP.textContent = COPY.recipNote || '';
+      list.appendChild(noteP);
+    }
+    root.addEventListener('input', update);
+    root.addEventListener('change', update);
+    update();
+  };
 })();

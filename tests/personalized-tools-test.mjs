@@ -527,4 +527,34 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 
+// v2.5 additions: OG image tester and hreflang checker.
+{
+  const { dom, win, doc, errors } = await boot('og-image-tester');
+  check('og image tester mounts the analyze panel', !!doc.querySelector('.inspect .inspect-url'));
+  check('og image tester starts with an instruction', doc.getElementById('ogit-stats').textContent.includes('Enter an image URL'));
+  setValue(win, 'ogit-url', 'https://example.test/card.png');
+  check('og image tester begins loading the image URL', doc.getElementById('ogit-stats').textContent.includes('Loading the image from https://example.test/card.png'));
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => !doc.querySelector('.inspect-result').hidden, 'og analysis done');
+  check('og analysis without an og:image leaves the manual URL intact', doc.getElementById('ogit-url').value === 'https://example.test/card.png');
+  check('og image tester has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('hreflang-checker');
+  setValue(win, 'hlc-src', '<link rel="alternate" hreflang="EN-us" href="https://example.test/a">\n<link rel="alternate" hreflang="fr-FR" href="https://example.test/fr/a/">\n<link rel="alternate" hreflang="fr-FR" href="https://example.test/fr/a2/">');
+  check('hreflang checker counts annotations and reports code + duplicate issues', doc.getElementById('hlc-stats').textContent.includes('3 hreflang annotation(s) found') && doc.getElementById('hlc-list').textContent.includes('not a valid hreflang code') && doc.getElementById('hlc-list').textContent.includes('declared 2 times'));
+  setValue(win, 'hlc-self', 'https://example.test/missing');
+  check('hreflang checker flags a missing self-reference', doc.getElementById('hlc-stats').textContent.includes('No self-reference'));
+  setValue(win, 'hlc-self', 'https://example.test/fr/a/');
+  check('hreflang checker confirms a present self-reference (trailing slash tolerated)', doc.getElementById('hlc-stats').textContent.includes('Self-reference present'));
+  doc.querySelector('.inspect-url').value = PAGE_URL;
+  doc.querySelector('.inspect-run').click();
+  await until(() => doc.getElementById('hlc-src').value.includes('hreflang'), 'hreflang prefill from analyze');
+  check('analyze mode prefills the checker from the page source with self-reference', doc.getElementById('hlc-src').value.includes('<link rel="alternate"') && doc.getElementById('hlc-stats').textContent.includes('3 hreflang annotation(s) found') && doc.getElementById('hlc-stats').textContent.includes('Self-reference present'));
+  check('hreflang checker has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 console.log(`\nPERSONALIZED TOOLS: ${checks} checks passed.`);

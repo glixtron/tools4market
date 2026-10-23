@@ -1,7 +1,21 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Four entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below).
+**Status:** ✅ Five entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below).
+
+## Entry 5 — v2.5 social + hreflang checkers
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.5 / deploy record). Cross-verified before commit: build **58 pages / 36 tools**, smoke **36/36**, SEO audit **1815/1815**, consent **30/30**, personalized **135/135** (10 new checks), suggest-api **24/24**.
+
+**Subject:** `feat: social + hreflang checkers (v2.5) — OG image tester, hreflang checker`
+
+**Summary (v2.5):**
+- **OG Image Tester** (dual-mode): any `og:image` URL previewed at true size and measured client-side — real pixel dimensions, aspect ratio vs the 1.91:1 / 1:1 card crops, size-tier guidance. Analyze mode loads the page's Open Graph image (Twitter fallback) from the snapshot; no extra fetches.
+- **Hreflang Checker** (dual-mode): any page HTML parsed via `DOMParser` — annotation list, ISO 639/3166 code-format validation, duplicate flags, required self-reference check against the canonical (slash/query tolerant). Analyze mode renders `snap.hreflangs` back into `<link>` markup in the textarea so both paths share one parser. Reciprocity honestly out of scope per-page.
+- Architecture: both follow the audit-tool render-from-snapshot pattern (Architecture.md §14); preview `<img>` dimension reads need no CORS.
+
+**Files in this commit:** `src/data/seo.js`, `src/data/inspect.js`, `src/data/index.js`, `src/runtime/seo.js`, `src/runtime/inspect.js`, `src/style.css`, `tests/personalized-tools-test.mjs`, `README.md`, `Architecture.md`, `progress.md`, `pendingcommit.md`.
 
 ## Entry 4 — v2.4 growth-plan review + three new tools
 

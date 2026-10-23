@@ -17,6 +17,7 @@ export const CATEGORIES = {
     metaDesc: 'Free SEO tools for meta tags, Open Graph, canonical links, hreflang, JSON-LD schema and estimated snippet previews. No signup.',
     pageExtra: [
       'Each tool focuses on a page signal: title and meta description candidates for search snippets, Open Graph and Twitter tags for social shares, canonical links for duplicate or alternate URLs, hreflang annotations for multilingual pages, and JSON-LD for supported rich-result features. Generate the markup, review an estimated title and description preview, then add the output to your template.',
+      'Checker companions cover the same signals on a live or pasted page: the OG Image Tester measures the actual social-card image a URL serves, and the Hreflang Checker validates language codes, duplicates and the required self-reference straight from the HTML.',
       'Together, these tools form a pre-publish checklist: write a page-specific description, compare title and snippet wording, and review canonical and language signals. The generators run in your browser, so you can use them with client sites, unpublished drafts and staging content.',
     ],
   },
