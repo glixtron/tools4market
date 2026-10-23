@@ -6,6 +6,27 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-23→24 (night session) — Cross-session integration: timestamp + IP converters (v2.8)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner pasted the completion transcript of a *second* OpenCode session that had worked in the Desktop checkout and asked: verify it, make sure everything is committed, then list the steps for pending tasks.
+
+**What was wrong:** the second session had worked on a stale base — `main` at `8f0cb1b` (v2.4) with uncommitted changes — three releases behind the pushed source of truth (`5e5ee5a`, v2.7 live). On that stale base it had created five tools. Two were genuinely new (`timestamp-converter`, `ip-converter`); two were parallel re-implementations of tools v2.5 had already shipped (`og-image-tester`, `hreflang-checker`); one was a duplicate of the existing `url-encoder-decoder`, which that session then renamed around mid-flight. Its "all tests pass" claim (61 pages / 39 tools) applied only to its own stale tree, and its code carried rules violations and honesty bugs.
+
+**What was done (v2.8, commit `7ce61cb`):**
+- **Integrated** the two new converters into `audit-growth-plan-v2.1`, rewritten to house rules: all user-facing strings moved to `src/data/inspect.js` (`tools.tsConv`, `tools.ipConv`) per rules §3; discarded the three duplicate/parallel tools, the `style.css` diff (styled its own implementation) and the stale doc diffs.
+- **Honesty fixes over the imported code:** batch-conversion claim removed (never implemented); pre-1970 negative timestamps now convert (FAQ promised them, code rejected them); `datetime-local` input parsed as the visitor's local time (was force-shifted with `Z`); the Local + Relative output lines the copy promised were implemented; IP input strips whitespace so "various spacing conventions" are true; fixed a prefill bug where *both* timestamp fields started filled, greeting new visitors with "Clear one field to convert."
+- **Registered** both as local tools (`LOCAL_TOOLS` + `SKIP_PANEL` → 15 local / 27 fetch) so they show "Runs in your browser" and ship only their own runtime.
+- **Repo hygiene:** `3-MONTH-STRATEGIC-PLAN.md` + `SUGGESTIONS.md` tracked for the first time (untracked on Desktop since v2.4); README/Architecture counts → 42 tools / 65 pages.
+
+**Verification (all before commit):** build 65 pages / 42 tools / 5 categories, smoke 42/42, SEO audit 2063/2063 (+82), consent 30/30, personalized 167/167 (+15 new checks incl. TZ-proof local-time conversion and hex/decimal/binary/spaced IP inputs), suggest-api 24/24. Deployed (Version ID `191deb7e`), IndexNow 64 URLs (HTTP 200), live-verify 61/61; both new pages confirmed live (200, "Runs in your browser", per-page runtime only, strings bundle serves `tsConv`/`ipConv`, both URLs in the tools sitemap).
+
+**Note for the owner:** the Desktop checkout's local changes are now **superseded** — everything of value lives in `origin/main` (`7ce61cb`). Safe to discard there: `git restore . && git clean -f` in `/Users/macbookpro/Desktop/Tools4market` (this also drops that session's stale doc edits; its untracked strategy docs are now tracked in the repo).
+
+**Completed:** 24 Oct 2026, 00:01 IST.
+
+---
+
 ## 2026-10-23 (late session) — PageSpeed deep fix: performance, CLS, accessibility
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
