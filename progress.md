@@ -2,6 +2,20 @@
 
 *Append-only. Newest entries at top.*
 
+### PageSpeed deep fix — v2.7 (23 Oct 2026, late session)
+
+**Trigger:** owner shared PageSpeed Insights — mobile Performance **36**, CLS 0.693, "unused JavaScript 445 KiB", render-blocking requests, Accessibility 90. Also requested a standing `worklog.md`.
+
+**Root causes (verified with local Lighthouse + network traces):** every page shipped all 7 runtime scripts (~210 KB JS it could not use); Google Fonts loaded via CSS `@import` (serial render-blocking chain + 30-min third-party cache); GTM's `gtm.js` (~560 KB) ran on every page although the container holds no GA4 measurement id; the AdSense loader (150–250 KB) fetched while the account is on hold with no ad unit ids; plus two dashboard-level injections found on the wire (`/tow0/…` first-party GA proxy + Cloudflare Web Analytics beacon — not in the repo; flagged for the owner in pending-work.md, the proxy may double-count GA4).
+
+**Shipped (v2.7):** per-page script slicing (static pages: `site.js` only; tool pages: category runtime + strings + inspect engine only for panel tools + `audit.js` only for the two audit tools — homepage went from 9 script requests to 1); self-hosted all 12 woff2 subsets in `/fonts/*` (immutable cache, preloaded headline + body faces, Google Fonts chain removed); GTM off by default (`GTM_ID` unset = off, matching the documented switch behavior); AdSense loader gated on `AD_SLOT_*` (auto-returns when slots are set; ads.txt stays); build-time CSS minification (64.9→47.8 KB, source readable); identity source maps for all first-party JS; a11y contrast fixes (`#8c6025` eyebrow/cat-num, `#766e5c` sec-num, `#8b8271` outcome-num, `#66707c` tool-proc), footer `h4`→`h3`, in-prose links underlined.
+
+**Measured (local Lighthouse mobile, before → after):** TBT **4,070→590 ms**, unused JS **557→71 KiB** (remainder is Google's own gtag.js), main-thread 8.0→1.6 s, **Accessibility 90→100, Best Practices 77→100**, SEO 100, CLS 0. Performance score varies 69–81 run-to-run depending on third-party fetch timing (was 62).
+
+**Tests:** seo-audit extended-regex updates for minified CSS + footer `h3`; consent + live-verify GTM assertions inverted (loader absent by default, ordering guards retained); live-verify AdSense assertion inverted (loader absent while slots unset, ads.txt still checked). Suites at commit time: build 63 pages/40 tools/5 categories, smoke 40/40, SEO audit 1981/1981, consent 30/30, personalized 152/152, suggest-api 24/24.
+
+**Indexing:** crawl side re-verified healthy (robots Allow:/, sitemap index with 3 child maps, canonicals, no accidental noindex); the heaviest main-thread work per crawl is gone too.
+
 ## 2026-10-23 — Marketing calculators + fifth category (v2.6)
 
 With AdSense on hold per owner, pulled Phase 3 forward: created the site's namesake **`marketing` category** and shipped its first batch of four pure-local calculators — the brand gap ("Tools4Market" with zero marketing calculators) closed.
@@ -324,7 +338,7 @@ Connected the new page to the Web & Utility category and related audit/SEO tools
 
 **Verification:** build produced 44 pages with no length warnings; all 30 tool pages passed smoke checks; personalized tool harness passed 84 checks; consent suite passed 30 checks; site-wide SEO audit passed 1,254 checks with zero failures; `git diff --check` is clean. The locally generated sitemap lists all 43 indexable HTML pages exactly once across three child files (404 excluded). In the local browser, the sitemap tool fetched the public Tools4Market homepage and same-host robots/sitemap files, then populated 40 URLs from the current production sitemap. A deterministic case also confirms an index plus all three child maps can be imported. Public fetches confirm source signals only; they do not confirm index status or Search Console performance.
 
-**Pending:** capture a representative 390×844 mobile pass and deploy the local changes when publication is authorized. Production was not modified.
+**Pending:** capture a representative 390×844 mobile pass ~~and deploy the local changes when publication is authorized~~ — the deploy happened long ago (v2.2 through v2.7 all live); the mobile screenshot pass remains open and is blocked on the desktop browser connection. Production was not modified by this entry's session.
 
 ## 2026-10-22 — 30-day audit & growth plan implementation
 
@@ -360,7 +374,7 @@ Connected the new page to the Web & Utility category and related audit/SEO tools
 
 **IndexNow live (22 Oct):** generated a stable 32-char key (`48794bab…701d`), stored in gitignored local `.env` (documented in README), rebuilt + redeployed so `/{key}.txt` is published (verified 200 + correct body), then `npm run indexnow` submitted **51 URLs → HTTP 202**. Bing/Yandex ingestion is asynchronous — verify in Bing Webmaster Tools → IndexNow; no crawl/index guarantee.
 
-**End-of-task ritual adopted (22 Oct):** `rules.md` §6 now requires opening `suggest.md` + `pendingcommit.md` at task finish, cross-verifying any pending development, then committing and pushing. First execution: found the uncommitted image-optimizer work described in `pendingcommit.md` (main repo), cross-verified it (build 53 pages/31 tools, audit 1528/1528 after fixing one real defect — metaDesc missing the primary keyword), committed as `5837fb7` on main, merged into this branch (`7d897f1`) with two doc conflicts resolved by combining both sessions' facts, added the v2.1 `usedFor`/`updated` metadata to the new tool, full suite green (audit 1570/1570, smoke 31/31, consent 30/30, personalized 84/84), pushed branch + fast-forwarded main. `suggest.md` initialized (was missing). **Image optimizer is committed but not yet deployed** — next `npm run deploy` will publish it.
+**End-of-task ritual adopted (22 Oct):** `rules.md` §6 now requires opening `suggest.md` + `pendingcommit.md` at task finish, cross-verifying any pending development, then committing and pushing. First execution: found the uncommitted image-optimizer work described in `pendingcommit.md` (main repo), cross-verified it (build 53 pages/31 tools, audit 1528/1528 after fixing one real defect — metaDesc missing the primary keyword), committed as `5837fb7` on main, merged into this branch (`7d897f1`) with two doc conflicts resolved by combining both sessions' facts, added the v2.1 `usedFor`/`updated` metadata to the new tool, full suite green (audit 1570/1570, smoke 31/31, consent 30/30, personalized 84/84), pushed branch + fast-forwarded main. `suggest.md` initialized (was missing). **Image optimizer is committed but not yet deployed** — next `npm run deploy` will publish it. *(Since shipped: went live with v2.2 on 22 Oct; production now serves v2.7.)*
 
 ### Human-First design refinement — v2.2 (22 Oct 2026, second session)
 
@@ -370,18 +384,4 @@ Connected the new page to the Web & Utility category and related audit/SEO tools
 
 **Tests:** extended `tests/seo-audit.mjs` with 22 new assertions (chips, pick note/updated, job icons, guide→tool links, SERP-safe H1s, processing notes, aria-current, reduced-motion, motion tokens, once-per-session hero, footer links, editorial outcome layout). **Audit 1592/1592** (was 1570), smoke 31/31, consent 30/30, personalized 84/84 — all green. One real defect caught mid-work: footer About/Contact duplicated (POLICY already lists them) — removed.
 
-**Not deployed yet** — production still serves v2.1 + the pending image-optimizer commit. Next `npm run deploy` (source `INDEXNOW_KEY` from `.env`, Node 24 via nvm) publishes v2.2 + image-compressor together; then `npm run indexnow` for the changed URLs. Still-pending user items unchanged: Search Console sitemap resubmission, AdSense ad units, optional `GOOGLE_SITE_VERIFY`, distribution plan. Visual/mobile screenshot pass still blocked (no desktop browser connected).
-
-### PageSpeed deep fix — v2.7 (23 Oct 2026, late session)
-
-**Trigger:** owner shared PageSpeed Insights — mobile Performance **36**, CLS 0.693, "unused JavaScript 445 KiB", render-blocking requests, Accessibility 90. Also requested a standing `worklog.md`.
-
-**Root causes (verified with local Lighthouse + network traces):** every page shipped all 7 runtime scripts (~210 KB JS it could not use); Google Fonts loaded via CSS `@import` (serial render-blocking chain + 30-min third-party cache); GTM's `gtm.js` (~560 KB) ran on every page although the container holds no GA4 measurement id; the AdSense loader (150–250 KB) fetched while the account is on hold with no ad unit ids; plus two dashboard-level injections found on the wire (`/tow0/…` first-party GA proxy + Cloudflare Web Analytics beacon — not in the repo; flagged for the owner in pending-work.md, the proxy may double-count GA4).
-
-**Shipped (v2.7):** per-page script slicing (static pages: `site.js` only; tool pages: category runtime + strings + inspect engine only for panel tools + `audit.js` only for the two audit tools — homepage went from 9 script requests to 1); self-hosted all 12 woff2 subsets in `/fonts/*` (immutable cache, preloaded headline + body faces, Google Fonts chain removed); GTM off by default (`GTM_ID` unset = off, matching the documented switch behavior); AdSense loader gated on `AD_SLOT_*` (auto-returns when slots are set; ads.txt stays); build-time CSS minification (64.9→47.8 KB, source readable); identity source maps for all first-party JS; a11y contrast fixes (`#8c6025` eyebrow/cat-num, `#766e5c` sec-num, `#8b8271` outcome-num, `#66707c` tool-proc), footer `h4`→`h3`, in-prose links underlined.
-
-**Measured (local Lighthouse mobile, before → after):** TBT **4,070→590 ms**, unused JS **557→71 KiB** (remainder is Google's own gtag.js), main-thread 8.0→1.6 s, **Accessibility 90→100, Best Practices 77→100**, SEO 100, CLS 0. Performance score varies 69–81 run-to-run depending on third-party fetch timing (was 62).
-
-**Tests:** seo-audit extended-regex updates for minified CSS + footer `h3`; consent + live-verify GTM assertions inverted (loader absent by default, ordering guards retained); live-verify AdSense assertion inverted (loader absent while slots unset, ads.txt still checked). Suites at commit time: build 63 pages/40 tools/5 categories, smoke 40/40, SEO audit 1981/1981, consent 30/30, personalized 152/152, suggest-api 24/24.
-
-**Indexing:** crawl side re-verified healthy (robots Allow:/, sitemap index with 3 child maps, canonicals, no accidental noindex); the heaviest main-thread work per crawl is gone too.
+**Not deployed yet** *(historical note — since shipped: v2.2 + image-compressor went live 22 Oct, v2.3–v2.7 on 23 Oct; production currently serves the v2.7 PageSpeed release)*. At the time of writing: production still served v2.1 + the pending image-optimizer commit. Next `npm run deploy` (source `INDEXNOW_KEY` from `.env`, Node 24 via nvm) publishes v2.2 + image-compressor together; then `npm run indexnow` for the changed URLs. Still-pending user items at that time: Search Console sitemap resubmission (since done by owner), AdSense ad units (still on hold), optional `GOOGLE_SITE_VERIFY` (superseded — DNS-verified property covers it), distribution plan (still open). Visual/mobile screenshot pass still blocked (no desktop browser connected).

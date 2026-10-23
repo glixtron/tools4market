@@ -2,6 +2,8 @@
 
 Running log of agent sessions: who did what, what was broken, how it was fixed, and when it completed. Newest entries first.
 
+*This log was created 23 Oct 2026 (per owner request); sessions before that date are recorded in `progress.md`, which remains the chronological project history.*
+
 ---
 
 ## 2026-10-23 (late session) — PageSpeed deep fix: performance, CLS, accessibility

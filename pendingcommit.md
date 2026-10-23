@@ -101,7 +101,7 @@
 
 **Files in this commit:** `build.mjs`, `src/data/index.js`, `src/site.js`, `src/style.css`, `tests/seo-audit.mjs`, `design.md`, `progress.md`.
 
-**Not deployed:** production still serves v2.1 + the pending image-optimizer commit. Next `npm run deploy` (source `INDEXNOW_KEY` from `.env`, Node 24 via nvm) publishes v2.2 + image-compressor together, then `npm run indexnow`.
+**Not deployed:** *(historical — since shipped: v2.2 + image-compressor went live 22 Oct; production currently serves v2.7.)* Production still served v2.1 + the pending image-optimizer commit at commit time.
 
 ## Entry 1 — image optimizer
 
