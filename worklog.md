@@ -6,6 +6,29 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-24 (early session, 2nd pass) — Day-2 content pack integrated (v2.10)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (two blog posts, an AEO FAQ set, analytics/GSC-GA4 setup guide, Product Hunt + social assets, 50-keyword research, a master compilation, and an OpenCode prompt naming 7 "machine-executable tasks"). Owner asked to read all of it and "add everything properly" to the project docs.
+
+**What was wrong with the pack as written:** it targets a CMS this site does not have, uses a URL scheme (`/ai-search/…`, `/seo-tools/…`, `/content/…`, `/blog/…`) this site never had — real URLs are `/tools/<slug>/` and `/blog/<slug>/` — carries stale 31-tool counts, and recommends installing GA4 through Google Tag Manager, which v2.7 measured as ~560 KB/page of dead weight and turned off. Executing the prompt verbatim would have produced 404 internal links and re-broken the performance work.
+
+**Cross-check before touching anything:** tasks 1–4 were already shipped — `/robots.txt` + `/llms.txt` at root, Organization + WebSite schema on the homepage, BreadcrumbList + FAQPage on every tool page, all asserted by the seo-audit. Task 5's structure (FAQ + FAQPage) also existed on all 44 tools; only the *content* was new. Task 6's llms.txt post would have duplicated the existing `llms-txt-guide` (self-cannibalisation). Task 7's `tool_used`/`tool_copied` already existed as `tool_run`/`copy_output`.
+
+**What actually shipped (v2.10, commit `ea839d3`):**
+- All 9 pack files archived verbatim in `docs/day2/`, plus `docs/day2/INTEGRATION-NOTES.md` recording the task-by-task matrix, the corrections and the owner-side leftovers.
+- **New guide `screaming-frog-alternative`** — the one genuinely new post, adapted to house voice: honest-limits sections kept, the "when to use which" decision rule kept, internal links moved to `relatedTools` (prose is HTML-escaped by design), 10-point pre-publish checklist shipped as a code block.
+- **`llms-txt-guide` upgraded in place rather than duplicated** — merged in the pack's three-question decision flow, the file-format skeleton and the three common mistakes; added a 6th FAQ capturing the "llms.txt example" query; set `updated: 2026-10-24`; ~640 → ~1,100 words. Kept our newer v2-spec (Aug 2026) section the pack did not know about.
+- **5 AEO FAQ additions** merged into the top-5 tools (robots-txt-generator: block training but stay citable; llms-txt-generator: do-I-need-one; meta-tag-generator: OG vs Twitter Card; utm-link-builder: lowercase rule; schema-markup-generator: priority order) — each trimmed to the 300-char answer rule and de-duplicated against existing FAQs.
+- **2 missing GA4 events** added to `src/site.js`: `search` (`search_term` + `results_count`, 800 ms debounce, ≥2 chars, deduped) and `external_link_click` (`link_host`/`link_path`, analytics/infra hosts excluded). Consent-gating by construction is unchanged — `track()` no-ops without gtag.
+- Owner-side leftovers (KPI sheet, GA4↔GSC link, social/PH/directory actions, indexing habit) recorded in a new `pending-work.md` section pointing at the archived files. Counts updated: README/Architecture → 68 pages, 44 tools, 11 guides.
+
+**Verification (all before commit):** build 68 pages / 44 tools / 11 guides, smoke 44/44, SEO audit **2167/2167** (+22 for the new guide and the FAQ changes), consent 30/30, personalized 181/181, suggest-api 24/24. Deployed as Worker version `6d5cd8fd-c009-4eae-a7cb-6d923add67b5`; IndexNow **67 URLs** (HTTP 200); live-verify **61/61**; new guide confirmed live with FAQPage schema, llms guide confirmed showing "Updated 2026-10-24", both new GA4 events confirmed in the served `site.js`.
+
+**Completed:** 24 Oct 2026, 02:24 IST.
+
+---
+
 ## 2026-10-24 (early session) — Calculator batch 2: email ROI + marketing budget (v2.9)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
