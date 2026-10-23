@@ -3,6 +3,7 @@ import { TOOLS_SEO } from './seo.js';
 import { TOOLS_AI } from './ai-search.js';
 import { TOOLS_CONTENT } from './content.js';
 import { TOOLS_WEB } from './web.js';
+import { TOOLS_MARKETING } from './marketing.js';
 import { POLICY } from './policy.js';
 
 export const CATEGORIES = {
@@ -66,9 +67,23 @@ export const CATEGORIES = {
       'These are the tools you reach for during a migration, an audit or a 2 a.m. incident, so they are deliberately zero-friction: no account, no queue and no file upload for browser-based tools. Generate, copy, verify the output yourself, and move on.',
     ],
   },
+  marketing: {
+    id: 'marketing',
+    slug: 'marketing-tools',
+    nav: 'Marketing',
+    name: 'Marketing Calculators',
+    icon: '📊',
+    homeDesc: 'ROI, ROAS, CAC and ad-metric calculators — the numbers marketers and founders actually run, in your browser with no signup.',
+    pageDesc: 'Free marketing calculators: ROI, ROAS, customer acquisition cost, CPC, CPM, CPA and CTR. Every calculation runs locally in your browser — nothing is uploaded.',
+    metaDesc: 'Free marketing calculators for ROI, ROAS, CAC, CPC, CPM and CPA. Fast, private, no signup — every calculation runs in your browser.',
+    pageExtra: [
+      'The four numbers every marketing conversation eventually lands on, in one place: ROI for the whole ledger, ROAS for the ad account, CAC for the price of one customer, and the CPC/CPM/CPA rates that sit underneath all of them. Each calculator takes the inputs you already have from any ad platform or spreadsheet, shows its working, and states what the number does not cover — because a marketing figure without its caveats is how bad budget decisions get made.',
+      'The set is designed to be read together. Start with the campaign rates to see what traffic cost, check ROAS against your break-even margin to see whether the ads earned, then step up to CAC and ROI for the unit-economics and profit views. Every calculation runs in your browser as you type: no account, no data leaves the page, and the currency selector keeps the output in the numbers your team actually reports.',
+    ],
+  },
 };
 
-export const TOOLS = [...TOOLS_SEO, ...TOOLS_AI, ...TOOLS_CONTENT, ...TOOLS_WEB];
+export const TOOLS = [...TOOLS_SEO, ...TOOLS_AI, ...TOOLS_CONTENT, ...TOOLS_WEB, ...TOOLS_MARKETING];
 export { POLICY };
 
 // ---------------------------------------------------------------------------
@@ -103,6 +118,13 @@ export const JOBS = [
     path: '/tools/web-crawler-audit/',
     cta: 'Start with the Web Crawler Audit',
     icon: 'browser-check',
+  },
+  {
+    title: 'Understand what a campaign really earned',
+    blurb: 'ROI, ROAS and CAC from the numbers you already have — private, instant, no signup.',
+    path: '/tools/roi-calculator/',
+    cta: 'Start with the ROI Calculator',
+    icon: 'chart-up',
   },
 ];
 

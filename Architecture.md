@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.5 · 23 Oct 2026 · 36 tools, 58 generated HTML pages*
+*Version: 2.6 · 23 Oct 2026 · 40 tools, 63 generated HTML pages*
 
 ---
 
@@ -28,10 +28,11 @@ src/
 ├── data/               ← BUILD-TIME ONLY — never shipped to browser
 │   ├── index.js        ← Central export: TOOLS, CATEGORIES, POLICY
 │   ├── helpers.js      ← HTML form-field builder functions (build-time)
-│   ├── seo.js          ← 8 SEO tool definitions (content + markup templates)
-│   ├── ai-search.js    ← 3 AI Search tool definitions
-│   ├── content.js      ← 4 Content & Social tool definitions
-│   ├── web.js          ← 3 Web & Utility tool definitions
+│   ├── seo.js          ← 12 SEO tool definitions (content + markup templates)
+│   ├── ai-search.js    ← 4 AI Search tool definitions
+│   ├── content.js      ← 8 Content & Social tool definitions
+│   ├── web.js          ← 12 Web & Utility tool definitions
+│   ├── marketing.js    ← 4 Marketing calculator definitions
 │   └── policy.js       ← 5 policy page HTML (About, Contact, Privacy, Terms, Disclaimer)
 │
 build.mjs               ← Static site generator (Node 18+, zero npm deps)
@@ -48,10 +49,11 @@ src/
 ├── style.css           ← Design system (Outfit + Inter fonts, CSS tokens)
 ├── site.js             ← Shell runtime: copy buttons, live search, tool init dispatcher
 └── runtime/            ← Per-category tool logic (classic IIFE scripts, no bundler)
-    ├── seo.js          ← Logic for 8 SEO & Meta tools
+    ├── seo.js          ← Logic for SEO & Meta tools
     ├── ai-search.js    ← Logic for robots.txt, AI blocker, llms.txt tools
     ├── content.js      ← Logic for slug, UTM, keyword density, hashtag tools
     ├── web.js          ← Logic for .htaccess, sitemap, password tools
+    ├── marketing.js    ← Logic for ROI, ROAS, CAC and ad-metric calculators (all local)
     ├── inspect.js      ← Page fetch, HTML extraction, phrase comparison, shared inspector panel
     └── audit.js        ← Web Crawler Audit and SEO Score Checker
 ```
@@ -424,3 +426,25 @@ their native fields from snapshot data the panel fetch already produced:
   and the required self-reference against the page's canonical. Reciprocity
   across alternates is explicitly out of scope for a single-page check and
   the copy says so — the report lists the alternate URLs to verify by hand.
+
+## 15. Marketing calculators + fifth category (v2.6)
+
+v2.6 added the site's namesake category — `marketing` in `CATEGORIES` — and
+the first batch of four calculators (`roi-calculator`, `roas-calculator`,
+`cac-calculator`, `ad-metrics-calculator`). Everything category-related is
+CATEGORIES-driven, so the new category flowed automatically into the header
+nav, footer, homepage outcome grid (now five cards), category hub page,
+related-tools sidebars and the pages sitemap.
+
+- **All four are pure-local** (`LOCAL_TOOLS` + `SKIP_PANEL`): no fetch, no
+  panel, labelled "Runs in your browser". Runtime logic lives in
+  `src/runtime/marketing.js`; every user-facing string (empty states,
+  formula labels, verdict tiers) lives in `src/data/inspect.js` under
+  `tools.roiCalc` / `roasCalc` / `cacCalc` / `admCalc` per rules §3.
+- **Currency display** is a build-time `<select>` whose option *values are
+  the symbols* ($, €, £, ₹, …); the runtime reads `select.value` and
+  prefixes results — the labels stay in the data file.
+- Verdict tiers (ROI bands, break-even ROAS via 1/margin, LTV:CAC bands,
+  missing-input guidance) are honest by design: each states what the number
+  does not cover and points at the neighbouring calculator for the missing
+  half of the picture.

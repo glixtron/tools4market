@@ -278,8 +278,8 @@ for (const t of TOOLS) {
   ok('home: task-language search placeholder', home.includes('Search tools by task'));
   ok('home: editor pick card links a live tool', /<aside class="pick-card"[\s\S]{0,600}?<a href="tools\/[a-z0-9-]+\/">/.test(home));
   ok('home: pick card shows a real output preview', home.includes('class="pick-sample"'));
-  ok('home: four "start with your job" paths', home.includes('id="start-with-your-job"') && (home.match(/class="job-card"/g) || []).length === 4);
-  ok('home: four numbered outcome categories', (home.match(/class="outcome-card"/g) || []).length === 4);
+  ok('home: five "start with your job" paths', home.includes('id="start-with-your-job"') && (home.match(/class="job-card"/g) || []).length === 5);
+  ok('home: five numbered outcome categories', (home.match(/class="outcome-card"/g) || []).length === 5);
   ok('home: guides framed as "show the work"', home.includes('Guides that show the work'));
   ok('home: contact / feedback CTA', home.includes('Suggest a tool') && home.includes('Report a bug') && /href="contact\/"/.test(home));
   ok('home: cookie banner reserves page space (body.ck-open)', read('assets/style.css').includes('body.ck-open'));
@@ -343,7 +343,7 @@ for (const t of TOOLS) {
 
   // --- job cards use the 1.5px line-icon family (no emoji in primary UI)
   const jobIcons = (home.match(/class="job-icon"/g) || []).length;
-  ok('home: four job cards carry line icons', jobIcons === 4, jobIcons + ' icons');
+  ok('home: five job cards carry line icons', jobIcons === 5, jobIcons + ' icons');
   ok('job icons: 1.5px stroke, rounded caps, currentColor', (home.match(/stroke-width="1.5"/g) || []).length >= 4);
 
   // --- guide cards: editorial date + topic label + "use this tool" bridge

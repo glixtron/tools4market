@@ -557,4 +557,58 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 
+// v2.6 additions: marketing calculators (ROI, ROAS, CAC, ad metrics).
+{
+  const { dom, doc, errors } = await boot('roi-calculator');
+  check('roi calculator skips the analyze panel (local-only)', !doc.querySelector('.inspect'));
+  check('roi calculator starts with an instruction', doc.getElementById('roic-verdict').textContent.includes('Enter the revenue'));
+  setValue(dom.window, 'roic-rev', '1000');
+  setValue(dom.window, 'roic-inv', '400');
+  check('roi calculator computes profit, ROI % and multiple', doc.getElementById('roic-out').textContent.includes('Net profit: $600') && doc.getElementById('roic-out').textContent.includes('ROI: 150% (2.5×') && doc.getElementById('roic-verdict').textContent.includes('exceptional'));
+  setValue(dom.window, 'roic-rev', '200');
+  check('roi calculator reports losses honestly', doc.getElementById('roic-out').textContent.includes('(a loss)') && doc.getElementById('roic-verdict').textContent.includes('negative ROI'));
+  check('roi calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('roas-calculator');
+  setValue(dom.window, 'roasc-spend', '500');
+  setValue(dom.window, 'roasc-rev', '2000');
+  check('roas calculator reports the ratio and revenue per unit', doc.getElementById('roasc-out').textContent.includes('ROAS: 4×') && doc.getElementById('roasc-out').textContent.includes('$1 spent returned $4 in revenue'));
+  setValue(dom.window, 'roasc-margin', '40');
+  check('roas calculator derives break-even from margin', doc.getElementById('roasc-out').textContent.includes('Break-even ROAS: 2.5× at a 40% gross margin') && doc.getElementById('roasc-verdict').textContent.includes('Above break-even'));
+  setValue(dom.window, 'roasc-spend', '0');
+  check('roas calculator guards zero spend', doc.getElementById('roasc-verdict').textContent.includes('greater than zero'));
+  check('roas calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('cac-calculator');
+  setValue(dom.window, 'cacc-spend', '8000');
+  setValue(dom.window, 'cacc-cust', '100');
+  check('cac calculator computes cost per customer', doc.getElementById('cacc-out').textContent.includes('CAC: $80 per new customer') && doc.getElementById('cacc-verdict').textContent.includes('lifetime value'));
+  setValue(dom.window, 'cacc-ltv', '300');
+  check('cac calculator derives the LTV:CAC ratio with a verdict', doc.getElementById('cacc-out').textContent.includes('LTV:CAC ratio: 3.75×') && doc.getElementById('cacc-verdict').textContent.includes('healthy range'));
+  setValue(dom.window, 'cacc-cust', '0');
+  check('cac calculator guards zero customers', doc.getElementById('cacc-verdict').textContent.includes('greater than zero'));
+  check('cac calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('ad-metrics-calculator');
+  setValue(dom.window, 'amc-spend', '300');
+  setValue(dom.window, 'amc-imp', '100000');
+  setValue(dom.window, 'amc-clicks', '150');
+  setValue(dom.window, 'amc-conv', '20');
+  const out = doc.getElementById('amc-out').textContent;
+  check('ad metrics calculator reads all four rates', out.includes('CPC: $2 per click') && out.includes('CPM: $3 per 1,000 impressions') && out.includes('CTR: 0.15%') && out.includes('CPA: $15 per conversion'));
+  setValue(dom.window, 'amc-conv', '');
+  check('ad metrics calculator flags missing conversions for CPA', doc.getElementById('amc-verdict').textContent.includes('No conversions recorded'));
+  setValue(dom.window, 'amc-clicks', '');
+  setValue(dom.window, 'amc-imp', '');
+  check('ad metrics calculator refuses spend-only results', doc.getElementById('amc-verdict').textContent.includes('spend alone gives no rate'));
+  check('ad metrics calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 console.log(`\nPERSONALIZED TOOLS: ${checks} checks passed.`);

@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 23 Oct 2026 — v2.4 growth-plan review + 3 new tools (JSON/sitemap/robots checkers) committed; production serving v2.3 + image-compressor fix (`f7874228`).*
+*Living tracker — update after every session. Last updated: 23 Oct 2026 — v2.6 shipped (marketing category + 4 calculators); production serving v2.5 (`0e496a9d`) until the next deploy. **AdSense work is ON HOLD per owner (23 Oct)** — account active, no slot wiring until the owner resumes it.*
 
 ## 👤 Owner follow-ups — launch and growth
 
@@ -9,20 +9,21 @@
 - [x] ~~Start Bing Webmaster Tools~~ — DONE per user; Bing crawling/index monitoring started
 - [x] **Google tag / GA4 tag present** — latest live verification found exactly one `G-6B4GGFC96K` tag on every published page, after Consent Mode defaults. Check collected traffic in GA4 separately; tag presence alone does not prove reporting attribution is configured correctly.
 - [x] ~~**Set `INDEXNOW_KEY`**~~ — DONE 22 Oct: key `48794bab…701d` generated, stored in local `.env` (gitignored; build reads it), `/{key}.txt` published and verified live (200), **51 URLs submitted to IndexNow (HTTP 202)**. Re-run `npm run indexnow` after each deploy.
-- [ ] **After the next deploy:** resubmit the sitemap in Search Console (blog now carries real `lastmod`; tool/pages deliberately have none) and check Coverage for new-indexed pages
-- [ ] **Check AdSense site/review status** — Google's readiness guidance focuses on unique, relevant content, clear navigation and user experience; it does not publish a fixed article-count threshold. Resolve any specific status/rejection findings before applying or reapplying.
+- [x] ~~**Resubmit the sitemap after the v2.4/v2.5 deploys**~~ — DONE by owner 23 Oct (GSC sitemap + Bing Webmaster both resubmitted); IndexNow re-run after each deploy. Coverage check for newly indexed pages still worth a look once data accrues.
+- [ ] **Check AdSense site/review status** — ⏸️ **ON HOLD per owner (23 Oct)**. When resumed: the console verdict decides the next step; Google's readiness guidance focuses on unique, relevant content and does not publish a fixed article-count threshold.
 - [ ] **Enable the OpenCode desktop browser** (experimental browser setting) so the visual/mobile verification pass can run — functional behaviour is already verified, only the screenshot/eyeball pass is waiting
 - [x] ~~**Create the GitHub repo + push**~~ — DONE: **https://github.com/glixtron/tools4market** (now **PRIVATE**, MIT licence), branch `main`, 2+ commits, remote `origin` configured
 - [x] ~~Deploy baseline to Cloudflare~~ — DONE; production live. **Deployed 22 Oct:** audit/growth-plan release (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hooks) live as Worker version `9d8d8e00-d9a7-4b60-a238-af5d3dffb96e` via `npm run deploy` from this machine (wrangler OAuth now authenticated locally). **Pending:** publish the image optimizer (committed to `main`, not yet deployed).
 - [x] ~~Attach canonical apex domain~~ — DONE: `https://tools4market.online` serves the site and is used in canonicals/sitemaps.
 - [x] ~~**Fix `www` canonical redirect**~~ — FIXED and verified live 22 Oct: `https://www.tools4market.online/` → 301 → `https://tools4market.online/` (one hop, via the Worker route `www.tools4market.online/*` now deployed in `wrangler.jsonc`).
-- [ ] **Finish AdSense ad-unit setup** — publisher loader and `ads.txt` are live. Create ad units and set `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR`, then finish the AdSense review flow. `SITE_URL` / `SITE_EMAIL` are optional overrides; defaults already point at the live domain.
+- [ ] **Finish AdSense ad-unit setup** — ⏸️ **ON HOLD per owner (23 Oct)**. Publisher loader and `ads.txt` are live; when resumed, create ad units and set `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` and redeploy — no ad units render until then.
 - [x] ~~**Point DNS / verify `/api/fetch`**~~ — latest live verification records Cloudflare DNS, apex + www canonical routing, live sitemap and a working public-page fetch proxy with the loopback SSRF probe blocked.
 
 ## 📈 Growth-plan follow-ups (from the 23 Oct 2026 plan review)
 
 - [x] ~~Build the plan's top missing tools~~ — DONE (v2.4): JSON Validator (local), Sitemap Validator + Robots.txt Tester (dual-mode). The plan's URL-encoder / UUID / Base64 rows already existed; llms.txt, FAQPage/Breadcrumb schema, GA4 events and the crawler-permissions work were also already shipped.
-- [ ] **Next tools from the matrix (when scheduled):** ~~OG Image Tester and Hreflang Checker~~ — shipped v2.5 (23 Oct). Remaining rows are all deprioritised: GTM Container Previewer and PDF-to-Text (niche effort, heavy dependency); no other high-volume gaps found in the matrix.
+- [ ] **Matrix rows (23 Oct plan review):** ~~OG Image Tester and Hreflang Checker~~ — shipped v2.5. Remaining rows deprioritised: GTM Container Previewer and PDF-to-Text (niche effort, heavy dependency); no other high-volume gaps found.
+- [ ] **Marketing calculators (Phase 3, pulled forward):** ✅ batch 1 DONE (v2.6, 23 Oct): ROI, ROAS, CAC + CPC/CPM/CPA under the new `marketing` category. Batch 2 when scheduled: email ROI, marketing budget/growth calculators — same pure-local pattern, `src/data/marketing.js` + `src/runtime/marketing.js`.
 - [x] ~~Programmatic doorway variants ("/tools/x-for-wordpress" ×100)~~ — **REJECTED for now**: scaled thin/variant pages are a documented spam-policy risk on a 0-authority, 3-day-old domain. Revisit only with genuine per-CMS value (real presets/screenshots) and enough authority to survive scrutiny.
 - [ ] **Owner decisions requested by the plan (still open):** budget for launch support ($50–100?), 1–2 h/day review commitment, brand-voice direction (keep honest/practitioner tone), geographic priority (India-first vs US/EU-first for RPM).
 - [ ] **Owner-side distribution:** Reddit value-first presence, Product Hunt launch (week-3 slot), LinkedIn/YouTube content, directory submissions — none of these are code tasks; the site-side prerequisites (llms.txt, schema, tools, guides) are done.
@@ -69,9 +70,9 @@
 - [x] **Ten full guides published** at `/blog/` — each with `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author/reviewer/date, cited sources, and links into the tools it discusses: robots.txt for search engines and AI crawlers · the website launch SEO checklist · how to block GPTBot · llms.txt guide · how to appear in ChatGPT search results · check whether AI crawlers can access your site · noindex vs robots.txt · why is my site not indexed · UTM naming conventions · schema markup for AI search
 - [x] **Google tag (GA4 `G-6B4GGFC96K`) verified on every published page** — byte-identical to Google's snippet, exactly one per page, always after the Consent Mode v2 defaults. Proved locally across every built page and live across every URL in all three sitemaps
 - [x] **GTM container `GTM-P6P4FLGB` audited** — it contains no GA4 measurement id, so there is no double counting with the direct Google tag
-- [ ] **AdSense verdict** — confirm the current status in the console. If declined, fix the specific findings and strengthen original utility, guidance and navigation; do not add articles to meet an invented count.
+- [ ] **AdSense verdict** — ⏸️ ON HOLD per owner (23 Oct). If resumed and declined: fix the specific findings and strengthen original utility; do not add articles to meet an invented count.
 - [x] **Deploy the 22 Oct audit work** (design v2.1, homepage IA, favicon.ico, GA4 events, IndexNow hook) — DEPLOYED 22 Oct via `npm run deploy`; live-verify suite **58/58** against production
-- [ ] **Deploy the image optimizer** — committed to `main` (`5837fb7`) with cross-verified tests; run `npm run deploy` + `npm run indexnow` to publish `/tools/image-compressor/`
+- [x] ~~**Deploy the image optimizer**~~ — DONE: shipped with v2.2 (22 Oct) and live since; `/tools/image-compressor/` verified in production
 - [ ] **Distribution plan** — tool directories, Quora/Reddit cadence, Pinterest, 1 YouTube Short/week (was listed under Phase 3; start now per the audit plan)
 - [x] **10 new tools shipped:** case converter · duplicate-line remover · lorem ipsum · reading time (text suite) + Base64 · URL encode · UUID · JWT decoder · user-agent parser · .ics calendar generator (dev suite). Word/char counter, text diff, JSON formatter, regex tester, QR and colour tools already exist in Phase 1 — not duplicated. **Verified: build 41 pages / 0 warnings, audit 236/236, smoke 30/30, ph2-test 129/129.**
 - [x] **Image Compressor & Optimizer pilot (22 Oct)** — added locally at `/tools/image-compressor/`: browser-local JPEG/PNG/WebP/AVIF input, WebP/JPEG/PNG export, resize and quality controls, per-file size/dimension comparison, and separate downloads. Limits batches to 10 files/50 MB total and each image to 20 MB/50 MP. Image bytes are not uploaded; EXIF/metadata caveats are disclosed. **Not deployed yet.**
@@ -89,7 +90,7 @@
 - [ ] Distribution: tool directories, Quora/Reddit cadence, Pinterest, 1 YouTube Short/week
 
 ## 📅 Monetization milestones
-- [ ] AdSense: finish or re-submit review when the site's unique content, navigation, policy pages and ad implementation are ready; there is no fixed article-count target in Google's published readiness guidance.
+- [ ] AdSense: ⏸️ ON HOLD per owner (23 Oct). When resumed: finish or re-submit review when the site's unique content, navigation, policy pages and ad implementation are ready; there is no fixed article-count target in Google's published readiness guidance.
 - [ ] Month 3–4: affiliate links live
 - [ ] 50K sessions/mo: apply Mediavine/Raptive
 

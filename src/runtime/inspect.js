@@ -694,6 +694,10 @@
     'user-agent-parser': 1,
     'image-compressor': 1,
     'json-validator': 1,
+    'roi-calculator': 1,
+    'roas-calculator': 1,
+    'cac-calculator': 1,
+    'ad-metrics-calculator': 1,
   };
 
   function mount(root, slug) {

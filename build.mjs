@@ -293,6 +293,7 @@ ${consentBanner(path)}
 <script defer src="${rel(path, '/assets/runtime/ai-search.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/content.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/web.js')}"></script>
+<script defer src="${rel(path, '/assets/runtime/marketing.js')}"></script>
 <script defer src="${rel(path, '/assets/runtime/audit.js')}"></script>
 </body>
 </html>`;
@@ -349,7 +350,7 @@ const PICK = TOOLS.find((t) => t.slug === PICK_ENTRY.slug) || TOOLS[0];
 const LOCAL_TOOLS = new Set([
   'password-generator', 'base64-encoder-decoder', 'uuid-generator', 'jwt-decoder',
   'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
-  'json-validator',
+  'json-validator', 'roi-calculator', 'roas-calculator', 'cac-calculator', 'ad-metrics-calculator',
 ]);
 const procNote = (t) => (LOCAL_TOOLS.has(t.slug) ? 'Runs in your browser' : 'Live page check available');
 
@@ -361,6 +362,7 @@ const JOB_ICONS = {
   antenna: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8"/><path d="M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>',
   'link-tag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7L11.2 6"/><path d="M14 11a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7L12.8 18"/></svg>',
   'browser-check': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M6.5 6.5h.01"/><path d="M9 6.5h.01"/><path d="M8.5 14l2.5 2.5 4.5-5"/></svg>',
+  'chart-up': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><path d="M15.5 6H19v3.5"/></svg>',
 };
 
 function homeBody() {
@@ -412,7 +414,7 @@ function homeBody() {
   </section>
 
   <section class="cat-section cat-outcomes" id="categories">
-    <p class="section-eyebrow"><span class="sec-num">02</span> Four outcome categories</p>
+    <p class="section-eyebrow"><span class="sec-num">02</span> Five outcome categories</p>
     <h2 class="section-title">Everything grouped by the job it does</h2>
     <div class="outcome-grid">
       ${cats.map((c, i) => {
@@ -855,7 +857,7 @@ ${feedItems}
 
   await copyFile(R + 'src/style.css', R + 'dist/assets/style.css');
   await copyFile(R + 'src/site.js', R + 'dist/assets/site.js');
-  for (const f of ['seo.js', 'ai-search.js', 'content.js', 'web.js', 'inspect.js', 'audit.js']) {
+  for (const f of ['seo.js', 'ai-search.js', 'content.js', 'web.js', 'marketing.js', 'inspect.js', 'audit.js']) {
     await copyFile(R + 'src/runtime/' + f, R + 'dist/assets/runtime/' + f);
   }
 

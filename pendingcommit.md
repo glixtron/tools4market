@@ -1,7 +1,21 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Five entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below).
+**Status:** ✅ Six entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below).
+
+## Entry 6 — v2.6 marketing calculators + fifth category
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.6). Cross-verified before commit: build **63 pages / 40 tools / 5 categories**, smoke **40/40**, SEO audit **1981/1981**, consent **30/30**, personalized **152/152** (17 new checks), suggest-api **24/24**.
+
+**Subject:** `feat: marketing calculators (v2.6) — ROI, ROAS, CAC, CPC/CPM/CPA + marketing category`
+
+**Summary (v2.6):**
+- New **`marketing` category** (site's namesake) — CATEGORIES-driven: nav, footer, outcome grid (5 cards), category hub, related-tools, pages sitemap all automatic. Fifth job card + `chart-up` icon on the homepage.
+- **ROI Calculator**: profit, ROI %, spend multiple, honest verdict tiers. **ROAS Calculator**: ratio + revenue-per-unit + margin-derived break-even line. **CAC Calculator**: cost per customer + optional LTV:CAC ratio with standard bands. **CPC, CPM & CPA Calculator**: computes CPC/CPM/CTR/CPA from whatever inputs exist, flags missing ones.
+- All four pure-local (`LOCAL_TOOLS` + `SKIP_PANEL` — 13 local / 27 live-check), currency selector with symbol values, all strings in `INSPECT_TEXT.tools.*`.
+
+**Files in this commit:** `src/data/marketing.js`, `src/runtime/marketing.js`, `src/data/index.js`, `src/data/inspect.js`, `build.mjs`, `src/runtime/inspect.js`, `tests/seo-audit.mjs`, `tests/personalized-tools-test.mjs`, `README.md`, `Architecture.md`, `progress.md`, `pendingcommit.md`, `pending-work.md`.
 
 ## Entry 5 — v2.5 social + hreflang checkers
 

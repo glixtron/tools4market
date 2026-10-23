@@ -2,6 +2,19 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-23 — Marketing calculators + fifth category (v2.6)
+
+With AdSense on hold per owner, pulled Phase 3 forward: created the site's namesake **`marketing` category** and shipped its first batch of four pure-local calculators — the brand gap ("Tools4Market" with zero marketing calculators) closed.
+
+- **New category — Marketing Calculators** (`marketing-tools`): CATEGORIES-driven, so nav, footer, homepage outcome grid (five cards now), category hub, related-tools and pages sitemap picked it up automatically. Homepage "start with your job" gained a fifth card ("Understand what a campaign really earned" → ROI Calculator) with a new `chart-up` line icon; outcome eyebrow updated to "Five outcome categories"; seo-audit count assertions updated 4→5.
+- **ROI Calculator** (`roi-calculator`): revenue + investment → net profit, ROI %, spend multiple, honest verdict tiers (loss → exceptional) plus the time/risk caveat.
+- **ROAS Calculator** (`roas-calculator`): spend + attributed revenue → ratio + revenue-per-unit; optional gross-margin field derives **break-even ROAS (1/margin)** and verdicts against that line — the "same dashboard, opposite verdicts" point the copy makes.
+- **CAC Calculator** (`cac-calculator`): spend + new customers → CAC; optional LTV field derives the **LTV:CAC ratio** with the standard <1 / 1–3 / 3–5 / >5+ interpretation.
+- **CPC, CPM & CPA Calculator** (`ad-metrics-calculator`): spend + impressions + clicks + conversions → CPC, CPM, CTR, CPA — computes whichever lines the inputs support, states what's missing instead of guessing.
+- All four: `LOCAL_TOOLS` + `SKIP_PANEL` (13 local / 27 live-check now), currency selector (8 currencies; option values are the symbols — labels stay in data per rules §3), runtime strings in `INSPECT_TEXT.tools.*`, no JS errors under smoke's full input sweep.
+- **Tests:** personalized 135 → **152** (17 new: math assertions for every metric incl. negative-ROI, zero-spend/zero-customer guards, missing-conversion handling, panel-skip proof); seo-audit auto-extended → **1981/1981**; smoke **40/40**; consent 30/30; suggest 24/24. Two FAQ keyword fixes caught mid-work (CAC + ad-metrics needed the primary keyword in ≥2 FAQs).
+- **Docs:** README (40 tools / 63 pages / 5 categories + tree refresh), Architecture.md header + §15 + tree refresh, this log, pendingcommit entry 6, pending-work (batch 1 done; batch 2 = email ROI, growth, budget calculators when scheduled).
+
 ## 2026-10-23 — Social + hreflang checkers (v2.5)
 
 Completed the last two worthwhile rows of the strategy plan's tool matrix, both SEO-category and both following the v2.3/v2.4 panel architecture (analyze → `APPLY` prefills from the same single snapshot fetch; manual mode one click away).
