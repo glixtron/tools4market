@@ -81,6 +81,10 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     if (!inp) return;
     const cards = Array.prototype.slice.call(document.querySelectorAll('.tool-card[data-search]'));
     const empty = document.getElementById('search-empty');
+    // GA4 `search` event (built-in name, `search_term` param): fired once the
+    // query has been idle long enough to be a real intent, not every keystroke.
+    let searchTimer = null;
+    let lastTracked = '';
     inp.addEventListener('input', () => {
       const q = inp.value.trim().toLowerCase();
       let visible = 0;
@@ -95,6 +99,12 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
         s.style.display = any ? '' : 'none';
       });
       if (empty) empty.style.display = (q && visible === 0) ? '' : 'none';
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => {
+        if (q.length < 2 || q === lastTracked) return;
+        lastTracked = q;
+        track('search', { search_term: q.slice(0, 60), results_count: visible });
+      }, 800);
     });
     // Example chips ("meta", "robots", "UTM", "schema", "audit") fill the
     // field and run the filter — a one-tap path for task-first visitors.
@@ -184,6 +194,14 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
       }
       const m = url.pathname.match(/^\/tools\/([a-z0-9-]+)\/$/);
       if (m && a.closest('.article')) track('blog_cta_click', { tool_slug: m[1] });
+      // Off-site link (guide sources, references): counts editorial outbound intent.
+      // Analytics/infra hosts are excluded — they fire on their own schedule.
+      if (url.origin !== window.location.origin) {
+        const host = url.hostname;
+        if (!/^(www\.)?(google-analytics\.com|googletagmanager\.com|cloudflareinsights\.com|schema\.org)$/.test(host)) {
+          track('external_link_click', { link_host: host, link_path: url.pathname.slice(0, 80) });
+        }
+      }
     });
   }
 

@@ -64,6 +64,7 @@ ${outputBlock('sl-out', 'Slugs')}`,
       { q: 'Do UTM parameters hurt SEO?', a: 'Tagged URLs can be treated as duplicate URLs of the canonical page. Ensure your pages have a self-referencing canonical tag so tagged variants consolidate — never put UTM links in your sitemap.' },
       { q: 'Are UTM parameters visible to users?', a: 'Yes — everything after the ? is visible in the address bar and to the destination site. Keep values generic: the UTM builder never needs personal data in a UTM parameter.' },
       { q: 'Does GA4 need UTMs, or is it automatic?', a: 'GA4 auto-detects some traffic (paid Google ads with auto-tagging, organic search). Everything else — email, social posts, affiliate links — needs explicit tagging, which is what the UTM builder adds.' },
+      { q: 'Should UTM parameters be lowercase?', a: 'Yes — GA4 is case-sensitive, so utm_source=LinkedIn and utm_source=linkedin count as two different sources. Standardize on lowercase and use hyphens for multi-word values.' },
     ],
     html: `
 ${f.url('ut-url', 'Destination URL', 'https://example.com/spring-sale')}

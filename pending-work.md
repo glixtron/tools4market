@@ -21,6 +21,19 @@
 - [x] ~~**GTM container**~~ — **turned off by default in v2.7** (23 Oct): the container was audited and holds no GA4 measurement id, so `gtm.js` (~560 KB parsed per page) bought nothing. Direct GA4 gtag + Consent Mode unchanged. Re-enable by setting `GTM_ID` in `.env` once the container has real tags.
 - [x] ~~**Point DNS / verify `/api/fetch`**~~ — latest live verification records Cloudflare DNS, apex + www canonical routing, live sitemap and a working public-page fetch proxy with the loopback SSRF probe blocked.
 
+## 📦 Day-2 content pack (owner's agent session, integrated 24 Oct)
+
+The owner's parallel "Day 2" agent session produced a 9-file content pack (archived verbatim in `docs/day2/`, cross-check in `docs/day2/INTEGRATION-NOTES.md`). Site-side tasks were audited against reality: robots/llms.txt, Organization/WebSite/BreadcrumbList/FAQPage schema and most GA4 events were **already shipped**; genuinely missing pieces were integrated 24 Oct (Screaming Frog guide, llms.txt guide upgrade, 5 FAQ upgrades, `search` + `external_link_click` GA4 events). Its URLs (`/ai-search/…`, `/seo-tools/…`, `/blog/…`) never matched this site (`/tools/…`, `/blog/…`) — rewrite before reusing any file from the pack. Remaining items are owner-side:
+
+- [ ] **Daily KPI Google Sheet** — 5-tab template in `docs/day2/Day2_Analytics_Setup_GSC_GA4.md` (Daily / Weekly / Content / Backlinks / Tool Tracker) + the 9 AM daily check habit
+- [ ] **Link GA4 ↔ Search Console** (GA4 Admin → Search Console links) — query data flows into GA4 within 24 h
+- [ ] **Link GA4 ↔ AdSense** — ⏸️ waits on the AdSense hold
+- [ ] **Request-indexing habit** — GSC URL inspection on each newly published URL (new guide + 2 tools this week)
+- [ ] **Social accounts + first posts** — templates in `docs/day2/Day2_Social_Execution.md` (X thread, 3 Reddit value-first comments); account setup checklist in the same file
+- [ ] **Product Hunt launch** — assets + copy in `docs/day2/Day2_ProductHunt_Launch_Assets.md`; planned slot ~13 Nov per the pack's timeline
+- [ ] **Directory submissions** — list and copy in the master file
+- [ ] **Long-term keyword list** — `docs/day2/Day2_Keyword_Research_LongTail_50.md` feeds future tool/guide decisions (several already covered by existing tools)
+
 ## 📈 Growth-plan follow-ups (from the 23 Oct 2026 plan review)
 
 - [x] ~~Build the plan's top missing tools~~ — DONE (v2.4): JSON Validator (local), Sitemap Validator + Robots.txt Tester (dual-mode). The plan's URL-encoder / UUID / Base64 rows already existed; llms.txt, FAQPage/Breadcrumb schema, GA4 events and the crawler-permissions work were also already shipped.

@@ -33,6 +33,7 @@ export const TOOLS_SEO = [
       { q: 'What is the ideal meta description length?', a: 'Google does not specify a fixed description length. Write a concise, page-specific summary; Google may shorten it or generate the snippet from page content for a particular query. The meta tag generator here passes your text through as written.' },
       { q: 'Are meta keywords still used by Google?', a: 'No. Google has ignored the meta keywords tag since 2009. It is harmless but pointless — include it only if other engines or internal tooling require it.' },
       { q: 'Do I need to add these tags to every page?', a: 'Yes — every indexable page should have a unique title and description. The meta tag generator produces the same head block for any URL, so treat the output as a template and write new copy for each page. Duplicate titles confuse search engines and reduce click-through rate.' },
+      { q: 'What is the difference between Open Graph and Twitter Card tags?', a: 'Open Graph tags are read by Facebook, LinkedIn and most social platforms; Twitter Card tags are read by X. X falls back to Open Graph when Twitter Cards are missing, so Open Graph is the priority — this generator emits both.' },
     ],
     html: `
 ${f.text('mt-title', 'Page title', 'Best Free Marketing Tools for 2026 — Tools4Market')}
@@ -254,6 +255,7 @@ ${outputBlock('hf-out', 'Hreflang tags')}`,
       { q: 'Is JSON-LD better than microdata?', a: 'For Google, yes — it is the officially recommended format. It is easier to maintain because it lives in one block instead of being threaded through your HTML attributes. The schema markup generator here emits JSON-LD only.' },
       { q: 'Does schema markup guarantee rich results?', a: 'No — it makes you eligible. Google decides per query whether showing a rich result improves the experience. Correct, complete markup improves the odds, but this schema markup generator cannot promise a rich result.' },
       { q: 'Where do I put the generated code?', a: 'Anywhere in the page HTML; the <head> just before </head> is conventional. On WordPress, use your SEO plugin’s schema/JSON-LD field or a code snippets plugin.' },
+      { q: 'What schema types are worth adding?', a: 'In priority order: Organization site-wide, BreadcrumbList on every non-home page, Article or Product on content pages, and FAQPage where genuine Q&A exists. Skip HowTo — Google deprecated its rich-result display.' },
     ],
     html: `
 ${f.select('sc-type', 'Schema type', [

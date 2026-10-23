@@ -2,6 +2,22 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-2 content pack integrated — v2.10 (24 Oct 2026)
+
+**Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (blog posts, AEO FAQs, analytics guide, PH/social assets, keyword research + an OpenCode prompt instructing an agent to execute 7 "machine tasks"). Owner: "read all these files also and write everything accordingly".
+
+**Cross-check first, then integrate.** Audited each prompt task against the live codebase before touching anything. Result: tasks 1–4 were **already shipped** (robots/llms.txt at root, Organization+WebSite homepage schema, BreadcrumbList + FAQPage on every tool page — all asserted by the seo-audit). The pack also assumed a CMS, a `/ai-search/…` URL scheme the site never had, stale 31-tool counts, and recommended GTM — which v2.7 measured as dead weight and turned off. Full matrix in `docs/day2/INTEGRATION-NOTES.md`; all 9 source files archived verbatim in `docs/day2/`.
+
+**Genuinely missing pieces shipped (v2.10):**
+- **New guide `screaming-frog-alternative`** — the pack's one non-duplicative post, adapted to house voice (honest-limits sections kept, internal links via `relatedTools`, 10-point pre-publish checklist as a code block). Guides 10→11, pages 67→68.
+- **`llms-txt-guide` upgraded in place, not duplicated** — the pack's llms.txt post would have cannibalised the existing guide; instead its decision flow, file skeleton and three common mistakes were merged in (`updated: 2026-10-24`, ~640→~1,100 words, 6th FAQ), keeping our newer v2-spec section the pack didn't know about.
+- **5 FAQ upgrades from the AEO file** — one non-duplicate Q&A each on robots-txt-generator, llms-txt-generator, meta-tag-generator, utm-link-builder, schema-markup-generator (trimmed to the 300-char answer rule).
+- **2 missing GA4 events** — `search` (`search_term` + `results_count`, 800 ms debounce, deduped) and `external_link_click` (`link_host`/`link_path`, infra hosts excluded) added to `src/site.js`; the pack's `tool_used`/`tool_copied` already existed as `tool_run`/`copy_output`. Direct gtag kept; GTM stays off.
+
+**Owner-side leftovers tracked** in a new pending-work.md section (KPI sheet, GA4↔GSC link, social/PH/directory actions, indexing habit).
+
+**Tests:** build 68 pages/44 tools/11 guides, smoke 44/44, seo-audit **2167/2167** (+22), personalized 181/181, consent 30/30, suggest-api 24/24. Deployed + IndexNow + live-verified same day (worklog.md).
+
 ### Calculator batch 2 — v2.9 (24 Oct 2026)
 
 **Trigger:** owner said "complete that also" after the day-1 pending audit, where batch 2 (email ROI + marketing budget/growth) was the recommended next scheduled agent-side item — the day-1 plan's month-3 calculators, pulled forward.

@@ -60,6 +60,7 @@ Sitemap: https://example.com/sitemap.xml`,
       { q: 'Where exactly do I put robots.txt?', a: 'Exactly one place: the domain root, e.g. https://example.com/robots.txt. It must answer there without redirects, so upload the output of this robots.txt generator as it stands.' },
       { q: 'Does robots.txt hide pages from Google?', a: 'No — it prevents crawling, not indexing. A blocked page can still appear in results if other pages link to it. The robots.txt generator only writes crawl rules; use a noindex meta tag or X-Robots-Tag header to exclude a page from results.' },
       { q: 'What is Crawl-delay?', a: 'A courtesy request for how many seconds a bot should wait between requests. Google ignores it; Bing and Yandex honour it. We do not include it by default since aggressive delays can throttle legitimate crawling.' },
+      { q: 'How do I block AI training but stay visible in ChatGPT answers?', a: 'Allow the retrieval crawlers (ChatGPT-User, OAI-SearchBot, PerplexityBot) and disallow the training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot). Your pages can then be cited in answers without being used to train future models.' },
     ],
     html: `
 ${AI_GROUPS('rb')}
@@ -182,6 +183,7 @@ ${outputBlock('ab-out', 'robots.txt')}`,
       { q: 'What is the correct format?', a: 'Per llmstxt.org: an optional H1 site name, a blockquote description, then markdown sections. This llms.txt generator writes the common pattern — “## Pages” with a bullet list of [title](url): note lines.' },
       { q: 'Where do I upload llms.txt?', a: 'At your domain root — https://yourdomain.com/llms.txt — the same place as robots.txt. The llms.txt generator output is ready to upload as it stands.' },
       { q: 'llms.txt or robots.txt — which do I need?', a: 'They do opposite jobs. robots.txt restricts crawlers; llms.txt recommends content. Many sites ship both.' },
+      { q: 'Do I need llms.txt for my site?', a: 'If your site has more than about ten substantive pages and you want the few AI tools that read the file to find your best content, publish one. For a single landing page — or a site that blocks AI crawlers — skip it; the file adds nothing.' },
     ],
     html: `
 ${f.text('ll-name', 'Site name', 'Tools4Market')}

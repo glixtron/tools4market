@@ -209,6 +209,7 @@ export const ARTICLES = [
     title: 'llms.txt: what it is, who reads it, and whether you need one',
     focus: 'llms.txt',
     date: '2026-10-21',
+    updated: '2026-10-24',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
     metaTitle: 'llms.txt Explained: Who Reads It, Who Ignores It',
@@ -244,12 +245,18 @@ export const ARTICLES = [
           'Use this test: **does your site have documentation-like content that an agent would need to answer questions about you?** Product docs, API references, pricing facts, policy pages. If yes, a maintained llms.txt helps the tools that choose to read it and costs you one small file. If your site is a blog or a tool collection, the file adds little — your ordinary, well-structured pages are already the source.',
           'What an llms.txt will not do: improve Google rankings, guarantee ChatGPT citations, or substitute for crawlable content and schema. Anyone selling that outcome is selling the file, not the result.',
           'One more angle: maintenance. Every file you publish is a promise that someone keeps it. An llms.txt that still lists a product you discontinued tells the few tools that read it exactly the wrong thing — and unlike a sitemap, nothing automatically validates it. If nobody on your team will own the file quarterly, treat that as your answer.',
+          'A quick three-question flow narrows it further. Is your site content-rich — more than about ten substantive pages worth curating? Do you actively want agent traffic, rather than having blocked AI crawlers entirely? And can you keep the file current when pages move? Two yes answers and a maintained file is a cheap, harmless bet; any no and the file is either pointless or a liability. Publishing llms.txt has positive expected value only in the narrow sense that the cost is two minutes — the upside, for most sites, is genuinely small.',
         ],
       },
       {
         h: 'How to write one that is actually useful',
         p: [
           'Keep it under a page. Link only real, public, current URLs. Write one-line notes that say what each linked page answers, because that note is what a model reads when deciding whether to fetch the link. Update it when pages move — a stale llms.txt is worse than none, because it actively misleads the few readers it has.',
+          'The whole format fits in a few lines: an H1 with the site name, an optional blockquote summary, then H2 sections of link lists. That is the entire spec — no YAML, no JSON, no schema:',
+        ],
+        pre: '# Your Site Name\n\n> One sentence on what the site is and who it is for.\n\n## Core pages\n\n- [Page title](https://example.com/page): One line on what the page answers.\n- [Page title](https://example.com/page): One line on what the page answers.\n\n## Optional\n\n- [About](https://example.com/about)\n- [Contact](https://example.com/contact)',
+        p2: [
+          'Three mistakes account for most bad files. Stuffing: a five hundred-link llms.txt is just a badly formatted sitemap, and curation is the entire point — ten to thirty pages that represent the best of the site is the right size. Broken links: every URL should be checked after every change, because a model that follows a dead link discounts the file. And the wrong location: it must sit at the domain root as `llms.txt`, not in a sub-folder and not renamed.',
           'Our **llms.txt generator** builds the structure from your page list and validates every URL format before you download the file. It also refuses to promise more than the file can deliver — same rule we follow in this guide.',
         ],
       },
@@ -260,6 +267,7 @@ export const ARTICLES = [
       { q: 'Where does the llms.txt file go?', a: 'At the root of your domain, exactly at https://yourdomain.com/llms.txt, served as plain text (markdown) with a 200 status. Sub-folders and sub-domains are not read for this purpose.' },
       { q: 'What is the difference between robots.txt and llms.txt?', a: 'robots.txt tells crawlers what they may fetch, and mainstream crawlers respect it. llms.txt is a voluntary content guide that some AI tools may choose to read. One controls access, the other curates context — they solve different problems and neither replaces the other.' },
       { q: 'Can an llms.txt hurt my site?', a: 'Not in search rankings. The only real risks are wasted effort and a stale file that points agents at moved or deleted pages, which misrepresents your site to the tools that do read it.' },
+      { q: 'What does a good llms.txt example look like?', a: 'An H1 site name, a one-sentence blockquote summary, then one or two H2 sections listing ten to thirty real pages with a one-line note each — the skeleton is in the writing section above. The generator builds exactly this shape from your page list.' },
     ],
     relatedTools: ['llms-txt-generator', 'robots-txt-generator', 'ai-crawler-blocker'],
     links: [
@@ -640,6 +648,77 @@ export const ARTICLES = [
     links: [
       { label: 'Google: structured data introduction', url: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data' },
       { label: 'Google: AI features and your website', url: 'https://developers.google.com/search/docs/appearance/ai-features' },
+    ],
+  },
+
+  // ---------------------------------------------------------- Screaming Frog alternative (Day-2 content integration, 24 Oct)
+  {
+    slug: 'screaming-frog-alternative',
+    title: 'Screaming Frog alternative: when a free browser audit is enough',
+    focus: 'screaming frog alternative',
+    date: '2026-10-24',
+    updated: '2026-10-24',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Screaming Frog Alternative Free — Browser-Based Audits',
+    metaDesc: 'Free Screaming Frog alternative for single-URL audits — check any page in seconds in the browser. No install, no licence, honest limits included.',
+    intro: 'Most SEO audits are not 10,000-URL enterprise crawls — they are a pre-launch check on one page. This guide compares Screaming Frog with a free Screaming Frog alternative that runs in the browser, and is honest about the jobs where the desktop crawler still wins.',
+    sections: [
+      {
+        h: 'What Screaming Frog does well (and what it costs)',
+        p: [
+          'Screaming Frog SEO Spider is the desktop crawling standard, and it earns that position with four strengths. Bulk crawling: tens of thousands of URLs in one run, mapping internal links, redirect chains, canonical mismatches, broken links and metadata across an entire site. Custom extraction: pull any element out of every page with regex, XPath or CSS selectors — nothing browser-based matches that. Configuration depth: bot user-agent, crawl speed, depth limits, include and exclude patterns, all tunable. And scheduled batch crawls in the paid tier, for the recurring client dashboard world.',
+          'The licence is roughly $209 a year per user after the first year, with a free tier capped at 500 URLs per crawl. For an agency of five SEOs that is over $1,000 a year plus the install and update overhead on every machine. That money is well spent if you crawl five-figure URL counts weekly. It is not well spent if most of your audits are one page, one launch, one client question at a time.',
+        ],
+      },
+      {
+        h: 'Where a free Screaming Frog alternative wins',
+        p: [
+          'For the single-URL and small-check jobs that make up most day-to-day audit work, a browser-based tool beats the desktop crawler on five counts. Speed: open a URL, paste the target, get the report in seconds — versus download, install, launch, configure, crawl. No install and no licence server: it runs on any machine with a browser, including the phone in your pocket when a client asks from across a meeting room. Shareability: the result travels with the URL instead of as an emailed CSV. Availability: nothing to update, nothing that expires. And cost: free, with no signup, which matters for the one-off checks that make up most of a small team\'s week.',
+          'The claim is deliberately narrow: for 80% of audit jobs, the browser path is faster and cheap enough to be the default. The other 20% are real, and the next section names them.',
+        ],
+      },
+      {
+        h: 'The honest limits of browser-based audits',
+        p: [
+          'Browser-based tools do not replace a desktop crawler, and any alternative that claims otherwise is selling something. The limits are structural. No bulk crawls: this is a one-URL-at-a-time tool by design, so a 10,000-URL site audit still belongs in Screaming Frog or Sitebulb. No custom extraction: you get the standard SEO signals — title, headings, meta description, canonical, robots, hreflang, schema, Open Graph, status and redirect chain — not arbitrary regex across every element. No scheduled crawls: nothing runs on a cron, and there is no recurring client export.',
+          'There is also an honesty constraint on the fetch itself: the audit reads the page as an anonymous visitor sees it. Content that appears only after login, behind a paywall or after heavy client-side rendering may not be visible to the fetcher, and a truthful report will say so rather than guess.',
+        ],
+      },
+      {
+        h: 'When to use which: a plain decision rule',
+        p: [
+          'Use the desktop crawler when the job is a whole-site technical audit, a scheduled re-crawl, custom extraction, or anything where the output feeds a recurring client report. Use a browser-based audit when the job is a single URL: a pre-publish check, a canonical or robots question, a quick competitor page teardown, a "why is this not indexed" first look. If the question starts with "this page" rather than "this site", start in the browser — and if the answer says the problem is site-wide, escalate to the crawler with that hypothesis in hand.',
+          'A useful habit: run the browser audit first anyway, even on big jobs. Five seconds of status, canonical, robots and schema checks on a representative page often tells you whether the full crawl is worth scheduling at all.',
+        ],
+        pre: 'Pre-publish audit — 10 points, one URL:\n\n 1. Returns HTTP 200 (no accidental redirect chain)\n 2. Indexable — no noindex, no disallow in robots.txt\n 3. Canonical self-references (or points where intended)\n 4. Title tag present, unique, within length\n 5. Meta description present, within length\n 6. One clear H1, heading order intact\n 7. Open Graph + Twitter Card tags present\n 8. Structured data parses (Article / Breadcrumb / FAQ)\n 9. Internal links resolve (no 404s on the page)\n10. Loads acceptably on a phone',
+      },
+      {
+        h: 'How the Web Crawler Audit works under the hood',
+        p: [
+          'This site\'s own audit — the Web Crawler Audit tool — fetches the URL you enter through a first-party proxy that strips cookies and blocks private-network targets, then reads what an anonymous visitor would see: the status code and any redirect chain, the canonical and robots directives, hreflang annotations, Open Graph and Twitter Card tags, the JSON-LD blocks, sitemap and llms.txt references, and the page\'s basic health signals. It returns a prioritised fix list and a crawl-health score, not just a data dump.',
+          'It is one URL per run, and it says so. The point is not to out-crawl a desktop crawler; it is to answer the page-level question in seconds, from any device, for free — and to pair honestly with the SEO Score Checker, which grades the on-page content side of the same page.',
+        ],
+      },
+      {
+        h: 'What a free audit should cover before you publish',
+        p: [
+          'Whatever tool you use, the pre-publish check is the same list: indexability, canonical, title, description, headings, social tags, structured data, link integrity, mobile behaviour. The checklist above is the one this site runs on itself before every deploy — the same ten checks, executed against the built pages, and the reason a mistake here gets caught by a test rather than by a reader.',
+          'Treat the audit as the first five minutes of publishing, not the last word on SEO. It catches the mechanical errors — the wrong robots directive, the missing canonical, the broken JSON-LD — that are invisible in a preview and expensive in production. The strategic half of the work (what the page says, and whether it deserves to rank) is a separate job, and no crawler does it for you.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Is there a free alternative to Screaming Frog?', a: 'Yes — for single-URL work. The Web Crawler Audit tool audits any page in seconds in the browser, free and with no signup. For full-site crawls of thousands of URLs, the paid desktop crawlers remain the right tool.' },
+      { q: 'What can browser-based SEO audits not do?', a: 'They do not bulk-crawl entire sites, run scheduled crawls, or support custom regex/XPath extraction. They answer page-level questions — status, canonical, robots, metadata, schema — one URL at a time.' },
+      { q: 'How accurate is a browser-based audit compared to Screaming Frog?', a: 'For the signals both read — status, redirects, canonical, robots, metadata, structured data — accuracy is equivalent, because both fetch the public page. The difference is coverage: the crawler reads the whole site, the browser tool reads the page you asked about.' },
+      { q: 'Can I crawl a whole site with the Web Crawler Audit?', a: 'No, and any tool claiming whole-site crawls from a browser tab should be treated carefully. Run it per URL; for site-wide work use a desktop crawler and treat this audit as the fast first look that tells you what to crawl.' },
+      { q: 'Do I need to install anything to use a Screaming Frog alternative?', a: 'No. Browser-based audits run on any device with a browser — no download, no licence, no updates. That is the main practical advantage over desktop crawlers for small, frequent checks.' },
+    ],
+    relatedTools: ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
+    links: [
+      { label: 'Screaming Frog SEO Spider — official site', url: 'https://www.screamingfrog.co.uk/seo-spider/' },
+      { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
     ],
   },
 ];

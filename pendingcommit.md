@@ -1,7 +1,22 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Nine entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below).
+**Status:** ✅ Ten entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below).
+
+## Entry 10 — v2.10 Day-2 content pack integration
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 24 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.10 + worklog.md). Cross-verified before commit: build **68 pages / 44 tools / 11 guides**, smoke **44/44**, SEO audit **2167/2167**, consent **30/30**, personalized **181/181**, suggest-api **24/24**.
+
+**Subject:** `feat: Day-2 content pack integration (v2.10) — Screaming Frog guide, llms.txt upgrade, FAQ + GA4 events`
+
+**Summary (v2.10):**
+- **Origin:** the owner's parallel "Day 2" agent session emitted a 9-file pack (two blog posts, AEO FAQ set, analytics setup guide, PH + social assets, 50-keyword research, master compilation, and an OpenCode prompt with 7 "machine tasks"). All 9 files archived verbatim in `docs/day2/`; cross-check matrix in `docs/day2/INTEGRATION-NOTES.md`.
+- **Cross-check outcome:** prompt tasks 1–4 were already shipped (root robots/llms.txt, Organization+WebSite, BreadcrumbList+FAQPage everywhere). The pack assumed a CMS, wrong URLs (`/ai-search/…` etc.), stale 31-tool counts and GTM (rejected — v2.7 turned it off).
+- **Shipped:** new guide `screaming-frog-alternative` (adapted, honest limits kept); `llms-txt-guide` upgraded in place instead of duplicated (decision flow, file skeleton, common mistakes, +FAQ, `updated` field); 5 AEO FAQ additions merged into the top-5 tools (300-char rule applied); GA4 `search` + `external_link_click` events added to `site.js` (the pack's tool_used/tool_copied already existed as tool_run/copy_output).
+- **Owner-side leftovers** (KPI sheet, GA4↔GSC link, social/PH/directory actions) tracked in a new `pending-work.md` section pointing at the archived files.
+
+**Files in this commit:** `src/data/blog.js` (new guide + upgrade), `src/data/ai-search.js`, `src/data/seo.js`, `src/data/content.js` (FAQ merges), `src/site.js` (GA4 events), `docs/day2/*` (10 files), `README.md`, `Architecture.md`, `pending-work.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 9 — v2.9 calculator batch 2 (email ROI + marketing budget)
 
