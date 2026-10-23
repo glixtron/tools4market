@@ -33,6 +33,17 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **Indexing health check:** robots.txt Allow:/ + sitemap index (3 child maps, 63 URLs), canonicals on every page, no noindex on public pages, IndexNow pipeline in place — crawl side unchanged and healthy; the speed fixes also remove the heaviest crawl-time main-thread work for Googlebot.
 
-**Deployed:** ✅ (see deploy entry below — updated after live verification)
+**Deployed:** ✅ commit `b53d0e8` pushed to `audit-growth-plan-v2.1` + `main`; production redeployed via `npm run deploy` (92 assets uploaded — fonts, source maps, minified CSS, all 63 pages); **IndexNow: 62 URLs submitted (HTTP 200)**; live verification **61/61 passed** (includes the new GTM-off, AdSense-off-while-slots-unset and ads.txt checks against production).
+
+**Live PageSpeed after deploy:**
+- **Desktop: Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100** (FCP 0.6 s, LCP 0.6 s, CLS 0, TBT 50 ms) — was 88/90/100/100.
+- **Mobile: Accessibility 100 · Best Practices 100 · SEO 100 · CLS 0** — was 90/77/100 with CLS up to 0.693. Performance score varies per run (57–81 observed) because the remaining cost is third-party and outside the repo: Google's own `gtag.js` (73 KiB) and the two Cloudflare-dashboard injections (`/tow0/…` 97 KiB + Web Analytics beacon). Owner action for the dashboard items is in pending-work.md — removing the `/tow0/` proxy (it may double-count GA4) is the single biggest remaining mobile lever.
+
+**Notes for next sessions:**
+- Any new tool page must be listed in the data files only — script loading is derived automatically (`RUNTIME_FILE` by category, `LOCAL_TOOLS` skip the inspect engine, `AUDIT_SLUGS` get `audit.js`).
+- If fonts are ever changed: drop new woff2 subsets in `src/fonts/`, replace the `@font-face` block at the top of `src/style.css` (keep `font-display: swap`), update the two `<link rel=preload>` entries in `build.mjs`.
+- To re-enable GTM: set `GTM_ID` in `.env`. To re-enable AdSense: set any `AD_SLOT_*` in `.env`. Both ship on the next build with no code change.
+
+**Completed:** 2026-10-23 23:01 IST
 
 ---
