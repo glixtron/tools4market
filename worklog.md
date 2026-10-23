@@ -6,6 +6,29 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-24 (early session) — Calculator batch 2: email ROI + marketing budget (v2.9)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner was shown the day-1 pending audit — the single open code-side item was the visual/mobile pass (blocked on the desktop browser being connected), and owner said "complete that also". The completable item was the next scheduled release: calculator batch 2, the day-1 plan's month-3 calculators pulled forward.
+
+**What was built (v2.9, commit `2f11247`):**
+- **Email ROI Calculator** — sends/opens/clicks/conversions/revenue/cost → open rate, click rate, click-to-open rate, conversion rate, revenue per email, net profit, ROI % and spend multiple, with verdict tiers and honesty guards: opens > sends, clicks > sends, conversions > clicks and zero cost (ROI undefined, full revenue counts as profit). Copy explicitly separates the profit view from ROAS and names the attribution traps (last-click flattery, assisted conversions).
+- **Marketing Budget Calculator** — customer base, monthly growth rate, target, blended CAC (+ optional ARPU) → net new customers needed, months to target on **compounding** growth, acquisition budget (gap × CAC), added monthly revenue at target and CAC payback. Guards: zero base, zero growth ("target not reached by growth alone"), already-reached target, zero CAC. The body copy names the compounding model as the flattering one and tells the reader to discount it against the linear pace check — same honesty standard as the ROI/ROAS/CAC trio.
+
+**Rules §3:** every user-facing string lives in `src/data/inspect.js` (`tools.emailRoi`, `tools.budgetCalc`); runtimes read `C`/`TOOLTXT` only. Both registered in `LOCAL_TOOLS` (`build.mjs`) + `SKIP_PANEL` (`runtime/inspect.js`) → 17 local / 27 fetch-capable, so both pages show "Runs in your browser" and ship only `runtime/marketing.js`.
+
+**One real defect caught by the suite mid-build:** the budget calculator's "already reached" guard wrote only to the verdict `<p>`, leaving the `mbc-out` output block empty — smoke failed `marketing-budget-calculator produced output`. Fixed: output now carries the zero-gap line while the verdict explains why no projection runs.
+
+**Verification (all before commit):** build **67 pages / 44 tools / 5 categories**, smoke **44/44**, SEO audit **2145/2145** (+82 new checks for the two tools), consent **30/30**, personalized **181/181** (+14 new functional checks — funnel rates, 220% ROI/3.2× multiple, 11.91 months at 8%, $60,000 budget, 3.33-month payback, plus every guard), suggest-api **24/24**. Docs updated: README + Architecture counts (44 tools / 67 pages), pending-work batch-2 row closed, pendingcommit Entry 9, progress v2.9 section.
+
+**Deployed:** Worker version `e786264f-1756-4731-97d3-9bd15f931d28`. IndexNow **66 URLs** (HTTP 200), live-verify **61/61**, both new tool pages confirmed live (HTTP 200, "Runs in your browser" label present, both in the tools sitemap).
+
+**Still blocked / owner-side (unchanged):** visual/mobile screenshot pass (needs the OpenCode desktop browser setting), Cloudflare `/tow0/` GA proxy + Web Analytics beacon review, AdSense (on hold), distribution accounts, GA4 dashboard goals, the founder decisions.
+
+**Completed:** 24 Oct 2026, 02:03 IST.
+
+---
+
 ## 2026-10-23→24 (night session) — Cross-session integration: timestamp + IP converters (v2.8)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
