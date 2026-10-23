@@ -165,8 +165,11 @@ ok('homepage WebSite + Organization JSON-LD', home.includes('"@type":"WebSite"')
 ok('homepage has a visible FAQ section + FAQPage schema', /Frequently asked questions/.test(home) && /"@type":"FAQPage"/.test(home));
 ok('homepage Bing msvalidate meta', /name="msvalidate\.01"/.test(home));
 ok('homepage has no noindex', !/content="noindex"/i.test(home));
-ok('GTM container script in head', /googletagmanager\.com\/gtm\.js/.test(home) && /GTM-P6P4FLGB/.test(home));
-ok('GTM noscript iframe in body', /ns\.html\?id=GTM-P6P4FLGB/.test(home));
+// GTM ships only when GTM_ID is set at build time; default builds carry no
+// gtm.js (container held no GA4 measurement id — the direct Google tag is
+// the single analytics tag). Re-enable by setting GTM_ID in .env.
+ok('no GTM loader in head (off by default)', !/gtm\.js\?id=GTM-/.test(home));
+ok('no GTM noscript iframe in body', !/ns\.html\?id=GTM-/.test(home));
 ok('exactly one Google tag (gtag.js) on the page', (home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length === 1, String((home.match(/gtag\/js\?id=G-6B4GGFC96K/g) || []).length));
 ok('gtag consent default is denied', /gtag\('consent',\s*'default'/.test(home) && /analytics_storage:\s*'denied'/.test(home));
 ok('consent region scoping (EEA/UK/CH)', /var REGION = \[/.test(home) && /"GB"/.test(home) && /"DE"/.test(home) && /region = REGION/.test(home));
@@ -174,10 +177,13 @@ ok('consent wait_for_update + url_passthrough + ads_data_redaction', /wait_for_u
 ok('consent defaults deny analytics/ads', /default_consent/.test(home) && /analytics_storage:\s*'denied'/.test(home) && /ad_storage:\s*'denied'/.test(home));
 ok('cookie consent banner + preferences present', /id="ck-banner"/.test(home) && /id="ck-panel"/.test(home) && /id="ck-accept"/.test(home) && /id="ck-reject"/.test(home));
 const toolPage = (await grab(ORIGIN + '/tools/case-converter/')).body;
-ok('tool pages also carry GTM + consent UI', /GTM-P6P4FLGB/.test(toolPage) && /id="ck-banner"/.test(toolPage));
+ok('tool pages carry the consent UI', /id="ck-banner"/.test(toolPage) && !/gtm\.js\?id=GTM-/.test(toolPage));
 const privacy = (await grab(ORIGIN + '/privacy-policy/')).body;
 ok('privacy policy documents cookies/consent', /Cookie settings/.test(privacy) && /Consent Mode/i.test(privacy));
-ok('AdSense loader present with the publisher id', /adsbygoogle\.js\?client=ca-pub-1509697031230558/.test(home));
+// The AdSense loader ships only when ad unit ids are configured (AD_SLOT_*).
+// While the account is on hold it stays out of the page; ads.txt remains
+// published so the publisher association is unaffected.
+ok('no AdSense loader while ad slots are unset', !/adsbygoogle\.js\?client=/.test(home));
 ok('ads.txt served with the publisher id', (await grab(ORIGIN + '/ads.txt')).body.includes('pub-1509697031230558'));
 const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
 ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(toolHtml) && !/data-ad-slot=""/.test(toolHtml) && !/data-ad-slot="ca-pub/.test(toolHtml));

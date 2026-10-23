@@ -363,14 +363,14 @@ for (const t of TOOLS) {
 
   // --- accessibility: header active-state + keyboard-friendly focus
   ok('build: nav marks the current section (aria-current)', read('blog/index.html').includes('aria-current="page"'));
-  ok('css: reduced-motion disables animation + transform churn', /@media \(prefers-reduced-motion: reduce\)/.test(css) && css.includes('animation-duration: .01ms !important'));
+  ok('css: reduced-motion disables animation + transform churn', /@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(css) && /animation-duration:\s*\.01ms\s*!important/.test(css));
 
   // --- motion tokens + once-per-session hero entrance
   ok('css: motion tokens defined', css.includes('--motion-fast') && css.includes('--motion-base') && css.includes('--motion-slow'));
   ok('site.js: hero entrance runs once per session', siteJs.includes('t4m_hero') && siteJs.includes('hero-anim'));
 
   // --- footer exposes contact + guides (not just legal)
-  ok('home: footer links Contact + Guides', /<h4>Company<\/h4>[\s\S]{0,400}href="contact\/"/.test(home) && /<h4>Company<\/h4>[\s\S]{0,200}href="blog\/"/.test(home));
+  ok('home: footer links Contact + Guides', /<h3>Company<\/h3>[\s\S]{0,400}href="contact\/"/.test(home) && /<h3>Company<\/h3>[\s\S]{0,200}href="blog\/"/.test(home));
 
   // --- outcome categories are an editorial two-column list, not a repeated grid
   ok('css: outcome grid is a 2-col editorial list on desktop', /\.outcome-grid\s*{[^}]*repeat\(2/.test(css));

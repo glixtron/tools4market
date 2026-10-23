@@ -62,8 +62,12 @@ const setCalls = (win, name) => (win.dataLayer || []).filter((e) => e && e[0] ==
 {
   const { dom, doc, win, errors } = await load('/');
   const d = defaultConsent(win);
-  ok('GTM container id present in page', doc.documentElement.innerHTML.includes('GTM-P6P4FLGB'));
-  ok('noscript iframe present', doc.documentElement.innerHTML.includes('ns.html?id=GTM-P6P4FLGB'));
+  // GTM ships only when GTM_ID is set at build time (default: off — the
+  // container held no GA4 measurement id, so the direct Google tag above is
+  // the one tag that must obey consent). Ordering checks below still cover
+  // the GTM case via the (iGtmStart === -1 || …) guards.
+  ok('no GTM loader when GTM_ID is unset', !doc.documentElement.innerHTML.includes('gtm.js?id='));
+  ok('no GTM noscript iframe when GTM_ID is unset', !doc.documentElement.innerHTML.includes('ns.html?id='));
   ok('default consent = denied before any choice', !!d && d.analytics_storage === 'denied' && d.ad_storage === 'denied', JSON.stringify(d));
   ok('banner shown when no choice stored', doc.getElementById('ck-banner').hidden === false);
   ok('preferences panel starts hidden', doc.getElementById('ck-panel').hidden === true);

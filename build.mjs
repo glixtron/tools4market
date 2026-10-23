@@ -30,9 +30,12 @@ const GA_ID = (process.env.GA_ID || 'G-6B4GGFC96K').trim();
 const ADSENSE_CLIENT = (process.env.ADSENSE_CLIENT || 'ca-pub-1509697031230558').trim();
 // Bing Webmaster Tools site-verification id (also shipped as /BingSiteAuth.xml)
 const BING_VERIFY = (process.env.BING_VERIFY || '77EFF8B735065A945570BBFD566B0530').trim();
-// Google Tag Manager container id (analytics). Consent-gated: nothing is stored
-// until the visitor accepts (Consent Mode v2 defaults are denied).
-const GTM_ID = (process.env.GTM_ID || 'GTM-P6P4FLGB').trim();
+// Google Tag Manager container id. OFF by default ("unset = feature stays off"):
+// the container was audited (2026-10) and holds no GA4 measurement id — GA4 runs
+// through the direct Google tag above — so gtm.js (~560 KB parsed on every page)
+// bought nothing while costing main-thread time. Set GTM_ID in .env to re-enable
+// once the container has real tags.
+const GTM_ID = (process.env.GTM_ID || '').trim();
 // Consent mode scope: 'basic' = denied in EEA/UK/CH, granted elsewhere (Google's
 // recommended "basic" mode). 'advanced' = denied for every visitor, everywhere.
 const CONSENT_MODE = (process.env.CONSENT_MODE || 'basic').trim().toLowerCase();
@@ -56,6 +59,12 @@ const AD_SLOTS = {
   'below content': (process.env.AD_SLOT_CONTENT || '').trim(),
   sidebar: (process.env.AD_SLOT_SIDEBAR || '').trim(),
 };
+// No ad unit ids = no <ins> units can render, so the adsbygoogle.js loader would
+// be pure overhead on every page (150–250 KB parsed, third-party cookies, extra
+// main-thread work — all flagged by PageSpeed while the account is on hold).
+// ads.txt stays published regardless. Set any AD_SLOT_* var and the loader ships
+// again automatically on the next build.
+const AD_SLOTS_ON = Object.values(AD_SLOTS).some(Boolean);
 
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -119,7 +128,25 @@ function consentBanner(path) {
 </div>`;
 }
 
-function layout({ path, title, desc, body, ld = [], noindex = false }) {
+// ---- Per-page script loading -------------------------------------------
+// Every page used to ship site.js + all seven runtime files (~210 KB JS) even
+// though a page needs only its own tool's runtime. PageSpeed flagged ~550 KB
+// of unused JavaScript per visit. Now: static pages load site.js only; a tool
+// page loads its category runtime, the inspect engine only when the tool has a
+// results panel (local tools skip it), and audit.js only for the two audit tools.
+const RUNTIME_FILE = { seo: 'seo.js', ai: 'ai-search.js', content: 'content.js', web: 'web.js', marketing: 'marketing.js' };
+const AUDIT_SLUGS = new Set(['seo-score-checker', 'web-crawler-audit']);
+function pageScripts(path, tool) {
+  const files = ['site.js'];
+  if (tool) {
+    files.push('inspect-strings.js', 'runtime/' + RUNTIME_FILE[tool.cat]);
+    if (!LOCAL_TOOLS.has(tool.slug)) files.push('runtime/inspect.js');
+    if (AUDIT_SLUGS.has(tool.slug)) files.push('runtime/audit.js');
+  }
+  return files.map((f) => `<script defer src="${rel(path, '/assets/' + f)}"></script>`).join('\n');
+}
+
+function layout({ path, title, desc, body, ld = [], noindex = false, tool = null }) {
   const url = SITE.url + path;
   // ---- consent defaults (Consent Mode v2) — pushed BEFORE GTM loads, so no
   // analytics/ad storage is written until the visitor accepts.
@@ -189,7 +216,7 @@ function layout({ path, title, desc, body, ld = [], noindex = false }) {
 
   gtag('config', '${esc(GA_ID)}');
 </script>` : '';
-  const adsenseLoader = ADSENSE_CLIENT ? `<!-- Google AdSense -->
+  const adsenseLoader = ADSENSE_CLIENT && AD_SLOTS_ON ? `<!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(ADSENSE_CLIENT)}"
      crossorigin="anonymous"></script>` : '';
   const gtmHead = GTM_ID ? `<!-- Google Tag Manager -->
@@ -227,9 +254,9 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <meta name="twitter:image" content="${SITE.url}/assets/og-image.png">
 ${BING_VERIFY ? `<meta name="msvalidate.01" content="${esc(BING_VERIFY)}">` : ''}
 ${GOOGLE_VERIFY ? `<meta name="google-site-verification" content="${esc(GOOGLE_VERIFY)}">` : ''}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-${ADSENSE_CLIENT ? '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' : ''}
+<link rel="preload" as="font" type="font/woff2" crossorigin href="${rel(path, '/fonts/fraunces-latin.woff2')}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="${rel(path, '/fonts/inter-latin.woff2')}">
+${AD_SLOTS_ON ? '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' : ''}
 <link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
 <link rel="icon" type="image/x-icon" href="${rel(path, '/favicon.ico')}">
 <link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
@@ -265,16 +292,16 @@ ${body}
       <p>Free browser-based tools for marketers, bloggers and webmakers. Most tools process input in your browser; page checks fetch the public URL through our first-party proxy. No signup, no limits.</p>
     </div>
     <div>
-      <h4>Categories</h4>
+      <h3>Categories</h3>
       ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}">${c.name}</a>`).join('')}
     </div>
     <div>
-      <h4>Company</h4>
+      <h3>Company</h3>
       <a href="${rel(path, '/blog/')}">Guides</a>
       ${POLICY.map((p) => `<a href="${rel(path, '/' + p.slug + '/')}">${p.title}</a>`).join('')}
     </div>
     <div>
-      <h4>Popular tools</h4>
+      <h3>Popular tools</h3>
       ${['robots-txt-generator', 'meta-tag-generator', 'open-graph-generator', 'keyword-density-checker', 'llms-txt-generator', 'utm-link-builder'].map((s) => {
         const t = TOOLS.find((x) => x.slug === s);
         return t ? `<a href="${rel(path, '/tools/' + s + '/')}">${t.name}</a>` : '';
@@ -286,15 +313,7 @@ ${body}
   </div>
 </footer>
 ${consentBanner(path)}
-<script defer src="${rel(path, '/assets/site.js')}"></script>
-<script defer src="${rel(path, '/assets/inspect-strings.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/inspect.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/seo.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/ai-search.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/content.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/web.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/marketing.js')}"></script>
-<script defer src="${rel(path, '/assets/runtime/audit.js')}"></script>
+${pageScripts(path, tool)}
 </body>
 </html>`;
 }
@@ -716,6 +735,39 @@ const toolLd = (t) => {
   ];
 };
 
+// ---- build helpers ------------------------------------------------------
+// Quote-aware CSS minifier: strips comments + collapses whitespace so the
+// shipped stylesheet is smaller while src/style.css stays human-readable.
+// (Deliberately conservative: no token surgery beyond whitespace/comments.)
+function minifyCss(src) {
+  let out = '', i = 0, q = null;
+  while (i < src.length) {
+    const c = src[i];
+    if (q) { out += c; if (c === '\\' && i + 1 < src.length) { out += src[i + 1]; i++; } else if (c === q) q = null; i++; continue; }
+    if (c === '"' || c === "'") { q = c; out += c; i++; continue; }
+    if (c === '/' && src[i + 1] === '*') { i = src.indexOf('*/', i + 2); i = i === -1 ? src.length : i + 2; continue; }
+    if (/\s/.test(c)) {
+      while (i < src.length && /\s/.test(src[i])) i++;
+      const prev = out[out.length - 1], next = src[i];
+      if (prev && next && !/[{};:,>+~()]/.test(prev) && !/[{};:,>+~()]/.test(next)) out += ' ';
+      continue;
+    }
+    out += c; i++;
+  }
+  return out.replace(/;}/g, '}').trim() + '\n';
+}
+// Copies a JS file and appends a trivially-correct identity source map
+// (generated === original, so each line maps to itself). Keeps unminified,
+// debuggable JS on the wire while satisfying the "missing source maps" audit.
+async function copyJsWithMap(src, dest) {
+  const code = await readFile(src, 'utf8');
+  const name = dest.slice(dest.lastIndexOf('/') + 1);
+  const mappings = 'AAAA' + ';AACA'.repeat(code.split('\n').length - 1);
+  const map = { version: 3, sources: [name], names: [], mappings };
+  await writeFile(dest + '.map', JSON.stringify(map));
+  await writeFile(dest, code + '\n//# sourceMappingURL=' + name + '.map\n');
+}
+
 const run = async () => {
   const warnings = [];
   await rm(R + 'dist', { recursive: true, force: true });
@@ -732,7 +784,7 @@ const run = async () => {
         ld: [breadcrumbLd([{ name: 'Home', path: '/' }, { name: c.name, path }])],
       };
     }),
-    ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t) })),
+    ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t), tool: t })),
     { path: '/blog/', title: 'Guides — Free SEO and Marketing How-Tos | ' + SITE.name, desc: 'Practical guides for the jobs these tools do: crawler rules, launch checklists, structured data, campaigns and technical SEO — tested, plain and free.', body: blogIndexBody(), ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Guides', url: SITE.url + '/blog/', description: 'How-to guides for marketers, bloggers and webmasters.' }, breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }])] },
     ...ARTICLES.map((a) => ({ path: '/blog/' + a.slug + '/', title: a.metaTitle, desc: a.metaDesc, body: articlePage(a), ld: articleLd(a) })),
     ...POLICY.map((p) => {
@@ -746,7 +798,7 @@ const run = async () => {
   ];
 
   for (const p of pages) {
-    const html = layout({ path: p.path, title: p.title, desc: p.desc, body: p.body, ld: p.ld || [], noindex: p.noindex });
+    const html = layout({ path: p.path, title: p.title, desc: p.desc, body: p.body, ld: p.ld || [], noindex: p.noindex, tool: p.tool || null });
     // Check lengths (warn only)
     if (p.title.length > 60) warnings.push(`TITLE >${60} (${p.title.length}): ${p.path}`);
     if (p.desc.length > 158) warnings.push(`DESC >${158} (${p.desc.length}): ${p.path}`);
@@ -855,10 +907,16 @@ ${feedItems}
 </rss>
 `);
 
-  await copyFile(R + 'src/style.css', R + 'dist/assets/style.css');
-  await copyFile(R + 'src/site.js', R + 'dist/assets/site.js');
+  // ---- assets: minified CSS (source stays readable in src/), JS + identity
+  // source maps (Lighthouse flags large first-party JS without maps), fonts.
+  await writeFile(R + 'dist/assets/style.css', minifyCss(await readFile(R + 'src/style.css', 'utf8')));
+  await copyJsWithMap(R + 'src/site.js', R + 'dist/assets/site.js');
   for (const f of ['seo.js', 'ai-search.js', 'content.js', 'web.js', 'marketing.js', 'inspect.js', 'audit.js']) {
-    await copyFile(R + 'src/runtime/' + f, R + 'dist/assets/runtime/' + f);
+    await copyJsWithMap(R + 'src/runtime/' + f, R + 'dist/assets/runtime/' + f);
+  }
+  await mkdir(R + 'dist/fonts', { recursive: true });
+  for (const f of await readdir(R + 'src/fonts')) {
+    await copyFile(R + 'src/fonts/' + f, R + 'dist/fonts/' + f);
   }
 
   // inject user-facing strings for the inspect/audit/score engine as a global
@@ -920,6 +978,9 @@ ${feedItems}
 
   // Cloudflare Pages: cache + security headers, and apex → www canonical redirect
   await writeFile(R + 'dist/_headers', `/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.html

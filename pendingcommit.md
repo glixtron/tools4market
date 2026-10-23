@@ -1,7 +1,25 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Six entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below).
+**Status:** ✅ Seven entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below).
+
+## Entry 7 — v2.7 PageSpeed deep fix (performance, fonts, a11y)
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.7 + worklog.md). Cross-verified before commit: build **63 pages / 40 tools / 5 categories**, smoke **40/40**, SEO audit **1981/1981**, consent **30/30**, personalized **152/152**, suggest-api **24/24**; local Lighthouse mobile: TBT 4,070→590 ms, unused JS 557→71 KiB, a11y 90→**100**, best practices 77→**100**.
+
+**Subject:** `perf: per-page scripts, self-hosted fonts, GTM/AdSense gating, a11y contrast (v2.7)`
+
+**Summary (v2.7):**
+- **Per-page script slicing** — static pages load `site.js` only (homepage 9→1 script requests); tool pages load their category runtime + strings + inspect engine (panel tools only) + `audit.js` (audit tools only). Was: all 7 runtimes + strings + inspect on every page (~210 KB unused per page).
+- **Self-hosted fonts** — 12 woff2 subsets vendored to `src/fonts/` → `/fonts/*` (immutable), CSS `@import` + preconnects removed, headline + body faces preloaded. Kills the render-blocking Google Fonts chain and the 30-min font cache flagged by PageSpeed.
+- **GTM off by default** — container audited as GA4-less; direct gtag + Consent Mode unchanged. `GTM_ID` in `.env` re-enables.
+- **AdSense loader gated on `AD_SLOT_*`** — no units configured → no loader (150–250 KB/page saved); ads.txt stays; loader auto-returns when slots are set.
+- **Build-time CSS minification** (quote-aware, source readable) + **identity source maps** for all first-party JS.
+- **A11y → 100**: contrast-corrected eyebrow/cat-num/sec-num/outcome-num/tool-proc, footer `h4`→`h3`, in-prose links underlined.
+- Tests updated where assertions were stale against the intentional changes (footer h3, minified-CSS regexes, GTM-off and AdSense-off live assertions).
+
+**Files in this commit:** `build.mjs`, `src/style.css`, `src/fonts/*` (12 files), `tests/seo-audit.mjs`, `tests/consent-test.mjs`, `tests/live-verify.mjs`, `worklog.md` (new), `pending-work.md`, `pendingcommit.md`, `progress.md`.
 
 ## Entry 6 — v2.6 marketing calculators + fifth category
 
