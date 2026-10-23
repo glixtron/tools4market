@@ -469,4 +469,204 @@
     root.addEventListener('input', update);
     update();
   };
+
+  // ---------------------------------------------------------- OG image tester
+  T['og-image-tester'] = function (root) {
+    var status = $(root, 'ogt-status');
+    var results = $(root, 'ogt-results');
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function chip(kind, text) { return el('span', 'chip ' + kind, text); }
+    function runFetch(url) {
+      status.textContent = 'Fetching page...';
+      results.innerHTML = '';
+      $(root, 'ogt-out').textContent = '';
+      if (!url) { status.textContent = 'Enter a URL to test.'; $(root, 'ogt-out').textContent = 'Enter a URL to test.'; return; }
+      fetch('/api/fetch?url=' + encodeURIComponent(url))
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j.ok || j.status >= 400) { status.textContent = 'Failed to fetch page: HTTP ' + (j.status || 'error'); $(root, 'ogt-out').textContent = 'Failed to fetch page: HTTP ' + (j.status || 'error'); return; }
+          var html = j.body;
+          status.textContent = 'Analyzing...';
+          $(root, 'ogt-out').textContent = 'Analyzing...';
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var ogImages = Array.prototype.slice.call(doc.querySelectorAll('meta[property="og:image"]')).map(function (m) { return m.getAttribute('content'); });
+          var twImages = Array.prototype.slice.call(doc.querySelectorAll('meta[name="twitter:image"]')).map(function (m) { return m.getAttribute('content'); });
+          var allImages = ogImages.map(function (u) { return { url: u, source: 'og:image' }; })
+            .concat(twImages.map(function (u) { return { url: u, source: 'twitter:image' }; }));
+          if (!allImages.length) {
+            status.textContent = 'No og:image or twitter:image tags found.';
+            $(root, 'ogt-out').textContent = 'No og:image or twitter:image tags found.';
+            return;
+          }
+          var summary = 'Found ' + allImages.length + ' image tag(s).';
+          status.textContent = summary;
+          $(root, 'ogt-out').textContent = summary;
+          allImages.forEach(function (img) {
+            var item = el('div', 'ogt-item');
+            var header = el('div', 'ogt-item-header');
+            header.appendChild(chip('info', img.source));
+            header.appendChild(el('code', null, img.url.length > 80 ? img.url.substring(0, 80) + '…' : img.url));
+            item.appendChild(header);
+            var preview = el('div', 'ogt-preview');
+            var imgEl = el('img', 'ogt-img');
+            imgEl.alt = 'Social card image';
+            imgEl.src = img.url;
+            imgEl.onload = function () {
+              preview.appendChild(el('span', null, imgEl.naturalWidth + ' × ' + imgEl.naturalHeight + 'px'));
+            };
+            imgEl.onerror = function () {
+              preview.appendChild(chip('error', 'Failed to load image'));
+            };
+            preview.appendChild(imgEl);
+            item.appendChild(preview);
+            results.appendChild(item);
+          });
+        })
+        .catch(function (e) { status.textContent = 'Error: ' + e.message; $(root, 'ogt-out').textContent = 'Error: ' + e.message; });
+    }
+    function runPaste() {
+      var html = $(root, 'ogt-paste').value;
+      if (!html) { status.textContent = 'Paste HTML first.'; $(root, 'ogt-out').textContent = 'Paste HTML first.'; return; }
+      status.textContent = 'Analyzing...';
+      $(root, 'ogt-out').textContent = 'Analyzing...';
+      results.innerHTML = '';
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var ogImages = Array.prototype.slice.call(doc.querySelectorAll('meta[property="og:image"]')).map(function (m) { return m.getAttribute('content'); });
+      var twImages = Array.prototype.slice.call(doc.querySelectorAll('meta[name="twitter:image"]')).map(function (m) { return m.getAttribute('content'); });
+      var allImages = ogImages.map(function (u) { return { url: u, source: 'og:image' }; })
+        .concat(twImages.map(function (u) { return { url: u, source: 'twitter:image' }; }));
+      if (!allImages.length) {
+        var msg = 'No og:image or twitter:image tags found in pasted HTML.';
+        status.textContent = msg;
+        $(root, 'ogt-out').textContent = msg;
+        return;
+      }
+      var summary = 'Found ' + allImages.length + ' image tag(s) in pasted HTML.';
+      status.textContent = summary;
+      $(root, 'ogt-out').textContent = summary;
+      allImages.forEach(function (img) {
+        var item = el('div', 'ogt-item');
+        var header = el('div', 'ogt-item-header');
+        header.appendChild(chip('info', img.source));
+        header.appendChild(el('code', null, img.url.length > 80 ? img.url.substring(0, 80) + '…' : img.url));
+        item.appendChild(header);
+        var preview = el('div', 'ogt-preview');
+        preview.appendChild(el('span', null, '(paste HTML - image cannot be previewed)'));
+        item.appendChild(preview);
+        results.appendChild(item);
+      });
+    }
+    $(root, 'ogt-run').addEventListener('click', function () { runFetch($(root, 'ogt-url').value.trim()); });
+    $(root, 'ogt-paste-run').addEventListener('click', runPaste);
+  };
+
+  // ---------------------------------------------------------- hreflang checker
+  T['hreflang-checker'] = function (root) {
+    var status = $(root, 'hlt-status');
+    var out = $(root, 'hlt-out');
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function chip(kind, text) { return el('span', 'chip ' + kind, text); }
+    function runFetch(url) {
+      status.textContent = 'Fetching page...';
+      out.textContent = '';
+      if (!url) { status.textContent = 'Enter a URL to check.'; out.textContent = 'Enter a URL to check.'; return; }
+      fetch('/api/fetch?url=' + encodeURIComponent(url))
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j.ok || j.status >= 400) { status.textContent = 'Failed to fetch page: HTTP ' + (j.status || 'error'); out.textContent = 'Failed to fetch page: HTTP ' + (j.status || 'error'); return; }
+          var html = j.body;
+          status.textContent = 'Analyzing...';
+          out.textContent = 'Analyzing...';
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var links = Array.prototype.slice.call(doc.querySelectorAll('link[rel="alternate"][hreflang]'));
+          if (!links.length) {
+            var nohl = 'No hreflang annotations found on this page.';
+            status.textContent = nohl;
+            out.textContent = nohl;
+            return;
+          }
+          var entries = links.map(function (l) {
+            var code = (l.getAttribute('hreflang') || '').trim();
+            var href = (l.getAttribute('href') || '').trim();
+            var parts = code.split('-');
+            var lang = parts[0].toLowerCase();
+            var region = parts.length > 1 ? parts[1].toUpperCase() : '';
+            var isSelf = href === url || (url && href === url.replace(/\/$/, ''));
+            return { code: code, lang: lang, region: region, href: href, self: isSelf };
+          });
+          var langs = {};
+          entries.forEach(function (e) { langs[e.lang] = (langs[e.lang] || 0) + 1; });
+          var langList = Object.keys(langs).sort();
+          var selfRefs = entries.filter(function (e) { return e.self; }).length;
+          var xDefault = entries.find(function (e) { return e.code.toLowerCase() === 'x-default'; });
+          var lines = [];
+          lines.push('Found ' + entries.length + ' hreflang annotation(s) in ' + langList.length + ' language(s).');
+          lines.push('Languages: ' + langList.join(', '));
+          lines.push('Self-referencing: ' + (selfRefs > 0 ? 'Yes (' + selfRefs + ')' : 'No'));
+          if (xDefault) lines.push('x-default: ' + xDefault.href);
+          lines.push('');
+          lines.push('All annotations:');
+          entries.forEach(function (e) {
+            var prefix = e.self ? '[SELF] ' : '';
+            var codeDesc = e.region ? e.lang + '-' + e.region : e.lang;
+            lines.push(prefix + codeDesc + ': ' + (e.href.length > 60 ? e.href.substring(0, 60) + '…' : e.href));
+          });
+          var report = lines.join('\n');
+          status.textContent = 'Found ' + entries.length + ' hreflang annotation(s).';
+          out.textContent = report;
+        })
+        .catch(function (e) { status.textContent = 'Error: ' + e.message; out.textContent = 'Error: ' + e.message; });
+    }
+    function runPaste() {
+      var html = $(root, 'hlt-paste').value;
+      if (!html) { status.textContent = 'Paste HTML first.'; out.textContent = 'Paste HTML first.'; return; }
+      status.textContent = 'Analyzing...';
+      out.textContent = 'Analyzing...';
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var links = Array.prototype.slice.call(doc.querySelectorAll('link[rel="alternate"][hreflang]'));
+      if (!links.length) {
+        var nohl = 'No hreflang annotations found in pasted HTML.';
+        status.textContent = nohl;
+        out.textContent = nohl;
+        return;
+      }
+      var entries = links.map(function (l) {
+        var code = (l.getAttribute('hreflang') || '').trim();
+        var href = (l.getAttribute('href') || '').trim();
+        var parts = code.split('-');
+        var lang = parts[0].toLowerCase();
+        var region = parts.length > 1 ? parts[1].toUpperCase() : '';
+        return { code: code, lang: lang, region: region, href: href };
+      });
+      var langs = {};
+      entries.forEach(function (e) { langs[e.lang] = (langs[e.lang] || 0) + 1; });
+      var langList = Object.keys(langs).sort();
+      var lines = [];
+      lines.push('Found ' + entries.length + ' hreflang annotation(s) in ' + langList.length + ' language(s) (pasted HTML).');
+      lines.push('Languages: ' + langList.join(', '));
+      lines.push('');
+      lines.push('All annotations:');
+      entries.forEach(function (e) {
+        var codeDesc = e.region ? e.lang + '-' + e.region : e.lang;
+        lines.push(codeDesc + ': ' + (e.href.length > 60 ? e.href.substring(0, 60) + '…' : e.href));
+      });
+      var report = lines.join('\n');
+      status.textContent = 'Found ' + entries.length + ' hreflang annotation(s).';
+      out.textContent = report;
+    }
+    $(root, 'hlt-run').addEventListener('click', function () { runFetch($(root, 'hlt-url').value.trim()); });
+    $(root, 'hlt-paste-run').addEventListener('click', runPaste);
+  };
 })();

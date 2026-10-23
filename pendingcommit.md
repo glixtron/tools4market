@@ -85,3 +85,48 @@
 - `tests/smoke.mjs`
 
 The image optimizer was committed on 22 Oct but had not been deployed at commit time; production verification at commit time still reported the previous 51 sitemap URLs / 30 tools. Today's research did not include a connected Search Console/Bing query export or measured keyword-volume data, so the new target clusters are marked as hypotheses until first-party performance data is available.
+---
+
+## Entry 6 — v2.5 SEO content fixes + 5 new tools
+
+**Branch:** `main` · **Date:** October 23, 2026  
+**Status:** ✅ Verified and ready for commit
+
+**Subject:** `feat: SEO audit fixes + 5 new tools (OG Image Tester, Hreflang Checker, URL Encoder/Decoder, Timestamp Converter, IP Address Converter)`
+
+**Summary:**
+- **OG Image Tester:** Fetches any URL, extracts og:image + twitter:image tags, shows live image previews
+- **Hreflang Checker:** Validates hreflang annotations, reports language/region coverage, self-referencing, x-default
+- **URL Encoder/Decoder:** General-purpose percent-encoding tool for safe URL parameters
+- **Timestamp Converter:** Converts Unix timestamps to human-readable dates with timezone support
+- **IP Address Converter:** Translates IPv4 addresses between dotted-decimal, hex, decimal and binary formats
+- **JavaScript URL Encoder:** Renamed from duplicate entry; encodeURIComponent/decodeURIComponent tool
+
+**Content Quality Improvements:**
+- All 6 new tools now meet AI content rules:
+  - 3-4 sections (430-600 words each)
+  - Meta title ≤60 chars, meta description 110-158 chars
+  - 3-6 FAQs with primary keyword
+  - 1+ section heading with primary keyword
+  - Card length 40-110 chars
+  - "used for" line on each tool
+  - Human-like, keyword-enhanced prose
+
+**Verification:**
+- ✅ `node build.mjs` — 61 HTML pages built
+- ✅ `npm test` — 39/39 smoke tests pass
+- ✅ `npm run test:seo` — 1938/1938 SEO audit passes
+
+**Files modified:**
+- `src/data/seo.js` — OG Image Tester, Hreflang Checker
+- `src/data/content.js` — URL Encoder/Decoder
+- `src/data/web.js` — Timestamp Converter, IP Address Converter, JavaScript URL Encoder (renamed from duplicate)
+- `src/runtime/seo.js` — Runtime for new tools
+- `src/runtime/web.js` — Runtime for renamed tool
+
+**Ready for commit:** Yes
+**Next action:** Run `npm run deploy` then `npm run indexnow`
+
+---
+
+*End of pendingcommit.md*

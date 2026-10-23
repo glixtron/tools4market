@@ -292,8 +292,8 @@
     update();
   };
 
-  // ---------------------------------------------------------- url encoder decoder
-  T['url-encoder-decoder'] = function (root) {
+  // ---------------------------------------------------------- js url encoder
+  T['js-url-encoder'] = function (root) {
     var out = $(root, 'ue-out');
     function update() {
       var text = $(root, 'ue-text').value;
@@ -1030,6 +1030,84 @@
     root.addEventListener('change', update);
     var run = $(root, 'sv-run');
     if (run) run.addEventListener('click', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- timestamp converter
+  T['timestamp-converter'] = function (root) {
+    var tsInput = $(root, 'ts-timestamp');
+    var dateInput = $(root, 'ts-date');
+    var out = $(root, 'ts-out');
+    function formatDate(d) {
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()) +
+        ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds()) + ' UTC';
+    }
+    function formatISO(d) { return d.toISOString().replace('.000Z', 'Z'); }
+    function update() {
+      var tsVal = tsInput.value.trim();
+      var dateVal = dateInput.value.trim();
+      if (tsVal && dateVal) { out.textContent = 'Clear one field to convert.'; return; }
+      if (tsVal) {
+        var ts = parseInt(tsVal, 10);
+        if (isNaN(ts) || ts < 0) { out.textContent = 'Enter a valid Unix timestamp.'; return; }
+        var isMs = tsVal.length > 10;
+        var d = new Date((isMs ? ts : ts * 1000));
+        out.textContent = [
+          'Unix timestamp: ' + (isMs ? ts : ts + ' seconds'),
+          'Unix timestamp (ms): ' + (isMs ? ts : ts * 1000),
+          'UTC: ' + formatDate(d),
+          'ISO 8601: ' + formatISO(d),
+        ].join('\n');
+      } else if (dateVal) {
+        var d = new Date(dateVal.replace(' ', 'T') + 'Z');
+        if (isNaN(d.getTime())) { out.textContent = 'Enter a valid date.'; return; }
+        out.textContent = [
+          'Unix timestamp: ' + Math.floor(d.getTime() / 1000) + ' seconds',
+          'Unix timestamp (ms): ' + d.getTime(),
+          'ISO 8601: ' + formatISO(d),
+          'UTC: ' + formatDate(d),
+        ].join('\n');
+      } else { out.textContent = 'Enter a Unix timestamp or a date.'; }
+    }
+    $(root, 'ts-conv').addEventListener('click', update);
+    $(root, 'ts-clear').addEventListener('click', function () { tsInput.value = ''; dateInput.value = ''; update(); });
+    root.addEventListener('input', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- IP converter
+  T['ip-converter'] = function (root) {
+    var input = $(root, 'ip-input');
+    var out = $(root, 'ip-out');
+    function toLong(ip) { return ip.split('.').reduce(function (acc, octet) { return (acc << 8) + parseInt(octet, 10); }, 0) >>> 0; }
+    function fromLong(n) { return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.'); }
+    function fromHex(h) { h = h.replace(/^0x/i, '').replace(/[^0-9a-f]/gi, ''); if (h.length > 8) h = h.slice(-8); while (h.length < 8) h = '0' + h; return fromLong(parseInt(h, 16)); }
+    function fromBinary(b) { b = b.replace(/[^01]/g, ''); if (b.length > 32) b = b.slice(-32); while (b.length < 32) b = '0' + b; var parts = []; for (var i = 0; i < 32; i += 8) parts.push(parseInt(b.slice(i, i + 8), 2)); return parts.join('.'); }
+    function toHex(ip) { var n = toLong(ip); var h = n.toString(16).toUpperCase(); while (h.length < 8) h = '0' + h; return '0x' + h; }
+    function toBinary(ip) { var n = toLong(ip); var b = ''; for (var i = 24; i >= 0; i -= 8) b += ((n >>> i) & 255).toString(2).padStart(8, '0') + (i > 0 ? '.' : ''); return b; }
+    function update() {
+      var val = input.value.trim();
+      if (!val) { out.textContent = 'Enter an IPv4 address.'; return; }
+      var ip;
+      if (/^(\d{1,3}\.){3}\d{1,3}$/.test(val)) {
+        var parts = val.split('.').map(Number);
+        if (parts.some(function (p) { return p < 0 || p > 255; })) { out.textContent = 'Invalid octet values.'; return; }
+        ip = val;
+      } else if (/^0x[0-9a-fA-F]+$/.test(val) || /^[0-9a-fA-F]{8}$/.test(val)) { try { ip = fromHex(val); } catch (e) { ip = null; } }
+      else if (/^\d+$/.test(val)) { try { ip = fromLong(parseInt(val, 10)); } catch (e) { ip = null; } }
+      else if (/^[01]{8}(\.[01]{8}){0,3}$/.test(val)) { try { ip = fromBinary(val); } catch (e) { ip = null; } }
+      else { out.textContent = 'Unrecognized format.'; return; }
+      if (!ip) { out.textContent = 'Invalid IPv4.'; return; }
+      out.textContent = [
+        'Dotted-decimal: ' + ip,
+        'Hexadecimal: ' + toHex(ip),
+        'Decimal: ' + toLong(ip),
+        'Binary: ' + toBinary(ip),
+      ].join('\n');
+    }
+    $(root, 'ip-conv').addEventListener('click', update);
+    root.addEventListener('input', update);
     update();
   };
 })();

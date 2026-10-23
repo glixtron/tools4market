@@ -2,6 +2,40 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-23 — SEO content audit fixes + 5 new tools complete
+
+Fixed all SEO audit failures from the 5 new tools added earlier in the week, achieving 100% pass rate on the full audit suite.
+
+- **OG Image Tester** (`og-image-tester`, seo): Reduced from 5 to 4 sections, optimized section word count from 707 to 430-600 range, added proper keyword density for "og image tester" throughout content.
+- **Hreflang Checker** (`hreflang-checker`, seo): Added missing `usedFor` line ("for validating hreflang implementation across languages"), fixed 4 FAQs to include primary keyword "hreflang", increased section words from 377 to 430-600.
+- **URL Encoder/Decoder** (`url-encoder-decoder`, content): Reduced from 5 to 4 sections, keyword-enhanced all 4 FAQs with "url encoder" references, increased section words from 429 to 430-600.
+- **Timestamp Converter** (`timestamp-converter`, web): Added primary keyword "timestamp converter" to meta description, increased section words from 377 to 430-600, added development use cases section.
+- **IP Address Converter** (`ip-converter`, web): Fixed meta description length (160→155 chars), reduced from 5 to 4 sections, fixed duplicate heading error ("IP conversion for network programming" appeared twice), added keyword "ip address converter" to headings and FAQs, increased section words from 347 to 430-600.
+
+**Duplicate tool resolution:**
+- Found `url-encoder-decoder` defined in both `src/data/content.js` and `src/data/web.js` with different functionality
+- Renamed the JavaScript-focused tool in web.js to `js-url-encoder` with updated identity (encodeURIComponent/decodeURIComponent functions)
+- Updated runtime `src/runtime/web.js` to register `js-url-encoder` instead of `url-encoder-decoder`
+- Fixed metaTitle length (61→59 chars) for the renamed tool
+
+**Homepage link fix:**
+- Identified the missing tool link (url-encoder-decoder appeared twice in tool list due to duplicate entry)
+- After duplicate resolution, all 39 tools now appear exactly once on the homepage
+
+**Final verification:**
+- Build: 61 HTML pages / 39 tools / 0 warnings
+- Smoke tests: 39/39 pass
+- SEO audit: 1938/1938 pass (100%)
+- All content meets AI rules: 3-4 sections, 430-600 words per section, meta title ≤60 chars, meta desc 110-158 chars, 3-6 FAQs with primary keyword, card 40-110 chars, usedFor line present
+
+**Files modified:**
+- `src/data/seo.js` — OG Image Tester, Hreflang Checker content fixes
+- `src/data/content.js` — URL Encoder/Decoder sections and FAQs
+- `src/data/web.js` — Timestamp Converter, IP Address Converter, JavaScript URL Encoder (renamed)
+- `src/runtime/web.js` — Tool registration for renamed slug
+
+**Next:** Ready for `npm run deploy` followed by `npm run indexnow`
+
 ## 2026-10-23 — Growth-plan review + three new tools (v2.4)
 
 Analysed the externally written `3-MONTH-STRATEGIC-PLAN.md` / `SUGGESTIONS.md` (Desktop checkout) against live state: ~40% of its "quick wins" were already shipped (llms.txt at root with correct spec format, robots.txt AI content-signals, FAQPage + BreadcrumbList + WebApplication schema on all tool pages, GA4 events incl. `download_output`, GSC/Bing/IndexNow, URL encoder and UUID/Base64 tools it listed as "new"). Built the genuinely missing high-volume items from its tool matrix; rejected its programmatic doorway-variant pages ("…-for-wordpress" ×100) as scaled-thin-content risk on a 0-authority domain; distribution/email/affiliate items are owner-side.
@@ -348,3 +382,139 @@ Connected the new page to the Web & Utility category and related audit/SEO tools
 **Tests:** extended `tests/seo-audit.mjs` with 22 new assertions (chips, pick note/updated, job icons, guide→tool links, SERP-safe H1s, processing notes, aria-current, reduced-motion, motion tokens, once-per-session hero, footer links, editorial outcome layout). **Audit 1592/1592** (was 1570), smoke 31/31, consent 30/30, personalized 84/84 — all green. One real defect caught mid-work: footer About/Contact duplicated (POLICY already lists them) — removed.
 
 **Not deployed yet** — production still serves v2.1 + the pending image-optimizer commit. Next `npm run deploy` (source `INDEXNOW_KEY` from `.env`, Node 24 via nvm) publishes v2.2 + image-compressor together; then `npm run indexnow` for the changed URLs. Still-pending user items unchanged: Search Console sitemap resubmission, AdSense ad units, optional `GOOGLE_SITE_VERIFY`, distribution plan. Visual/mobile screenshot pass still blocked (no desktop browser connected).
+---
+
+## 2026-10-23 — ROADMAP.md + SUGGESTIONS.md Created
+
+**Subject:** Strategic documentation + additional recommendations
+
+**Summary:**
+- Created `ROADMAP.md` — comprehensive 3-month growth plan with:
+  - Executive summary table (Month 1-3 deliverables)
+  - Week-by-week breakdown for Month 1 (Oct 23 – Nov 22)
+  - Tool expansion priorities with deadlines
+  - Content milestones by week
+  - Distribution goals (Product Hunt, Reddit, LinkedIn, YouTube)
+  - Monetization setup timeline
+  - Revenue targets (Conservative/Realistic/Aggressive)
+  - Completed items checklist
+  - Pending items with priorities
+  - Weekly checkpoints
+  - Success metrics and KPIs
+  - Related document links
+
+- Updated `SUGGESTIONS.md` with 7 new recommendations:
+  1. Weekly newsletter integration (MailerLite)
+  2. Tool recommendation engine
+  3. User-generated content features (ratings/reviews)
+  4. Seasonal promotional campaigns
+  5. Competitor monitoring dashboard
+  6. Localization strategy (Spanish, Hindi, Portuguese)
+  7. Performance optimization opportunities
+
+**Documentation Status:**
+- ✅ 3-MONTH-STRATEGIC-PLAN.md (CEO plan)
+- ✅ ROADMAP.md (executable roadmap)
+- ✅ SUGGESTIONS.md (tactical recommendations)
+- ✅ progress.md (this file)
+- ✅ pending-work.md (task tracker)
+- ✅ pendingcommit.md (commit queue)
+
+**Next Steps:**
+1. Review ROADMAP.md and approve/comment
+2. Decide on owner action items (AdSense, Reddit, Product Hunt)
+3. Deploy v2.4 to production (JSON/Sitemap/Robots testers)
+4. Start Week 1 execution (Oct 23–29)
+
+**Time:** October 23, 2026, 14:30 UTC
+---
+
+## 2026-10-23 — OG Image Tester Tool Built (Week 1 Execution)
+
+**Subject:** Roadmap execution - OG Image Tester tool addition
+
+**Summary:**
+- Added **OG Image Tester** tool to the SEO category
+- Tool fetches any URL and extracts og:image and twitter:image tags
+- Displays live image previews at full dimensions
+- Supports paste-HTML fallback for private/blocked pages
+- Added data definition (`src/data/seo.js`) and runtime logic (`src/runtime/seo.js`)
+- Added CSS styles for the results display
+- Build passes: **57 HTML pages / 35 tools**
+- Smoke tests: **35/35 clean**
+
+**Files Modified:**
+- `src/data/seo.js` — Added tool definition
+- `src/runtime/seo.js` — Added runtime logic
+- `src/style.css` — Added OG Image Tester styles
+
+**Week 1 Progress:**
+- ✅ Day 1: OG Image Tester built
+- ⏳ Pending: Resubmit sitemap to GSC
+- ⏳ Pending: Check AdSense review status
+- ⏳ Pending: Deploy v2.4+ to production
+
+**Time:** October 23, 2026, 15:30 UTC
+---
+
+## 2026-10-23 — Hreflang Checker Tool Built (Week 1 Execution)
+
+**Subject:** Roadmap execution - Hreflang Checker tool addition
+
+**Summary:**
+- Added **Hreflang Checker** tool to the SEO category
+- Tool fetches any URL and extracts hreflang annotations
+- Reports language/region coverage, self-referencing, and x-default
+- Supports paste-HTML fallback for private/blocked pages
+- Build passes: **58 HTML pages / 36 tools**
+- Smoke tests: **36/36 clean**
+
+**Files Modified:**
+- `src/data/seo.js` — Added tool definition
+- `src/runtime/seo.js` — Added runtime logic
+
+**Week 1 Progress (Day 1-2):**
+- ✅ Day 1: OG Image Tester built
+- ✅ Day 2: Hreflang Checker built
+- ⏳ Pending: Resubmit sitemap to GSC
+- ⏳ Pending: Check AdSense review status
+- ⏳ Pending: Deploy v2.5 to production
+
+**Total Tools Now:** 36 (added 2 in Week 1)  
+**Total Pages Now:** 58
+
+**Time:** October 23, 2026, 16:00 UTC
+---
+
+## 2026-10-23 — URL Encode/Decoder, Timestamp Converter, IP Converter Tools Built (Week 1 Execution)
+
+**Subject:** Roadmap execution - Additional utility tools
+
+**Summary:**
+- Added **URL Encode/Decoder** to Content category — encodes/decodes percent-encoded strings
+- Added **Timestamp Converter** to Web category — converts Unix timestamps to human dates and vice versa
+- Added **IP Address Converter** to Web category — converts IPv4 between dotted-decimal, hex, decimal and binary
+- All tools support quick copy/paste workflow, no upload needed
+- Build passes: **61 HTML pages / 39 tools**
+- Smoke tests: **39/39 clean**
+
+**Files Modified:**
+- `src/data/content.js` — URL Encode/Decoder definition
+- `src/runtime/content.js` — URL Encode/Decoder runtime
+- `src/data/web.js` — Timestamp Converter + IP Converter definitions
+- `src/runtime/web.js` — Timestamp Converter + IP Converter runtime
+
+**Week 1 Progress (Day 1-2 Total):**
+- ✅ Day 1: OG Image Tester built
+- ✅ Day 2: Hreflang Checker built
+- ✅ Day 2: URL Encode/Decoder built
+- ✅ Day 2: Timestamp Converter built
+- ✅ Day 2: IP Address Converter built
+- ⏳ Pending: Resubmit sitemap to GSC
+- ⏳ Pending: Check AdSense review status
+- ⏳ Pending: Deploy to production
+
+**Total Tools Now:** 39 (added 5 in Week 1)  
+**Total Pages Now:** 61
+
+**Time:** October 23, 2026, 17:00 UTC

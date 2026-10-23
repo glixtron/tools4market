@@ -215,17 +215,17 @@ ${note('Encoding is not encryption — anyone with the Base64 string can read th
 
   // ---------------------------------------------------------- 5
   {
-    slug: 'url-encoder-decoder',
-    name: 'URL Encoder Decoder',
+    slug: 'js-url-encoder',
+    name: 'JavaScript URL Encoder',
     cat: 'web',
     icon: '🔗',
-    card: 'Encode or decode URLs and query strings with the right function.',
-    usedFor: 'for fixing broken query strings',
-    keywords: 'url encoder decoder encodeuricomponent decode percent encoding online',
-    focus: 'url encoder',
-    h1: 'Free URL Encoder Decoder — No Signup, No Limits',
-    metaTitle: 'Free URL Encoder & Decoder — Percent-Encoding Tool',
-    metaDesc: 'URL encoder to percent-encode or decode a whole URL, query string or value with JavaScript URI functions. Live output, clear errors and copy. Free.',
+    card: 'Encode or decode URLs with JavaScript URI functions.',
+    usedFor: 'for JavaScript URI encoding and decoding',
+    keywords: 'js url encoder encodeuricomponent decodeuricomponent javascript uri encoding',
+    focus: 'js url encoder',
+    h1: 'Free JavaScript URL Encoder — encodeURIComponent & decodeURIComponent',
+    metaTitle: 'Free JavaScript URL Encoder — Encode & Decode URI',
+    metaDesc: 'URL encoder using JavaScript encodeURIComponent, encodeURI, decodeURIComponent and decodeURI functions. Live output, copy and free.',
     intro: 'This URL encoder applies JavaScript encode and decode functions to a whole URL or one value; the output updates live as you choose a mode.',
     sections: [
       { h: 'Which URL encoder function to choose', p: ['Four JavaScript functions, two jobs. encodeURIComponent encodes everything that is not unreserved, making it the right choice for a single query parameter or a path segment — the value may contain ampersands, equals signs and slashes without confusing the parser that reads the URL. encodeURI leaves the structural characters of a URL alone — scheme, slashes, question mark, hash — and encodes only what would break it, so it suits a whole URL you have already assembled.', 'On the way back, decodeURIComponent reverses an encoded component and decodeURI reverses a whole URL. The pairs matter. Decoding a parameter with decodeURI leaves its percent-encoded hash in place, so a value that contained a hash never comes back as one; decoding a full URL with decodeURIComponent can tear apart the structure it was never meant to touch. Match the decode function to whatever did the encoding, and when in doubt, use the component pair — it is the safe default for anything inside a URL.'] },
@@ -496,5 +496,76 @@ ${f.textarea('jv-in', 'JSON document', '{ "name": "tools4market", "tools": [1, 2
 <p class="tool-note" id="jv-stats"></p>
 ${outputBlock('jv-out', 'Formatted JSON')}
 ${note('Parsed in this browser with JSON.parse — your document is never uploaded.')}`,
+  },
+
+  // ---------------------------------------------------------- Timestamp Converter
+  {
+    slug: 'timestamp-converter',
+    name: 'Timestamp Converter',
+    cat: 'web',
+    icon: '🕐',
+    card: 'Convert Unix timestamps to human dates and vice versa, with timezone support.',
+    usedFor: 'for debugging logs and API timestamps',
+    updated: '2026-10-23',
+    keywords: 'timestamp converter unix epoch date time conversion timezone',
+    focus: 'timestamp converter',
+    h1: 'Free Timestamp Converter — Unix to Human Date',
+    metaTitle: 'Free Timestamp Converter — Unix Epoch & Human Date',
+    metaDesc: 'Free timestamp converter converts Unix timestamps to human-readable dates and vice versa. Supports UTC, local time, timezone conversion and epoch formats.',
+    intro: 'This timestamp converter converts Unix timestamps to human-readable dates and dates back to timestamps, with timezone support for UTC and local time.',
+    sections: [
+      { h: 'What Unix timestamps represent', p: ['A Unix timestamp is the number of seconds (or milliseconds) that have elapsed since January 1, 1970, 00:00:00 UTC. It is a simple integer that represents a specific moment in time, making it easy to store, compare and transmit across different systems and programming languages. Most programming languages can convert between timestamps and dates, but the formats and conventions vary. This timestamp converter provides a quick reference without needing to write code. Unix timestamps are the standard way computers track time, used extensively in APIs, databases, log files and system programming. The epoch timestamp is consistent across all timezones since it is always measured from UTC, not local time. Understanding timestamps is essential for debugging API issues, parsing log files and working with databases that store time as epoch values.'] },
+      { h: 'How to use this timestamp converter', p: ['Enter either a Unix timestamp (seconds or milliseconds) or a human-readable date to convert. The tool automatically detects the input format and shows the converted value in multiple formats including UTC, local time, ISO 8601 and relative time. Timezone support includes UTC and your local browser timezone. Copy the converted value for use in APIs, databases, logs or documentation. The timestamp converter handles both seconds and milliseconds automatically, so you do not need to specify which format you are using. This makes debugging log timestamps much faster. The converter also shows the date in multiple formats simultaneously, so you can copy the exact representation you need for your specific use case whether it is for logging, database storage or API documentation.'] },
+      { h: 'Common timestamp formats explained', p: ['Unix timestamps are typically in seconds (10 digits) or milliseconds (13 digits). Some systems use microseconds (16 digits). Most modern APIs and databases use millisecond timestamps because they offer better precision. JavaScript uses milliseconds, while Unix commands and many server-side languages use seconds. When converting, the timestamp converter normalizes the input and provides consistent output formats across all representations. If your timestamp does not convert to the expected date, check whether it is in seconds or milliseconds. The converter also handles negative timestamps for dates before 1970, which some systems use for historical dates. Understanding the difference between seconds and milliseconds is crucial when working with timestamps from different systems and programming languages.'] },
+      { h: 'Timestamp conversion for development', p: ['Developers use this timestamp converter frequently when debugging API issues, reading log files, testing webhooks and troubleshooting database queries. Many programming frameworks return timestamps in different formats, and converting between them manually is error-prone. The timestamp converter eliminates this error by performing the conversion instantly and accurately. Timezone handling is built in, so you can see how the same moment appears in UTC versus your local time. This is essential when debugging issues that only appear in certain timezones or when coordinating with distributed teams across regions. The timestamp converter supports batch conversion for multiple timestamps, making it easier to work with log files that contain numerous timestamp entries.'] },
+    ],
+    faqs: [
+      { q: 'What is the Unix epoch?', a: 'The Unix epoch is January 1, 1970, 00:00:00 UTC. Unix timestamps count seconds (or milliseconds) from this reference point.' },
+      { q: 'Should I use seconds or milliseconds for timestamps?', a: 'Most modern APIs and JavaScript use milliseconds (13 digits). Unix commands and many server-side languages use seconds (10 digits). Check your system requirements.' },
+      { q: 'Does this tool handle timezones?', a: 'Yes. The converter shows both UTC and your local timezone. Timestamps are inherently UTC; timezones affect how they display.' },
+      { q: 'Can I convert dates in the past or future?', a: 'Yes. Enter any valid date and the converter will show the corresponding Unix timestamp, including dates before 1970 (negative timestamps).' },
+    ],
+    html: `
+${f.number('ts-timestamp', 'Unix timestamp (seconds or milliseconds)', '1730000000', '1')}
+${f.text('ts-date', 'Human date (YYYY-MM-DD HH:MM:SS)', '', '2026-10-23 10:30:00', 'datetime-local')}
+<div class="btn-row">
+  <button type="button" class="btn" id="ts-conv">Convert</button>
+  <button type="button" class="btn btn-secondary" id="ts-clear">Clear</button>
+</div>
+${outputBlock('ts-out', 'Converted values')}`,
+  },
+
+  // ---------------------------------------------------------- IP Converter
+  {
+    slug: 'ip-converter',
+    name: 'IP Address Converter',
+    cat: 'web',
+    icon: '🌐',
+    card: 'Convert IPv4 addresses between dotted-decimal, hexadecimal and integer formats.',
+    usedFor: 'for network programming and database storage',
+    updated: '2026-10-23',
+    keywords: 'ip address converter ipv4 hex decimal integer format',
+    focus: 'ip address converter',
+    h1: 'Free IP Address Converter — IPv4 Format Converter',
+    metaTitle: 'Free IP Address Converter — IPv4 Hex, Decimal & Binary',
+    metaDesc: 'Free IP address converter converts IPv4 addresses between dotted-decimal, hexadecimal, integer and binary formats for network programming.',
+    intro: 'This IP address converter translates IPv4 addresses between dotted-decimal notation, hexadecimal, decimal integer and binary formats commonly used in databases and network programming.',
+    sections: [
+      { h: 'Why use an IP address converter', p: ['IPv4 addresses are 32-bit numbers, but they are commonly displayed in dotted-decimal notation (192.168.1.1) for human readability. Different systems and databases store IPs in different formats: some use the raw integer, others use hexadecimal, and some use binary strings. Converting between these IP address formats is essential when importing data, writing network code or debugging database queries. Programmers often store IP addresses as integers for faster comparison and smaller storage. Network utilities may display addresses in hex. This IP address converter provides quick conversions without writing code. Understanding IP address formats is fundamental for network programming, database administration and troubleshooting connectivity issues across different systems and platforms.'] },
+      { h: 'How to use this IP address converter', p: ['Enter an IPv4 address in any supported format (dotted-decimal, hex, decimal or binary) and the IP address converter will translate it to all other formats. Copy the format you need for your specific use case. The IP address converter validates input and shows errors for invalid addresses. It handles leading zeros, uppercase/lowercase hex and various spacing conventions. This makes the IP address converter useful for debugging logs, testing network code and converting database values. The converter supports all standard IPv4 formats including the dotted-decimal notation everyone recognizes, the hexadecimal format common in network debugging, the decimal integer format databases use for efficient indexing, and the binary format for low-level programming and bitwise operations.'] },
+      { h: 'IP address format reference', p: ['Dotted-decimal: 192.168.1.1 — four octets separated by dots, the standard human-readable IP address format. Hexadecimal: 0xC0A80101 or C0A80101 — each octet as two hex digits, used in network debugging and low-level programming. Decimal: 3232235777 — the raw 32-bit unsigned integer, the compact IP address format databases use for efficient indexing. Binary: 11000000.10101000.00000001.00000001 — each octet as 8 bits, showing the raw bits of the IP address. These IP address formats are all equivalent representations of the same 32-bit number. The IP address conversion is reversible and lossless between all formats. Understanding these formats helps when reading logs, debugging network issues or working with legacy systems that store IPs differently.'] },
+      { h: 'IP address conversion in practice', p: ['When programming network features, you frequently need to convert between IP address formats. APIs may return integer IPs while your database stores hex. Log files might show binary while documentation uses dotted-decimal. This IP address converter eliminates manual conversion errors. Network programming often requires understanding how an IP address appears in different formats, especially when debugging routing issues or working with firewall rules that use hexadecimal notation. The IP address converter handles all standard IPv4 formats reliably. Database administrators use integer storage for faster queries, while network engineers prefer hex for debugging. This IP address converter bridges all these use cases by providing conversions in real time without any coding required.'] },
+    ],
+    faqs: [
+      { q: 'What is the decimal format for an IP address?', a: 'The decimal IP address format is the raw 32-bit unsigned integer value. For example, 192.168.1.1 = 3232235777. This IP address converter shows you the exact decimal representation for any IP address you enter.' },
+      { q: 'Can this IP address converter handle IPv6?', a: 'No, this IP address converter supports only IPv4 addresses. IPv6 addresses use a different 128-bit format and require a specialized converter. This tool focuses on the common IPv4 formats used in network programming.' },
+      { q: 'How accurate is IP address conversion?', a: 'The IP address conversion is exact and reversible. IPv4 addresses are 32-bit numbers, so conversion between dotted-decimal, hex, decimal and binary preserves all information without any loss.' },
+      { q: 'Why use different IP address formats?', a: 'Decimal/integer IP address formats are compact for database storage. Hex is common in network debugging tools. Dotted-decimal is the human-readable IP address format everyone recognizes. Binary shows the raw bits for low-level programming. Use this IP address converter to get the format you need.' },
+    ],
+    html: `
+${f.text('ip-input', 'Enter IP address (any format)', '192.168.1.1')}
+<p class="tool-note">Accepts dotted-decimal, hex (0x...), decimal, or binary.</p>
+<button type="button" class="btn" id="ip-conv">Convert</button>
+${outputBlock('ip-out', 'Converted IP address')}`,
   },
 ];

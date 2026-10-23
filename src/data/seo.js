@@ -454,4 +454,83 @@ ${outputArea('sc2-fixes', 'Fix these first')}
   <button type="button" class="btn btn-ghost" id="sc2-paste-run">Score pasted HTML</button>
 </details>`,
   },
+
+  // ---------------------------------------------------------- 11
+  {
+    slug: 'og-image-tester',
+    name: 'OG Image Tester',
+    cat: 'seo',
+    icon: '🖼️',
+    card: 'Test any URL to see its og:image and twitter:image tags with live previews.',
+    usedFor: 'for debugging social card images',
+    updated: '2026-10-23',
+    keywords: 'og image tester open graph image preview twitter card debug',
+    focus: 'og image tester',
+    h1: 'Free OG Image Tester — Preview Open Graph & Twitter Images',
+    metaTitle: 'Free OG Image Tester — Test Open Graph & Twitter Card Images',
+    metaDesc: 'Enter a URL and this OG image tester extracts og:image and twitter:image tags, then shows the live image at full size. Debug social cards instantly.',
+    intro: 'This OG image tester fetches a URL and extracts the og:image and twitter:image tags it declares, then displays each image at its full dimensions so you can see whether your social card will look sharp on Facebook, LinkedIn, X and Discord.',
+    sections: [
+      { h: 'What this OG image tester checks', p: ['The OG image tester reads the Open Graph and Twitter Card image tags from a page source. For each image URL found, it displays the real image, records its dimensions where the server reports them, and reports whether the URL is accessible and the image loads correctly. This OG image tester does not validate image quality, aspect ratio or file size — those are editorial decisions that depend on the content you share. What this OG image tester does is show you exactly what a social platform will see, so a broken image URL or a redirect to the wrong asset shows up immediately and you can fix it before publishing. Using an OG image tester is essential for anyone sharing links on social media. Facebook, LinkedIn, X, Discord and Slack all read og:image tags to build the preview card that appears when a link is shared.'] },
+      { h: 'How to use this OG image tester', p: ['Paste a public page URL and run the test. The OG image tester shows every og:image and twitter:image found, the exact URLs, and a live preview of each image at full dimensions. If an image fails to load, the tester reports the error so you can fix the URL or server configuration. For pages behind a login or with fetch blocked, paste the page HTML into this OG image tester. That path extracts the tags from the markup but cannot verify whether the image URLs work for a crawler. The OG image tester works in three modes: enter a live URL for a full analysis with image previews, paste HTML for tag extraction without network requests, or use the built-in defaults to test the tool interface.'] },
+      { h: 'Open Graph image requirements', p: ['Facebook recommends 1200×630 pixels at 1.91:1 ratio, under 1 MB, in JPEG, PNG or WebP format. LinkedIn accepts the same size range and displays OG images in the LinkedIn feed with similar dimensions. X (Twitter) falls back to Open Graph when twitter:image is missing, but prefers 1200×675 at 2:1 for large cards. Discord reads og:image and displays it at roughly 400×210 pixels in chat previews. Understanding these requirements helps you create OG images that work across all platforms. If your OG image looks cropped or blurry in the OG image tester preview, check the dimensions against the platform you care about most and adjust the source image accordingly.'] },
+      { h: 'Why OG image testing matters for traffic', p: ['Social media shares drive significant referral traffic to websites. When your link is shared on Facebook, LinkedIn or X, the OG image is often the first thing people notice. A compelling OG image increases click-through rates dramatically compared to links with missing or default images. The OG image tester catches issues that would otherwise only be visible after sharing and receiving poor engagement. Missing og:image, redirected image URLs, images behind authentication, or expired signed URLs are common problems the OG image tester identifies. This free OG image tester makes it easy to verify every piece of content before publishing.'] },
+    ],
+    faqs: [
+      { q: 'What size should og:image be for the OG image tester results?', a: 'The OG image tester works best with 1200×630 pixels at 1.91:1 ratio under 1 MB. Use JPEG, PNG or WebP format for maximum compatibility across Facebook, LinkedIn, X and Discord.' },
+      { q: 'Why is my OG image not showing in the OG image tester?', a: 'This OG image tester can identify several causes: missing og:image tag, a broken image URL, a redirect that changes the asset, an image behind authentication, or a file size that exceeds crawler limits. Run the OG image tester and check each image URL.' },
+      { q: 'Do I need twitter:image if I have og:image in the OG image tester?', a: 'No — X (Twitter), LinkedIn, Discord and most platforms fall back to og:image when twitter:image is missing. Use twitter:image only to override the Open Graph value for a specific X-specific format.' },
+      { q: 'How does the OG image tester help with social media traffic?', a: 'The OG image tester ensures your shared links display properly on Facebook, LinkedIn, X and Discord. Proper OG images increase click-through rates from social media, driving more traffic to your site.' },
+    ],
+    html: `
+${f.url('ogt-url', 'Page URL to test', 'https://your-site.com/your-page')}
+<button type="button" class="btn ogt-run" id="ogt-run">Test OG images</button>
+<div class="stat-line" id="ogt-status" aria-live="polite"></div>
+<div class="ogt-results" id="ogt-results" aria-label="OG image test results"></div>
+<details class="inspect-paste">
+  <summary>Fetch blocked, or the page is private? Paste the HTML instead.</summary>
+  <textarea id="ogt-paste" class="inspect-ta" rows="4" placeholder="View Source → copy → paste the page HTML here." aria-label="Paste page HTML"></textarea>
+  <button type="button" class="btn btn-ghost" id="ogt-paste-run">Test pasted HTML</button>
+</details>
+${outputArea('ogt-out', 'Analysis results')}`,
+  },
+
+  // ---------------------------------------------------------- 12
+  {
+    slug: 'hreflang-checker',
+    name: 'Hreflang Checker',
+    cat: 'seo',
+    icon: '🌐',
+    card: 'Check hreflang tags for language and region errors.',
+    usedFor: 'for validating hreflang implementation across languages',
+    updated: '2026-10-23',
+    keywords: 'hreflang checker validate audit language regional tags implementation',
+    focus: 'hreflang checker',
+    h1: 'Free Hreflang Checker — Audit Language & Region Tags',
+    metaTitle: 'Free Hreflang Checker — Validate hreflang Annotations Online',
+    metaDesc: 'Free hreflang checker validates language and region tags. Enter a URL to audit hreflang annotations, find errors and missing hreflang variants.',
+    intro: 'This hreflang checker fetches a URL and reports every link[rel="alternate"][hreflang] annotation. Use this hreflang checker to validate hreflang implementation, find language coverage gaps and audit hreflang for SEO.',
+    sections: [
+      { h: 'What the hreflang checker validates', p: ['The hreflang checker reads every <link rel="alternate" hreflang="..." href="..."> tag and groups them by language code and region code. This hreflang checker reports the total count of hreflang annotations, the unique language codes found, any x-default declaration, and whether self-referencing hreflang exists for the tested URL. Using the hreflang checker helps you verify that your hreflang implementation follows best practices. The hreflang checker does not validate whether target URLs exist or contain matching hreflang back-references — that would require crawling every variant — but it surfaces the annotation structure so you can verify completeness and catch common hreflang errors that hurt international SEO. Missing hreflang annotations, incorrect language codes, and incomplete regional targeting are frequent issues that the hreflang checker helps identify before they affect search visibility.'] },
+      { h: 'How to use this hreflang checker tool', p: ['Paste a public page URL and run the hreflang check. The hreflang checker shows each hreflang entry with its code, the language and optional region portion, and the target URL. Self-referencing hreflang entries are highlighted so you can confirm your hreflang implementation includes the self-reference. For private pages or pages behind a login, paste the HTML source into the hreflang checker. That path reads the hreflang tags from the markup but cannot verify response headers or crawl the targets. The hreflang checker works entirely in your browser for fast hreflang validation. Results include the complete hreflang annotation structure so you can review every language variant declaration and identify gaps in your international targeting.'] },
+      { h: 'Hreflang implementation basics', p: ['Hreflang tells search engines which language or region a page targets. The hreflang attribute value follows BCP 47 format: just a language code like "en" or "es", or a language-region pair like "en-US" or "zh-Hant-TW". A special "x-default" hreflang value indicates the page to show when no other variant matches the user language settings. Proper hreflang implementation drives traffic from multiple countries. Self-referencing hreflang (the page pointing to itself) is not strictly required but recommended as a signal that the implementation is complete. Every language variant should point to every other variant in a complete hreflang mesh. Without proper hreflang implementation, search engines may show the wrong language version to users, reducing engagement and conversions from international audiences.'] },
+      { h: 'Why hreflang validation matters for multilingual SEO', p: ['Correct hreflang implementation drives targeted traffic from multiple countries. When hreflang tags work properly, French users see French pages in Google.fr, German users see German pages in Google.de, and English users see your English pages. Missing self-reference, conflicting region codes, duplicate hreflang codes with different casing (EN vs en), or incomplete language variants are common problems the hreflang checker identifies. Without proper hreflang validation, you might lose international traffic to competitors who correctly implement hreflang across all their language and regional variants. Using this hreflang checker regularly keeps your multilingual SEO strategy strong.'] },
+    ],
+    faqs: [
+      { q: 'What is hreflang and why does it matter for SEO?', a: 'Hreflang is an HTML attribute that tells search engines which language and regional targeting a page has. Proper hreflang implementation helps Google show the right language variant to the right users, driving international traffic from multiple countries.' },
+      { q: 'What does this hreflang checker validate?', a: 'This hreflang checker validates hreflang annotations on any URL. It checks for valid hreflang language codes, region codes, self-referencing hreflang and x-default declarations to ensure your hreflang implementation is correct.' },
+      { q: 'What is self-referencing hreflang?', a: 'Self-referencing hreflang means a page includes a hreflang tag pointing to itself. The hreflang checker highlights missing self-references so you can complete your hreflang implementation.' },
+      { q: 'Why use this hreflang checker for SEO?', a: 'The hreflang checker catches hreflang errors before they hurt international SEO. Proper hreflang validation improves multilingual search rankings and ensures the right users see the right language pages.' },
+    ],
+    html: `
+${f.url('hlt-url', 'Page URL to audit', 'https://your-site.com/en/page')}
+<button type="button" class="btn hlt-run" id="hlt-run">Check hreflang</button>
+<div class="stat-line" id="hlt-status" aria-live="polite"></div>
+${outputArea('hlt-out', 'Hreflang report')}
+<details class="inspect-paste">
+  <summary>Fetch blocked, or the page is private? Paste the HTML instead.</summary>
+  <textarea id="hlt-paste" class="inspect-ta" rows="4" placeholder="View Source → copy → paste the page HTML here." aria-label="Paste page HTML"></textarea>
+  <button type="button" class="btn btn-ghost" id="hlt-paste-run">Check pasted HTML</button>
+</details>`,
+  },
 ];

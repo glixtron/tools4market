@@ -389,4 +389,26 @@
     root.addEventListener('input', update);
     update();
   };
+
+  // ---------------------------------------------------------- URL encoder/decoder
+  T['url-encoder-decoder'] = function (root) {
+    var out = $(root, 'ued-out');
+    var input = $(root, 'ued-text');
+    function encode(t) { return encodeURIComponent(t).replace(/%20/g, '+'); }
+    function decode(t) { return decodeURIComponent(t.replace(/\+/g, ' ')); }
+    function update(mode) {
+      var val = input.value;
+      if (mode === 'encode') out.textContent = encode(val);
+      else if (mode === 'decode') out.textContent = decode(val);
+      else {
+        try { out.textContent = decode(val); }
+        catch (e) { out.textContent = encode(val); }
+      }
+    }
+    for (var i = 0; i < 2; i++) (function (b) {
+      b.addEventListener('click', function () { update(b.dataset.ued); });
+    })(root.querySelector('[data-ued="' + (i ? 'decode' : 'encode') + '"]'));
+    root.addEventListener('input', function () { update(); });
+    update();
+  };
 })();

@@ -304,4 +304,40 @@ ${outputBlock('lo-out', 'Lorem Ipsum text')}`,
 ${f.textarea('rt-text', 'Paste your text (nothing is uploaded)', 'Paste an article, script or draft here to measure its length and timing…', 9)}
 ${outputBlock('rt-out', 'Text statistics')}`,
   },
+
+  // ---------------------------------------------------------- 9
+  {
+    slug: 'url-encoder-decoder',
+    name: 'URL Encode/Decode',
+    cat: 'content',
+    icon: '🔗',
+    card: 'Encode special characters for URLs or decode percent-encoded strings.',
+    usedFor: 'for safe URL parameters',
+    updated: '2026-10-23',
+    keywords: 'url encoder decode percent-encoding url-safe special characters encoding',
+    focus: 'url encoder decoder',
+    h1: 'Free URL Encoder & Decoder — Percent-Encoding Tool',
+    metaTitle: 'Free URL Encoder & Decoder — Percent-Encoding Online',
+    metaDesc: 'Free URL encoder and decoder converts special characters to percent-encoding. Encode URL parameters safely or decode percent-encoded strings instantly.',
+    intro: 'This URL encoder/decoder converts special characters to percent-encoded form for safe transmission in URLs and decodes encoded strings back to readable text. Use this URL encoder for API work, debugging and link building.',
+    sections: [
+      { h: 'When to use URL encoding for URLs', p: ['URLs can only contain a limited set of ASCII characters. Anything else — accented letters, emoji, spaces, symbols — must be percent-encoded for the URL to be valid. The URL encoder replaces special bytes with %XX where XX is the hexadecimal value. Spaces become %20, ampersands become %26, and so on. Most browsers handle URL encoding automatically when you paste a URL, but debugging API calls, building query strings by hand, and inspecting server logs often require reading or writing the encoded form yourself. The URL encoder and decoder work in two modes: encoding takes readable text and makes it URL-safe for use in web addresses; decoding does the reverse, turning %20 back into spaces and %3A into colons. Proper URL encoding is essential for web development, API integrations and ensuring links work correctly across all platforms.'] },
+      { h: 'How to use this URL encoder and decoder tool', p: ['Paste text into the URL encoder input box. The URL encoder shows the encoded version immediately. To use the URL decoder, paste an already-encoded string and the tool reverses the URL encoding. Copy the URL encoder result for use in your code, documentation or URL bar. The URL encoder and decoder conversion runs entirely in your browser with no server round-trip for security. Typical use cases include encoding search terms for query strings, encoding URL slugs with non-ASCII characters, decoding a URL you copied from a server log, and verifying that a generated URL contains the expected encoded values.'] },
+      { h: 'Common URL encoding patterns and rules', p: ['Spaces become %20 or + in query strings, depending on the encoding convention. Ampersands (&) separate query parameters and must be URL-encoded when they appear in a parameter value. Unicode characters are encoded as UTF-8 bytes, so é becomes %C3%A9. The colon in time strings (:) is often URL-encoded when it appears in a path segment, though it is allowed unencoded in query strings. Some URL characters are reserved and have special meaning: ? separates the path from the query, # marks a fragment, and / separates path segments. When these characters appear as data rather than delimiters, they must be URL-encoded. This URL encoder follows standard RFC 3986 URL encoding rules.'] },
+      { h: 'Why URL encoding matters for web development', p: ['Proper URL encoding prevents broken links, 404 errors and security issues. When URLs contain unencoded special characters, servers may reject them or interpret them incorrectly. The URL encoder ensures your URLs are safe for transmission across the internet and is essential for API development, web scraping and link building. The URL decoder helps you understand what servers receive when you send URLs. Decoding URLs lets you verify that your URL encoder is producing the correct output. URL encoding affects how links appear in search results and social media — properly encoded links look professional and share correctly across platforms.'] },
+    ],
+    faqs: [
+      { q: 'What characters need URL encoding?', a: 'Any character outside the ASCII unreserved set (A-Z, a-z, 0-9, -_.~) must be percent-encoded. Common URL encoding applies to spaces, accented letters, emoji, &, ?, # and =. Use this URL encoder to handle these special characters safely.' },
+      { q: 'Should I encode spaces as %20 or + in URLs?', a: 'In URL path segments, use %20. In query strings, + is common for spaces but %20 is also accepted. This URL encoder uses %20 for spaces everywhere. The URL decoder handles both formats correctly.' },
+      { q: 'Does URL encoding affect SEO and crawling?', a: 'Properly URL-encoded URLs work correctly for search engine crawling. A mis-encoded URL can break links or cause 404 errors. Use this URL encoder and decoder to keep URLs clean and SEO-friendly.' },
+      { q: 'How does this URL decoder work?', a: 'Paste the encoded URL into the decoder to see the original characters. The URL decoder handles nested encoding and shows the fully decoded result safely. This URL encoder and decoder pair is invaluable for debugging.' },
+    ],
+    html: `
+${f.textarea('ued-text', 'Text to encode or decode', 'Hello World! & goodbye=see you', 6)}
+<div class="btn-row">
+  <button type="button" class="btn" data-ued="encode">Encode</button>
+  <button type="button" class="btn btn-secondary" data-ued="decode">Decode</button>
+</div>
+${outputBlock('ued-out', 'Result')}`,
+  },
 ];
