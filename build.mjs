@@ -370,6 +370,7 @@ const LOCAL_TOOLS = new Set([
   'password-generator', 'base64-encoder-decoder', 'uuid-generator', 'jwt-decoder',
   'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
   'json-validator', 'roi-calculator', 'roas-calculator', 'cac-calculator', 'ad-metrics-calculator',
+  'timestamp-converter', 'ip-converter',
 ]);
 const procNote = (t) => (LOCAL_TOOLS.has(t.slug) ? 'Runs in your browser' : 'Live page check available');
 

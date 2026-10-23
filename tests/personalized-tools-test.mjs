@@ -611,4 +611,42 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 
+// v2.8 additions: timestamp + IP converters (integrated from the second session's work).
+{
+  const { dom, doc, errors } = await boot('timestamp-converter');
+  check('timestamp converter skips the analyze panel (local-only)', !doc.querySelector('.inspect'));
+  const tsOut = doc.getElementById('ts-out').textContent;
+  check('timestamp converter starts from the prefilled example', tsOut.includes('Unix timestamp: 1730000000 seconds') && tsOut.includes('Unix timestamp (ms): 1730000000000'));
+  check('timestamp converter renders UTC, local, ISO and relative lines', tsOut.includes('UTC: 2024-10-27 03:33:20 UTC') && tsOut.includes('ISO 8601: 2024-10-27T03:33:20Z') && tsOut.includes('Local:') && tsOut.includes('Relative:'));
+  setValue(dom.window, 'ts-timestamp', '1730000000000');
+  check('timestamp converter auto-detects milliseconds', doc.getElementById('ts-out').textContent.includes('Unix timestamp: 1730000000 seconds') && doc.getElementById('ts-out').textContent.includes('Unix timestamp (ms): 1730000000000'));
+  setValue(dom.window, 'ts-timestamp', '-1000000000');
+  check('timestamp converter accepts pre-1970 (negative) timestamps', doc.getElementById('ts-out').textContent.includes('Unix timestamp: -1000000000 seconds'));
+  setValue(dom.window, 'ts-timestamp', '');
+  setValue(dom.window, 'ts-date', '2000-01-01T00:00');
+  const expectMs = new Date('2000-01-01T00:00').getTime();
+  check('date input converts as the visitor\'s local time (no UTC shift)', doc.getElementById('ts-out').textContent.includes('Unix timestamp (ms): ' + expectMs));
+  setValue(dom.window, 'ts-timestamp', '1730000000');
+  check('timestamp converter asks to clear one field when both are filled', doc.getElementById('ts-out').textContent.includes('Clear one field'));
+  check('timestamp converter has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('ip-converter');
+  check('ip converter skips the analyze panel (local-only)', !doc.querySelector('.inspect'));
+  setValue(dom.window, 'ip-input', '192.168.1.1');
+  let ipOut = doc.getElementById('ip-out').textContent;
+  check('ip converter translates dotted-decimal to hex, decimal and binary', ipOut.includes('Dotted-decimal: 192.168.1.1') && ipOut.includes('Hexadecimal: 0xC0A80101') && ipOut.includes('Decimal: 3232235777') && ipOut.includes('Binary: 11000000.10101000.00000001.00000001'));
+  setValue(dom.window, 'ip-input', '0xC0A80101');
+  check('ip converter accepts hex input', doc.getElementById('ip-out').textContent.includes('Dotted-decimal: 192.168.1.1'));
+  setValue(dom.window, 'ip-input', '3232235777');
+  check('ip converter accepts decimal-integer input', doc.getElementById('ip-out').textContent.includes('Dotted-decimal: 192.168.1.1'));
+  setValue(dom.window, 'ip-input', '192 . 168 . 1 . 1');
+  check('ip converter tolerates spaced input', doc.getElementById('ip-out').textContent.includes('Dotted-decimal: 192.168.1.1'));
+  setValue(dom.window, 'ip-input', '300.1.1.1');
+  check('ip converter rejects out-of-range octets', doc.getElementById('ip-out').textContent.includes('0–255'));
+  check('ip converter has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 console.log(`\nPERSONALIZED TOOLS: ${checks} checks passed.`);

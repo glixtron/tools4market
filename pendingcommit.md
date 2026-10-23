@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Seven entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below).
+**Status:** ✅ Eight entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below).
+
+## Entry 8 — v2.8 timestamp + IP converters (cross-session integration)
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.8 + worklog.md). Cross-verified before commit: build **65 pages / 42 tools / 5 categories**, smoke **42/42**, SEO audit **2063/2063**, consent **30/30**, personalized **167/167** (15 new checks), suggest-api **24/24**.
+
+**Subject:** `feat: timestamp + IP converters (v2.8) — integrated from the second session's work`
+
+**Summary (v2.8):**
+- **Origin:** a second OpenCode session working on the Desktop checkout (stale `main` at `8f0cb1b`/v2.4, uncommitted) had created five tools. Two were genuinely new — **timestamp-converter** and **ip-converter** — and were integrated here. The other three were parallel re-implementations of tools already shipped in v2.5 (`og-image-tester`, `hreflang-checker`) or of an existing tool (`url-encoder-decoder` duplicate), and were discarded to avoid slug conflicts and doorway-style duplication.
+- **Rules §3 compliance:** the imported runtime code carried hardcoded user-facing strings — all copy moved to `src/data/inspect.js` (`tools.tsConv`, `tools.ipConv`); runtimes now read `COPY`.
+- **Honesty fixes over the imported version:** removed a batch-conversion claim the code never implemented; negative (pre-1970) timestamps now actually convert (FAQ promised them, code rejected them); the `datetime-local` date input is parsed as the visitor's local time (was force-shifted with a `Z`); added the Local + Relative output lines the copy promised; IP input tolerates spaced paste (copy promised it).
+- **Registration:** both tools added to `LOCAL_TOOLS` (`build.mjs`, "Runs in your browser" label + script slicing) and `SKIP_PANEL` (`runtime/inspect.js`) → 15 local / 27 fetch-capable.
+- **Repo docs:** `3-MONTH-STRATEGIC-PLAN.md` and `SUGGESTIONS.md` (previously untracked on Desktop, referenced in Entry 4) now tracked; README/Architecture counts updated to 42 tools / 65 pages.
+
+**Files in this commit:** `src/data/web.js`, `src/runtime/web.js`, `src/data/inspect.js`, `build.mjs`, `src/runtime/inspect.js`, `tests/personalized-tools-test.mjs`, `3-MONTH-STRATEGIC-PLAN.md` (new), `SUGGESTIONS.md` (new), `README.md`, `Architecture.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 7 — v2.7 PageSpeed deep fix (performance, fonts, a11y)
 

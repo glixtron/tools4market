@@ -2,6 +2,20 @@
 
 *Append-only. Newest entries at top.*
 
+### Timestamp + IP converters integrated from a second session — v2.8 (23 Oct 2026, night session)
+
+**Trigger:** owner pasted the transcript of a second OpenCode session that had worked in the Desktop checkout (`/Users/macbookpro/Desktop/Tools4market`, stale `main` at `8f0cb1b`/v2.4 with uncommitted changes) and asked for verification + "everything committed".
+
+**What that session did:** on the stale v2.4 base it created five tools — `og-image-tester`, `hreflang-checker`, a duplicate `url-encoder-decoder` (already shipped in `web.js`), plus two genuinely new ones: `timestamp-converter` and `ip-converter`. Its own build claimed 61 pages / 39 tools, smoke 39/39, SEO audit 1938/1938 — on its stale tree, not on the live v2.7 codebase.
+
+**Integration decisions (source of truth = `audit-growth-plan-v2.1`):** taken — the two new converters (data + runtime), rewritten to house rules; discarded — the three parallel/duplicate tools (v2.5 already shipped og-image-tester + hreflang-checker with different implementation and passing audits; importing the duplicate url-encoder-decoder would recreate the exact slug collision that session had to fix mid-flight), the Desktop `style.css` diff (ogt-* styles for its own implementation, plus a duplicated line), and the Desktop doc diffs (stale numbers; this entry is the accurate record).
+
+**Rules §3 + honesty pass over the imported code:** every user-facing string moved to `src/data/inspect.js` (`tools.tsConv`, `tools.ipConv`); the batch-conversion claim (never implemented) replaced with an honest sentence; pre-1970 negative timestamps now convert (the code rejected them while the FAQ promised them); the date input parses as the visitor's local time instead of a forced `Z`; the Local and Relative output lines the copy promised were implemented; IP input strips whitespace so the advertised "various spacing conventions" work. `f.number`/`f.text` prefill bug fixed — the original form pre-filled *both* timestamp fields, so the tool greeted first-time visitors with "Clear one field to convert."; now the timestamp field carries the example and the page opens with a live conversion.
+
+**Shipped:** two new tools in the `web` category, both labelled "Runs in your browser" (15 local / 27 fetch-capable); `3-MONTH-STRATEGIC-PLAN.md` + `SUGGESTIONS.md` tracked in the repo for the first time (previously untracked on Desktop, referenced since v2.4); README/Architecture counts → 42 tools / 65 pages.
+
+**Tests:** +15 personalized checks (timestamp: panel skip, ms auto-detect, negatives, local-time conversion asserted TZ-proof against the same `Date` parse, both-fields guard; IP: panel skip, hex/decimal/binary/spaced inputs, octet range). Suites at commit time: build 65 pages/42 tools/5 categories, smoke 42/42, SEO audit 2063/2063, consent 30/30, personalized 167/167, suggest-api 24/24. Deployed + live-verified (see worklog.md).
+
 ### PageSpeed deep fix — v2.7 (23 Oct 2026, late session)
 
 **Trigger:** owner shared PageSpeed Insights — mobile Performance **36**, CLS 0.693, "unused JavaScript 445 KiB", render-blocking requests, Accessibility 90. Also requested a standing `worklog.md`.

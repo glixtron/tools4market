@@ -1032,4 +1032,108 @@
     if (run) run.addEventListener('click', update);
     update();
   };
+
+// ---------------------------------------------------------- timestamp converter
+  T['timestamp-converter'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).tsConv) || {};
+    var tsInput = $(root, 'ts-timestamp');
+    var dateInput = $(root, 'ts-date');
+    var out = $(root, 'ts-out');
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    function utcStr(d) {
+      return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()) +
+        ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds()) + ' UTC';
+    }
+    function localStr(d) {
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+        ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ' local time';
+    }
+    function isoStr(d) { return d.toISOString().replace('.000Z', 'Z'); }
+    function relStr(d) {
+      var diff = Date.now() - d.getTime();
+      var past = diff > 0;
+      if (past) diff = -diff;
+      var units = [['year', 31536000000], ['month', 2592000000], ['day', 86400000], ['hour', 3600000], ['minute', 60000], ['second', 1000]];
+      for (var i = 0; i < units.length; i++) {
+        var v = Math.floor(Math.abs(diff) / units[i][1]);
+        if (v >= 1 || i === units.length - 1) {
+          return v + ' ' + units[i][0] + (v === 1 ? '' : 's') + (past ? ' ago' : ' from now');
+        }
+      }
+    }
+    function lines(d) {
+      return [
+        COPY.lblUtc + ' ' + utcStr(d),
+        COPY.lblLocal + ' ' + localStr(d),
+        COPY.lblIso + ' ' + isoStr(d),
+        COPY.lblRel + ' ' + relStr(d),
+      ];
+    }
+    function update() {
+      var tsVal = tsInput.value.trim();
+      var dateVal = dateInput.value.trim();
+      if (tsVal && dateVal) { out.textContent = COPY.clearOne || ''; return; }
+      if (tsVal) {
+        if (!/^-?\d+$/.test(tsVal)) { out.textContent = COPY.invalidTs; return; }
+        var digits = tsVal.charAt(0) === '-' ? tsVal.slice(1) : tsVal;
+        var isMs = digits.length > 10;
+        var ts = parseInt(tsVal, 10);
+        var d = new Date(isMs ? ts : ts * 1000);
+        if (isNaN(d.getTime())) { out.textContent = COPY.invalidDate; return; }
+        out.textContent = [
+          COPY.lblSec + ' ' + (isMs ? Math.floor(ts / 1000) : ts) + ' ' + (COPY.secUnit || ''),
+          COPY.lblMs + ' ' + (isMs ? ts : ts * 1000),
+        ].concat(lines(d)).join('\n');
+      } else if (dateVal) {
+        // datetime-local values are the visitor's local time — parse as local,
+        // never with a forced 'Z' (that shifted the instant by the UTC offset).
+        var d2 = new Date(dateVal.replace(' ', 'T'));
+        if (isNaN(d2.getTime())) { out.textContent = COPY.invalidDate; return; }
+        out.textContent = [
+          COPY.lblSec + ' ' + Math.floor(d2.getTime() / 1000) + ' ' + (COPY.secUnit || ''),
+          COPY.lblMs + ' ' + d2.getTime(),
+        ].concat(lines(d2)).join('\n');
+      } else { out.textContent = COPY.empty || ''; }
+    }
+    $(root, 'ts-conv').addEventListener('click', update);
+    $(root, 'ts-clear').addEventListener('click', function () { tsInput.value = ''; dateInput.value = ''; update(); });
+    root.addEventListener('input', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- IP converter
+  T['ip-converter'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).ipConv) || {};
+    var input = $(root, 'ip-input');
+    var out = $(root, 'ip-out');
+    function toLong(ip) { return ip.split('.').reduce(function (acc, octet) { return (acc << 8) + parseInt(octet, 10); }, 0) >>> 0; }
+    function fromLong(n) { return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.'); }
+    function fromHex(h) { h = h.replace(/^0x/i, '').replace(/[^0-9a-f]/gi, ''); if (h.length > 8) h = h.slice(-8); while (h.length < 8) h = '0' + h; return fromLong(parseInt(h, 16)); }
+    function fromBinary(b) { b = b.replace(/[^01]/g, ''); if (b.length > 32) b = b.slice(-32); while (b.length < 32) b = '0' + b; var parts = []; for (var i = 0; i < 32; i += 8) parts.push(parseInt(b.slice(i, i + 8), 2)); return parts.join('.'); }
+    function toHex(ip) { var n = toLong(ip); var h = n.toString(16).toUpperCase(); while (h.length < 8) h = '0' + h; return '0x' + h; }
+    function toBinary(ip) { var n = toLong(ip); var b = ''; for (var i = 24; i >= 0; i -= 8) b += ((n >>> i) & 255).toString(2).padStart(8, '0') + (i > 0 ? '.' : ''); return b; }
+    function update() {
+      var val = input.value.replace(/\s+/g, '');
+      if (!val) { out.textContent = COPY.empty || ''; return; }
+      var ip;
+      if (/^(\d{1,3}\.){3}\d{1,3}$/.test(val)) {
+        var parts = val.split('.').map(Number);
+        if (parts.some(function (p) { return p < 0 || p > 255; })) { out.textContent = COPY.invalidOctets || ''; return; }
+        ip = val;
+      } else if (/^0x[0-9a-fA-F]+$/.test(val) || /^[0-9a-fA-F]{8}$/.test(val)) { try { ip = fromHex(val); } catch (e) { ip = null; } }
+      else if (/^\d+$/.test(val)) { try { ip = fromLong(parseInt(val, 10)); } catch (e) { ip = null; } }
+      else if (/^[01]{8}(\.[01]{8}){3}$/.test(val)) { try { ip = fromBinary(val); } catch (e) { ip = null; } }
+      else { out.textContent = COPY.unrecognized || ''; return; }
+      if (!ip) { out.textContent = COPY.invalid || ''; return; }
+      out.textContent = [
+        COPY.lblDotted + ' ' + ip,
+        COPY.lblHex + ' ' + toHex(ip),
+        COPY.lblDec + ' ' + toLong(ip),
+        COPY.lblBinary + ' ' + toBinary(ip),
+      ].join('\n');
+    }
+    $(root, 'ip-conv').addEventListener('click', update);
+    root.addEventListener('input', update);
+    update();
+  };
 })();

@@ -698,6 +698,8 @@
     'roas-calculator': 1,
     'cac-calculator': 1,
     'ad-metrics-calculator': 1,
+    'timestamp-converter': 1,
+    'ip-converter': 1,
   };
 
   function mount(root, slug) {
