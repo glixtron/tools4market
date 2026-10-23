@@ -2,6 +2,17 @@
 
 *Append-only. Newest entries at top.*
 
+## 2026-10-23 — Growth-plan review + three new tools (v2.4)
+
+Analysed the externally written `3-MONTH-STRATEGIC-PLAN.md` / `SUGGESTIONS.md` (Desktop checkout) against live state: ~40% of its "quick wins" were already shipped (llms.txt at root with correct spec format, robots.txt AI content-signals, FAQPage + BreadcrumbList + WebApplication schema on all tool pages, GA4 events incl. `download_output`, GSC/Bing/IndexNow, URL encoder and UUID/Base64 tools it listed as "new"). Built the genuinely missing high-volume items from its tool matrix; rejected its programmatic doorway-variant pages ("…-for-wordpress" ×100) as scaled-thin-content risk on a 0-authority domain; distribution/email/affiliate items are owner-side.
+
+- **New tool — JSON Validator & Formatter** (`json-validator`, web, local): live `JSON.parse` with line/column error positions, structure counts (objects/arrays/primitives + depth), Format/Minify toggle, copy-ready output. Registered local (`LOCAL_TOOLS` + `SKIP_PANEL` — 9 local / 25 live-check now).
+- **New tool — Sitemap Validator** (`sitemap-validator`, web, dual-mode): validates urlset/sitemapindex structure — well-formedness, root element, sitemap namespace, absolute `loc`s, duplicate detection, ISO-8601 `lastmod`, `changefreq` enum, `priority` range, unknown elements, 50k/50MB protocol limits — in the browser. Analyze mode prefills from a fetched sitemap.
+- **New tool — Robots.txt Tester** (`robots-txt-tester`, ai, dual-mode): paste-or-fetch robots.txt, test any path against any user-agent using the shared `T4M_INSPECT.parseRobotsTxt` longest-match-wins engine; verdict chip (ALLOWED/BLOCKED) with the exact matched rule, declared-sitemap list, AI-crawler group coverage (TRAINING+SEARCH bot lists), and syntax notes (rules before any User-agent, unknown directives, no groups).
+- **Engine extension:** the main analyze fetch now accepts text/XML resources (`allowText` for `.xml`/`.txt`), and the snapshot keeps a capped `raw` copy of such responses (≤400 KB) so both checkers prefill from the *same single fetch* as the signal readout. `raw` is never included in the suggest payload (explicit allow-list) and never leaves the page.
+- **Tests:** personalized 110 → **125** (local correctness for all three tools + analyze→prefill single-fetch flows for both checkers); seo-audit auto-extended to the new pages → **1733/1733**; smoke **34/34**; consent 30/30; suggest 24/24. One test defect caught and fixed mid-work (verdict assertion carried over a previous path state).
+- **Docs:** README counts (34 tools / 56 pages), Architecture.md header + note, category page copy (web + ai hubs name the new tools), this log, pendingcommit entry 4, pending-work growth follow-ups (next-candidate tools, rejected programmatic variants, owner decisions from the plan).
+
 ## 2026-10-23 — Analyze-anywhere + AI fix suggestions (v2.3)
 
 Made every fetch-capable tool behave like the meta-description page's "Analyze my page" flow, then added the two things that turn analysis into action — a gap list and AI drafts.

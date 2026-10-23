@@ -610,6 +610,16 @@
     'keyword-density-checker': function (snap, root) {
       setVal(root, 'kd-text', snap.bodyText.slice(0, 6000));
     },
+    'sitemap-validator': function (snap, root) {
+      if (snap.raw && (/\bxml\b/i.test(snap.contentType || '') || /\.xml$/i.test(String(snap.finalUrl || snap.url || '').split(/[?#]/)[0]))) {
+        setVal(root, 'sv-xml', snap.raw);
+      }
+    },
+    'robots-txt-tester': function (snap, root) {
+      if (snap.raw && (/text\/plain/i.test(snap.contentType || '') || /\.txt$/i.test(String(snap.finalUrl || snap.url || '').split(/[?#]/)[0]))) {
+        setVal(root, 'rt-robots', snap.raw);
+      }
+    },
     'case-converter': function (snap, root) {
       setVal(root, 'cc-text', snap.h1s[0] || snap.title);
     },
@@ -672,6 +682,7 @@
     'lorem-ipsum-generator': 1,
     'user-agent-parser': 1,
     'image-compressor': 1,
+    'json-validator': 1,
   };
 
   function mount(root, slug) {
@@ -775,6 +786,14 @@
       if (meta.status) { snap.status = meta.status; snap.ms = meta.ms; snap.bytes = meta.bytes; }
       if (meta.siteRobots) snap.siteRobots = meta.siteRobots;
       if (meta.siteSitemap) snap.siteSitemap = meta.siteSitemap;
+      // Keep the raw text of robots.txt / sitemap.xml responses (capped) so the
+      // robots tester and sitemap validator can prefill from the same fetch.
+      // Never used for HTML pages and never sent anywhere — see runSuggest's
+      // explicit payload allow-list.
+      var rawUrl = String(meta.finalUrl || meta.url || '').split(/[?#]/)[0];
+      if (/\.(xml|txt)$/i.test(rawUrl) || (meta.contentType && /\bxml\b|text\/plain/i.test(meta.contentType) && !/html/i.test(meta.contentType))) {
+        snap.raw = String(html).slice(0, 400000);
+      }
       snap.requestedUrl = meta.url || '';
       snap.finalUrl = meta.finalUrl || meta.url || '';
       snap.contentType = meta.contentType || '';
@@ -807,7 +826,10 @@
       if (!/^https?:\/\//i.test(u)) { status.textContent = ERR.badUrl || 'Enter a full URL.'; return; }
       status.textContent = P.analyzing || 'Analyzing…';
       btn.disabled = true;
-      fetchPage(u).then(function (r) {
+      // robots.txt and sitemap.xml are plain text / XML resources: accept them
+      // so the tester and validator tools can be prefilled from the same fetch.
+      var textResource = /\.(xml|txt)(\?|#|$)/i.test(u.split(/[?#]/)[0]);
+      fetchPage(u, { allowText: textResource }).then(function (r) {
         if (!r.ok) {
           btn.disabled = false;
           status.textContent = ERR.fetchFailed || 'Could not fetch that page.';
@@ -1236,6 +1258,10 @@
         return snap.siteSitemap && snap.siteSitemap.found
           ? tips.sitemapImported
           : tips.sitemapSeeded;
+      case 'sitemap-validator':
+        return tips.sitemapCheck;
+      case 'robots-txt-tester':
+        return tips.robotsCheck;
       case 'utm-link-builder':
         return 'Destination pre-filled with your page URL \u2014 just add source, medium and campaign.';
       case 'htaccess-redirect-generator':

@@ -1,6 +1,6 @@
 # Pending Work
 
-*Living tracker — update after every session. Last updated: 22 Oct 2026 — audit/growth-plan release **deployed to production** (Worker `9d8d8e00`, live-verify 58/58); image optimizer + keyword review committed to `main` (not yet deployed).*
+*Living tracker — update after every session. Last updated: 23 Oct 2026 — v2.4 growth-plan review + 3 new tools (JSON/sitemap/robots checkers) committed; production serving v2.3 + image-compressor fix (`f7874228`).*
 
 ## 👤 Owner follow-ups — launch and growth
 
@@ -18,6 +18,15 @@
 - [x] ~~**Fix `www` canonical redirect**~~ — FIXED and verified live 22 Oct: `https://www.tools4market.online/` → 301 → `https://tools4market.online/` (one hop, via the Worker route `www.tools4market.online/*` now deployed in `wrangler.jsonc`).
 - [ ] **Finish AdSense ad-unit setup** — publisher loader and `ads.txt` are live. Create ad units and set `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR`, then finish the AdSense review flow. `SITE_URL` / `SITE_EMAIL` are optional overrides; defaults already point at the live domain.
 - [x] ~~**Point DNS / verify `/api/fetch`**~~ — latest live verification records Cloudflare DNS, apex + www canonical routing, live sitemap and a working public-page fetch proxy with the loopback SSRF probe blocked.
+
+## 📈 Growth-plan follow-ups (from the 23 Oct 2026 plan review)
+
+- [x] ~~Build the plan's top missing tools~~ — DONE (v2.4): JSON Validator (local), Sitemap Validator + Robots.txt Tester (dual-mode). The plan's URL-encoder / UUID / Base64 rows already existed; llms.txt, FAQPage/Breadcrumb schema, GA4 events and the crawler-permissions work were also already shipped.
+- [ ] **Next tools from the matrix (when scheduled):** OG Image Tester (fetch a page → preview og:image/twitter:image at real dimensions) and Hreflang Checker (live-page annotation audit) — the remaining worthwhile rows; GTM Container Previewer and PDF-to-Text are deprioritised (niche effort, heavy dependency).
+- [x] ~~Programmatic doorway variants ("/tools/x-for-wordpress" ×100)~~ — **REJECTED for now**: scaled thin/variant pages are a documented spam-policy risk on a 0-authority, 3-day-old domain. Revisit only with genuine per-CMS value (real presets/screenshots) and enough authority to survive scrutiny.
+- [ ] **Owner decisions requested by the plan (still open):** budget for launch support ($50–100?), 1–2 h/day review commitment, brand-voice direction (keep honest/practitioner tone), geographic priority (India-first vs US/EU-first for RPM).
+- [ ] **Owner-side distribution:** Reddit value-first presence, Product Hunt launch (week-3 slot), LinkedIn/YouTube content, directory submissions — none of these are code tasks; the site-side prerequisites (llms.txt, schema, tools, guides) are done.
+- [ ] **Email capture (month 2–3):** newsletter signup needs an owner account (e.g. MailerLite free tier) before any UI work.
 
 ## ✅ Phase 1 — complete (20 Oct 2026)
 

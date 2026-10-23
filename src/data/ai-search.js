@@ -68,6 +68,58 @@ ${outputBlock('rb-out', 'robots.txt')}
 ${note('Copy the output into a file named <strong>robots.txt</strong> and upload it to your domain root.')}`,
   },
 
+  // ---------------------------------------------------------- robots.txt tester
+  {
+    slug: 'robots-txt-tester',
+    name: 'Robots.txt Tester',
+    cat: 'ai',
+    icon: '🧪',
+    card: 'Test any URL path against your robots.txt rules — which rule wins, and for which bot.',
+    usedFor: 'for verifying live crawler rules',
+    updated: '2026-10-23',
+    keywords: 'robots txt tester check rules crawl path disallow allow user-agent',
+    focus: 'robots txt tester',
+    h1: 'Free Robots.txt Tester — Check Crawler Rules for Any Path',
+    metaTitle: 'Free Robots.txt Tester — Check Rules for Any Bot',
+    metaDesc: 'Test any URL path against your robots.txt with this free robots.txt tester — matched rule, ALLOW or BLOCK verdict, AI crawler coverage and syntax notes.',
+    intro: 'Paste your robots.txt into this free robots.txt tester, pick a user-agent and a URL path, and see exactly which rule wins — plus which AI crawlers have dedicated groups in the file.',
+    sections: [
+      { h: 'What this robots.txt tester reports', p: ['For the path and user-agent you choose, the tester applies the same selection order Google documents: the most specific matching group wins — a group naming your bot beats the wildcard group — and within it, the longest matching rule decides, with Allow winning ties of equal length. The verdict shows ALLOWED or BLOCKED together with the exact rule line that decided it, so you can confirm the file does what you think rather than what you meant when you wrote it. A path with no matching Disallow is allowed; that absence is a decision too, and it is the one people forget they made.', 'The file details below the verdict cover the rest of the picture: every Sitemap line declared in the file, whether each known AI crawler — GPTBot, ClaudeBot, PerplexityBot, CCBot, Google-Extended and friends — has its own User-agent group or falls under the wildcard rules, and a short syntax pass that flags rules written before any User-agent line and unknown directives crawlers will ignore.'] },
+      { h: 'How to use this robots.txt tester', p: ['Paste the live file — open https://yourdomain.com/robots.txt in the browser and copy the source — or use Analyze mode with the file URL and it loads into the tester automatically. Enter the path to test, exactly as a crawler would request it: /pricing tests the pricing page, /blog/2026/ a specific post. Paths are matched from the start of the request, so /blog covers everything under /blog/ unless a longer rule says otherwise. Pick the bot that matters: Googlebot for search indexing, an AI crawler to check training or answer access, or Other with a custom name for anything else.', 'Test the paths you actually care about — the homepage, admin or staging areas, PDF or export directories, and any URL that has ever appeared somewhere it should not. The matching runs in your browser against the text you pasted, so nothing is uploaded and you can iterate freely: change a rule in your editor, paste again, and watch the verdict flip before you touch the live file.'] },
+      { h: 'Robots.txt rules that surprise people', p: ['Robots.txt is block-list, not allow-list: the wildcard group with no Disallow allows everything, and adding a specific bot group does not restrict it until you write a Disallow for that group. Rules are case-sensitive paths — /Private does not match /private — but user-agent names are matched as lowercase substrings, so Googlebot and googlebot are the same group. A Disallow: / with nothing after it blocks the whole site for that group; an empty Disallow value means the opposite and is ignored entirely. Wildcards (*) and the trailing $ anchor are supported by Google, and the tester matches them the same way.', 'The second class of surprises is social, not syntactic. robots.txt does not remove pages from the index — a URL disallowed but linked elsewhere can still appear in search, described from other sites — and it never protects confidential files: anyone can read the file, and the paths it names are advertised, not hidden. Blocking an AI crawler here is a policy statement to well-behaved bots, not an enforcement mechanism. Keep the file small, keep every rule earning its place, and re-test after each edit — one misplaced line at the top of a file can unlock or close the whole site.'] },
+    ],
+    faqs: [
+      { q: 'Does robots.txt really block a crawler?', a: 'Only for bots that honour it — every major search and AI crawler does. It is not access control: the file is public. This tester shows what those bots are told, not what they are forced to do.' },
+      { q: 'How does this robots.txt tester pick the winning rule?', a: 'The most specific matching User-agent group wins, then the longest matching rule, with Allow winning ties — the order Google documents. The tester shows the exact line that decided the verdict.' },
+      { q: 'Which AI crawlers should I allow or block?', a: 'That is a policy decision: GPTBot, ClaudeBot and CCBot train on what they may read; OAI-SearchBot, PerplexityBot and Claude-SearchBot answer queries with it. The tester shows which of them have dedicated groups in your file.' },
+      { q: 'Can I test a full URL instead of a path?', a: 'Yes — paste either /pricing-style paths or a full https:// URL; only the path and query are matched against the rules, which is exactly how crawlers apply them.' },
+    ],
+    html: `
+${f.textarea('rt-robots', 'robots.txt contents', 'User-agent: *\nDisallow: /private\nSitemap: https://example.com/sitemap.xml', 9)}
+<div class="field-row">
+${f.text('rt-path', 'URL path to test', '/pricing', '/')}
+${f.select('rt-bot', 'User-agent', [
+      { v: 'googlebot', l: 'Googlebot (search)' },
+      { v: 'gptbot', l: 'GPTBot (OpenAI training)' },
+      { v: 'oai-searchbot', l: 'OAI-SearchBot (ChatGPT search)' },
+      { v: 'claudebot', l: 'ClaudeBot (Anthropic)' },
+      { v: 'perplexitybot', l: 'PerplexityBot' },
+      { v: 'ccbot', l: 'CCBot (Common Crawl)' },
+      { v: 'bytespider', l: 'Bytespider (ByteDance)' },
+      { v: 'google-extended', l: 'Google-Extended' },
+      { v: 'bingbot', l: 'Bingbot' },
+      { v: 'applebot', l: 'Applebot' },
+      { v: 'other', l: 'Other (enter below)' },
+    ])}
+</div>
+${f.text('rt-custom', 'Custom user-agent name (used with “Other”)', 'my-bot')}
+<div class="btn-row"><button type="button" class="btn" id="rt-run">Test path</button></div>
+<p class="tool-note" id="rt-stats"></p>
+${outputArea('rt-verdict', 'Verdict')}
+${outputArea('rt-details', 'File details')}
+${note('Matching follows the longest-match-wins order Google documents; confirm critical rules in your server logs before relying on them.')}`,
+  },
+
   // ---------------------------------------------------------- 2
   {
     slug: 'ai-crawler-blocker',

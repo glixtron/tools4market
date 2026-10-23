@@ -31,7 +31,7 @@ export const CATEGORIES = {
     metaDesc: 'Free AI search tools: robots.txt generator with AI crawler presets, one-click AI bot blocker (GPTBot, ClaudeBot, PerplexityBot) and llms.txt generator.',
     pageExtra: [
       'Robots.txt has become a policy document: the same file now decides which AI crawlers may train on your content, which may answer from it in real time, and what classic search bots see. This category gives you the generator with presets for 18+ bots (GPTBot, ClaudeBot, PerplexityBot, Google-Extended and friends), a one-click blocker when you want to opt out of AI training entirely, and an llms.txt file that maps your best content for answer engines.',
-      'After generating, audit any live URL with the Web Crawler Audit to see exactly which crawlers are welcome and which rules they hit. A robots.txt change is one of the few SEO edits with an immediate, verifiable effect — fetch the file, confirm the rules, and watch crawl behaviour in your server logs.',
+      'After generating, test any rule with the Robots.txt Tester — paste the live file, pick a bot and a path, and read which rule wins — then audit any live URL with the Web Crawler Audit to see exactly which crawlers are welcome and which rules they hit. A robots.txt change is one of the few SEO edits with an immediate, verifiable effect — fetch the file, confirm the rules, and watch crawl behaviour in your server logs.',
     ],
   },
   content: {
@@ -61,7 +61,7 @@ export const CATEGORIES = {
     pageExtra: [
       'The webmaster’s utility belt: a standards-valid XML sitemap generated from a URL list, .htaccess rules for the redirects, canonicalisation and HTTPS moves you eventually have to make, and a password generator that uses your browser’s cryptographically secure randomness instead of a predictable seed.',
       'Preparing images for a website is part of the same workflow. The image compressor can resize and re-encode common raster images as WebP, JPEG or PNG, then report the actual before-and-after file sizes. It runs on the selected files in your browser, with no file upload to our service.',
-      'The belt has grown to carry the daily decoders and generators as well: Base64 and URL percent-encoding in both directions, a bulk v4 UUID generator, a JWT decoder that shows claims and expiry dates without pretending to verify signatures, a user-agent parser for puzzling log lines, and an ICS generator that turns a simple form into a valid, downloadable calendar file.',
+      'The belt has grown to carry the daily decoders and generators as well: Base64 and URL percent-encoding in both directions, a bulk v4 UUID generator, a JWT decoder that shows claims and expiry dates without pretending to verify signatures, a user-agent parser for puzzling log lines, an ICS generator that turns a simple form into a valid, downloadable calendar file, a JSON validator that checks, formats and minifies API payloads, and a sitemap validator that catches malformed entries before a Search Console submission.',
       'These are the tools you reach for during a migration, an audit or a 2 a.m. incident, so they are deliberately zero-friction: no account, no queue and no file upload for browser-based tools. Generate, copy, verify the output yourself, and move on.',
     ],
   },

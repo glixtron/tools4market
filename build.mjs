@@ -349,6 +349,7 @@ const PICK = TOOLS.find((t) => t.slug === PICK_ENTRY.slug) || TOOLS[0];
 const LOCAL_TOOLS = new Set([
   'password-generator', 'base64-encoder-decoder', 'uuid-generator', 'jwt-decoder',
   'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
+  'json-validator',
 ]);
 const procNote = (t) => (LOCAL_TOOLS.has(t.slug) ? 'Runs in your browser' : 'Live page check available');
 

@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Three entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` (below) — committed + pushed same day, `main` fast-forwarded.
+**Status:** ✅ Four entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below).
+
+## Entry 4 — v2.4 growth-plan review + three new tools
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
+**Status:** ✅ Committed, pushed and deployed same day (see progress.md v2.4 for the deploy record). Cross-verified before commit: build **56 pages / 34 tools**, smoke **34/34**, SEO audit **1733/1733**, consent **30/30**, personalized **125/125** (15 new checks), suggest-api **24/24**.
+
+**Subject:** `feat: growth-plan tools (v2.4) — JSON validator, sitemap validator, robots.txt tester`
+
+**Summary (v2.4):**
+- Analysed the externally written `3-MONTH-STRATEGIC-PLAN.md` / `SUGGESTIONS.md` against live state — much of its "quick wins" list was already shipped; built the three genuinely missing high-volume items from its tool matrix; rejected its programmatic doorway-variant pages as scaled-thin-content risk on a new domain.
+- **JSON Validator & Formatter** (local): live parse with line/column errors, structure counts + depth, Format/Minify, copy output. Local classification (`LOCAL_TOOLS` + `SKIP_PANEL`; 9 local / 25 live-check now).
+- **Sitemap Validator** (dual-mode): urlset/sitemapindex structure checks — well-formedness, root, namespace, absolute locs, duplicates, ISO-8601 lastmod, changefreq enum, priority range, unknown elements, 50k/50MB limits — all client-side.
+- **Robots.txt Tester** (dual-mode): path × user-agent rule matching via the shared `parseRobotsTxt` longest-match engine; ALLOWED/BLOCKED verdict with the matched rule, declared sitemaps, AI-crawler group coverage, syntax notes.
+- Engine: analyze fetch accepts `.xml`/`.txt` (`allowText`) and the snapshot keeps a capped `raw` for such responses — both checkers prefill from the same single fetch; `raw` is never sent anywhere (suggest payload stays an explicit allow-list).
+
+**Files in this commit:** `src/data/web.js`, `src/data/ai-search.js`, `src/data/inspect.js`, `src/data/index.js`, `src/runtime/web.js`, `src/runtime/ai-search.js`, `src/runtime/inspect.js`, `build.mjs`, `tests/personalized-tools-test.mjs`, `README.md`, `Architecture.md`, `progress.md`, `pendingcommit.md`, `pending-work.md`.
 
 ## Entry 3 — v2.3 analyze-anywhere + AI fix suggestions
 
@@ -20,7 +36,7 @@
 
 **Files in this commit:** `functions/api/suggest.js`, `worker.js`, `wrangler.jsonc`, `src/data/inspect.js`, `src/data/policy.js`, `src/runtime/inspect.js`, `src/runtime/audit.js`, `src/site.js`, `src/style.css`, `tests/suggest-api-test.mjs`, `tests/personalized-tools-test.mjs`, `tests/seo-audit.mjs`, `tests/live-verify.mjs`, `README.md`, `design.md`, `progress.md`.
 
-**Not deployed:** production still serves v2.1 + image-compressor. Next `npm run deploy` publishes v2.2 + image-compressor + v2.3 (AI binding goes live with it), then `npm run indexnow` and `npm run test:live`.
+**Not deployed:** (historical note — since shipped: v2.2 + image-compressor + v2.3 went live the same day, Worker `8e3f3be7`, live-verify 61/61, then the image-compressor SKIP_PANEL fix in `f7874228`.)
 
 ## Entry 2 — v2.2 Human-First design refinement
 

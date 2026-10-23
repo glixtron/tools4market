@@ -106,4 +106,110 @@
     root.addEventListener('input', update);
     update();
   };
+
+  // ---------------------------------------------------------- robots.txt tester
+  T['robots-txt-tester'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).robotst) || {};
+    var ta = $(root, 'rt-robots');
+    var pathIn = $(root, 'rt-path');
+    var botSel = $(root, 'rt-bot');
+    var custom = $(root, 'rt-custom');
+    var verdict = $(root, 'rt-verdict');
+    var details = $(root, 'rt-details');
+    var stats = $(root, 'rt-stats');
+
+    function node(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    function tpl(str, map) {
+      var s = String(str);
+      Object.keys(map).forEach(function (k) { s = s.split('{' + k + '}').join(map[k]); });
+      return s;
+    }
+    function botName() {
+      var v = botSel.value;
+      if (v === (COPY.uaOther || 'other')) return (custom.value || '').trim().toLowerCase();
+      return v;
+    }
+    function testUrl() {
+      var raw = (pathIn.value || '').trim() || '/';
+      if (!/^https?:\/\//i.test(raw)) raw = 'https://robots-test.local' + (raw.charAt(0) === '/' ? raw : '/' + raw);
+      return raw;
+    }
+
+    function update() {
+      var text = ta.value;
+      verdict.textContent = '';
+      details.textContent = '';
+      if (!text.trim()) { stats.textContent = COPY.empty || ''; return; }
+      var bot = botName() || 'googlebot';
+      var url = testUrl();
+      var res = window.T4M_INSPECT.parseRobotsTxt(text, url, bot);
+      var path = url.replace(/^https?:\/\/[^/]+/, '') || '/';
+      verdict.appendChild(node('span', 'chip ' + (res.allowed ? 'good' : 'bad'),
+        res.allowed ? tpl(COPY.verdictAllow || 'ALLOWED for {bot}', { bot: bot }) : tpl(COPY.verdictBlock || 'BLOCKED for {bot}', { bot: bot })));
+      verdict.appendChild(node('p', null, tpl(COPY.pathNote || 'Tested path: {v}', { v: path })));
+      verdict.appendChild(node('p', null, res.matched
+        ? tpl(COPY.matchedRule || 'Matched rule: {v}', { v: (res.matched.allow ? 'Allow: ' : 'Disallow: ') + res.matched.path })
+        : (COPY.noMatch || 'No rule matches this path — with no matching Disallow, crawlers may fetch it.')));
+
+      details.appendChild(node('p', 'rt-head', tpl(COPY.sitemapHead || 'Sitemap declarations ({n})', { n: res.sitemapUrls.length })));
+      if (res.sitemapUrls.length) {
+        var ul = node('ul', 'rt-list');
+        res.sitemapUrls.forEach(function (u) { ul.appendChild(node('li', null, u)); });
+        details.appendChild(ul);
+      } else {
+        details.appendChild(node('p', null, COPY.noSitemaps || 'No Sitemap lines are declared in this file.'));
+      }
+
+      // AI crawler coverage — which known training/search bots have their own group?
+      var agents = [];
+      text.split(/\r?\n/).forEach(function (line) {
+        var m = /^\s*user-agent\s*:\s*(\S+)/i.exec(line.replace(/#.*$/, ''));
+        if (m) agents.push(m[1].toLowerCase());
+      });
+      var present = [], absent = [];
+      TRAINING.concat(SEARCH).forEach(function (b) {
+        (agents.indexOf(b.toLowerCase()) !== -1 ? present : absent).push(b);
+      });
+      details.appendChild(node('p', 'rt-head', COPY.aiHead || 'AI crawler coverage in this file'));
+      var aiUl = node('ul', 'rt-list');
+      present.forEach(function (b) { aiUl.appendChild(node('li', null, tpl(COPY.aiGroup || '{v}: dedicated User-agent group found.', { v: b }))); });
+      if (absent.length) aiUl.appendChild(node('li', null, tpl(COPY.aiNoGroup || '{v}: no dedicated group — only the * rules apply.', { v: absent.join(', ') })));
+      details.appendChild(aiUl);
+
+      var lines = text.split(/\r?\n/);
+      var syn = [];
+      var seenAgent = false;
+      var hasGroup = false;
+      lines.forEach(function (rawLine, ix) {
+        var line = rawLine.replace(/#.*$/, '').trim();
+        if (!line) return;
+        var m = /^([a-zA-Z-]+)\s*:/.exec(line);
+        if (!m) return;
+        var key = m[1].toLowerCase();
+        if (key === 'user-agent') { seenAgent = true; hasGroup = true; return; }
+        if (key === 'allow' || key === 'disallow') {
+          if (!seenAgent) syn.push(tpl(COPY.synRuleNoAgent || 'Line {i}: a rule appears before any User-agent line.', { i: ix + 1 }));
+          return;
+        }
+        if (key === 'sitemap' || key === 'crawl-delay' || key === 'host') return;
+        syn.push(tpl(COPY.synUnknown || 'Line {i}: unknown directive "{v}".', { i: ix + 1, v: m[1] }));
+      });
+      if (!hasGroup) syn.push(COPY.synNoGroups || 'No User-agent groups found — as written, this file allows every crawler everywhere.');
+      details.appendChild(node('p', 'rt-head', COPY.synHead || 'Syntax notes'));
+      var synUl = node('ul', 'rt-list');
+      (syn.length ? syn : [COPY.synOk || 'No structural problems found in this file.']).forEach(function (s) { synUl.appendChild(node('li', null, s)); });
+      details.appendChild(synUl);
+      stats.textContent = '';
+    }
+    root.addEventListener('input', update);
+    root.addEventListener('change', update);
+    var run = $(root, 'rt-run');
+    if (run) run.addEventListener('click', update);
+    update();
+  };
 })();

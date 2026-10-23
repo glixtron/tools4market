@@ -481,4 +481,50 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 
+// Growth-plan additions: JSON validator (local) and the dual-mode sitemap/robots checkers.
+{
+  const { dom, win, doc, errors } = await boot('json-validator');
+  check('json validator skips the page-analysis panel (local-only tool)', !doc.querySelector('.inspect'));
+  setValue(win, 'jv-in', '{"name":"t4m","list":[1,2],"ok":true,"none":null}');
+  check('json validator accepts valid JSON and reports structure', doc.getElementById('jv-stats').textContent.includes('Valid JSON') && doc.getElementById('jv-out').textContent.includes('"name": "t4m"'));
+  doc.querySelector('[data-jv="minify"]').click();
+  check('json validator minifies without changing data', doc.getElementById('jv-out').textContent === '{"name":"t4m","list":[1,2],"ok":true,"none":null}');
+  setValue(win, 'jv-in', '{"a": 1,}');
+  check('json validator reports invalid JSON with a position', doc.getElementById('jv-stats').textContent.includes('Invalid JSON') && doc.getElementById('jv-out').textContent === '');
+  check('json validator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('sitemap-validator');
+  check('sitemap validator mounts the analyze panel', !!doc.querySelector('.inspect .inspect-url'));
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.test/a</loc><lastmod>2026-10-23</lastmod></url><url><loc>https://example.test/a</loc></url></urlset>';
+  setValue(win, 'sv-xml', xml);
+  check('sitemap validator counts entries and flags duplicates', doc.getElementById('sv-stats').textContent.includes('Valid urlset — 2 URL entries') && doc.getElementById('sv-out').textContent.includes('2 times'));
+  setValue(win, 'sv-xml', 'not xml at all');
+  check('sitemap validator reports malformed XML clearly', doc.getElementById('sv-stats').textContent.includes('Not well-formed XML'));
+  setValue(win, 'sv-xml', '');
+  doc.querySelector('.inspect-url').value = 'https://example.test/sitemap.xml';
+  doc.querySelector('.inspect-run').click();
+  await until(() => doc.getElementById('sv-stats').textContent.includes('Valid urlset'), 'sitemap prefill from analyze');
+  check('analyze mode prefills the validator from the fetched sitemap', doc.getElementById('sv-xml').value.includes('<urlset') && win.__fetchLog.filter((u) => u === 'https://example.test/sitemap.xml').length === 1);
+  check('sitemap validator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, win, doc, errors } = await boot('robots-txt-tester');
+  setValue(win, 'rt-robots', ROBOTS);
+  setValue(win, 'rt-path', '/private/page');
+  check('robots tester blocks a disallowed path with the matched rule', doc.getElementById('rt-verdict').textContent.includes('BLOCKED for googlebot') && doc.getElementById('rt-verdict').textContent.includes('Disallow: /private'));
+  setValue(win, 'rt-path', '/private/public/page');
+  check('robots tester applies the longest matching allow rule', doc.getElementById('rt-verdict').textContent.includes('ALLOWED for googlebot'));
+  check('robots tester reports declared sitemaps and AI crawler coverage', doc.getElementById('rt-details').textContent.includes('Sitemap declarations (1)') && doc.getElementById('rt-details').textContent.includes('GPTBot'));
+  doc.querySelector('.inspect-url').value = 'https://example.test/robots.txt';
+  doc.querySelector('.inspect-run').click();
+  await until(() => doc.getElementById('rt-robots').value.includes('User-agent: *'), 'robots prefill from analyze');
+  setValue(win, 'rt-path', '/private/page');
+  check('analyze mode prefills the tester from the fetched robots.txt (single fetch)', doc.getElementById('rt-verdict').textContent.includes('BLOCKED') && win.__fetchLog.filter((u) => u === 'https://example.test/robots.txt').length === 1);
+  check('robots tester has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 console.log(`\nPERSONALIZED TOOLS: ${checks} checks passed.`);

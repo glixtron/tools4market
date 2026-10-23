@@ -860,4 +860,176 @@
     updateQuality();
     drawSelected();
   };
+
+  // ---------------------------------------------------------- JSON validator & formatter
+  T['json-validator'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).jsonv) || {};
+    var input = $(root, 'jv-in');
+    var out = $(root, 'jv-out');
+    var stats = $(root, 'jv-stats');
+    var noteEl = $(root, 'jv-note');
+    var mode = 'pretty';
+
+    function posOf(text, err) {
+      var m = /position\s+(\d+)/i.exec(String((err && err.message) || err));
+      if (!m) return '';
+      var pos = Math.min(parseInt(m[1], 10), text.length);
+      var upto = text.slice(0, pos);
+      var line = upto.split('\n').length;
+      var col = pos - upto.lastIndexOf('\n');
+      return String(COPY.errLine || 'line {l}, column {c}').replace('{l}', line).replace('{c}', col);
+    }
+
+    function count(v) {
+      var c = { depth: 0, objects: 0, arrays: 0, strings: 0, numbers: 0, booleans: 0, nulls: 0 };
+      (function walk(node, depth) {
+        if (depth > c.depth) c.depth = depth;
+        if (node === null) { c.nulls++; return; }
+        var t = typeof node;
+        if (t === 'object') {
+          if (Array.isArray(node)) { c.arrays++; node.forEach(function (x) { walk(x, depth + 1); }); }
+          else { c.objects++; Object.keys(node).forEach(function (k) { walk(node[k], depth + 1); }); }
+        } else if (t === 'string') c.strings++;
+        else if (t === 'number') c.numbers++;
+        else if (t === 'boolean') c.booleans++;
+      })(v, 0);
+      return c;
+    }
+
+    function update() {
+      var text = input.value;
+      if (!text.trim()) { out.textContent = ''; stats.textContent = COPY.empty || ''; return; }
+      var parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e) {
+        out.textContent = '';
+        var at = posOf(text, e);
+        var msg = String((e && e.message) || e);
+        stats.textContent = at
+          ? String(COPY.invalid || 'Invalid JSON: {v} ({at})').replace('{v}', msg).replace('{at}', at)
+          : String(COPY.invalidNoAt || 'Invalid JSON: {v}').replace('{v}', msg);
+        return;
+      }
+      var c = count(parsed);
+      out.textContent = mode === 'minify' ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+      stats.textContent =
+        String(COPY.valid || 'Valid JSON — {v} characters, {d} levels deep.').replace('{v}', text.length).replace('{d}', c.depth) + ' ' +
+        String(COPY.stats || '{o} objects · {a} arrays · {s} strings · {n} numbers · {b} booleans · {z} null values')
+          .replace('{o}', c.objects).replace('{a}', c.arrays).replace('{s}', c.strings)
+          .replace('{n}', c.numbers).replace('{b}', c.booleans).replace('{z}', c.nulls);
+      if (noteEl && !noteEl.textContent) noteEl.textContent = COPY.clickFirst || '';
+    }
+
+    root.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('[data-jv]') : null;
+      if (!b) return;
+      mode = b.getAttribute('data-jv');
+      update();
+      if (noteEl) noteEl.textContent = mode === 'minify' ? (COPY.minify || '') : (COPY.pretty || '');
+    });
+    root.addEventListener('input', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- sitemap validator
+  T['sitemap-validator'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).sitemapv) || {};
+    var input = $(root, 'sv-xml');
+    var out = $(root, 'sv-out');
+    var stats = $(root, 'sv-stats');
+    var KNOWN_URL_CHILD = { loc: 1, lastmod: 1, changefreq: 1, priority: 1 };
+    var KNOWN_MAP_CHILD = { loc: 1, lastmod: 1 };
+    var CHANGEFREQ = { always: 1, hourly: 1, daily: 1, weekly: 1, monthly: 1, yearly: 1, never: 1 };
+    var ISO = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
+
+    function tpl(str, map) {
+      var s = String(str);
+      Object.keys(map).forEach(function (k) { s = s.split('{' + k + '}').join(map[k]); });
+      return s;
+    }
+
+    function update() {
+      var text = input.value;
+      out.textContent = '';
+      if (!text.trim()) { stats.textContent = COPY.empty || ''; return; }
+      var doc;
+      try {
+        doc = new DOMParser().parseFromString(text, 'application/xml');
+      } catch (e) {
+        stats.textContent = tpl(COPY.badXml || 'Not well-formed XML: {v}.', { v: String((e && e.message) || e) });
+        return;
+      }
+      var perr = doc.getElementsByTagName('parsererror');
+      if (perr.length) {
+        stats.textContent = tpl(COPY.badXml || 'Not well-formed XML: {v}.', { v: (perr[0].textContent || '').split('\n')[0].slice(0, 160) });
+        return;
+      }
+      var rootEl = doc.documentElement;
+      var kind = String((rootEl && rootEl.localName) || '').toLowerCase();
+      if (kind !== 'urlset' && kind !== 'sitemapindex') {
+        stats.textContent = tpl(COPY.badRoot || 'The root element is <{v}> — expected <urlset> or <sitemapindex>.', { v: String((rootEl && rootEl.localName) || 'unknown') });
+        return;
+      }
+      var issues = [];
+      var warnings = [];
+      if ((rootEl.getAttribute('xmlns') || '') !== 'http://www.sitemaps.org/schemas/sitemap/0.9') warnings.push(COPY.noNs || '');
+      var entryTag = kind === 'urlset' ? 'url' : 'sitemap';
+      var known = kind === 'urlset' ? KNOWN_URL_CHILD : KNOWN_MAP_CHILD;
+      var entries = doc.getElementsByTagName(entryTag);
+      var seen = {};
+      for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+        var idx = i + 1;
+        var loc = '';
+        for (var j = 0; j < entry.children.length; j++) {
+          var child = entry.children[j];
+          var name = String(child.localName || '').toLowerCase();
+          var val = (child.textContent || '').trim();
+          if (name === 'loc') {
+            loc = val;
+            if (!val) issues.push(tpl(COPY.locMissing || 'Entry {i}: no <loc>.', { i: idx }));
+            else if (!/^https?:\/\//i.test(val)) issues.push(tpl(COPY.locBad || 'Entry {i}: <loc> is not an absolute URL ({v}).', { i: idx, v: val.slice(0, 80) }));
+            else if (seen[val]) seen[val].push(idx);
+            else seen[val] = [idx];
+          } else if (name === 'lastmod') {
+            if (!ISO.test(val)) issues.push(tpl(COPY.lastmodBad || 'Entry {i}: lastmod "{v}" is not ISO 8601.', { i: idx, v: val.slice(0, 40) }));
+          } else if (name === 'changefreq') {
+            if (!CHANGEFREQ[val.toLowerCase()]) issues.push(tpl(COPY.changefreqBad || 'Entry {i}: changefreq "{v}" invalid.', { i: idx, v: val.slice(0, 40) }));
+          } else if (name === 'priority') {
+            var pnum = Number(val);
+            if (!/^\d+(\.\d+)?$/.test(val) || pnum < 0 || pnum > 1) issues.push(tpl(COPY.priorityBad || 'Entry {i}: priority "{v}" must be 0.0-1.0.', { i: idx, v: val.slice(0, 20) }));
+          } else if (!known[name]) {
+            issues.push(tpl(COPY.unknownChild || 'Entry {i}: unexpected element <{v}>.', { i: idx, v: name }));
+          }
+        }
+        if (!loc) issues.push(tpl(COPY.locMissing || 'Entry {i}: no <loc>.', { i: idx }));
+      }
+      Object.keys(seen).forEach(function (u) {
+        if (seen[u].length > 1) issues.push(tpl(COPY.dupLoc || '<loc> appears {n} times: {v}', { n: seen[u].length, v: u.slice(0, 120) }));
+      });
+      if (entries.length > 50000) warnings.push(tpl(COPY.warn50k || 'More than 50,000 entries ({n}) — split into a sitemap index.', { n: entries.length }));
+      if (text.length > 52428800) warnings.push(tpl(COPY.warn50mb || 'The file is about {v} uncompressed — split into a sitemap index.', { v: Math.round(text.length / 1048576) + ' MB' }));
+
+      var head = kind === 'urlset'
+        ? tpl(COPY.okUrlset || 'Valid urlset — {n} URL entries checked.', { n: entries.length })
+        : tpl(COPY.okIndex || 'Valid sitemap index — {n} child-sitemap entries checked.', { n: entries.length });
+      stats.textContent = head + ' ' +
+        tpl(COPY.summary || '{n} entries · {i} issues · {w} warnings', { n: entries.length, i: issues.length, w: warnings.length }) +
+        (issues.length + warnings.length === 0 ? ' ' + tpl(COPY.validClean || '{n} entries checked — no issues found.', { n: entries.length }) : '');
+
+      if (issues.length || warnings.length) {
+        var ul = el('ul', 'sv-list');
+        issues.concat(warnings).slice(0, 30).forEach(function (msg) { ul.appendChild(el('li', null, msg)); });
+        out.appendChild(ul);
+        var rest = issues.length + warnings.length - Math.min(issues.length + warnings.length, 30);
+        if (rest > 0) out.appendChild(el('p', null, tpl(COPY.moreIssues || '…and {n} more issue(s).', { n: rest })));
+      }
+    }
+    root.addEventListener('input', update);
+    root.addEventListener('change', update);
+    var run = $(root, 'sv-run');
+    if (run) run.addEventListener('click', update);
+    update();
+  };
 })();

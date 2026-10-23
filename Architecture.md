@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.2 · 22 Oct 2026 · 31 tools, 53 generated HTML pages*
+*Version: 2.4 · 23 Oct 2026 · 34 tools, 56 generated HTML pages*
 
 ---
 
@@ -96,7 +96,7 @@ Tools4market/
 │       └── audit.js              ← web-crawler-audit and seo-score-checker
 │
 ├── dist/                        ← GENERATED OUTPUT (deploy this folder)
-│   ├── index.html               ← Homepage: hero + search + all 31 tool cards
+│   ├── index.html               ← Homepage: hero + search + all 34 tool cards
 │   ├── seo-tools/index.html     ← Category hub pages (4 total)
 │   ├── ai-search-tools/
 │   ├── content-social-tools/
@@ -379,3 +379,26 @@ Generator / AI Crawler Blocker make them per site), so the host itself stays ful
 open. Blocking AI bots is a per-customer choice, not this site's default. If that
 decision ever changes, change `robots.txt` in `build.mjs` and the copy in the
 homepage FAQ together.
+
+## 13. Text-resource analysis (v2.4 — sitemap validator, robots tester)
+
+The shared analyze pipeline (§11/§12) originally fetched HTML pages only. Two
+checker tools need the *source text* of robots.txt / sitemap.xml, not a signal
+summary:
+
+- The main panel fetch passes `allowText` when the analyzed URL ends in
+  `.xml` / `.txt`, so the proxy's text/XML content-type gate lets those
+  responses through instead of rejecting them as non-HTML.
+- `analyze()` keeps a capped copy of such responses on the snapshot
+  (`snap.raw`, ≤400 KB, only for XML/text resources — never for HTML). The
+  per-tool `APPLY` entries for `sitemap-validator` and `robots-txt-tester`
+  load it into the tool's textarea, so one fetch feeds both the signal
+  readout and the checker. `snap.raw` is never rendered and never sent
+  anywhere: the `/api/suggest` payload is an explicit allow-list of five
+  compact fields (v2.3).
+- Both checkers parse strictly client-side (`DOMParser` for XML, the shared
+  `parseRobotsTxt` engine for robots rules) and work fully in manual mode —
+  the panel is a prefill convenience, not a requirement.
+- Local-only tools (`json-validator` included; 9 total) stay out of the panel
+  via `SKIP_PANEL` and are labelled "Runs in your browser" on their cards via
+  `LOCAL_TOOLS` in `build.mjs`.
