@@ -671,6 +671,7 @@
     'ics-calendar-generator': 1,
     'lorem-ipsum-generator': 1,
     'user-agent-parser': 1,
+    'image-compressor': 1,
   };
 
   function mount(root, slug) {

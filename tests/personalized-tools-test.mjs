@@ -370,6 +370,16 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 {
+  // Image compressor is local-only (files never leave the browser) — its page
+  // must not mount the URL-analysis panel (regression: it was missing from
+  // SKIP_PANEL while its card said "Runs in your browser").
+  const { dom, doc, errors } = await boot('image-compressor');
+  check('image compressor avoids the page-analysis panel', !doc.querySelector('.inspect'));
+  check('image compressor keeps its local file picker', !!doc.getElementById('ic-files'));
+  check('image compressor has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
   const { dom, win, doc, errors } = await boot('ics-calendar-generator');
   setValue(win, 'ics-title', 'Overnight deploy');
   setValue(win, 'ics-sdate', '2026-10-22');

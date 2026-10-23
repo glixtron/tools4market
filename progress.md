@@ -13,7 +13,9 @@ Made every fetch-capable tool behave like the meta-description page's "Analyze m
 - **Disclosure:** privacy policy §1 documents `/api/suggest` (what is sent, Cloudflare Workers AI as processor, nothing stored, consent requirement, no ranking promise); date bumped to 23 Oct 2026.
 - **Tests:** new `tests/suggest-api-test.mjs` (24 checks — contract, guards, prompt shape, output cleaning, degradation); personalized suite extended 84 → **107** (mode toggle, empty + fixable gaps, consent lock → re-render, AI round trip incl. payload-shape assertion, shared-panel audit single-fetch); seo-audit extended 1592 → **1610** (backend wiring, keyless/consent/privacy assertions). Full run: build clean · smoke **31/31** · seo **1610/1610** · consent **30/30** · personalized **107/107** · suggest **24/24**.
 - **Docs:** README (second backend route, `/api/suggest` section, AI_MODEL row), design.md → v2.3 (toggle/gap/AI components + a11y bullets), this log.
-- Not yet deployed; live `wrangler dev`/production check of the real model call pending in the deploy step below.
+- **Shipped:** deployed to production (Worker version `8e3f3be7`, `env.AI` bound), IndexNow 52 URLs, live-verify **61/61** including a real Workers AI draft from the production `/api/suggest`. The planned default model was deprecated (May 2026) — live validation caught it and the default is now `@cf/meta/llama-3.1-8b-instruct-fp8`.
+- **Post-deploy classification review (8-vs-23 processing notes):** card counts verified correct (8 local / 23 live-check), but the review caught that `image-compressor` was missing from `SKIP_PANEL` — its page mounted an "Analyze my page" panel despite being local-only. Fixed, with a regression check in the personalized suite (now 110/110).
+- **Still user-blocked (needs the connected desktop browser + the user's logins):** Search Console sitemap resubmission + `GOOGLE_SITE_VERIFY` token, AdSense ad-unit creation (`AD_SLOT_*` env vars), and the visual/mobile screenshot pass of the new UI.
 
 ## 2026-10-22 — Browser-local image optimization pilot
 

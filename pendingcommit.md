@@ -6,7 +6,8 @@
 ## Entry 3 — v2.3 analyze-anywhere + AI fix suggestions
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 23 Oct 2026
-**Status:** ✅ Committed and pushed. Cross-verified before commit: build 53 pages / 31 tools, smoke **31/31**, SEO audit **1610/1610** (18 new assertions), consent **30/30**, personalized **107/107** (23 new checks), new suggest-api suite **24/24**. Real Workers AI call validated end-to-end in `wrangler dev` (description + title drafts returned; 403 cross-origin / 405 GET guards verified). One live issue found and fixed during validation: the planned default model `@cf/meta/llama-3.1-8b-instruct` was deprecated (May 2026) — default switched to the current `@cf/meta/llama-3.1-8b-instruct-fp8`.
+**Status:** ✅ Committed, pushed and **deployed to production** (Worker `8e3f3be7`, `env.AI` bound; IndexNow 52 URLs; live-verify 61/61 incl. a real production `/api/suggest` draft). Cross-verified before commit: build 53 pages / 31 tools, smoke **31/31**, SEO audit **1610/1610** (18 new assertions), consent **30/30**, personalized **107/107** (23 new checks), new suggest-api suite **24/24**. Real Workers AI call validated end-to-end in `wrangler dev` (description + title drafts returned; 403 cross-origin / 405 GET guards verified). One live issue found and fixed during validation: the planned default model `@cf/meta/llama-3.1-8b-instruct` was deprecated (May 2026) — default switched to the current `@cf/meta/llama-3.1-8b-instruct-fp8`.
+**Follow-up commit (same day):** post-deploy 8-vs-23 processing-note review found `image-compressor` missing from `SKIP_PANEL` (local-only tool was mounting the analyze panel). Fixed + regression check (personalized now 110/110), redeployed.
 
 **Subject:** `feat: analyze-anywhere + AI fix suggestions (v2.3) — two-mode input, gap list, consent-gated /api/suggest`
 
