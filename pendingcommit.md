@@ -1,7 +1,22 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Eight entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below).
+**Status:** ✅ Nine entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below).
+
+## Entry 9 — v2.9 calculator batch 2 (email ROI + marketing budget)
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 24 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day (see progress.md v2.9 + worklog.md). Cross-verified before commit: build **67 pages / 44 tools / 5 categories**, smoke **44/44**, SEO audit **2145/2145**, consent **30/30**, personalized **181/181** (14 new checks), suggest-api **24/24**.
+
+**Subject:** `feat: calculator batch 2 (v2.9) — email ROI + marketing budget/growth`
+
+**Summary (v2.9):**
+- **Email ROI Calculator** — sends/opens/clicks/conversions/revenue/cost in → open, click, click-to-open and conversion rates + revenue per email + net profit + ROI % + spend multiple, with verdict tiers and honesty guards (opens > sends, clicks > sends, conversions > clicks, zero cost → ROI undefined).
+- **Marketing Budget Calculator** — base/growth rate/target/CAC (+ optional ARPU) → net new customers needed, months to target on **compounding** growth (stated plainly, with the saturation caveat in the copy), acquisition budget (gap × CAC), added monthly revenue at target and CAC payback; guards for zero base, zero growth, already-reached targets, zero CAC.
+- Both pure-local ("Runs in your browser"), all copy in `src/data/inspect.js` (`tools.emailRoi`, `tools.budgetCalc`), registered in `LOCAL_TOOLS` + `SKIP_PANEL` → 17 local / 27 fetch.
+- Smoke caught one real defect mid-build: the budget tool's "already reached" guard left the output block empty — output now carries the zero-gap line while the verdict explains.
+
+**Files in this commit:** `src/data/marketing.js`, `src/runtime/marketing.js`, `src/data/inspect.js`, `build.mjs`, `src/runtime/inspect.js`, `tests/personalized-tools-test.mjs`, `README.md`, `Architecture.md`, `pending-work.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 8 — v2.8 timestamp + IP converters (cross-session integration)
 

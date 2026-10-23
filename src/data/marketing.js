@@ -159,4 +159,81 @@ ${outputBlock('amc-out', 'Result')}
 <p class="tool-note" id="amc-verdict"></p>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
+
+  // ---------------------------------------------------------- Email ROI calculator
+  {
+    slug: 'email-roi-calculator',
+    name: 'Email ROI Calculator',
+    cat: 'marketing',
+    icon: '📧',
+    card: 'ROI, profit and every funnel rate — open, click, conversion — from one campaign. Private and instant.',
+    usedFor: 'for newsletter and campaign reporting',
+    updated: '2026-10-24',
+    keywords: 'email roi calculator campaign return revenue profit newsletter',
+    focus: 'email roi calculator',
+    h1: 'Free Email ROI Calculator — Campaign Return, Profit and Rates',
+    metaTitle: 'Free Email ROI Calculator — Campaign Return Instantly',
+    metaDesc: 'Free email ROI calculator — enter sends, opens, clicks, conversions and cost to get ROI, profit and every campaign rate. No signup, private.',
+    intro: 'Enter what the campaign sent and what it earned, and this email ROI calculator returns ROI, net profit, revenue per email and the rates behind the result — open, click, click-to-open and conversion.',
+    sections: [
+      { h: 'How this email ROI calculator works', p: ['Email ROI is net profit divided by what the campaign cost, as a percentage — the same profit view the other calculators on this site take, applied to the channel where costs are lowest and the margin for error is therefore in the numbers, not the budget. Feed this calculator six figures: emails sent, opens, clicks, conversions, revenue and total cost. It returns the ROI percentage and spend multiple alongside revenue per email, and the whole funnel in rates — open rate over sends, click rate over sends, click-to-open rate over opens and conversion rate over clicks — so a single weak stage is visible instead of hidden inside one blended number.', 'The cost line decides whether the result means anything. Platform fees are obvious; count the list cost, the design and copy time, and any discount or fulfilment behind the offer, because a campaign that looks profitable only when half its costs live elsewhere is not profitable. The calculator runs entirely in this browser — the numbers never leave the page — and recomputes as you type, so rerunning with a corrected cost or a late revenue figure takes a keystroke, not a meeting.'] },
+      { h: 'Reading email ROI against the funnel', p: ['A ROI percentage tells you whether the campaign paid; the funnel rates tell you why. An open rate around 20–30% on a warmed, permission-based list is normal — below that, look at deliverability and sender reputation before blaming the subject line. A click rate of 2–5% and a click-to-open rate above 15% suggest the offer matches the list; a healthy open rate paired with weak clicks points at the email body or the offer itself, and a strong click rate with weak conversions points at the landing page, which email cannot fix.', 'Attribution deserves the same suspicion the ROI line gets. Last-click reporting credits the email with conversions it merely touched on the way, and assisted conversions — a reader who opened, clicked nothing, then returned through search — cut the other way, counting real email influence the report never shows. Compare campaigns on the same attribution window and the same revenue definition; an email ROI measured across seven days against a brand campaign measured across thirty is a ranking of measurement choices, not of campaigns.'] },
+      { h: 'Where email ROI numbers earn their keep', p: ['The practical uses are specific. Budget reviews: email usually posts the highest ROI of the mix, and this calculator puts a defensible number on that claim instead of a vibe. Segmentation tests: run the same offer to a segmented list and a blast list, and the ROI gap — not the open-rate gap — settles whether the segmentation work pays. Deliverability investments: a warmed-up sending domain or a list-clean-up tool is a cost with no visible revenue line, so the honest way to approve it is to model the open and click rates after the fix and watch what happens to ROI and revenue per email here.', 'Keep the neighbours in view: ROAS zooms into the paid layer of the same question, CAC reframes it per customer, and the marketing budget calculator turns this campaign\u2019s return into next quarter\u2019s plan. Email rarely loses money at list prices, so the real question this ROI number answers is not whether to send, but what to send next — and to whom.'] },
+    ],
+    faqs: [
+      { q: 'What is a good email ROI?', a: 'Many teams treat anything above 100% — the campaign returned its cost plus profit — as solid, with strong email programmes posting far higher, since the channel costs little once the list exists. The honest benchmark is your own alternative use of the same money.' },
+      { q: 'How do I calculate email ROI by hand?', a: 'Subtract the campaign cost from the campaign revenue to get net profit, then divide by the cost and multiply by 100. This email ROI calculator does that step and adds the funnel rates so you can see which stage moved the number.' },
+      { q: 'Why is my email ROI lower than my ROAS?', a: 'ROAS divides revenue by ad spend alone; ROI counts every cost — platform fees, creative time, discounts, fulfilment. A campaign can show healthy ROAS and thin ROI once the full ledger is in. This calculator uses the profit view.' },
+      { q: 'What costs belong in the email ROI calculation?', a: 'Platform or ESP fees, list acquisition or cleaning costs, creative and copy time, and any discount or fulfilment behind the offer. Count them consistently across campaigns — consistency matters more than perfect precision.' },
+    ],
+    html: `
+${cur('erc-cur')}
+${f.number('erc-sent', 'Emails sent', '', '0')}
+${f.number('erc-opened', 'Opens', '', '0')}
+${f.number('erc-clicked', 'Clicks', '', '0')}
+${f.number('erc-conv', 'Conversions (orders, signups, leads)', '', '0')}
+${f.number('erc-rev', 'Revenue the campaign earned', '', '0')}
+${f.number('erc-cost', 'Total campaign cost (platform + creative + offer)', '', '0')}
+${outputBlock('erc-out', 'Result')}
+<p class="tool-note" id="erc-verdict"></p>
+${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
+  },
+
+  // ---------------------------------------------------------- Marketing budget calculator
+  {
+    slug: 'marketing-budget-calculator',
+    name: 'Marketing Budget Calculator',
+    cat: 'marketing',
+    icon: '🎯',
+    card: 'Months to target, acquisition budget and CAC payback from your base and growth rate. Private and instant.',
+    usedFor: 'for growth planning and budget requests',
+    updated: '2026-10-24',
+    keywords: 'marketing budget calculator growth projection customers cac payback plan',
+    focus: 'marketing budget calculator',
+    h1: 'Free Marketing Budget Calculator — Growth Plan in Minutes',
+    metaTitle: 'Free Marketing Budget Calculator — Plan Growth Spend',
+    metaDesc: 'Free marketing budget calculator — enter customers, growth rate and target to get the months, the budget and the payback. Private, no signup.',
+    intro: 'Enter the customer base, the monthly growth rate and where you want to land, and this marketing budget calculator returns the months to target, the acquisition budget and the CAC payback — with honest guards on the assumptions.',
+    sections: [
+      { h: 'How this marketing budget calculator works', p: ['Growth targets fail quietly when the arithmetic behind them is hand-waved. This marketing budget calculator takes three inputs — your current customer base, the monthly growth rate you believe in, and the target — and returns the two numbers a plan is actually judged on: how many months the target is away, and what buying the gap outright would cost at your current acquisition cost. If you add average revenue per customer, it also shows the monthly revenue the target unlocks and how many months of that revenue pay back one CAC.', 'The months figure is computed on compounding growth — each month\u2019s customers join the base the next month\u2019s rate acts on — which is the model behind most growth decks and the one that flatters them most. The tool states it plainly so you can discount it honestly: a 8% monthly rate is not eight customers a hundred, it is a doubling roughly every nine months, and targets that assume the rate holds while the audience saturates will slip. Change any input and every line recomputes in this browser; nothing you type leaves the page.'] },
+      { h: 'Reading the projections honestly', p: ['Treat the months-to-target line as a planning horizon, not a promise. Constant-rate compounding is generous at long horizons — real programmes plateau as the easy audience converts first — so when the calculator returns eighteen months, plan against the linear check you can do by eye (this month\u2019s net-new customers × the months remaining) and expect the compounding number to be the optimistic edge of the range. Under six months is aggressive but reachable; over two years is distant enough that an intermediate milestone keeps progress measurable.', 'The budget line carries its own caveat: acquisition cost is assumed flat. Budgets that scale a channel usually push CAC up as the cheapest inventory and audiences are consumed first, so the gap × CAC figure is a floor, not a quote. The payback line — CAC divided by monthly revenue per customer — is the number that survives those caveats best, because it compares the cost of a customer against what that customer actually pays per month; anything under a year is usually defensible, anything over two years needs a retention story to match.'] },
+      { h: 'Where the budget numbers earn their keep', p: ['The practical uses are concrete. Budget requests: a target, the months behind it and the acquisition cost of the gap is a funding conversation in three numbers instead of a deck. Quarterly planning: run last quarter\u2019s actual growth rate through the calculator and compare the projection against where the base actually landed — the gap between them is the most honest forecast calibration you will get. Channel decisions: if buying the gap outright costs more than the budget on the table, the plan is a growth-rate plan, and the rate needs evidence from the channels that produced it before the target moves.', 'Keep the neighbours in view — CAC tells you what one customer should cost to acquire, and the ROI calculators tell you what each campaign returns. This tool is the bridge between them: campaigns produce the rate, the rate produces the months, and the months decide whether the budget request is a plan or a wish.'] },
+    ],
+    faqs: [
+      { q: 'How do I calculate a marketing budget for growth?', a: 'Work backwards from the target: subtract the current base to get the gap, multiply the gap by your blended CAC to get the acquisition budget, and use the months-to-target figure to decide whether the plan needs more money or more time. This marketing budget calculator does all three steps together.' },
+      { q: 'What does a marketing budget calculator use as inputs?', a: 'The current customer base, the monthly growth rate, the target customer count and the blended customer acquisition cost. Average revenue per customer is optional but unlocks the revenue-at-target and CAC payback lines.' },
+      { q: 'How many months should a growth target span?', a: 'Under six months is aggressive for most new programmes, six to twelve months is the sweet spot for planning, and beyond two years the compounding assumptions deserve an intermediate milestone so progress stays measurable.' },
+      { q: 'What CAC should I use — blended or by channel?', a: 'Blended (total marketing spend ÷ total new customers) for the overall plan, since that is what the budget actually buys. Channel-specific CACs belong in the campaign ROI calculators, where each channel is judged on its own numbers.' },
+    ],
+    html: `
+${cur('mbc-cur')}
+${f.number('mbc-base', 'Current customers', '', '0')}
+${f.number('mbc-rate', 'Monthly growth rate (%)', '', '0')}
+${f.number('mbc-target', 'Target customers', '', '0')}
+${f.number('mbc-cac', 'Blended customer acquisition cost (CAC)', '', '0')}
+${f.number('mbc-arpu', 'Average revenue per customer per month (optional)', '', '0')}
+${outputBlock('mbc-out', 'Result')}
+<p class="tool-note" id="mbc-verdict"></p>
+${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
+  },
 ];

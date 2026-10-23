@@ -700,6 +700,8 @@
     'ad-metrics-calculator': 1,
     'timestamp-converter': 1,
     'ip-converter': 1,
+    'email-roi-calculator': 1,
+    'marketing-budget-calculator': 1,
   };
 
   function mount(root, slug) {

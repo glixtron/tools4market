@@ -649,4 +649,47 @@ for (const [slug, selector, expected] of [
   dom.window.close();
 }
 
+// v2.9 additions: email ROI + marketing budget calculators (batch 2).
+{
+  const { dom, doc, errors } = await boot('email-roi-calculator');
+  check('email roi calculator skips the analyze panel (local-only)', !doc.querySelector('.inspect'));
+  check('email roi calculator starts with an instruction', doc.getElementById('erc-verdict').textContent.includes('Enter the emails sent'));
+  setValue(dom.window, 'erc-sent', '10000');
+  setValue(dom.window, 'erc-opened', '3200');
+  setValue(dom.window, 'erc-clicked', '480');
+  setValue(dom.window, 'erc-conv', '36');
+  setValue(dom.window, 'erc-rev', '2880');
+  setValue(dom.window, 'erc-cost', '900');
+  let erc = doc.getElementById('erc-out').textContent;
+  check('email roi calculator computes the funnel rates', erc.includes('Open rate: 32%') && erc.includes('Click rate: 4.8%') && erc.includes('Click-to-open rate: 15%') && erc.includes('Conversion rate (clicks → orders): 7.5%'));
+  check('email roi calculator computes profit, ROI and multiple', erc.includes('Revenue per email: $0.288') && erc.includes('Net profit: $1,980') && erc.includes('Email ROI: 220% (3.2×') && doc.getElementById('erc-verdict').textContent.includes('Above 200%'));
+  setValue(dom.window, 'erc-cost', '0');
+  check('email roi calculator flags a zero cost honestly', doc.getElementById('erc-out').textContent.includes('ROI percentage is undefined'));
+  setValue(dom.window, 'erc-cost', '900');
+  setValue(dom.window, 'erc-opened', '12000');
+  check('email roi calculator rejects impossible funnel numbers', doc.getElementById('erc-verdict').textContent.includes('Opens exceed sends'));
+  check('email roi calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+{
+  const { dom, doc, errors } = await boot('marketing-budget-calculator');
+  check('budget calculator skips the analyze panel (local-only)', !doc.querySelector('.inspect'));
+  check('budget calculator starts with an instruction', doc.getElementById('mbc-verdict').textContent.includes('Enter your customer base'));
+  setValue(dom.window, 'mbc-base', '1000');
+  setValue(dom.window, 'mbc-rate', '8');
+  setValue(dom.window, 'mbc-target', '2500');
+  setValue(dom.window, 'mbc-cac', '40');
+  setValue(dom.window, 'mbc-arpu', '12');
+  let mbc = doc.getElementById('mbc-out').textContent;
+  check('budget calculator computes gap, months and budget', mbc.includes('Net new customers needed: 1,500') && mbc.includes('Months to target at constant growth: 11.91') && mbc.includes('Acquisition budget to reach target: $60,000'));
+  check('budget calculator computes revenue impact and payback', mbc.includes('Added monthly revenue at target: $18,000') && mbc.includes('CAC payback period: 3.33') && doc.getElementById('mbc-verdict').textContent.includes('Six to twelve'));
+  setValue(dom.window, 'mbc-target', '800');
+  check('budget calculator flags a target already reached', doc.getElementById('mbc-verdict').textContent.includes('already reached'));
+  setValue(dom.window, 'mbc-target', '2500');
+  setValue(dom.window, 'mbc-rate', '0');
+  check('budget calculator refuses to project zero growth', doc.getElementById('mbc-verdict').textContent.includes('not reached by growth alone'));
+  check('budget calculator has no JavaScript errors', errors.length === 0);
+  dom.window.close();
+}
+
 console.log(`\nPERSONALIZED TOOLS: ${checks} checks passed.`);

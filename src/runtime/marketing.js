@@ -174,4 +174,91 @@
     on(root, update);
     update();
   };
+
+  // ---------------------------------------------------------- Email ROI calculator
+  T['email-roi-calculator'] = function (root) {
+    var C = TOOLTXT.emailRoi || {};
+    var cur = $(root, 'erc-cur');
+    var sent = $(root, 'erc-sent');
+    var opened = $(root, 'erc-opened');
+    var clicked = $(root, 'erc-clicked');
+    var conv = $(root, 'erc-conv');
+    var rev = $(root, 'erc-rev');
+    var cost = $(root, 'erc-cost');
+    var out = $(root, 'erc-out');
+    var verdict = $(root, 'erc-verdict');
+    function pct(n, d) { return d > 0 ? fmt(n / d * 100) + '%' : '—'; }
+    function update() {
+      var c = cur.value || '$';
+      var s = num(sent.value), o = num(opened.value), k = num(clicked.value), cv = num(conv.value), r = num(rev.value), i = num(cost.value);
+      if (!s && !r && !i) { set(out, verdict, '', C.empty || ''); return; }
+      if (!s) { set(out, verdict, '', C.needSent || ''); return; }
+      if (o > s) { set(out, verdict, '', C.impossibleOpens || ''); return; }
+      if (k > s) { set(out, verdict, '', C.impossibleClicks || ''); return; }
+      if (cv > k) { set(out, verdict, '', C.impossibleConv || ''); return; }
+      var lines = [];
+      lines.push(C.lblOpen + ' ' + pct(o, s));
+      lines.push(C.lblClick + ' ' + pct(k, s));
+      if (o) lines.push(C.lblCtor + ' ' + pct(k, o));
+      if (k) lines.push(C.lblConvRate + ' ' + pct(cv, k));
+      lines.push(C.lblRevPer + ' ' + money(r / s, c));
+      var profit = r - i;
+      lines.push((profit < 0 ? (C.negProfit || 'Net profit: {v}.') : (C.profit || 'Net profit: {v}')).replace('{v}', money(profit, c)));
+      var vText = '';
+      if (!i) {
+        lines.push(C.costZero || '');
+      } else {
+        var roi = profit / i * 100;
+        lines.push((C.roi || 'Email ROI: {v}% ({m}× the investment back).').replace('{v}', fmt(roi)).replace('{m}', fmt(r / i)));
+        vText = roi < 0 ? (C.vNeg || '') : roi < 50 ? (C.vThin || '') : roi < 200 ? (C.vSteady || '') : (C.vStrong || '');
+      }
+      set(out, verdict, lines.filter(Boolean).join('\n'), vText);
+    }
+    on(root, update);
+    update();
+  };
+
+  // ---------------------------------------------------------- Marketing budget calculator
+  T['marketing-budget-calculator'] = function (root) {
+    var C = TOOLTXT.budgetCalc || {};
+    var cur = $(root, 'mbc-cur');
+    var base = $(root, 'mbc-base');
+    var rate = $(root, 'mbc-rate');
+    var target = $(root, 'mbc-target');
+    var cac = $(root, 'mbc-cac');
+    var arpu = $(root, 'mbc-arpu');
+    var out = $(root, 'mbc-out');
+    var verdict = $(root, 'mbc-verdict');
+    function update() {
+      var c = cur.value || '$';
+      var b = num(base.value), g = num(rate.value) / 100, t = num(target.value), cc = num(cac.value), a = num(arpu.value);
+      if (!b && !t && !cc) { set(out, verdict, '', C.empty || ''); return; }
+      if (!b) { set(out, verdict, '', C.needBase || ''); return; }
+      if (t <= b) { set(out, verdict, C.lblNeeded + ' 0', C.already || ''); return; }
+      var gap = t - b;
+      var lines = [];
+      lines.push(C.lblNeeded + ' ' + fmt(gap));
+      var vText = '';
+      if (!g) {
+        lines.push(C.lblMonths + ' —');
+        vText = C.noGrowth || '';
+      } else {
+        var months = Math.log(t / b) / Math.log(1 + g);
+        lines.push(C.lblMonths + ' ' + fmt(months) + ' ' + (C.monthsUnit || ''));
+        vText = months < 6 ? (C.vFast || '') : months < 12 ? (C.vSteady || '') : months < 24 ? (C.vLong || '') : (C.vDistant || '');
+      }
+      if (cc) {
+        lines.push(C.lblBudget + ' ' + money(gap * cc, c));
+        if (a) {
+          lines.push(C.lblRevenue + ' ' + money(gap * a, c));
+          lines.push(C.lblPayback + ' ' + fmt(cc / a) + ' ' + (C.monthsUnit || ''));
+        }
+      } else {
+        lines.push(C.cacZero || '');
+      }
+      set(out, verdict, lines.filter(Boolean).join('\n'), vText);
+    }
+    on(root, update);
+    update();
+  };
 })();

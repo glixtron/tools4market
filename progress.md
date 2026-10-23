@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Calculator batch 2 — v2.9 (24 Oct 2026)
+
+**Trigger:** owner said "complete that also" after the day-1 pending audit, where batch 2 (email ROI + marketing budget/growth) was the recommended next scheduled agent-side item — the day-1 plan's month-3 calculators, pulled forward.
+
+**Shipped:** two new pure-local calculators under the `marketing` category (v2.6 pattern, `src/data/marketing.js` + `src/runtime/marketing.js`, all copy in `src/data/inspect.js` as `tools.emailRoi` / `tools.budgetCalc`):
+- **Email ROI Calculator** — six inputs (sends, opens, clicks, conversions, revenue, cost) → open/click/click-to-open/conversion rates, revenue per email, net profit, ROI % and spend multiple, with verdict tiers and impossible-number guards (opens > sends, clicks > sends, conversions > clicks, zero cost → ROI undefined).
+- **Marketing Budget Calculator** — base, monthly growth rate, target, blended CAC (+ optional ARPU) → net new customers needed, months to target on compounding growth (the flattering model named as such in the copy, with a linear sanity-check caveat), acquisition budget (gap × CAC), added monthly revenue at target and CAC payback; guards for zero base, zero growth ("target not reached by growth alone"), already-reached targets and zero CAC.
+
+**Registration + counts:** both in `LOCAL_TOOLS` + `SKIP_PANEL` → 17 local / 27 fetch-capable; site now **44 tools / 67 pages / 5 categories**; README + Architecture updated.
+
+**Tests:** +14 personalized checks (email: funnel rates 32/4.8/15/7.5%, profit $1,980, ROI 220% at 3.2×, zero-cost note, impossible-opens guard; budget: gap 1,500, 11.91 months at 8% from 1,000→2,500, $60,000 budget, $18,000 added MRR, 3.33-month payback, already-reached and zero-growth guards). Smoke caught one real defect mid-build: the "already reached" guard left the budget output block empty — the output now carries the zero-gap line while the verdict explains. Suites at commit time: build 67 pages/44 tools/5 categories, smoke 44/44, SEO audit 2145/2145 (+82), consent 30/30, personalized 181/181, suggest-api 24/24.
+
 ### Timestamp + IP converters integrated from a second session — v2.8 (23 Oct 2026, night session)
 
 **Trigger:** owner pasted the transcript of a second OpenCode session that had worked in the Desktop checkout (`/Users/macbookpro/Desktop/Tools4market`, stale `main` at `8f0cb1b`/v2.4 with uncommitted changes) and asked for verification + "everything committed".
