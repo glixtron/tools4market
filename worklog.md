@@ -27,7 +27,9 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **Cross-linking:** `website-launch-seo-checklist` now links all three new guides, `meta-description-length-2026` links the two spec sheets, and `noindex-vs-robots-txt` / `why-is-my-site-not-indexed` link the redirect guide — so the cluster has inbound links from older pages, not only from itself.
 
-**Verification:** build **75 pages** / 44 tools / **18 guides**; SEO audit **2368/2368** (+77), smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed; IndexNow **74 URLs**; live-verify **70/70**; all three URLs 200 with `BlogPosting` + `FAQPage` + `BreadcrumbList` and a Read next block.
+**Verification:** build **75 pages** / 44 tools / **18 guides**; SEO audit **2386/2386** (+95), smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed; IndexNow **74 URLs**; live-verify **70/70**; all three URLs 200 with `BlogPosting` + `FAQPage` + `BreadcrumbList` and a Read next block.
+
+**Guard added (same session):** the audit now asserts that every `relatedTools` slug resolves, naming the slug it could not find. Unknown slugs were dropped silently by the renderer, which is how `image-optimizer` (Day 8) and `xml-sitemap-generator` (Day 9) both reached a review instead of a build failure. Verified by injecting a bad slug: **2385 passed, 1 failed — `blog/internal-linking: every relatedTool slug resolves — image-optimizer`**, then removing it.
 
 **Pack notes:** `docs/day9/INTEGRATION-NOTES.md` (all three files archived beside it).
 

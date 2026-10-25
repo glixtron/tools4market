@@ -99,3 +99,16 @@ at all three, `meta-description-length-2026` at the two spec sheets, and
 
 That keeps the cluster reachable in both directions — the new pages are linked from
 older guides, not only from each other.
+
+## The slug failure mode is now an audit failure
+
+Twice in two packs an unknown `relatedTools` slug has survived review: `image-optimizer`
+(Day 8) and `xml-sitemap-generator` (Day 9). Both times the renderer dropped it silently,
+so the page still had three linked tools and nothing looked wrong.
+
+`tests/seo-audit.mjs` now asserts that every slug in `relatedTools` resolves to a real
+tool, and the failure message names the slug. Checked by injecting `image-optimizer` into
+a guide that does not use it: **2385 passed, 1 failed — `blog/internal-linking: every
+relatedTool slug resolves — image-optimizer`**. The pack's "all slugs verified" line is
+now a claim the build can confirm or refuse, rather than a claim to trust.
+

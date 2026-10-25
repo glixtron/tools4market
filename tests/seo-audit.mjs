@@ -165,6 +165,9 @@ for (const t of TOOLS) {
     // `relatedTools` is tool-slugs-only and silently drops anything else, so the
     // guide-to-guide field gets its own existence check.
     ok(`${p}: relatedGuides all resolve`, (a.relatedGuides || []).every((s2) => ARTICLES.some((x) => x.slug === s2)), (a.relatedGuides || []).filter((s2) => !ARTICLES.some((x) => x.slug === s2)).join(','));
+    // Unknown slugs are dropped silently by the renderer, so "3 related tools"
+    // can pass while one of the three never appears. Assert resolution instead.
+    ok(`${p}: every relatedTool slug resolves`, (a.relatedTools || []).every((s2) => TOOLS.some((t) => t.slug === s2)), (a.relatedTools || []).filter((s2) => !TOOLS.some((t) => t.slug === s2)).join(','));
     ok(`${p}: relatedGuides never points at itself`, !(a.relatedGuides || []).includes(a.slug));
     ok(`${p}: cites authoritative sources`, (a.links || []).length >= 2);
     for (const s2 of a.sections) for (const pr of [...(s2.p || []), ...(s2.p2 || [])]) { const k = norm(pr).slice(0, 120); if (k.length > 60) add(seenParas, k, p); }

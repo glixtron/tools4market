@@ -6,7 +6,7 @@
 ## Entry 14 — v2.14 Day-9 guides
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
-**Status:** ✅ Committed, pushed, deployed same day. Cross-verified before commit: build **75 pages / 44 tools / 18 guides**, smoke **44/44**, SEO audit **2368/2368**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **70/70**.
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified before commit: build **75 pages / 44 tools / 18 guides**, smoke **44/44**, SEO audit **2386/2386**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **70/70**.
 
 **Subject:** `feat: Day-9 guides — Open Graph image size, .htaccess 301 redirects, title tag length (v2.14)`
 
@@ -15,9 +15,10 @@
 - **Corrections applied to the pack:** 301/302 reframed as canonicalisation rather than "passes PageRank"; the unpublishable 5-hop limit dropped; "Coverage" → "Page indexing" and redirect entries are informational; the title rewrite rate, CTR lift and CTR-ranking claim removed; the OG click multiplier, 600×315 minimum and per-platform caps removed — the guide now says the OGP spec defines no dimensions; X's retired card validator replaced.
 - **Format:** spec tables and bullet lists converted to prose (the renderer supports neither); redirect patterns use the existing `sections[].pre` code block; the duplicate "FAQ array" blocks dropped.
 - **Cross-links:** launch checklist → all three; meta description guide → both spec sheets; noindex + not-indexed → the redirect guide.
+- **New audit guard:** every `relatedTools` slug must resolve, and the failure names the slug. Unknown slugs were dropped silently — the reason `image-optimizer` (Day 8) and `xml-sitemap-generator` (Day 9) both reached review instead of failing the build.
 - **Docs:** `docs/day9/` (3 pack files + `INTEGRATION-NOTES.md`), README/Architecture → 75 pages, 18 guides, v2.14.
 
-**Files in this commit:** `src/data/blog.js` (3 guides + 4 cross-link updates), `docs/day9/*`, `README.md`, `Architecture.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
+**Files in this commit:** `src/data/blog.js` (3 guides + 4 cross-link updates), `tests/seo-audit.mjs` (relatedTools resolution guard), `docs/day9/*`, `README.md`, `Architecture.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 13 — live-verify accepts the edge scheme hop
 

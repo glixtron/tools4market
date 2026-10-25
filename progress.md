@@ -12,7 +12,9 @@
 
 **Format:** the pack's spec tables and bullet lists cannot render (prose is escaped, one `<p>` per string), so they became prose; the four redirect patterns use the existing `sections[].pre` code block. The separate "FAQ array" blocks were dropped — `article.faqs[]` already generates `FAQPage`.
 
-**Tests:** build 75 pages / 44 tools / 18 guides, seo-audit **2368/2368** (+77), smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify 70/70, IndexNow 74 URLs. Pack notes in `docs/day9/INTEGRATION-NOTES.md`.
+**New guard:** the audit now fails on an unknown `relatedTools` slug and names it. Those slugs were dropped silently by the renderer — the reason `image-optimizer` and `xml-sitemap-generator` both got as far as review. Verified by injecting one (2385/2386, failure naming the slug).
+
+**Tests:** build 75 pages / 44 tools / 18 guides, seo-audit **2386/2386** (+95), smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify 70/70, IndexNow 74 URLs. Pack notes in `docs/day9/INTEGRATION-NOTES.md`.
 
 ### Day-8 gap-list guides — v2.13 (25 Oct 2026)
 
