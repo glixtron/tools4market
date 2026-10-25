@@ -14,6 +14,8 @@
 
 **Doc drift fixed:** README said “Eighteen how-to guides” (stale since Day 8) and now lists twenty-four; ARCHITECTURE’s crawler-policy section still described the pre-v2.15 “allows every crawler” position and now describes the shipped policy.
 
+**AdSense silent failure closed:** `slotId()` maps an unrecognised `AD_SLOT_*` to “no slot”, so a malformed id ships a finished-looking page that earns nothing — the exact bug that shipped `ca-pub-…:0/0` on 24 Oct. The build now prints `⚠ AdSense: … not numeric and ignored` with the offending variable, and `ℹ AdSense loader on, 0 ad units` while the placeholders are still in place. Verified against a bogus id, a bare numeric id, and the current empty env. No dist change, so no redeploy.
+
 **Tests:** build 81 pages / 44 tools / 24 guides; all 58 citations render; seo-audit **2547/2547**, smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify **73/73**. Deployed `60455cbb`; IndexNow submitted **8 changed URLs**, not all 80.
 
 ### Day-11 guides — v2.17 (25 Oct 2026)

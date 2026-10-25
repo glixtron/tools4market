@@ -1102,6 +1102,22 @@ ${feedItems}
   const pageCount = pages.length;
   console.log(`\u2714 Built ${pageCount} HTML pages (${TOOLS.length} tools, ${Object.keys(CATEGORIES).length} categories, ${POLICY.length} policy pages) + sitemap.xml, robots.txt, 404.html, assets.`);
   if (warnings.length) console.log('\u26a0 SEO length warnings (60/158 limits):\n  ' + warnings.join('\n  '));
+
+  // AdSense is the one setting where a wrong value fails silently: slotId() turns
+  // anything it does not recognise into a placeholder, so a malformed id ships a
+  // page that looks finished and earns nothing. Say so at build time instead.
+  const badSlots = Object.entries({
+    AD_SLOT_TOP: process.env.AD_SLOT_TOP,
+    AD_SLOT_CONTENT: process.env.AD_SLOT_CONTENT,
+    AD_SLOT_SIDEBAR: process.env.AD_SLOT_SIDEBAR,
+  }).filter(([, raw]) => String(raw || '').trim() && !slotId(raw)).map(([k, raw]) => `${k}="${raw}"`);
+  if (badSlots.length) {
+    console.log(`\u26a0 AdSense: ${badSlots.length} slot id(s) not numeric and ignored — reserved placeholder rendered instead:\n  ${badSlots.join('\n  ')}\n  Expected a numeric data-ad-slot (6+ digits), or ca-pub-<digits>:<digits>.`);
+  }
+  const liveSlots = Object.values(AD_SLOTS).filter(Boolean).length;
+  if (ADSENSE_ENABLED && !liveSlots) {
+    console.log('\u2139 AdSense loader on, 0 ad units — every slot is a reserved placeholder. Revenue stays zero until AD_SLOT_TOP / AD_SLOT_CONTENT / AD_SLOT_SIDEBAR hold real numeric ids.');
+  }
 };
 
 run().catch((e) => { console.error(e); process.exit(1); });

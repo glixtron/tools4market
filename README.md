@@ -377,7 +377,7 @@ grep -rn "TODO-DOMAIN" .     # must return nothing
 
 **To switch on real ads:**
 1. AdSense console → *Ad units* → create three display units (top banner, below content, sidebar) and copy their ids.
-2. Cloudflare → Worker → *Settings → Variables and Secrets* → add `AD_SLOT_TOP`, `AD_SLOT_CONTENT`, `AD_SLOT_SIDEBAR` → redeploy. Each slot then renders a real `<ins class="adsbygoogle">` unit; until then the reserved placeholder stays (no broken units, no layout shift).
+2. Cloudflare → Worker → *Settings → Variables and Secrets* → add `AD_SLOT_TOP`, `AD_SLOT_CONTENT`, `AD_SLOT_SIDEBAR` → redeploy. Each slot then renders a real `<ins class="adsbygoogle">` unit; until then the reserved placeholder stays (no broken units, no layout shift). The value must be the numeric `data-ad-slot` id (6+ digits); `ca-pub-<digits>:<digits>` is also accepted. Anything else is ignored by design, and the build now prints a `⚠ AdSense: … not numeric and ignored` line naming the variable — a malformed id otherwise ships a page that looks finished and earns nothing. `ℹ AdSense loader on, 0 ad units` means the placeholders are still in place.
 3. AdSense console → tick *"I've placed the code"* → **Request review**.
 
 **Rules:** nothing may ever sit inside the tool interaction area (rules.md §5) — the reserved slots are outside it by construction.

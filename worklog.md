@@ -21,6 +21,8 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **Verification:** build **81 pages / 44 tools / 24 guides**; all 58 citations render into their pages; SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed `60455cbb`; live-verify **73/73**. The eight edited guides were checked on the live site for the corrected hrefs and for the absence of `developer.x.com`. IndexNow submitted those **8 changed URLs**, not all 80 — the protocol asks for new or materially changed URLs, and re-submitting the whole sitemap on a link edit is noise.
 
+**One silent failure closed on the monetisation path.** `AD_SLOT_TOP`, `AD_SLOT_CONTENT` and `AD_SLOT_SIDEBAR` are still empty, and the build’s `slotId()` treats an unrecognised value as “no slot” rather than an error — which is how the 24 Oct deploy shipped `ca-pub-…:0/0` as a real `data-ad-slot` for a day. The build now names the problem instead of swallowing it: a non-numeric `AD_SLOT_*` prints `⚠ AdSense: N slot id(s) not numeric and ignored` with the offending values, and an enabled loader with zero live units prints `ℹ AdSense loader on, 0 ad units — … Revenue stays zero until …`. Tested both ways: a bogus `ca-pub-…:0/0` produces the warning, a bare `123456` is accepted, and the current empty env produces the informational line. No dist bytes change, so no redeploy was needed.
+
 **Owner actions still open:** AdSense slot ids, Launchstag Verify now, Cloudflare managed robots.txt off, distribution kickoff.
 
 **Completed:** 25 Oct 2026.

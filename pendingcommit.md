@@ -16,8 +16,9 @@
 - **New `scripts/check-sources.mjs`** (`npm run check:sources`): walks all 43 unique `links[]` URLs, fails on 4xx/5xx, classifies redirects as moved / locale (`?hl=`) / slash, and supports `--strict`. It sends `Accept-Language: en`, without which every Google docs URL localised and turned into a false positive.
 - **Doc drift fixed:** README still said “Eighteen how-to guides” (stale since Day 8); ARCHITECTURE still described the pre-v2.15 “allows every crawler” robots policy.
 - **IndexNow submitted 8 changed URLs**, not all 80 — the protocol asks for new or materially changed URLs.
+- **AdSense build warning:** a malformed `AD_SLOT_*` used to fall back to a placeholder silently; the build now prints the offending variable, plus an “0 ad units” notice while the slots are empty.
 
-**Files in this commit:** `src/data/blog.js` (citation repairs), `scripts/check-sources.mjs` (new), `package.json` (`check:sources`), `README.md`, `ARCHITECTURE.md`, `pendingcommit.md`, `progress.md`, `worklog.md`, `suggest.md`.
+**Files in this commit:** `src/data/blog.js` (citation repairs), `scripts/check-sources.mjs` (new), `package.json` (`check:sources`), `build.mjs` (AdSense warnings), `README.md`, `ARCHITECTURE.md`, `pendingcommit.md`, `progress.md`, `worklog.md`, `suggest.md`.
 
 ## Entry 18 — v2.17 Day-11 guides
 
