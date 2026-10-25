@@ -1,7 +1,22 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Twelve entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below).
+**Status:** ✅ Thirteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below).
+
+## Entry 13 — live-verify accepts the edge scheme hop
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed to both branches, `main` fast-forwarded, Desktop checkout synced. No rebuild or redeploy — test and docs only.
+
+**Subject:** `fix: live-verify accepts the edge scheme hop for http://www`
+
+**Summary:**
+- **What failed:** the post-deploy live run returned 69/70. `http://www` now sends `301 → https://www.tools4market.online/`, because the zone's *Always Use HTTPS* upgrades the scheme before the Worker's host rule runs. The site was correct; the assertion was describing the pre-setting ordering.
+- **New contract:** hop 1 must start `https://`, and the fully followed request must land on `https://tools4market.online/` — no loop, canonical destination, without pinning a hop count the edge controls.
+- **Worker behaviour unchanged:** `tests/worker-routing.mjs` still asserts the one-hop `http://www → https apex` case, because it calls `worker.js` directly with no zone setting in front.
+- **Docs:** the "one hop" claim in the v2.13 worklog, `progress.md` and `pendingcommit.md` is now qualified with the two-hop edge behaviour.
+
+**Files in this commit:** `tests/live-verify.mjs`, `worklog.md`, `progress.md`, `pendingcommit.md`.
 
 ## Entry 12 — v2.13 Day-8 gap-list guides
 
