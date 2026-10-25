@@ -8,7 +8,7 @@
 
 **Two changes.** `worker.js` now redirects `http:` → `https://tools4market.online` with `301` (path and query preserved, `no-store`), positioned **before** the `www → apex` redirect so `http://www` resolves in one hop. The check deliberately ignores `X-Forwarded-Proto` — client-spoofable — and exempts localhost so `npm run preview` keeps working. The generated `_headers` now sends `Strict-Transport-Security: max-age=31536000` (no `includeSubDomains`, no `preload`: both are irreversible and no subdomain inventory exists yet).
 
-**New guard:** `tests/worker-routing.mjs` (`npm run test:worker`, 14 checks) tests the routing matrix against `worker.js` directly — no deploy, no network — and asserts the HSTS/still-present-security-header shape of `dist/_headers`. `tests/live-verify.mjs` gained four assertions (65 → 69) for the deployed edge.
+**New guard:** `tests/worker-routing.mjs` (`npm run test:worker`, 14 checks) tests the routing matrix against `worker.js` directly — no deploy, no network — and asserts the HSTS/still-present-security-header shape of `dist/_headers`. `tests/live-verify.mjs` gained five assertions (65 → 70) for the deployed edge.
 
 **Owner-side follow-up:** turn on Cloudflare **Always Use HTTPS**.
 

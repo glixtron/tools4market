@@ -19,9 +19,9 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **New `tests/worker-routing.mjs` (`npm run test:worker`, 14 checks).** The redirect logic is tested without a deploy: apex http → 301, `http://www` → https apex in one hop, path + query preserved, spoofed `X-Forwarded-Proto` cannot skip it, https apex serves 200 with no loop, localhost exempt, and `dist/_headers` carries HSTS without `includeSubDomains`. Node's `Request` does not synthesise a `host` header from the URL, so the harness sets it explicitly — the first attempt looked like `https://www` was not redirecting purely because of that.
 
-**Four new live assertions** in `tests/live-verify.mjs` (65 → 69) cover the deployed edge, with `redirect: 'manual'` so a redirect is observable instead of being followed.
+**Five new live assertions** in `tests/live-verify.mjs` (65 → 70) cover the deployed edge, with `redirect: 'manual'` so a redirect is observable instead of being followed.
 
-**Verification:** build 69 pages / 44 tools / 12 guides; smoke **44/44**, SEO audit **2189/2189**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **69/69**; deployed; IndexNow resubmitted.
+**Verification:** build 69 pages / 44 tools / 12 guides; smoke **44/44**, SEO audit **2189/2189**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **70/70**; deployed; IndexNow resubmitted.
 
 **Owner action still worth taking:** enable Cloudflare **Always Use HTTPS** (SSL/TLS → Edge Certificates) as belt-and-braces — it catches requests before the Worker runs. HSTS preload should wait until every subdomain is known to be HTTPS-only.
 
