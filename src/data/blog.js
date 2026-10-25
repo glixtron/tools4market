@@ -131,7 +131,7 @@ export const ARTICLES = [
       { q: 'Do I need Schema markup to rank?', a: 'Schema is not a direct ranking factor, but it makes your pages eligible for rich results and it tells search engines what the page is about. Add it where it is accurate — incorrect markup can hurt.' },
     ],
     relatedTools: ['meta-tag-generator', 'robots-txt-generator', 'sitemap-generator', 'serp-preview-tool', 'schema-markup-generator'],
-    relatedGuides: ['core-web-vitals', 'image-seo', 'title-tag-length-2026', 'open-graph-image-size-2026', 'htaccess-301-redirect', 'hreflang-basics'],
+    relatedGuides: ['core-web-vitals', 'image-seo', 'title-tag-length-2026', 'open-graph-image-size-2026', 'htaccess-301-redirect', 'hreflang-basics', 'xml-sitemap-best-practices', 'test-structured-data'],
     links: [
       { label: 'Google: Search Console starter guide', url: 'https://developers.google.com/search/docs/monitor-debug/search-console-start' },
       { label: 'Google: sitemap build guide', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -458,7 +458,7 @@ export const ARTICLES = [
       { q: 'Do noindex pages waste crawl budget?', a: 'They use some, because Google must fetch the page to see the directive. That is the accepted cost: for pages that are linked and could be indexed, a crawl is required to keep them out of results.' },
     ],
     relatedTools: ['robots-txt-generator', 'web-crawler-audit', 'meta-tag-generator'],
-    relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed'],
+    relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed', 'http-status-codes-seo'],
     links: [
       { label: 'Google: robots.txt introduction', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro' },
       { label: 'Google: robots meta tag, data-nosnippet and X-Robots-Tag', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/meta-tag' },
@@ -522,7 +522,7 @@ export const ARTICLES = [
       { q: 'Will more content or more backlinks get my pages indexed?', a: 'Links and genuine authority help discovery and selection, and unique content gives Google a reason to index. But fix technical blocks first — links to an uncrawlable page accomplish nothing.' },
     ],
     relatedTools: ['web-crawler-audit', 'sitemap-generator', 'robots-txt-generator', 'seo-score-checker'],
-    relatedGuides: ['internal-linking', 'htaccess-301-redirect', 'rel-canonical-tag'],
+    relatedGuides: ['internal-linking', 'htaccess-301-redirect', 'rel-canonical-tag', 'xml-sitemap-best-practices', 'http-status-codes-seo'],
     links: [
       { label: 'Google: ask Google to recrawl your URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl' },
       { label: 'Google: build and submit a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -649,6 +649,7 @@ export const ARTICLES = [
       { q: 'Is invalid schema harmful?', a: 'Invalid JSON-LD is simply ignored, so the direct risk is low — but markup that misrepresents the page (fake reviews, invisible FAQs) risks manual penalties and lost trust. Mark up only what is genuinely visible on the page.' },
     ],
     relatedTools: ['schema-markup-generator', 'seo-score-checker', 'web-crawler-audit'],
+    relatedGuides: ['test-structured-data', 'website-launch-seo-checklist', 'internal-linking'],
     links: [
       { label: 'Google: structured data introduction', url: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data' },
       { label: 'Google: AI features and your website', url: 'https://developers.google.com/search/docs/appearance/ai-features' },
@@ -720,7 +721,7 @@ export const ARTICLES = [
       { q: 'Do I need to install anything to use a Screaming Frog alternative?', a: 'No. Browser-based audits run on any device with a browser — no download, no licence, no updates. That is the main practical advantage over desktop crawlers for small, frequent checks.' },
     ],
     relatedTools: ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
-    relatedGuides: ['internal-linking', 'core-web-vitals', 'hreflang-basics'],
+    relatedGuides: ['internal-linking', 'core-web-vitals', 'hreflang-basics', 'test-structured-data'],
     links: [
       { label: 'Screaming Frog SEO Spider — official site', url: 'https://www.screamingfrog.co.uk/seo-spider/' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
@@ -864,7 +865,7 @@ export const ARTICLES = [
       { q: 'How is internal linking different from backlinks?', a: 'Backlinks come from other sites and take months to earn. Internal links you control, cost nothing, and can be added in a minute. Both move link signals; internal links are the part you can fix today.' },
     ],
     relatedTools: ['web-crawler-audit', 'seo-score-checker', 'url-slug-generator', 'sitemap-generator'],
-    relatedGuides: ['image-seo', 'core-web-vitals', 'url-slug-best-practices'],
+    relatedGuides: ['image-seo', 'core-web-vitals', 'url-slug-best-practices', 'xml-sitemap-best-practices'],
     links: [
       { label: 'Google: links crawlable — make links discoverable', url: 'https://developers.google.com/search/docs/crawling-indexing/links-crawlable' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
@@ -1200,7 +1201,7 @@ export const ARTICLES = [
       { q: 'Do redirect chains hurt SEO?', a: 'They do not break anything, but each hop is an extra request and an extra point of failure, and signals have further to travel. Redirect straight to the final URL. Google publishes no hop limit, so treat any chain longer than one hop as work to clean up.' },
     ],
     relatedTools: ['htaccess-redirect-generator', 'web-crawler-audit', 'canonical-tag-generator', 'sitemap-generator'],
-    relatedGuides: ['website-launch-seo-checklist', 'noindex-vs-robots-txt', 'why-is-my-site-not-indexed', 'url-slug-best-practices', 'rel-canonical-tag'],
+    relatedGuides: ['website-launch-seo-checklist', 'noindex-vs-robots-txt', 'why-is-my-site-not-indexed', 'url-slug-best-practices', 'rel-canonical-tag', 'http-status-codes-seo'],
     links: [
       { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
       { label: 'Apache: mod_alias redirect directives', url: 'https://httpd.apache.org/docs/current/mod/mod_alias.html' },
@@ -1463,7 +1464,7 @@ export const ARTICLES = [
       { q: 'How long does Google take to honour a canonical?', a: 'Google publishes no timeframe. It is applied when the URL is recrawled and the signals are re-evaluated, which is why a canonical change is confirmed in URL Inspection rather than assumed after a deploy.' },
     ],
     relatedTools: ['canonical-tag-generator', 'web-crawler-audit', 'sitemap-generator', 'htaccess-redirect-generator'],
-    relatedGuides: ['htaccess-301-redirect', 'url-slug-best-practices', 'why-is-my-site-not-indexed'],
+    relatedGuides: ['htaccess-301-redirect', 'url-slug-best-practices', 'why-is-my-site-not-indexed', 'http-status-codes-seo'],
     links: [
       { label: 'Google: specify a canonical URL', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls' },
       { label: 'Google: what URL canonicalization is', url: 'https://developers.google.com/search/docs/crawling-indexing/canonicalization' },
@@ -1563,6 +1564,221 @@ export const ARTICLES = [
       { label: 'Google: tell Google about localized versions', url: 'https://developers.google.com/search/docs/specialty/international/localized-versions' },
       { label: 'Google: managing multi-regional sites', url: 'https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites' },
       { label: 'Google: specify a canonical URL', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls' },
+    ],
+  },
+  {
+    slug: 'xml-sitemap-best-practices',
+    title: 'XML sitemap best practices: limits, lastmod and what Google ignores',
+    focus: 'xml sitemap',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'XML Sitemap Best Practices: Limits, lastmod and Submission',
+    metaDesc: 'An XML sitemap is a discovery hint, not a ranking factor. The 50,000-URL limit, what Google ignores, how lastmod works, and how to submit one.',
+    intro: 'An XML sitemap is a list of URLs you want crawled, wrapped in a format search engines agreed on in 2005. It is a discovery hint rather than a ranking factor, and most sitemap advice blurs that line.',
+    sections: [
+      {
+        h: 'What an XML sitemap is, and what it is not',
+        p: [
+          'The protocol is small. An XML file declares a `<urlset>`, and each page is one `<url>` with a `<loc>` holding the absolute address. Three optional children follow: `<lastmod>`, `<changefreq>` and `<priority>`. Everything else in sitemap advice is commentary on those four elements.',
+          'What a sitemap does is help discovery. Google’s documentation treats submission as a hint that a URL exists; it does not promise a crawl, and it does not promise indexing. A page that returns noindex, a redirect or a 404 in a sitemap is not a shortcut, it is a contradiction the crawler has to resolve.',
+        ],
+      },
+      {
+        h: 'The protocol limits, and the ones Google adds',
+        p: [
+          'The protocol caps a single file at 50,000 URLs or 50 MB uncompressed, whichever comes first. A sitemap index file has the same limits and can list up to 50,000 sitemaps. Splitting by section — tools, guides, categories — keeps each file small and makes the per-sitemap reporting in Search Console readable.',
+          'Google adds requirements the protocol leaves open. The file must be UTF-8, every URL must be fully qualified, and a sitemap hosted in a subdirectory covers only descendants of that directory unless you submit it through Search Console. That last rule is why a sitemap belongs at the site root.',
+        ],
+      },
+      {
+        h: 'lastmod, changefreq and priority: what actually gets used',
+        p: [
+          'Google ignores `<changefreq>` and `<priority>` outright. The first is a guess about editing rhythm; the second is relative and defaults to 0.5. Neither changes crawling nor ranking, and filling them in is busywork that makes a file look more precise than it is.',
+          '`<lastmod>` is the one Google uses, and only while it stays trustworthy. The value is read when Google can verify it against the page’s actual last significant change, and the field may stop being trusted site-wide if every URL claims to have changed today. A deploy that rewrites the timestamp without changing the page is the fastest way to make it worthless.',
+        ],
+      },
+      {
+        h: 'The mistakes that make a sitemap useless',
+        p: [
+          'The common failure is a sitemap full of URLs that should not be there: redirects, 404s, noindex pages, robots-blocked paths and parameter variants of a canonical page. Each one spends crawl attention and tells Google something the page itself denies. The sitemap should list the canonical, indexable, 200-status URL and nothing else.',
+          'The quieter failures are structural. An unescaped ampersand breaks the XML parser. A relative `<loc>` is resolved differently than you expect. A sitemap generated once and never regenerated drifts out of date while still looking valid. And two sitemaps covering the same URLs with different `lastmod` values create a contradiction no validator will flag.',
+        ],
+      },
+      {
+        h: 'Submitting an XML sitemap, and the ping that no longer exists',
+        p: [
+          'Announce the file in `robots.txt` with an absolute `Sitemap:` line, then submit the same URL in Search Console and Bing Webmaster Tools. The robots.txt line is a hint for every crawler that reads the file; Search Console is where you see whether Google fetched it and how many URLs it discovered.',
+          'The old ping endpoint is gone. Google deprecated `/ping?sitemap=` in June 2023 and stopped answering it at the end of that year, so a script that still calls it gets a 404 and a false sense of having submitted something. IndexNow is a separate protocol used by Bing, Yandex and a few others; Google does not participate, so it is not a replacement.',
+        ],
+      },
+      {
+        h: 'A ten-minute XML sitemap audit',
+        p: [
+          'Take twenty URLs from the sitemap and check four things: the status is 200, the canonical points at the same URL, the page is indexable, and `lastmod` matches a real change. Then compare the sitemap count with the number Search Console reports as discovered, and read the coverage reasons for the difference.',
+          'The XML Sitemap Generator writes the file and the index, the Web Crawler Audit confirms a URL’s status and canonical, and the Robots.txt Generator keeps the `Sitemap:` line from being buried under a disallow. Ten minutes of sampling catches the errors a validator cannot see.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Is an XML sitemap a ranking factor?', a: 'No. It is a discovery hint. Google’s documentation says submission does not guarantee crawling or indexing, and no ranking weight is assigned to the file itself.' },
+      { q: 'Do I need a sitemap?', a: 'Not always. A small site with clean internal links can be discovered without one. It earns its place on large sites, new sites, orphan pages and any site where internal linking is weak.' },
+      { q: 'What are the XML sitemap limits?', a: '50,000 URLs or 50 MB uncompressed per file, whichever comes first. A sitemap index has the same limits and can list up to 50,000 sitemaps, each of which may hold 50,000 URLs.' },
+      { q: 'Does Google use changefreq and priority?', a: 'No. Google ignores both elements. It uses lastmod when the value is consistently and verifiably accurate, and an unreliable lastmod may be ignored site-wide.' },
+      { q: 'Does submitting a sitemap guarantee indexing?', a: 'No. It helps discovery and can influence which canonical URL Google shows, but indexing still depends on the page being crawlable, indexable and worth including.' },
+      { q: 'Is the sitemap ping endpoint still available?', a: 'No. Google deprecated it in June 2023 and it stopped working at the end of that year. Submit through Search Console or the robots.txt Sitemap directive instead.' },
+    ],
+    relatedTools: ['sitemap-generator', 'web-crawler-audit', 'robots-txt-generator', 'seo-score-checker'],
+    relatedGuides: ['why-is-my-site-not-indexed', 'internal-linking', 'htaccess-301-redirect', 'robots-txt-for-search-and-ai-crawlers'],
+    links: [
+      { label: 'sitemaps.org: the XML sitemap protocol', url: 'https://www.sitemaps.org/protocol.html' },
+      { label: 'Google: build and submit a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
+      { label: 'Google: the sitemaps ping endpoint is going away', url: 'https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping' },
+    ],
+  },
+  {
+    slug: 'test-structured-data',
+    title: 'How to test structured data: two validators, two different questions',
+    focus: 'structured data',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'How to Test Structured Data: Rich Results vs Schema',
+    metaDesc: 'Two validators test structured data differently: Rich Results Test checks Google eligibility, Schema Markup Validator checks the markup. What neither can do.',
+    intro: 'Testing structured data is not one check. One validator asks whether Google can use the markup for a rich result; the other asks whether the markup is valid schema.org at all.',
+    sections: [
+      {
+        h: 'Two validators for structured data, two different questions',
+        p: [
+          'The Rich Results Test belongs to Google and answers a product question: is this page eligible for one of the search features Google supports? The Schema Markup Validator belongs to schema.org and answers a vocabulary question: is this a well-formed instance of the vocabulary, regardless of whether Google uses it?',
+          'Both are useful and neither replaces the other. A block can be schema-valid and ineligible for any rich result, and a block can pass the Rich Results Test while containing properties schema.org does not define. Running one and calling the markup tested is how people end up surprised in Search Console.',
+        ],
+      },
+      {
+        h: 'What the Rich Results Test actually checks',
+        p: [
+          'The Rich Results Test accepts a URL or a code snippet, renders JavaScript, and lists the feature types it detected. It checks Google’s required and recommended properties for those features, and it reports errors separately from warnings. A warning is usually a missing recommendation, not a reason the markup is ignored.',
+          'It only knows the features Google supports. “No items detected” on a valid Organization block is not an error, because Organization markup is not a rich result. The test also cannot judge whether the page deserves the feature, only whether the markup meets the published requirements.',
+          'It also shows the parsed items it found, which is the fastest way to see whether a CMS emitted one clean block or three overlapping ones.',
+        ],
+      },
+      {
+        h: 'What the Schema Markup Validator adds',
+        p: [
+          'The Schema Markup Validator checks syntax and vocabulary: malformed JSON, a missing `@context`, an unknown type, a property used with the wrong value type, a date that is not a date. It is the tool that catches a typo the Rich Results Test may silently skip because the property is optional for Google.',
+          'It does not apply Google’s eligibility rules or content policies. A FAQPage block for questions that are not visible on the page can be schema-valid and still violate Google’s structured data policies. Validity is necessary; it is not sufficient.',
+        ],
+      },
+      {
+        h: 'The structured data errors worth fixing first',
+        p: [
+          'Fix required properties first, because those decide whether a feature can appear at all: `headline`, `image` and `datePublished` on an article; `offers` and `price` on a product; `itemListElement` on a breadcrumb. Then fix types and nesting, where a string sits where an object belongs or an `@id` reference points at nothing.',
+          'Then check the policy layer. Markup must describe content a user can see, must not be hidden, and must not claim reviews or ratings the page does not show. Those are not syntax errors, which is why a validator can pass a page Google will ignore.',
+        ],
+      },
+      {
+        h: 'Test the structured data that is deployed, not the draft',
+        p: [
+          'Test the live URL, not the template in your editor. The URL test fetches the page as Googlebot would, including JavaScript-generated JSON-LD; the code test only sees the text you paste. A staging site behind authentication cannot be fetched, so paste the source for a syntax check and test the production URL after deploy.',
+          'Test the canonical URL rather than a tracking variant, and confirm the page is not noindex or blocked. After a fix, expect a delay: recrawling, reprocessing and the appearance of a rich result are separate steps, and the enhancement reports in Search Console are where to watch them.',
+          'A redirect is another false negative: the tools follow it and report on the destination, which may be a different template from the one you meant to check.',
+        ],
+      },
+      {
+        h: 'A ten-minute structured data validation pass',
+        p: [
+          'Pick one URL per template — home, article, product, FAQ — and run both validators. Fix errors, read warnings, and confirm every claim in the markup is visible on the page. Then inspect the same URL in Search Console to see what Google actually parsed.',
+          'The Schema Markup Generator builds the block, the Web Crawler Audit confirms the deployed page returns 200 with that block in place, and the SEO Score Checker covers the surrounding metadata. The pass is short because the point is template coverage, not every URL.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is the difference between the Rich Results Test and the Schema Markup Validator?', a: 'The Rich Results Test checks whether Google can use the markup for a supported rich result. The Schema Markup Validator checks whether the JSON-LD, microdata or RDFa is valid schema.org. One tests eligibility, the other tests the vocabulary.' },
+      { q: 'Does valid structured data guarantee a rich result?', a: 'No. Valid markup makes a page eligible; Google still decides whether to show the enhancement. Missing required properties, invisible content or a feature Google does not support will prevent it even when the syntax is perfect.' },
+      { q: 'Is structured data a ranking factor?', a: 'Not directly. Google describes it as a way to make pages eligible for richer appearances. It can improve how a result looks and how clearly the page is understood, but it is not a score added to the ranking.' },
+      { q: 'Why does the Rich Results Test show no items detected?', a: 'Either the page has no markup for a feature Google supports, the markup is generated in a way the test cannot see, or the feature is not one Google shows as a rich result. Organization and other non-feature types routinely report nothing.' },
+      { q: 'Can I test structured data by pasting JSON-LD?', a: 'Yes, both tools accept a code snippet. Use the snippet for syntax checks and the URL test for the final check, because the URL test renders the page and sees markup that only exists after JavaScript runs.' },
+      { q: 'Do I need to validate every page?', a: 'No. Validate one URL per template and any page with unusual markup. Templates repeat, so a fix at the template level covers thousands of URLs; page-by-page validation spends time on the same code.' },
+    ],
+    relatedTools: ['schema-markup-generator', 'web-crawler-audit', 'seo-score-checker', 'serp-preview-tool'],
+    relatedGuides: ['schema-markup-for-ai-search', 'website-launch-seo-checklist', 'screaming-frog-alternative'],
+    links: [
+      { label: 'Google: Rich Results Test', url: 'https://search.google.com/test/rich-results' },
+      { label: 'schema.org: Schema Markup Validator', url: 'https://validator.schema.org/' },
+      { label: 'Google: structured data general guidelines', url: 'https://developers.google.com/search/docs/appearance/structured-data/sd-policies' },
+    ],
+  },
+  {
+    slug: 'http-status-codes-seo',
+    title: 'HTTP status codes that change what Google does with a URL',
+    focus: 'http status code',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'HTTP Status Codes and Google: 301, 404, 410, 429, 503',
+    metaDesc: 'A status code does not rank a page, but it decides whether Google crawls, indexes, redirects or drops it. The codes that matter, and the soft 404 mistake.',
+    intro: 'An HTTP status code is the server’s first sentence about a URL, and Google acts on it before it reads the page. The difference between 301 and 302, or 404 and 410, changes what happens next.',
+    sections: [
+      {
+        h: 'The HTTP status code is read before the content',
+        p: [
+          'Every response begins with a three-digit code. Google’s crawlers use it to decide whether to follow, fetch, process or drop the URL; the content only matters after that decision. A 200 response moves a URL into the indexing pipeline, where indexing is still not guaranteed.',
+          'None of this is a ranking factor in the sense of a score. A status code controls access and consolidation: whether a URL stays in the index, whether its signals move to another URL, and whether the crawler comes back. Confusing that with ranking is how people end up redirecting pages that should simply return 404.',
+        ],
+      },
+      {
+        h: '301 and 308 versus 302 and 307',
+        p: [
+          '301 and 308 are permanent; 302 and 307 are temporary. Google treats 301 and 308 the same, and 302 and 307 the same. The permanent pair is a strong signal that the target should be processed and that the old URL’s signals belong there; the temporary pair is a weak signal and keeps the old URL in play.',
+          'Use a permanent redirect when the move is permanent, and redirect straight to the final URL. Google’s crawlers follow up to ten hops by default, but each hop is a request and a chance to fail, and a chain usually means a template was changed in two places. The method distinction between 307 and 302 matters for non-GET requests; for ordinary pages it rarely does.',
+        ],
+      },
+      {
+        h: '404 and 410: both removals, same treatment',
+        p: [
+          'Google treats all 4xx codes except 429 the same way: the content is ignored, and an indexed URL is removed. The 404 versus 410 distinction is semantic — “not found” against “gone” — not a faster-removal switch. Google’s documentation is explicit that newly encountered 404 pages are not processed at all.',
+          'What does matter is returning a real 4xx. A “not found” page served with 200 is a soft 404: Google sees a successful response with no useful content, and Search Console reports it as an error anyway. Redirecting every missing URL to the homepage is the other common mistake; it turns a clear removal into a confusing duplicate.',
+        ],
+      },
+      {
+        h: '429 and 5xx: slow down, do not disappear',
+        p: [
+          '429 and 5xx are server-side signals, and Google treats them as temporary. Crawlers slow down, already indexed URLs are preserved for a while, and content from a 5xx response is ignored. When the server returns 2xx again, the crawl rate recovers gradually rather than instantly.',
+          'Use 503 with `Retry-After` for planned maintenance instead of serving a 200 holding page. A brief outage is not a deindexing event, but a long one stops crawling and delays every other fix. Watch the Crawl Stats report for 5xx spikes before assuming a content problem.',
+        ],
+      },
+      {
+        h: 'Status codes at scale: soft 404s, chains and canonicals',
+        p: [
+          'At scale, status codes interact with the other signals. A redirect removes the old URL from the index; a canonical keeps it and states a preference; a noindex removes it without nominating a replacement. Picking two of those for the same URL creates the kind of contradiction that gets resolved by the crawler rather than by you.',
+          'Soft 404s are the most common production bug in single-page apps: the router renders “not found” into a 200 response. Server-side rendering or a correct status from the edge fixes it. A redirect loop is the second: browsers and crawlers give up, and the URL is neither indexed nor clearly removed.',
+        ],
+      },
+      {
+        h: 'A ten-minute HTTP status code audit',
+        p: [
+          'Sample each template and a handful of retired URLs. The live page should return 200; an old URL should return one permanent redirect hop; a deleted page should return 404 or 410; nothing you submitted should return 5xx. Then check that the sitemap contains only the 200 URLs and that no canonical points at a redirect.',
+          'The Web Crawler Audit reports the status and redirect chain for a single URL, the .htaccess Redirect Generator writes the permanent rule, and the XML Sitemap Generator keeps the submitted set honest. The SEO Score Checker is the final sweep for the pages that pass.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Do HTTP status codes affect ranking?', a: 'Not directly. They control crawling, indexing and the consolidation of signals. A 200 page can rank or not; a 301 moves signals to the target; a 404 removes the URL from the index. None of those is a ranking score.' },
+      { q: 'What is the difference between HTTP status codes 301 and 302?', a: 'A 301 is permanent and Google treats it as a strong signal that the target should be processed and inherit the old URL’s signals. A 302 is temporary, a weak signal, and keeps the old URL in play. Use 301 for moves you do not intend to reverse.' },
+      { q: 'Is a 410 better than a 404 for SEO?', a: 'Not in Google’s handling. All 4xx codes except 429 are treated the same: content is ignored and indexed URLs are removed. A 410 says “gone” more precisely, which helps humans and logs, but it is not a faster removal switch.' },
+      { q: 'What is a soft 404?', a: 'A response that returns 200 but shows an error or empty page. Google sees a success with no useful content and reports it as a soft 404, which is worse than a clear 404 because it looks like a valid page that should be indexed.' },
+      { q: 'Does a 5xx error deindex my site?', a: 'Not immediately. Google treats 5xx as temporary: indexed URLs are preserved for a while, content is ignored and crawl rate drops. A prolonged outage can lead to removal, and crawling recovers gradually once 2xx responses return.' },
+      { q: 'Should I redirect a 404 to the homepage?', a: 'Usually not. It turns a clear removal into a confusing duplicate and gives every missing URL the same target. Redirect only when a page has a genuine successor, and let the rest return 404 or 410.' },
+    ],
+    relatedTools: ['web-crawler-audit', 'htaccess-redirect-generator', 'sitemap-generator', 'seo-score-checker'],
+    relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed', 'noindex-vs-robots-txt', 'rel-canonical-tag'],
+    links: [
+      { label: 'Google: how HTTP status codes affect crawling', url: 'https://developers.google.com/search/docs/crawling-indexing/http-network-errors' },
+      { label: 'RFC 9110: HTTP semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110' },
+      { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
     ],
   },
 ];

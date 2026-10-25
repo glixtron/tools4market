@@ -6,6 +6,31 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (9th pass) — Day-11 pack: XML sitemaps, structured-data validation, HTTP status codes (v2.17)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** CEO Day-11 proposal named XML sitemaps, Twitter Cards and schema validation; the founder forwarded it for execution.
+
+**One candidate failed the primary-source gate, so it was replaced.** The proposal cited X’s card documentation at `developer.x.com/en/docs/twitter-for-websites/cards`. That URL now redirects to `docs.x.com/overview`, and the replacement path returns 404: X no longer publishes the card reference, and the last official copy is an archived snapshot. The proposal also said the standalone Card Validator is “gone”; in fact the preview was removed in 2022 and the page remains for logs and domain checks. Writing a guide whose primary citation redirects to a documentation home page would have broken the rule that facts come from current primary sources. The third slot went to HTTP status codes instead — RFC 9110 plus Google’s crawling documentation, both live, and a genuine gap (no guide used the phrase “http status”).
+
+**What shipped.** `xml-sitemap-best-practices` (622 words), `test-structured-data` (632) and `http-status-codes-seo` (633), each six prose sections and six FAQs, tool names only, no tables or lists.
+
+**Facts pinned to the primary documents, including the ones that contradict common advice.** Sitemaps: 50,000 URLs or 50 MB uncompressed per file, 50,000 entries in an index, UTF-8 and absolute URLs, a subdirectory sitemap covers only its own descendants unless submitted through Search Console, Google ignores `changefreq` and `priority`, and `lastmod` is used only while consistently verifiable. The ping endpoint was deprecated in June 2023 and stopped answering at the end of 2023, so old scripts are now getting 404s. Status codes: Google treats 301 and 308 the same, 302 and 307 the same, 301 is a strong signal and 302 weak, crawlers follow up to ten hops, all 4xx except 429 are handled identically — so “410 removes faster than 404” is not Google’s documented behaviour — and 429/5xx are temporary with crawl rate recovering gradually. Validation: the Rich Results Test checks Google feature eligibility, the Schema Markup Validator checks schema.org syntax, and passing one says nothing about the other.
+
+**Corrections made before publish.** The structured-data draft came in at 578 words (under the 600 floor) and its metaDesc at 161 characters (over the 158 cap); the draft was expanded rather than padded and the description rewritten to 157. One FAQ pair in the status-code post did not carry the focus phrase, which the audit caught as a single failure; the question was reworded rather than adding a keyword to the answer.
+
+**Cross-links.** `why-is-my-site-not-indexed` now points at both the sitemap and status-code guides; `website-launch-seo-checklist` at the sitemap and validation guides; `internal-linking` at the sitemap guide; `schema-markup-for-ai-search` and `screaming-frog-alternative` at the validation guide; and `htaccess-301-redirect`, `noindex-vs-robots-txt` and `rel-canonical-tag` at the status-code guide. The schema guide had no `relatedGuides` field at all before this pass, so the link graph now covers it.
+
+**Verification:** build **81 pages / 44 tools / 24 guides**, sitemap **80 URLs**; SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed `4e35b662`; IndexNow **80 URLs** (HTTP 200); live-verify **73/73**. All three live URLs return 200 with the three schema blocks and a Read next block; the live blog sitemap lists 24.
+
+**Deferred:** a Twitter Cards guide, until X republishes a stable card reference or the archived snapshot is accepted as the citation of record. Recorded in `suggest.md` so it is not re-proposed as if the docs were live.
+
+**Owner actions still open:** AdSense slot ids, Launchstag Verify now, Cloudflare managed robots.txt off, distribution kickoff.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (8th pass) — Day-10 pack: URL slugs, rel=canonical, hreflang (v2.16)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

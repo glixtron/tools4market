@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Seventeen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below).
+**Status:** ✅ Eighteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below).
+
+## Entry 18 — v2.17 Day-11 guides
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **81 pages / 44 tools / 24 guides** (80 sitemap URLs), SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**, IndexNow **80 URLs**.
+
+**Subject:** `feat: Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (v2.17)`
+
+**Summary:**
+- **One proposed topic was replaced after source verification:** X’s card documentation now redirects to `docs.x.com/overview` and the new card path 404s, so the primary reference is not live; the Card Validator’s preview was removed in 2022 rather than the tool disappearing. HTTP status codes took the slot, sourced from RFC 9110 and Google’s crawling docs.
+- **Three posts:** `xml-sitemap-best-practices` (622 words), `test-structured-data` (632) and `http-status-codes-seo` (633) — six prose sections and six FAQs each, tool names only, no tables or lists.
+- **Facts that contradict folklore:** sitemaps are a discovery hint, Google ignores changefreq/priority, the ping endpoint died at the end of 2023; Google treats 301/308 and 302/307 alike; all 4xx except 429 are handled the same, so 410 is not faster than 404; Rich Results Test and Schema Markup Validator test different things.
+- **Pre-publish fixes:** validation guide raised from 578 to 632 words and its metaDesc cut from 161 to 157; one status-code FAQ reworded to carry the focus phrase.
+- **Cross-links:** why-is-my-site-not-indexed → sitemap + status codes; website-launch-seo-checklist → sitemap + validation; internal-linking → sitemap; schema-markup-for-ai-search and screaming-frog-alternative → validation; htaccess-301-redirect, noindex-vs-robots-txt and rel-canonical-tag → status codes. The schema guide had no `relatedGuides` field before this pass.
+
+**Files in this commit:** `src/data/blog.js` (3 guides + cross-links), `README.md`, `ARCHITECTURE.md`, `suggest.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 17 — v2.16 Day-10 guides
 

@@ -2,6 +2,22 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-11 guides — v2.17 (25 Oct 2026)
+
+**Trigger:** CEO Day-11 proposal for XML sitemaps, Twitter Cards and schema validation. One candidate did not survive verification: X’s card documentation URL now redirects to `docs.x.com/overview` and the replacement path 404s, so the primary reference no longer exists live; the Card Validator’s preview was removed in 2022 rather than the tool being gone. The slot went to HTTP status codes, sourced from RFC 9110 and Google’s crawling documentation.
+
+**Added:** `xml-sitemap-best-practices` (622 words), `test-structured-data` (632) and `http-status-codes-seo` (633) — six prose sections and six FAQs each, tool names only, no tables or lists.
+
+**Anti-folklore points:** a sitemap is a discovery hint and Google ignores changefreq/priority; the ping endpoint died at the end of 2023; Google treats 301 and 308 alike and 302 and 307 alike; all 4xx except 429 are handled the same, so 410 is not a faster removal than 404; Rich Results Test and Schema Markup Validator answer different questions.
+
+**Corrections before publish:** validation guide raised from 578 to 632 words and its metaDesc cut from 161 to 157; one status-code FAQ reworded to carry the focus phrase after the audit caught it.
+
+**Cross-links:** why-is-my-site-not-indexed → sitemap + status codes; website-launch-seo-checklist → sitemap + validation; internal-linking → sitemap; schema-markup-for-ai-search and screaming-frog-alternative → validation; htaccess-301-redirect, noindex-vs-robots-txt and rel-canonical-tag → status codes. The schema guide had no relatedGuides field before this pass.
+
+**Tests:** build **81 pages / 44 tools / 24 guides** (80 sitemap URLs), seo-audit **2547/2547**, smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify **73/73**, IndexNow **80 URLs**. Deployed `4e35b662`.
+
+**Deferred:** Twitter Cards guide until X republishes a card reference; recorded in `suggest.md`.
+
 ### Day-10 guides — v2.16 (25 Oct 2026)
 
 **Trigger:** owner authorized Day 10 after the audit corrections, with topics gap-checked against the 18-guide library rather than chosen by keyword volume.

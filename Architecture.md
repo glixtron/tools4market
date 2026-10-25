@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.16 · 25 Oct 2026 · 44 tools, 78 generated HTML pages, 21 guides*
+*Version: 2.17 · 25 Oct 2026 · 44 tools, 81 generated HTML pages, 24 guides*
 
 ---
 
