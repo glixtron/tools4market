@@ -143,6 +143,8 @@ ${outputArea('kd-out', 'Frequency analysis')}`,
       { q: 'Do hashtags still help reach?', a: 'Yes, but they work as classification, not magic: they tell the platform what your post is about so it can find the right audience. The hashtag generator leads with your specific terms rather than borrowed broad tags.' },
       { q: 'CamelCase or all lowercase hashtags?', a: 'Neither affects reach, but CamelCase (#EmailMarketing) is far more readable — especially for screen readers, which announce each joined word.' },
       { q: 'Should I put hashtags in the caption or first comment?', a: 'On Instagram both are indexed identically; first-comment keeps captions clean. On X, LinkedIn and TikTok they belong in the post itself.' },
+      { q: 'Should I use the same hashtags on every post?', a: 'No. An identical tag set on every post reads as automation to Instagram and TikTok and can cap reach. Keep 5–10 branded tags steady, then swap the rest to match what that post is actually about.' },
+      { q: 'Can a hashtag be banned or restricted?', a: 'Yes. Some tags are quarantined for spam, and a post using one can drop out of tag and Explore results with no warning. Search the tag first — a thin or empty tag page is the signal to leave it out of your set.' },
     ],
     html: `
 ${f.text('hg-keyword', 'Your topic or keyword', 'email marketing')}

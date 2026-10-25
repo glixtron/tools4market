@@ -6,6 +6,28 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (2nd pass) — Day-7 pack integrated: 13 FAQs + 1 guide (v2.12)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner dispatched Day 7 (3 files, ~13,000 words) — FAQ Part 4 for tools 16–20, three long-tail blog posts, an internal-linking widget template.
+
+**Cross-check before writing anything.** The pack again targeted URLs that do not exist here (`/content/hashtag-generator`, `/web-tools/xml-sitemap-generator`) and shipped hand-written FAQ `JSON-LD`; this site derives `FAQPage` from `tools.<slug>.faqs[]` at build time, so pasting it would have created a second schema copy that drifts.
+
+**FAQ Part 4 — 13 of 15 merged, 2 rejected.** Each proposed question was checked against the four that already existed on the tool. Rejected as duplicates: hashtag per-platform counts, password safety, Base64-is-encryption, Base64 compression, URL `encodeURI` vs `encodeURIComponent`, XML-sitemap definition. Shipped the distinct ones: hashtag rotation + banned tags, `sitemap-news.xml`, sitemap update cadence, password-manager advice, Base64 use cases + padding, URL-encoding definition + separator trap. All trimmed to the ~300-character answer rule.
+
+**Blog batch 3 — 1 of 3 published, and that is the correct number.**
+- `meta-description-length-2026` **published**. Adapted, not pasted: dropped the unsourced CTR range and the invented per-platform character table (Google publishes no character limit and truncates on rendered width — the article says so and gives a ladder as a rule of thumb instead), six sections not seven, house voice, internal links pointed at real tool slugs.
+- `why-is-my-site-not-indexed` **already exists** (live since 21 Oct, same focus phrase, fuller structure). The pack's post 8 would have been a direct duplicate; only its genuine delta was merged — two FAQs covering "Discovered — currently not indexed" and where Search Console reports the exclusion reason. The pack's "35% of cases / 5+ years of forum questions" table was discarded as unsourced.
+- The AI-training opt-out post **not published**: the site already runs three AI-crawler guides and `how-to-block-gptbot` already answers its central question. A fourth would split authority, not add it.
+
+**Internal-linking widget — reviewed, not built.** The template is complete but its batch script rewrites built HTML, which `build.mjs` regenerates; it has to become a build step. Its `sessionStorage` counters would also bypass the consent gate. Reasoning recorded in `docs/day7/INTEGRATION-NOTES.md` so the next session does not re-litigate it. All three pack files archived verbatim alongside those notes.
+
+**Verification:** build **69 pages** / 44 tools / **12 guides**; SEO audit **2189/2189** (+22), smoke **44/44**, consent **30/30**, personalized **181/181**. Three audit rules caught real errors mid-pass and were fixed rather than waived: the 3–6 FAQ cap (four pages were at 7), the 3–6 section cap (the new guide was at 7), and the focus-phrase rules for title/description/intro/heading.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 — Brand mark wired in site-wide (v2.11)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

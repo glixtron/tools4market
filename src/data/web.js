@@ -71,6 +71,8 @@ ${note('Back up your existing .htaccess before overwriting it — a syntax error
       { q: 'Does a sitemap improve rankings?', a: 'Not directly. A sitemap helps discovery and crawl coverage, and a URL appearing in one is not proof that it has been indexed. The XML sitemap generator gives you a valid file; what happens next depends on your content and the crawl signals Google sends.' },
       { q: 'Should I include noindex or redirected pages?', a: 'No. Only canonical, indexable, 200-status URLs belong in the sitemap. Everything else sends mixed signals.' },
       { q: 'Do I need changefreq and priority?', a: 'They are optional and carry little weight today. lastmod is the one attribute worth setting — truthfully. The XML sitemap generator lets you leave every optional field empty and still produce a valid file.' },
+      { q: 'Sitemap.xml or sitemap-news.xml?', a: 'sitemap.xml lists every URL you want indexed. sitemap-news.xml is a Google News format for articles published in the last 48 hours; it only does anything for sites already accepted into Google News. Most sites need the plain sitemap and nothing else.' },
+      { q: 'How often should the sitemap be updated?', a: 'On every publish, and on every unpublish — a dead URL left in the sitemap is a quality signal against you. If your build generates it, this is automatic; on a static site, regenerate and redeploy the file whenever the URL set changes.' },
     ],
     html: `
 ${f.textarea('sm-urls', 'URLs — one per line', 'https://example.com/\nhttps://example.com/pricing\nhttps://example.com/blog/seo-guide', 9)}
@@ -150,6 +152,8 @@ ${note('Structure and attribute checks only — this validator does not fetch th
       { q: 'Is my password sent anywhere?', a: 'No. Generation happens entirely in your browser. This page has no backend and collects nothing — you can disconnect from the internet and it still works.' },
       { q: 'How long should my password be?', a: '16 characters for most accounts, 20+ for anything that guards money or site administration. Length beats complexity: a long password with fewer character types is stronger than a short one with all symbols. The password generator shows the entropy figure for the settings you pick.' },
       { q: 'Should I use a passphrase instead?', a: 'Passphrases (four or more random words) are a fine alternative when you must type a password manually. They are easier to remember and their entropy is high — as long as the words are truly random, not a quote or lyric.' },
+      { q: 'Should I use a password manager?', a: 'Yes — generate here, store there. A manager removes the reason people reuse passwords, and reuse is what turns one breach into twenty. Generate a unique password per account and let the manager remember it.' },
+      { q: 'How often should I change a password?', a: 'Only when there is a reason: a breach, a shared account, or a device you no longer control. Routine rotation every 90 days is outdated advice — it produces weaker, memorised variations and no measurable security gain.' },
     ],
     html: `
 <div class="field">
@@ -198,6 +202,8 @@ ${note('Passwords are generated on your device and never leave this page. Store 
       { q: 'Does this Base64 encoder encrypt data?', a: 'No. It is an encoding that makes bytes text-safe and is fully reversible by anyone. Use real encryption if you need confidentiality.' },
       { q: 'Why is the encoded text about a third longer?', a: 'Every three bytes become four characters (plus occasional padding), so output is roughly four-thirds the size of the input.' },
       { q: 'Can this Base64 encoder handle URL-safe values?', a: 'Yes. It uses hyphen and underscore in place of plus and slash, with optional padding, for JWTs, filenames and signed URLs.' },
+      { q: 'What is Base64 actually used for?', a: 'Transport, not security: data URLs that inline an image in CSS, email attachments, binary blobs inside JSON, HTTP Basic auth headers, and JWT segments. In every case the point is to survive a text-only channel intact.' },
+      { q: 'Why does Base64 end with equals signs?', a: 'Padding. Base64 works in three-byte groups that become four characters; when the input does not divide evenly, one or two “=” fill the gap so the length stays a multiple of four. URL-safe variants often drop the padding and let the decoder infer it.' },
       { q: 'Why does my decoded text show strange characters?', a: 'Usually a dialect mismatch (punctuation from the wrong alphabet), missing padding, or bytes that are not UTF-8 text at all. Paste the complete string.' },
     ],
     html: `
@@ -237,6 +243,8 @@ ${note('Encoding is not encryption — anyone with the Base64 string can read th
       { q: 'Why does my URL show percent-2520 instead of percent-20?', a: 'The value was encoded twice: the percent sign of the first pass was encoded again. Decode once, or stop encoding a value that is already encoded.' },
       { q: 'Does this URL encoder protect or encrypt data?', a: 'No. URL encoding is a reversible text transformation for transport and offers no secrecy or integrity whatsoever.' },
       { q: 'Why do plus signs turn into spaces?', a: 'Browser form submissions use plus for space in query strings. Percent-20 is the unambiguous space encoding and is safe everywhere.' },
+      { q: 'What does URL encoding actually do?', a: 'It rewrites characters a URL cannot carry literally — spaces, non-ASCII letters, emoji and the reserved characters used as data — as a percent sign plus two hex digits, so the string survives transport intact.' },
+      { q: 'Why does my URL break at an ampersand or equals sign?', a: 'Those are separators. A value containing a literal & or = must be encoded as %26 or %3D first — otherwise the parser reads it as the end of your parameter and the rest of the value becomes a new key.' },
     ],
     html: `
 ${f.textarea('ue-text', 'URL, query string or text', 'https://example.com/search?q=hello world&lang=en', 6)}

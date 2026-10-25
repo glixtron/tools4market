@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-7 pack integrated — v2.12 (25 Oct 2026)
+
+**Trigger:** owner dispatched Day 7 — FAQ Part 4 (tools 16–20), three long-tail posts, an internal-linking widget template.
+
+**13 FAQ merges, 2 rejections.** Every proposed question was diffed against the four already on the tool. Duplicates dropped (hashtag per-platform counts, password safety, Base64-is-encryption, Base64 compression, `encodeURI` vs `encodeURIComponent`, sitemap definition); distinct ones shipped (hashtag rotation, banned tags, `sitemap-news.xml`, update cadence, password managers, Base64 use cases, padding, URL-encoding definition, separator trap). The pack's hand-written JSON-LD was not used — schema is generated from the same data array, by design.
+
+**One guide out of three posts.** `meta-description-length-2026` is new (guides 11 → 12, pages 68 → 69). The "why is my site not indexed" post duplicated a guide live since 21 Oct — merged its two genuinely new FAQs instead, and discarded the unsourced "35% of cases" table. The AI-training opt-out post was not published: three AI-crawler guides already exist and `how-to-block-gptbot` answers its core question.
+
+**Widget reviewed, deferred with reasons** (`docs/day7/INTEGRATION-NOTES.md`): the batch-insert script mutates built HTML that the next build overwrites, and its counters bypass the consent gate. It belongs in the build, not a post-build pass.
+
+**Tests:** build 69 pages/44 tools/12 guides, seo-audit **2189/2189**, smoke 44/44, consent 30/30, personalized 181/181. The audit's 3–6 FAQ and 3–6 section caps caught four over-long pages and the new guide mid-pass.
+
 ### Brand mark wired in site-wide — v2.11 (25 Oct 2026)
 
 **Trigger:** owner supplied a new logo (navy tile, white "k" mark, lime dot) and asked for it on the site.

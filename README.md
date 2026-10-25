@@ -39,7 +39,7 @@ Then open <http://localhost:8090>.
 A clean build prints:
 
 ```
-✔ Built 68 HTML pages (44 tools, 5 categories, 5 policy pages, 11 guides and blog hub) + sitemap.xml, robots.txt, 404.html, assets.
+✔ Built 69 HTML pages (44 tools, 5 categories, 5 policy pages, 12 guides and blog hub) + sitemap.xml, robots.txt, 404.html, assets.
 ```
 
 The build also warns if any page's `<title>` exceeds 60 characters or its meta description exceeds 158 — fix the data file rather than ignoring the warning.
@@ -272,7 +272,7 @@ Both layers ship from this single repo to one Cloudflare project — no second s
 
 | Layer | What it is | Where it comes from | Runs on |
 |---|---|---|---|
-| **Frontend** | 68 static pages (HTML/CSS/JS, 44 tools and 11 guides) | `dist/` (built by `node build.mjs`) | Cloudflare static assets (global CDN) |
+| **Frontend** | 69 static pages (HTML/CSS/JS, 44 tools and 12 guides) | `dist/` (built by `node build.mjs`) | Cloudflare static assets (global CDN) |
 | **Backend** | `/api/fetch` live-URL proxy (SSRF-guarded) | `functions/api/fetch.js`, served by `worker.js` | The same Worker (serverless) — or a Pages Function on Path B |
 | **Backend** | `/api/suggest` AI fix suggestions (consent-gated client) | `functions/api/suggest.js`, served by `worker.js` | The same Worker + the `AI` (Workers AI) binding — no API key anywhere |
 

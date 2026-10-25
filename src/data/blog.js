@@ -515,6 +515,7 @@ export const ARTICLES = [
       { q: 'How long does Google take to index a new site?', a: 'Anywhere from a few days to several weeks. A correct sitemap, a couple of internal links and a healthy robots.txt speed it up; requesting indexing on key URLs after those checks can nudge the first crawl. There is no guaranteed timeline for when a new site gets indexed.' },
       { q: 'Does submitting a sitemap guarantee indexing?', a: 'No. A sitemap is a discovery hint. Google still decides whether to crawl and index each URL, and repeatedly resubmitting an unchanged sitemap has no effect.' },
       { q: 'Why does Search Console say "Crawled — currently not indexed"?', a: 'Google fetched the page and chose not to include it — usually thin or duplicate value, a noindex directive, a canonical elsewhere, or a soft-404-like experience. Improve the page\'s distinct value and its internal links; the status updates after the next crawl.' },
+      { q: 'What does "Discovered — currently not indexed" mean?', a: 'Google knows the URL exists but has not fetched it yet. Nothing is broken; the queue is waiting on crawl budget or on a reason to spend it. Internal links from pages that already rank, plus a sitemap entry, move it along faster than resubmitting the URL repeatedly.' },
       { q: 'Can robots.txt stop my site from being indexed?', a: 'Yes — a broad Disallow blocks crawling, and for a new site that means no content is ever seen. For pages already indexed, blocking robots.txt can leave them listed anyway, which is why noindex (kept crawlable) is the right tool for de-indexing.' },
       { q: 'Will more content or more backlinks get my pages indexed?', a: 'Links and genuine authority help discovery and selection, and unique content gives Google a reason to index. But fix technical blocks first — links to an uncrawlable page accomplish nothing.' },
     ],
@@ -719,6 +720,79 @@ export const ARTICLES = [
     links: [
       { label: 'Screaming Frog SEO Spider — official site', url: 'https://www.screamingfrog.co.uk/seo-spider/' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
+    ],
+  },
+  {
+    slug: 'meta-description-length-2026',
+    title: 'How long should a meta description be? The 2026 answer',
+    focus: 'meta description length',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Meta Description Length in 2026 — What Actually Fits',
+    metaDesc: 'Meta description length in 2026: aim for 120–155 characters. Why the old 160 limit still circulates, what Google truncates on, and how to write one it keeps.',
+    intro: 'Meta description length is usually quoted as 160 characters. Google does not count characters — it measures pixels, and the budget is smaller on a phone. Here is the range that survives both, why descriptions get rewritten anyway, and how to write one that is more likely to be kept.',
+    sections: [
+      {
+        h: 'The short answer on meta description length',
+        p: [
+          'Write to 120–155 characters. That fits a Google desktop result in full and still fits most mobile results, where the snippet is narrower and truncates earlier. Below roughly 70 characters you have usually said too little for Google to keep, and it starts pulling a sentence out of the page instead.',
+          'Treat the number as a budget, not a rule. Google truncates on rendered width, so a description full of wide letters (W, M, capitals) is cut earlier than the same character count of narrow ones. Checking a draft in a character counter tells you whether you are in range; checking it in a snippet preview tells you whether it actually fits.',
+        ],
+      },
+      {
+        h: 'Why the 160-character limit still circulates',
+        p: [
+          'It was accurate once. Google widened desktop snippets in 2017 to around 160 characters, the number stuck in every checklist since, and nothing has formally replaced it — Google never publishes a character limit. What changed is mobile, where the same snippet renders in a narrower column and the visible text ends sooner.',
+          'The practical result is a two-tier budget: 155 characters is safe everywhere, 160 is safe on desktop and risky on mobile, and anything past 180 is truncated on both. The old limit is not wrong so much as it is desktop-only advice presented as universal.',
+        ],
+      },
+      {
+        h: 'A ladder you can check a draft against',
+        p: ['Rough guide for a Google result, English text, average letter widths:'],
+        pre: 'under 70 chars   too thin — Google usually substitutes page text\n70–119           fits everywhere; often feels unfinished\n120–155          the target: full display on desktop and most mobile\n156–180          desktop only; mobile truncates\n180+             truncated on both',
+        p2: [
+          'The upper bound is softer than the lower one. A 158-character description that ends on a complete clause is better than a 150-character one that stops mid-thought — but only if the truncation point happens to fall after the useful part, which you cannot control per device. Ending with a short, self-contained clause is the cheapest insurance.',
+        ],
+      },
+      {
+        h: 'What Google does with the description you wrote',
+        p: [
+          'A description is a hint, not a directive. Google shows the one you wrote for a good share of queries and rewrites the rest — often pulling a passage from the page that matches the searcher’s exact wording, sometimes appending a date or a rating, sometimes building a snippet around where the query appears in the text. No tag or length prevents this, and most of the time the rewrite is not a problem: it is matched to the query that produced it.',
+          'What you can influence is whether your version is good enough to keep. A description that reads like a sentence a person would write, promises exactly what the page delivers, and contains the words people actually search for has a better chance of being used. A description that repeats the title, stuffs keywords or describes a different page gives Google a reason to replace it.',
+        ],
+      },
+      {
+        h: 'Writing one that survives',
+        p: [
+          'Say what the page is and what it gives the reader, in that order. Keep the target phrase in the sentence once, phrased the way people search rather than the way a keyword tool exports it. Use the active voice and a specific noun — “check your meta description length against mobile and desktop” beats “this tool helps with meta descriptions”.',
+          'Leave the brand name out unless the page is a brand page; it spends characters on a word the searcher already sees in the URL. End on a complete thought, not a cliffhanger. And write a different one for every page: a site-wide description is the fastest way to have all of them rewritten at once.',
+          'Then check it. The Meta Description Checker counts characters and marks the desktop and mobile cut-off points; the SERP Preview Tool renders the snippet the way a result page would, which is the only way to see whether the truncation lands somewhere sensible; the Meta Tag Generator writes the full head block once the wording is settled.',
+        ],
+      },
+      {
+        h: 'Common mistakes',
+        p: [
+          'Auto-generating from the first paragraph. It is the default in most CMSs and it produces descriptions that start mid-sentence, repeat the heading and waste the first 40 characters. Write it by hand; it is thirty seconds per page.',
+          'Repeating the title. If the title already says “Meta description length 2026”, the description should not start with those four words — that is a third of the budget spent saying nothing new.',
+          'Keyword lists. Comma-separated phrases read as spam to a person and give the snippet no reason to be clicked. One phrase, in a sentence.',
+          'One description for every page. Duplicates are a strong signal that the pages are near-duplicates too, and Google will happily rewrite all of them.',
+          'No description at all. Google then builds one from page text, which is usually worse than anything you would have written.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Does meta description length affect rankings?', a: 'No. Google has said the description is not a ranking factor. It affects the snippet, and the snippet affects whether people click — so it moves traffic, not position.' },
+      { q: 'Should the keyword go in the meta description?', a: 'Yes, once, in the sentence where it reads naturally. Google bolds matched words in the snippet, which helps the result stand out, but a description written around a keyword list reads as spam and gets rewritten.' },
+      { q: 'Can two pages share a meta description?', a: 'They can, but they should not. Duplicates blur which page answers a query and give Google a reason to rewrite both. Every indexable page deserves its own sentence.' },
+      { q: 'Is the limit different on mobile?', a: 'Yes. Google truncates on rendered width, and a mobile result is narrower, so the same description shows fewer words. Writing to about 120–155 characters keeps the useful part visible on both.' },
+      { q: 'Do I need a meta description on every page?', a: 'Write one for every page you want clicked. Google may ignore it and build a snippet from the page, but a good description is used often enough that leaving it empty is a wasted opportunity, not a neutral choice.' },
+    ],
+    relatedTools: ['meta-description-checker', 'meta-tag-generator', 'serp-preview-tool'],
+    links: [
+      { label: 'Google: control your snippets in search results', url: 'https://developers.google.com/search/docs/appearance/snippet' },
+      { label: 'Google: meta tags and attributes that Google supports', url: 'https://developers.google.com/search/docs/crawling-indexing/meta-tag' },
     ],
   },
 ];
