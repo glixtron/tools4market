@@ -14,6 +14,8 @@
     "test:seo": "node tests/seo-audit.mjs",
     "test:consent": "node tests/consent-test.mjs",
     "test:live": "node tests/live-verify.mjs",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "brand": "node scripts/make-brand-assets.mjs",
+    "brand:og": "node scripts/render-og.mjs"
   }
 }

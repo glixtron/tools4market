@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Brand mark wired in site-wide — v2.11 (25 Oct 2026)
+
+**Trigger:** owner supplied a new logo (navy tile, white "k" mark, lime dot) and asked for it on the site.
+
+**The file needed work first.** It was a JPEG named `.png` with ~35% dead margin — at 34px the mark would have been unreadable. Added `scripts/make-brand-assets.mjs` (pure Node + zlib): tight bbox crop using a max-channel distance threshold (the soft navy gradient defeats a per-channel epsilon), square pad, box-filter downscale to 512/192/180/72/96, and a `favicon.svg` that inlines the 96px mark as base64 so the shipped favicon is the real artwork.
+
+**The share card had to move too.** `og-image.png` still carried the retired indigo "T4" badge, so it was redrawn at exact 1200×630 on a canvas (`scripts/render-og.mjs` + `scripts/brand/og-card.html`) — new mark, navy-to-lime palette, current tagline and the "44 tools / No signup / Runs in your browser" pills — then re-encoded to opaque RGB at 5 bits per channel: **776 KB → 54 KB**, no visible loss.
+
+**Wiring:** `<img class="logo-mark">` in header and footer (34px with `width`/`height`, gradient tile kept as fallback), dedicated `apple-touch-icon.png`, `theme-color` + manifest `theme_color` → `#0b172f`, Organization/BlogPosting `logo` → the square 512 tile. `npm run brand` / `npm run brand:og` added; `design.md` §5 documents the pipeline.
+
+**Tests:** build 68 pages/44 tools/11 guides, smoke 44/44, seo-audit **2167/2167**, consent 30/30, personalized 181/181.
+
 ### Day-2 content pack integrated — v2.10 (24 Oct 2026)
 
 **Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (blog posts, AEO FAQs, analytics guide, PH/social assets, keyword research + an OpenCode prompt instructing an agent to execute 7 "machine tasks"). Owner: "read all these files also and write everything accordingly".

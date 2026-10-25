@@ -536,6 +536,13 @@ p { margin: 0 0 1em; }
   box-shadow: 0 2px 8px rgba(36,59,99,.32);
 }
 
+/* Raster brand mark (scripts/make-brand-assets.mjs). The artwork already carries
+   its own navy tile, so the gradient above only shows if the image fails. */
+img.logo-mark {
+  object-fit: cover;
+  border-radius: 9px;
+}
+
 /* Nav */
 .site-nav {
   display: flex;
@@ -1716,6 +1723,7 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
 .site-footer .logo-mark {
   background: linear-gradient(145deg, #243b63, #96682c);
   box-shadow: 0 2px 8px rgba(231,180,94,.35);
+  border-radius: 9px;
 }
 
 .site-footer p {

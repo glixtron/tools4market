@@ -6,6 +6,29 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 — Brand mark wired in site-wide (v2.11)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner supplied a new logo (`tools4market-logo.png`, a navy tile with the white "k" mark and a lime dot) and asked to "add this as a logo on our website".
+
+**What was actually delivered:** the supplied file was a JPEG with a `.png` extension and ~35% dead navy margin. Dropped in unchanged it would have (a) failed as a PNG, (b) rendered the mark at roughly a third of the tile at 34px. So the asset pipeline came first, the wiring second.
+
+**New `scripts/make-brand-assets.mjs`** (pure Node + zlib — no sharp/imagemagick, so it regenerates on any machine):
+- decodes the master PNG, finds the artwork's bounding box using a max-channel distance from the corner colour (a tight per-channel epsilon swallows the soft navy gradient — the first attempt returned the whole 1024² canvas),
+- crops to a square around that box with 6% padding,
+- box-filter downscales to **512 / 192 / 180 / 72 / 96** and re-encodes each as PNG,
+- writes `favicon.svg` as a navy rounded tile with the 96px mark inlined as base64, so the real artwork ships instead of a hand-traced approximation that would drift.
+
+**New `scripts/render-og.mjs`** (local render server + canvas page in `scripts/brand/og-card.html`): the old `og-image.png` still carried the retired indigo "T4" badge. The card is now drawn at exact 1200×630 on a canvas (real type rendering, not an upscaled viewport grab), POSTed back and re-encoded to opaque RGB with 5-bit-per-channel quantisation — **776 KB → 54 KB** with no visible difference, which matters because every social crawler fetches it.
+
+**Wiring:** header + footer `logo-mark` are now `<img>` (34px, `width`/`height` set — no layout shift; the old gradient tile stays as CSS fallback), `apple-touch-icon` points at the dedicated 180px file, `theme-color` and the PWA manifest move to the logo's `#0b172f`, `favicon.ico` still wraps a PNG so legacy crawlers keep working, and the Organization/BlogPosting `logo` moves from the 1200×630 card to the square 512 tile (Google's logo guidance). `npm run brand` / `npm run brand:og` documented in `design.md` §5.
+
+**Verification:** build 68 pages / 44 tools / 11 guides; smoke **44/44**, SEO audit **2167/2167**, consent **30/30**, personalized **181/181** — all green on the first run after wiring. Rendered header inspected in the desktop browser at 1100px.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-24 (early session, 2nd pass) — Day-2 content pack integrated (v2.10)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

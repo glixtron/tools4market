@@ -2,12 +2,36 @@
 // Tools4Market — static site generator. Run: node build.mjs
 import { rm, mkdir, writeFile, copyFile, readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, SEARCH_EXAMPLES, weekIndex } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE } from './src/data/inspect.js';
 import { ARTICLES } from './src/data/blog.js';
 
 const R = fileURLToPath(new URL('.', import.meta.url));
 const YEAR = new Date().getFullYear();
+
+// ---- Asset cache-busting -------------------------------------------------
+// `/assets/*` and `/fonts/*` are served `max-age=31536000, immutable`, but the
+// filenames are stable, so an in-place edit (style.css, a runtime file, an icon)
+// would never reach a returning visitor. Append `?v=<hash>` to every HTML asset
+// reference: the bytes change → the URL changes → the cache is bypassed, while
+// the bare path still resolves for crawlers that drop the query string.
+// (Suggestion logged 23 Oct in suggest.md; implemented here for the v2.11 mark.)
+const ASSET_V = await (async () => {
+  const h = createHash('sha256');
+  const dirs = ['src/assets', 'src/runtime', 'src/data', 'src/fonts'];
+  const files = ['src/style.css', 'src/site.js'];
+  for (const d of dirs) {
+    try {
+      for (const f of (await readdir(R + d)).sort()) {
+        if (/\.(js|css|png|svg|woff2)$/.test(f)) files.push(d + '/' + f);
+      }
+    } catch { /* directory not present */ }
+  }
+  for (const f of files) h.update(await readFile(R + f));
+  return h.digest('hex').slice(0, 8);
+})();
+const av = (path, p) => rel(path, p) + '?v=' + ASSET_V;
 
 // "22 October 2026" for the visible Last-updated labels (ISO date → long form)
 const fmtDate = (iso) => {
@@ -143,7 +167,7 @@ function pageScripts(path, tool) {
     if (!LOCAL_TOOLS.has(tool.slug)) files.push('runtime/inspect.js');
     if (AUDIT_SLUGS.has(tool.slug)) files.push('runtime/audit.js');
   }
-  return files.map((f) => `<script defer src="${rel(path, '/assets/' + f)}"></script>`).join('\n');
+  return files.map((f) => `<script defer src="${av(path, '/assets/' + f)}"></script>`).join('\n');
 }
 
 function layout({ path, title, desc, body, ld = [], noindex = false, tool = null }) {
@@ -257,22 +281,22 @@ ${GOOGLE_VERIFY ? `<meta name="google-site-verification" content="${esc(GOOGLE_V
 <link rel="preload" as="font" type="font/woff2" crossorigin href="${rel(path, '/fonts/fraunces-latin.woff2')}">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="${rel(path, '/fonts/inter-latin.woff2')}">
 ${AD_SLOTS_ON ? '<link rel="preconnect" href="https://pagead2.googlesyndication.com">' : ''}
-<link rel="icon" type="image/svg+xml" href="${rel(path, '/assets/favicon.svg')}">
+<link rel="icon" type="image/svg+xml" href="${av(path, '/assets/favicon.svg')}">
 <link rel="icon" type="image/x-icon" href="${rel(path, '/favicon.ico')}">
-<link rel="apple-touch-icon" href="${rel(path, '/assets/icon-192.png')}">
+<link rel="apple-touch-icon" sizes="180x180" href="${av(path, '/assets/apple-touch-icon.png')}">
 <link rel="manifest" href="${rel(path, '/manifest.webmanifest')}">
 <link rel="sitemap" type="application/xml" href="${rel(path, '/sitemap.xml')}">
 <link rel="alternate" type="text/plain" href="${rel(path, '/llms.txt')}">
 <link rel="alternate" type="application/rss+xml" title="${SITE.name} — Guides" href="/feed.xml">
-<meta name="theme-color" content="#243b63">
-<link rel="stylesheet" href="${rel(path, '/assets/style.css')}">
+<meta name="theme-color" content="#0b172f">
+<link rel="stylesheet" href="${av(path, '/assets/style.css')}">
 ${ld.map(ldTag).join('\n')}
 </head>
 <body>
 ${gtmBody}
 <header class="site-header">
   <div class="container header-inner">
-    <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
+    <a class="logo" href="${rel(path, '/')}"><img class="logo-mark" src="${av(path, '/assets/logo-mark.png')}" alt="" width="34" height="34" decoding="async"><span>Tools4Market</span></a>
     <nav class="site-nav" aria-label="Main">
       ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}\"${path.startsWith('/' + c.slug + '/') ? ' aria-current="page"' : ''}>${c.nav}</a>`).join('')}
       <a href="${rel(path, '/blog/')}\"${path.startsWith('/blog/') ? ' aria-current="page"' : ''}>Guides</a>
@@ -288,7 +312,7 @@ ${body}
   <div class="footer-brand-bar"></div>
   <div class="container footer-grid">
     <div>
-      <a class="logo" href="${rel(path, '/')}"><span class="logo-mark">T4</span><span>Tools4Market</span></a>
+      <a class="logo" href="${rel(path, '/')}"><img class="logo-mark" src="${av(path, '/assets/logo-mark.png')}" alt="" width="34" height="34" decoding="async"><span>Tools4Market</span></a>
       <p>Free browser-based tools for marketers, bloggers and webmakers. Most tools process input in your browser; page checks fetch the public URL through our first-party proxy. No signup, no limits.</p>
     </div>
     <div>
@@ -347,7 +371,8 @@ function homeLd() {
     },
     {
       '@context': 'https://schema.org', '@type': 'Organization',
-      name: SITE.name, url: SITE.url + '/', logo: SITE.url + '/assets/og-image.png',
+      name: SITE.name, url: SITE.url + '/',
+      logo: { '@type': 'ImageObject', url: SITE.url + '/assets/icon-512.png', width: 512, height: 512 },
       email: SITE.email,
     },
     {
@@ -689,7 +714,7 @@ function articleLd(a) {
       headline: a.title, description: a.metaDesc, url: SITE.url + path,
       datePublished: a.date, dateModified: a.updated || a.date,
       author: { '@type': 'Organization', name: a.author },
-      publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/og-image.png' } },
+      publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/icon-512.png', width: 512, height: 512 } },
       image: SITE.url + '/assets/og-image.png',
       inLanguage: 'en', mainEntityOfPage: { '@type': 'WebPage', '@id': SITE.url + path },
       keywords: a.focus,
@@ -927,7 +952,9 @@ ${feedItems}
     ';window.T4M_SCORE=' + JSON.stringify(SCORE) + ';\n';
   await writeFile(R + 'dist/assets/inspect-strings.js', stringsJs);
 
-  await writeFile(R + 'dist/assets/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#243b63"/><stop offset="1" stop-color="#96682c"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="42" font-family="Georgia,serif" font-size="26" font-weight="700" fill="#f8f5ee" text-anchor="middle">T4</text></svg>\n`);
+  // favicon.svg + the app-icon set are generated by scripts/make-brand-assets.mjs
+  // from src/assets/logo.png — see that script for the crop/scale pipeline.
+  await copyFile(R + 'src/assets/favicon.svg', R + 'dist/assets/favicon.svg');
   // /favicon.ico — legacy browsers and several crawlers request it from the
   // domain root by default (it used to answer 404). An ICO is just a small
   // container around a PNG, so wrap the 192px brand icon instead of checking a
@@ -951,7 +978,7 @@ ${feedItems}
   }
   // social share image (og:image / twitter:image) — pre-rendered, brand palette
   await copyFile(R + 'src/assets/og-image.png', R + 'dist/assets/og-image.png');
-  for (const ic of ['icon-192.png', 'icon-512.png']) {
+  for (const ic of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo-mark.png']) {
     await copyFile(R + 'src/assets/' + ic, R + 'dist/assets/' + ic);
   }
   // PWA manifest (installability + mobile polish)
@@ -963,7 +990,7 @@ ${feedItems}
     scope: '/',
     display: 'standalone',
     background_color: '#f8f5ee',
-    theme_color: '#243b63',
+    theme_color: '#0b172f',
     icons: [
       { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },

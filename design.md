@@ -222,7 +222,11 @@ Shadows (rgba now keyed to ink navy):
 
 ### Header
 Sticky, `backdrop-filter: blur(12px)` on white 92%. Wordmark in Fraunces; the
-`logo-mark` is a 34px navy→brass gradient tile. Nav hover = soft blue pill.
+`logo-mark` is a 34px tile carrying the brand artwork (`src/assets/logo-mark.png`).
+The gradient tile CSS remains as the fallback if the image ever fails to load.
+Brand artwork, icons and the social card are generated from one master by
+`npm run brand` (crop → square → 512/192/180/72/96 + `favicon.svg`); the OG card
+is rendered by `npm run brand:og`. Nav hover = soft blue pill.
 
 ### Hero (homepage only) — `.hero-grid`
 Two columns (`1.15fr / .85fr`, single column ≤1024px): copy + task search left,
