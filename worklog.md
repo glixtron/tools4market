@@ -2,7 +2,32 @@
 
 Running log of agent sessions: who did what, what was broken, how it was fixed, and when it completed. Newest entries first.
 
-*This log was created 23 Oct 2026 (per owner request); sessions before that date are recorded in `progress.md`, which remains the chronological project history.*
+*This log was created 23 Oct 2026 (per owner request); sessions before that date are recorded in `progress.md`, which remains the chronological project history. Every working session appends one entry here, newest first.*
+
+---
+
+## 2026-10-25 (4th pass) — Day-8 gap-list pack: 3 new guides (v2.13)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner dispatched Day 8 — three posts chosen from the gap list the previous session identified (internal linking, image SEO, Core Web Vitals) rather than by cadence.
+
+**This pack was structurally right and factually wrong in places.** For the first time the topics were genuinely missing: a keyword sweep against the 12-guide library returned zero hits for "internal linking", "image", "vital", "LCP", "CLS", "INP" and "alt text". Three posts, three new guides — the first pack where the count in the executive summary matched what was publishable.
+
+**Corrected before publishing:**
+- "Failing all three Core Web Vitals is a confirmed ranking penalty" is false and contradicted the pack's own FAQ. Page experience is a **tiebreaker**; the guides say that everywhere and never claim a penalty.
+- `rel="next"`/`rel="prev"` as a pagination requirement: Google stopped using those hints in **2019**. The pack's advice would have sent readers to add tags that do nothing while leaving later pages unlinked. Rewritten as the opposite, with what paginated archives actually need.
+- "roughly 100 internal links per page" — a 2008-era guideline presented as current. Replaced with dilution/context as the real constraints.
+- "AVIF not supported in older Edge" — current Edge supports it. Corrected, because the error pushes readers toward a worse format.
+- The `image-optimizer` tool **does not exist** here; there is one tool, *Image Compressor & Optimizer*. `relatedTools` drops unknown slugs silently, so the pack's link lists would have produced dead entries with no error.
+- Search-volume totals (17.6K / 21.5K / 56K) are third-party estimates; used for prioritisation, published nowhere.
+
+**New build capability:** `article.relatedGuides[]` renders a **Read next** block. Before this, guides could not link to guides at all — prose is escaped and `relatedTools` is tool-slugs-only, which is exactly the gap the internal-linking guide is about. `tests/seo-audit.mjs` now asserts every slug resolves and that the links are present in the built page, so a typo fails the build instead of disappearing. Three existing guides (`website-launch-seo-checklist`, `why-is-my-site-not-indexed`, `screaming-frog-alternative`) now point into the new cluster, so none of the three new pages is an orphan.
+
+**Verification:** build **72 pages** / 44 tools / **15 guides**; SEO audit **2291/2291** (+102), smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed; IndexNow 71 URLs; live-verify **70/70**; all three guide URLs return 200 with `BlogPosting` + `FAQPage` + `BreadcrumbList` schema.
+
+**Pack notes:** `docs/day8/INTEGRATION-NOTES.md` (all three files archived beside it).
+
+**Completed:** 25 Oct 2026.
 
 ---
 

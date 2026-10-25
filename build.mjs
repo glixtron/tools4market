@@ -686,6 +686,11 @@ function policyPage(p) {
 function articlePage(a) {
   const path = '/blog/' + a.slug + '/';
   const related = (a.relatedTools || []).map((s) => TOOLS.find((t) => t.slug === s)).filter(Boolean);
+  // Guide → guide links. `relatedTools` is tool-slugs-only by design, and inline
+  // prose is escaped, so without this a guide has no way to point at another
+  // guide. Optional field; unknown slugs would disappear silently, so the SEO
+  // audit asserts that every slug resolves.
+  const next = (a.relatedGuides || []).map((s) => ARTICLES.find((x) => x.slug === s)).filter(Boolean);
   const words = a.sections.reduce((n, s) => n + [...(s.p || []), ...(s.p2 || [])].join(' ').split(/\s+/).filter(Boolean).length, 0);
   const paras = (list) => list.map((p) => `<p>${rich(p)}</p>`).join('\n');
   return `<div class="container">
@@ -699,6 +704,7 @@ function articlePage(a) {
     <h2>Frequently asked questions</h2>
     ${a.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${rich(f.a)}</p></details>`).join('\n')}
     ${related.length ? `<h2>Tools for this guide</h2>\n<ul class="article-tools">${related.map((t) => `<li><a href="${rel(path, '/tools/' + t.slug + '/')}">${esc(t.name)}</a> — ${esc(t.card)}</li>`).join('\n')}</ul>` : ''}
+    ${next.length ? `<h2>Read next</h2>\n<ul class="article-tools">${next.map((x) => `<li><a href="${rel(path, '/blog/' + x.slug + '/')}">${esc(x.title)}</a></li>`).join('\n')}</ul>` : ''}
   </article>
 </div>`;
 }

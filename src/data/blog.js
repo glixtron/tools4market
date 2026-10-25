@@ -131,6 +131,7 @@ export const ARTICLES = [
       { q: 'Do I need Schema markup to rank?', a: 'Schema is not a direct ranking factor, but it makes your pages eligible for rich results and it tells search engines what the page is about. Add it where it is accurate — incorrect markup can hurt.' },
     ],
     relatedTools: ['meta-tag-generator', 'robots-txt-generator', 'sitemap-generator', 'serp-preview-tool', 'schema-markup-generator'],
+    relatedGuides: ['core-web-vitals', 'image-seo'],
     links: [
       { label: 'Google: Search Console starter guide', url: 'https://developers.google.com/search/docs/monitor-debug/search-console-start' },
       { label: 'Google: sitemap build guide', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -520,6 +521,7 @@ export const ARTICLES = [
       { q: 'Will more content or more backlinks get my pages indexed?', a: 'Links and genuine authority help discovery and selection, and unique content gives Google a reason to index. But fix technical blocks first — links to an uncrawlable page accomplish nothing.' },
     ],
     relatedTools: ['web-crawler-audit', 'sitemap-generator', 'robots-txt-generator', 'seo-score-checker'],
+    relatedGuides: ['internal-linking'],
     links: [
       { label: 'Google: ask Google to recrawl your URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl' },
       { label: 'Google: build and submit a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -717,6 +719,7 @@ export const ARTICLES = [
       { q: 'Do I need to install anything to use a Screaming Frog alternative?', a: 'No. Browser-based audits run on any device with a browser — no download, no licence, no updates. That is the main practical advantage over desktop crawlers for small, frequent checks.' },
     ],
     relatedTools: ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
+    relatedGuides: ['internal-linking', 'core-web-vitals'],
     links: [
       { label: 'Screaming Frog SEO Spider — official site', url: 'https://www.screamingfrog.co.uk/seo-spider/' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
@@ -793,6 +796,216 @@ export const ARTICLES = [
     links: [
       { label: 'Google: control your snippets in search results', url: 'https://developers.google.com/search/docs/appearance/snippet' },
       { label: 'Google: meta tags and attributes that Google supports', url: 'https://developers.google.com/search/docs/crawling-indexing/meta-tag' },
+    ],
+  },
+  {
+    slug: 'internal-linking',
+    title: 'Internal linking: the SEO lever you already own',
+    focus: 'internal linking',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Internal Linking in 2026: Build a Link Graph That Works',
+    metaDesc: 'Internal linking is the cheapest SEO work you control. How link signals, discovery and anchor text actually work — plus an audit you can finish today.',
+    intro: 'Internal linking is the only ranking input you can add in thirty seconds and never pay for. Here is what it actually does, where sites leak the benefit, and the audit that finds the leaks.',
+    sections: [
+      {
+        h: 'What internal linking actually does',
+        p: [
+          'A crawler learns about your site from three places: links it finds elsewhere, your sitemap, and the links your own pages point at each other. Only the third tells it which pages matter. A sitemap is a list of URLs you would like crawled; an internal link is a recommendation, with a description attached, from a page the crawler already trusts.',
+          'That is why a new page with no inbound internal links sits in the queue. Google knows it exists, has no signal about its importance, and spends crawl budget on pages that are linked. The same links carry the anchor text Google reads as a summary of the destination. Nothing else in SEO is this cheap to add after the fact.',
+        ],
+      },
+      {
+        h: 'The four layers of a link graph',
+        p: [
+          'Global navigation is the baseline: the same handful of links in the header and footer of every page, telling crawlers which sections are the spine of the site. Breadcrumbs come next — visible links plus `BreadcrumbList` markup — and they do double duty, because they also earn the breadcrumb trail in a search result. Related blocks link the page you are on to three or five contextual neighbours. Inline links inside the prose are the last layer and the most valuable one, since the sentence around the link describes the destination.',
+          'Most sites have the first two and stop. That is enough to make a site crawlable and not enough to make it rank: the pages that win are usually the pages with the most contextual links pointing at them, not the pages closest to the homepage.',
+        ],
+      },
+      {
+        h: 'Auditing what you already have',
+        p: [
+          'Pick your ten most important pages and count four things for each. Inbound internal links: how many other pages link here — zero means orphaned, three or more is healthy for a normal page, five or more for one you are trying to rank. Contextual links out, in the body: three per thousand words is a working target, not a quota. A related block whose links actually relate. Breadcrumbs with markup.',
+          'The Web Crawler Audit reports status, canonical, directives and outbound links for one URL, which is enough to spot a page whose only inbound links are the header and footer. Work from the pages that matter most; a site-wide sweep is a bigger job than it looks, and the wins are concentrated in about a dozen URLs.',
+        ],
+      },
+      {
+        h: 'Anchor text is where the meaning lives',
+        p: [
+          'Anchor text is a hint about the destination, so “click here” wastes the one free description you get. “Build the file with the Robots.txt Generator” tells the crawler what the destination is; “read more” tells it nothing. Vary the wording naturally rather than repeating an exact-match phrase fifty times — the same anchor everywhere starts to look engineered, and it reads badly for anyone skimming link lists with a screen reader.',
+          'Keep the sentence working if the link is removed. A good internal link is a useful sentence that happens to point somewhere, not a link with words bolted around it.',
+        ],
+      },
+      {
+        h: 'Five ways internal linking quietly fails',
+        p: [
+          '“Click here” anchors are the first. Footer dumping is the second: putting every page in the footer spreads link value across hundreds of links and gives none of them context. Auto-generated related widgets are the third — if the same five posts appear under every article, the block is decoration. Slug changes are the fourth: every edit breaks the links pointing at the old URL, so redirect or do not change it.',
+          'The fifth is the one most often taught wrong. Paginated archives do not need `rel="next"` and `rel="prev"`: Google stopped using those hints in 2019. What paginated pages need is ordinary crawlable links to the next page, and a sensible canonical strategy. Adding the tags does nothing; omitting the links orphans every page after the first.',
+        ],
+      },
+      {
+        h: 'A routine that keeps the graph honest',
+        p: [
+          'At publish, do three things: link out to two or three relevant pages from the new article, add one link to the new page from an established page, and check that the related block is populated with something that actually relates. Once a month, run the ten-page audit again and look for pages that lost their inbound links when something was rewritten or deleted.',
+          'When you delete a page, redirect it to the closest replacement instead of leaving a 404. When you add a tool, give it a guide that links to it, and link to the guide from related coverage. The graph stays healthy through small, boring maintenance — the same way a sitemap stays honest.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is internal linking?', a: 'Internal linking is linking from one page on your site to another page on the same site. It does three jobs: helps crawlers discover pages, tells them which pages matter through the link graph, and gives them anchor text that describes each destination.' },
+      { q: 'How many internal links should a page have?', a: 'There is no fixed cap. A working target is three or more contextual links out per thousand words, and three to five inbound links for a page you want to rank. Hundreds of template links in a footer add noise rather than signal.' },
+      { q: 'Does anchor text matter for internal links?', a: 'Yes. Google reads anchor text as a description of the destination, so “build the file with the Robots.txt Generator” is a better link than “click here”. Vary the wording naturally instead of repeating one exact phrase across the site.' },
+      { q: 'Do breadcrumbs count as internal linking?', a: 'They do. Breadcrumbs are ordinary links plus `BreadcrumbList` markup, and they earn a breadcrumb trail in search results as well as passing link signals from section pages down to individual pages.' },
+      { q: 'Can internal links hurt SEO?', a: 'Rarely, and only through volume or irrelevance: hundreds of identical footer links, or a block of unrelated links on every page, dilute the signal. A handful of contextual links that help a reader never hurts.' },
+      { q: 'How is internal linking different from backlinks?', a: 'Backlinks come from other sites and take months to earn. Internal links you control, cost nothing, and can be added in a minute. Both move link signals; internal links are the part you can fix today.' },
+    ],
+    relatedTools: ['web-crawler-audit', 'seo-score-checker', 'url-slug-generator', 'sitemap-generator'],
+    relatedGuides: ['image-seo', 'core-web-vitals'],
+    links: [
+      { label: 'Google: links crawlable — make links discoverable', url: 'https://developers.google.com/search/docs/crawling-indexing/links-crawlable' },
+      { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
+    ],
+  },
+  {
+    slug: 'image-seo',
+    title: 'Image SEO: alt text, formats and the weight you ship',
+    focus: 'image seo',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Image SEO in 2026: Alt Text, Formats and File Weight',
+    metaDesc: 'Image SEO is two jobs: being findable in Google Images and not slowing the page down. Alt text, filenames, formats and a checklist that covers both.',
+    intro: 'Image SEO is usually taught as alt-text trivia. It is really two jobs — being findable in image search, and not making the page slower than it needs to be. Both are fixable in an afternoon.',
+    sections: [
+      {
+        h: 'What Google reads on an image',
+        p: [
+          'Image ranking is a separate system from web ranking, and it reads a handful of things: the alt attribute, the file name, the text around the image, the page it sits on, and structured data or an image sitemap if you publish one. None of them is magic, and none compensates for an image that is irrelevant to the page it appears on.',
+          'The same signals do double duty. Alt text is the accessible name a screen reader announces, and the file name is what a person sees when the image fails to load. Writing them well is an accessibility fix that happens to be an SEO fix.',
+        ],
+      },
+      {
+        h: 'Alt text, written for a person who cannot see the image',
+        p: [
+          'Describe what the image shows, in five to fifteen words, as a sentence rather than a keyword list. “Screenshot of the Robots.txt Generator showing AI crawler presets” is useful; “image1.jpg” and “SEO tools SEO free 2026” are not. Do not start with “image of” — a screen reader already announces that it is an image.',
+          'Include the phrase once if it fits the sentence, and leave it out if it does not. Decorative images — rules, background patterns, spacer icons — get `alt=""`, which tells assistive technology to skip them. Marking a decorative image with a description is as wrong as leaving a meaningful one empty.',
+        ],
+      },
+      {
+        h: 'File names, formats and what a megabyte costs',
+        p: [
+          'Name the file before uploading: lowercase, hyphens, three to five words — `robots-txt-generator-interface.webp`, not `IMG_4521.png`. Use WebP for most content images. AVIF compresses further and current versions of every major browser support it, with JPEG as the fallback. Keep PNG for transparency, and stop exporting screenshots as PNG when WebP will do.',
+          'Size is where the money is. This site’s own social card weighed 776 KB straight off the canvas and 54 KB after quantising to five bits per channel — visually identical at 1200×630, fourteen times smaller. A 4 MB hero on a phone is not a design choice; it is a Core Web Vitals problem.',
+        ],
+      },
+      {
+        h: 'Dimensions, srcset and the layout-shift trap',
+        p: [
+          'Every image should carry `width` and `height` attributes matching its intrinsic size, so the browser reserves space before the bytes arrive. Without them the page reflows as images land, which is exactly what Cumulative Layout Shift measures. Ship the image at the largest size it is displayed at, and use `srcset` with `sizes` when the same picture appears at several widths.',
+          'Do not lazy-load the hero. `loading="lazy"` on the largest above-the-fold image delays the exact element LCP is timing. Use it below the fold, and preload the hero when it is critical to the first paint.',
+        ],
+      },
+      {
+        h: 'Image search is its own surface',
+        p: [
+          'Google Images sends real traffic, but the intent is different: people are looking for a picture, not for a tool. Expect image sessions to convert worse than organic sessions, and treat the surface as reach rather than a funnel. A correctly described image on a relevant page is what makes it eligible; an image sitemap helps discovery once you have hundreds.',
+          'If you license images, put the credit and licence in the IPTC metadata and in structured data — Google surfaces licensing information in image results. If you do not, do not invent it; wrong licence metadata is worse than none.',
+        ],
+      },
+      {
+        h: 'A pre-publish image check',
+        p: [
+          'Name the file descriptively, resize it to the largest display size, compress it with the Image Compressor & Optimizer, write alt text for a person who cannot see it, and set width and height. Five steps, about a minute per image, and the page gets lighter every time you do it.',
+          'Then measure. PageSpeed Insights reports the LCP element on a real render; if the hero image is still the largest element and the score is poor, the problem is its weight or dimensions, not the alt text.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is image SEO?', a: 'Image SEO is the work of making images findable in Google Images and keeping them from slowing the page down: descriptive alt text and file names, modern formats, sensible dimensions, and compression to the smallest size that still looks right.' },
+      { q: 'How long should alt text be?', a: 'Five to fifteen words is the working range. Shorter than that is usually too vague to describe anything; longer starts reading like keyword stuffing. Write a sentence a person would say out loud, not a comma-separated list.' },
+      { q: 'Does image file size affect rankings?', a: 'Not directly — bytes are not a ranking factor. It affects Largest Contentful Paint, which is part of Core Web Vitals, and that is a ranking signal. A heavy hero image is one of the most common causes of a poor LCP on mobile.' },
+      { q: 'Which image format should I use?', a: 'WebP for most content images, AVIF when you want the smallest file and can accept slower encoding, JPEG as the universal fallback, PNG only where transparency is required. Export at the size you display, not the size the camera produced.' },
+      { q: 'Do I need an image sitemap?', a: 'Only once image discovery is a real problem — typically hundreds of images, or images loaded by JavaScript that a crawler may not execute. For a normal page, alt text and a crawlable image tag do more than a sitemap entry.' },
+      { q: 'Can I use AI-generated images?', a: 'Yes. Google indexes them the same way as any other image; what matters is that the alt text and file name describe what is actually shown. If a jurisdiction requires disclosure of synthetic images, disclose it.' },
+    ],
+    relatedTools: ['image-compressor', 'web-crawler-audit', 'seo-score-checker', 'url-slug-generator'],
+    relatedGuides: ['core-web-vitals', 'internal-linking'],
+    links: [
+      { label: 'Google: image SEO best practices', url: 'https://developers.google.com/search/docs/appearance/google-images' },
+      { label: 'Google: image sitemaps', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps' },
+    ],
+  },
+  {
+    slug: 'core-web-vitals',
+    title: 'Core Web Vitals: what LCP, CLS and INP actually measure',
+    focus: 'core web vitals',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Core Web Vitals in 2026: LCP, CLS and INP Explained',
+    metaDesc: 'Core Web Vitals are three field measurements, not a Lighthouse score. What LCP, CLS and INP each measure, the thresholds, and the fixes that move them.',
+    intro: 'Core Web Vitals are three numbers Google collects from real browsers. They are not the same as your Lighthouse score, and understanding that difference is most of the work.',
+    sections: [
+      {
+        h: 'The three Core Web Vitals and their thresholds',
+        p: [
+          'Largest Contentful Paint times how long the largest element in the viewport takes to render: good under 2.5 seconds, poor past 4.0. Cumulative Layout Shift scores unexpected movement: good under 0.1, poor past 0.25. Interaction to Next Paint times the delay between a tap and the next frame that shows a response: good under 200 milliseconds, poor past 500.',
+          'Google evaluates the 75th percentile of real users over a 28-day window, per page group. That detail matters. A fast desktop visit does not cancel out a slow phone, and one good day does not clear a bad month.',
+        ],
+      },
+      {
+        h: 'LCP: the largest element, not the first byte',
+        p: [
+          'Find the element before changing anything. In Chrome DevTools the Performance panel marks the LCP element on a recorded load, and PageSpeed Insights names it too. Usually it is a hero image, a large heading, or a block of text waiting on a web font. The fix depends entirely on which one it is.',
+          'When it is an image, resize and compress it, preload it, and stop lazy-loading it. When it is text, the font is usually the culprit: preload the file, use `font-display: swap`, and cut the weights you actually load. Render-blocking CSS and JavaScript delay all three cases, so defer whatever the first paint does not need.',
+        ],
+      },
+      {
+        h: 'CLS: reserve the space before you fill it',
+        p: [
+          'Layout shift is what happens when content moves after the user has seen it. Images without `width` and `height` are the classic cause; web fonts that load late and change text metrics are the second; banners, cookie bars and embeds injected above existing content are the third. Each one is fixable by reserving space in advance.',
+          'Shifts the user causes — opening a menu, expanding a section — do not count. The score is about surprises, which is why a page that jumps around on load can score worse than a page that looks busier but stays still.',
+        ],
+      },
+      {
+        h: 'INP: the metric that replaced FID',
+        p: [
+          'Interaction to Next Paint replaced First Input Delay in March 2024. FID measured only the input delay before a handler started; INP measures the whole interaction, including the work the handler does and the frame that finally paints. It is stricter, and it fails pages that looked fine under FID.',
+          'The cause is almost always a long task on the main thread. Break work into chunks, move non-urgent work to an idle callback, and audit third-party scripts before optimising your own. On this site, removing Google Tag Manager took roughly 560 KB of script off every page view — more than any handler rewrite would have saved.',
+        ],
+      },
+      {
+        h: 'Field data, lab data and the 100-score trap',
+        p: [
+          'Lighthouse and the PageSpeed lab test run in a controlled environment. They are reproducible, they catch regressions immediately, and they are not what Google grades. Field data comes from real Chrome users through the Chrome UX Report, lags by the 28-day window, and feeds the ranking signal.',
+          'So a 100/100 Lighthouse score with poor field data is still a failing page, and a 70 with good field data is not. Core Web Vitals are also a tiebreaker rather than a penalty: they separate pages whose content is otherwise comparable. Content still does most of the work.',
+        ],
+      },
+      {
+        h: 'A diagnosis order that finds the real cause',
+        p: [
+          'Start in Search Console’s Core Web Vitals report to see which URL groups fail and on which metric. Open PageSpeed Insights for one failing URL and read both the field and lab sections. Identify the specific element or task, fix that one thing, then leave it alone for a month — field data cannot show you today’s change.',
+          'Re-measure at the URL-group level, not the homepage, and compare like with like: mobile field data against mobile field data. Chasing the score instead of the element is how sites end up fast in a lab and slow for the people who matter.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What are Core Web Vitals?', a: 'Core Web Vitals are three field metrics Google uses to describe page experience: Largest Contentful Paint for loading, Cumulative Layout Shift for visual stability, and Interaction to Next Paint for responsiveness. Each is measured at the 75th percentile of real users.' },
+      { q: 'What is a good LCP score?', a: 'Under 2.5 seconds at the 75th percentile. Between 2.5 and 4.0 seconds needs improvement, and past 4.0 is poor. LCP times the largest element in the viewport, so the fix starts by identifying whether that element is an image, a heading, or text waiting on a font.' },
+      { q: 'What is a good CLS score?', a: 'Under 0.1 is good, 0.1 to 0.25 needs improvement, past 0.25 is poor. Set width and height on images and embeds, preload the fonts you actually use with `font-display: swap`, and reserve space for ads and banners before they load.' },
+      { q: 'What is INP and why did it replace FID?', a: 'Interaction to Next Paint measures the full delay from a tap to the next painted frame, including the handler work. It replaced First Input Delay in March 2024 because FID only measured the wait before the handler started, which missed the slow part.' },
+      { q: 'Do Core Web Vitals affect Google rankings?', a: 'Yes, as a tiebreaker. Page experience — Core Web Vitals, HTTPS, mobile usability and intrusive interstitials — has been a ranking input since 2021. It does not override content quality; it separates pages that are otherwise close.' },
+      { q: 'How do I check my Core Web Vitals?', a: 'The Search Console Core Web Vitals report shows field data by URL group. PageSpeed Insights shows field and lab data for one URL, Lighthouse gives lab data only, and the web-vitals library collects real-user measurements on your own pages.' },
+    ],
+    relatedTools: ['image-compressor', 'web-crawler-audit', 'seo-score-checker'],
+    relatedGuides: ['image-seo', 'internal-linking'],
+    links: [
+      { label: 'web.dev: Core Web Vitals', url: 'https://web.dev/articles/vitals' },
+      { label: 'Google Search Central: page experience', url: 'https://developers.google.com/search/docs/appearance/page-experience' },
     ],
   },
 ];

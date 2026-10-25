@@ -162,6 +162,10 @@ for (const t of TOOLS) {
     ok(`${p}: >=2 FAQs relate to the target phrase`, a.faqs.filter((f) => hasFocus(f.q + ' ' + f.a, a.focus)).length >= 2);
     ok(`${p}: has a date + author`, !!a.date && !!a.author);
     ok(`${p}: links to >=3 tools`, (a.relatedTools || []).length >= 3, (a.relatedTools || []).length + '');
+    // `relatedTools` is tool-slugs-only and silently drops anything else, so the
+    // guide-to-guide field gets its own existence check.
+    ok(`${p}: relatedGuides all resolve`, (a.relatedGuides || []).every((s2) => ARTICLES.some((x) => x.slug === s2)), (a.relatedGuides || []).filter((s2) => !ARTICLES.some((x) => x.slug === s2)).join(','));
+    ok(`${p}: relatedGuides never points at itself`, !(a.relatedGuides || []).includes(a.slug));
     ok(`${p}: cites authoritative sources`, (a.links || []).length >= 2);
     for (const s2 of a.sections) for (const pr of [...(s2.p || []), ...(s2.p2 || [])]) { const k = norm(pr).slice(0, 120); if (k.length > 60) add(seenParas, k, p); }
   }
@@ -174,6 +178,10 @@ for (const t of TOOLS) {
     ok(`blog/${a.slug}: FAQPage schema`, /"@type":"FAQPage"/.test(html));
     ok(`blog/${a.slug}: BreadcrumbList schema`, /"@type":"BreadcrumbList"/.test(html));
     ok(`blog/${a.slug}: no noindex`, !/content="noindex"/i.test(html));
+    if ((a.relatedGuides || []).length) {
+      const guideLinks = new Set([...html.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/blog/' + a.slug + '/').pathname; } catch (e) { return ''; } }).filter((u) => /^\/blog\/[a-z0-9-]+\/$/.test(u)));
+      ok(`blog/${a.slug}: renders its related guides`, a.relatedGuides.every((s2) => guideLinks.has('/blog/' + s2 + '/')), a.relatedGuides.filter((s2) => !guideLinks.has('/blog/' + s2 + '/')).join(','));
+    }
     const toolLinks = new Set([...html.matchAll(/href="([^"]+)"/g)].map((m) => { try { return new URL(m[1], 'https://tools4market.online/blog/' + a.slug + '/').pathname; } catch (e) { return ''; } }).filter((u) => /^\/tools\/[a-z0-9-]+\/$/.test(u)));
     ok(`blog/${a.slug}: links to >=3 tool pages`, toolLinks.size >= 3, toolLinks.size + '');
   }

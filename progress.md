@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-8 gap-list guides — v2.13 (25 Oct 2026)
+
+**Trigger:** owner dispatched Day 8 built from the gap list rather than cadence — internal linking, image SEO, Core Web Vitals.
+
+**All three published; all three were genuinely new.** A keyword sweep against the 12 extant guides returned no matches for "internal linking", "image", "vital", "LCP", "CLS", "INP" or "alt text". Guides 12 → 15, pages 69 → 72.
+
+**Fact-checking did the real work.** The Core Web Vitals post claimed a "confirmed ranking penalty" for failing all three metrics — page experience is a tiebreaker, not a penalty, and the pack's own FAQ said so. The internal-linking post required `rel="next"`/`rel="prev"` for pagination; Google deprecated those signals in 2019, so the advice was inverted and explained. A 2008-era "100 links per page" figure and a stale AVIF support claim were corrected, and the pack's separate `image-optimizer` tool does not exist here — it is one tool, *Image Compressor & Optimizer*.
+
+**New: `relatedGuides[]`.** Guides could not link to guides before: prose is escaped and `relatedTools` is tool-slugs-only. A build-time **Read next** block now renders those links, with audit assertions for slug existence and rendered output. Three existing guides were mapped into the new cluster so the new pages are not orphans — the site now does the thing the internal-linking guide recommends.
+
+**Tests:** build 72 pages / 44 tools / 15 guides, seo-audit **2291/2291** (+102), smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14. Pack notes in `docs/day8/INTEGRATION-NOTES.md`.
+
 ### HTTPS enforced on both hosts (25 Oct 2026)
 
 **The report was accurate:** `http://tools4market.online/` answered **200**. The certificate was fine — there was simply no rule treating plain HTTP as a different origin, so every page had two live URLs. Cloudflare's *Always Use HTTPS* zone setting looks to be off as well.

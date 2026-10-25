@@ -1,7 +1,22 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Eleven entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below).
+**Status:** ✅ Twelve entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below).
+
+## Entry 12 — v2.13 Day-8 gap-list guides
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified before commit: build **72 pages / 44 tools / 15 guides**, smoke **44/44**, SEO audit **2291/2291**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **70/70**.
+
+**Subject:** `feat: Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (v2.13)`
+
+**Summary:**
+- **Three guides, all genuinely new** (guides 12 → 15): `internal-linking`, `image-seo`, `core-web-vitals`. Verified against the library before writing, not after.
+- **Corrections applied to the pack:** no "ranking penalty" claim (page experience is a tiebreaker); `rel=next/prev` advice inverted (Google dropped those hints in 2019); 100-links and AVIF-support myths removed; `image-optimizer` replaced with the single existing `image-compressor`; third-party volume figures kept out of the site.
+- **New `article.relatedGuides[]`** → build-time **Read next** block; audit asserts every slug resolves and the links render. Three existing guides mapped into the cluster so the new pages have inbound links.
+- **Docs:** `docs/day8/` (3 pack files + `INTEGRATION-NOTES.md`), README/Architecture → 72 pages, 15 guides, v2.13.
+
+**Files in this commit:** `src/data/blog.js` (3 guides + 3 cross-links), `build.mjs` (`relatedGuides`), `tests/seo-audit.mjs` (+6 rules), `docs/day8/*`, `README.md`, `Architecture.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 11 — HTTPS enforcement (plain http → https)
 
