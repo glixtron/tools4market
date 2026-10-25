@@ -25,6 +25,8 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **Owner action still worth taking:** enable Cloudflare **Always Use HTTPS** (SSL/TLS → Edge Certificates) as belt-and-braces — it catches requests before the Worker runs. HSTS preload should wait until every subdomain is known to be HTTPS-only.
 
+**Follow-up (same day):** owner enabled *Always Use HTTPS*. Verified the layering — `http://tools4market.online/` now returns Cloudflare's own `301` (`Content-Type: text/html`, no Worker headers), so the zone setting is the first line and the Worker redirect is the fallback rather than the primary. HSTS is confirmed live at `max-age=31536000` on the homepage, a tool page, the blog hub and a static asset. Subdomain inventory checked before considering `includeSubDomains`: `www` (redirects to apex) and `mail` (Namecheap Private Email, itself http→https and then to `privateemail.com`); both are HTTPS-capable, and mail routing is MX-only (`mx1/mx2.privateemail.com`), so adding `includeSubDomains` is now low-risk — but not required, and deliberately still off until the owner asks.
+
 **Completed:** 25 Oct 2026.
 
 ---
