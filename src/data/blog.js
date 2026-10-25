@@ -64,7 +64,7 @@ export const ARTICLES = [
     relatedTools: ['robots-txt-generator', 'ai-crawler-blocker', 'llms-txt-generator', 'sitemap-generator'],
     links: [
       { label: 'Google: robots.txt intro', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro' },
-      { label: 'Google: robots.txt meta tag', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/meta-tag' },
+      { label: 'Google: robots meta tag specifications', url: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag' },
       { label: 'Google: remove a page from the index', url: 'https://developers.google.com/search/docs/crawling-indexing/block-indexing' },
     ],
   },
@@ -461,7 +461,7 @@ export const ARTICLES = [
     relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed', 'http-status-codes-seo'],
     links: [
       { label: 'Google: robots.txt introduction', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro' },
-      { label: 'Google: robots meta tag, data-nosnippet and X-Robots-Tag', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/meta-tag' },
+      { label: 'Google: robots meta tag, data-nosnippet and X-Robots-Tag', url: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag' },
     ],
   },
   {
@@ -589,7 +589,7 @@ export const ARTICLES = [
     relatedTools: ['utm-link-builder', 'url-encoder-decoder', 'case-converter'],
     links: [
       { label: 'Google: collected traffic sources and channels (GA4)', url: 'https://support.google.com/analytics/answer/9756891' },
-      { label: 'Google: URL building for campaigns', url: 'https://support.google.com/analytics/answer/10917986' },
+      { label: 'Google: URL building for campaigns', url: 'https://support.google.com/analytics/answer/10917952' },
     ],
   },
   {
@@ -798,7 +798,7 @@ export const ARTICLES = [
     relatedGuides: ['title-tag-length-2026', 'open-graph-image-size-2026'],
     links: [
       { label: 'Google: control your snippets in search results', url: 'https://developers.google.com/search/docs/appearance/snippet' },
-      { label: 'Google: meta tags and attributes that Google supports', url: 'https://developers.google.com/search/docs/crawling-indexing/meta-tag' },
+      { label: 'Google: meta tags and attributes that Google supports', url: 'https://developers.google.com/search/docs/crawling-indexing/special-tags' },
     ],
   },
   {
@@ -1096,8 +1096,7 @@ export const ARTICLES = [
     relatedGuides: ['meta-description-length-2026', 'image-seo', 'website-launch-seo-checklist'],
     links: [
       { label: 'The Open Graph protocol', url: 'https://ogp.me/' },
-      { label: 'Facebook: webmasters sharing guide', url: 'https://developers.facebook.com/docs/sharing/webmasters/' },
-      { label: 'X: cards markup reference', url: 'https://developer.x.com/en/docs/x-for-websites/cards/overview/markup' },
+      { label: 'Facebook: webmasters sharing guide', url: 'https://developers.facebook.com/documentation/sharing/webmasters' },
     ],
   },
   {
@@ -1378,7 +1377,7 @@ export const ARTICLES = [
     relatedGuides: ['htaccess-301-redirect', 'rel-canonical-tag', 'internal-linking'],
     links: [
       { label: 'Google: URL structure best practices', url: 'https://developers.google.com/search/docs/crawling-indexing/url-structure' },
-      { label: 'IETF STD 66 (RFC 3986): URI syntax', url: 'https://www.rfc-editor.org/rfc/rfc3986' },
+      { label: 'IETF STD 66 (RFC 3986): URI syntax', url: 'https://www.rfc-editor.org/rfc/rfc3986.html' },
       { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
     ],
   },
@@ -1468,7 +1467,7 @@ export const ARTICLES = [
     links: [
       { label: 'Google: specify a canonical URL', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls' },
       { label: 'Google: what URL canonicalization is', url: 'https://developers.google.com/search/docs/crawling-indexing/canonicalization' },
-      { label: 'RFC 6596: the canonical link relation', url: 'https://www.rfc-editor.org/rfc/rfc6596' },
+      { label: 'RFC 6596: the canonical link relation', url: 'https://www.rfc-editor.org/rfc/rfc6596.html' },
     ],
   },
   {
@@ -1776,8 +1775,8 @@ export const ARTICLES = [
     relatedTools: ['web-crawler-audit', 'htaccess-redirect-generator', 'sitemap-generator', 'seo-score-checker'],
     relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed', 'noindex-vs-robots-txt', 'rel-canonical-tag'],
     links: [
-      { label: 'Google: how HTTP status codes affect crawling', url: 'https://developers.google.com/search/docs/crawling-indexing/http-network-errors' },
-      { label: 'RFC 9110: HTTP semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110' },
+      { label: 'Google: how HTTP status codes affect crawling', url: 'https://developers.google.com/crawling/docs/troubleshooting/http-status-codes' },
+      { label: 'RFC 9110: HTTP semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110.html' },
       { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
     ],
   },

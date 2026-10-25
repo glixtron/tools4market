@@ -6,6 +6,27 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (10th pass) — Source-link hygiene: five dead citations fixed, a checker to stop the next one
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** the CEO locked a new gate after the Day-11 verification — never cite a primary-doc URL as authority without confirming it returns 200 with the expected content. Applying that gate retroactively to the 24 guides found citations that had quietly rotted.
+
+**What was actually broken.** Four citations returned 404 or pointed at a dead host: the robots meta-tag reference (two guides cited `…/crawling-indexing/robots/meta-tag`, deleted), the GA4 URL-builder article (`support.google.com/analytics/answer/10917986`), the “meta tags Google supports” page (`…/crawling-indexing/meta-tag`), and X’s cards markup reference (`developer.x.com/…/cards/overview/markup`, a host that no longer serves docs). Each was re-pointed at the live equivalent — `robots-meta-tag`, `answer/10917952`, `special-tags` — and the X link was removed from `open-graph-image-size-2026` rather than replaced, because nothing live says the same thing. That guide now cites `ogp.me` and Facebook’s sharing guide, which is enough for the two claims it makes.
+
+**A checker, so this is caught before publish rather than after.** `scripts/check-sources.mjs` (`npm run check:sources`) walks every guide’s `links[]` — 43 unique URLs across 24 guides — and fails on 4xx/5xx. The first run also exposed a measurement bug in the checker itself: `?hl=fr` locators were showing up as redirects because the request advertised no language, so the script would have reported Google localisation as drift. It now sends `Accept-Language: en` and classifies redirects three ways: **moved** (path changed — re-point it), **locale** (`?hl=` only — ignored), **slash** (trailing slash — ignored). `--strict` promotes moved to a failure.
+
+**Five genuine moves re-pointed, not just suppressed.** The checker’s remaining warnings were real: Google moved the HTTP-status doc to `/crawling/docs/troubleshooting/http-status-codes`, Facebook moved `/docs/sharing/webmasters/` to `/documentation/sharing/webmasters`, and three RFC citations used `/rfc/rfcNNNN`, which redirects to `/info/`; they now point at the canonical `/rfc/rfcNNNN.html` document text. Final run: **43/43 reachable, 0 failed, 0 moved**.
+
+**Two pieces of stale documentation fixed in the same pass.** README still said “Eighteen how-to guides” — stale since Day 8 — and now lists all twenty-four. More seriously, ARCHITECTURE’s crawler-policy section still said the site “allows every crawler”, three weeks after v2.15 rewrote that policy to block AI training crawlers and explicitly allow answer engines. A doc that describes the opposite of the shipped `robots.txt` is worse than no doc, because it is the page a future reader trusts.
+
+**Verification:** build **81 pages / 44 tools / 24 guides**; all 58 citations render into their pages; SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed `60455cbb`; live-verify **73/73**. The eight edited guides were checked on the live site for the corrected hrefs and for the absence of `developer.x.com`. IndexNow submitted those **8 changed URLs**, not all 80 — the protocol asks for new or materially changed URLs, and re-submitting the whole sitemap on a link edit is noise.
+
+**Owner actions still open:** AdSense slot ids, Launchstag Verify now, Cloudflare managed robots.txt off, distribution kickoff.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (9th pass) — Day-11 pack: XML sitemaps, structured-data validation, HTTP status codes (v2.17)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

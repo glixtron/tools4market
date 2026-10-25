@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Eighteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below).
+**Status:** ✅ Nineteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below).
+
+## Entry 19 — Source-link hygiene and a citation checker
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **81 pages / 44 tools / 24 guides**, SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**, sources **43/43 reachable**.
+
+**Subject:** `fix: repair five dead guide citations and add a source-link checker`
+
+**Summary:**
+- **Four rotted citations found by applying the new gate retroactively:** the robots meta-tag reference (404, cited by two guides) → `robots-meta-tag`; the GA4 URL-builder article (404) → `answer/10917952`; the meta-tags page (404) → `special-tags`; X’s cards markup reference removed from `open-graph-image-size-2026` rather than replaced, because nothing live says the same thing.
+- **Five genuine moves re-pointed:** Google’s HTTP-status document to `/crawling/docs/troubleshooting/http-status-codes`, Facebook’s sharing guide to `/documentation/sharing/webmasters`, and three RFC citations to their canonical `/rfc/rfcNNNN.html` text instead of the `/info/` landing pages.
+- **New `scripts/check-sources.mjs`** (`npm run check:sources`): walks all 43 unique `links[]` URLs, fails on 4xx/5xx, classifies redirects as moved / locale (`?hl=`) / slash, and supports `--strict`. It sends `Accept-Language: en`, without which every Google docs URL localised and turned into a false positive.
+- **Doc drift fixed:** README still said “Eighteen how-to guides” (stale since Day 8); ARCHITECTURE still described the pre-v2.15 “allows every crawler” robots policy.
+- **IndexNow submitted 8 changed URLs**, not all 80 — the protocol asks for new or materially changed URLs.
+
+**Files in this commit:** `src/data/blog.js` (citation repairs), `scripts/check-sources.mjs` (new), `package.json` (`check:sources`), `README.md`, `ARCHITECTURE.md`, `pendingcommit.md`, `progress.md`, `worklog.md`, `suggest.md`.
 
 ## Entry 18 — v2.17 Day-11 guides
 

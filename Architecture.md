@@ -373,14 +373,35 @@ so the card changes on its own every Monday. Each pick tool carries `pickWhy`
   `google-site-verification` meta tag when a property needs the HTML method (the
   domain property is already verified via DNS TXT, so it defaults to empty).
 
-### Crawler policy (deliberate, per the audit's open question)
+### Crawler policy (v2.15 — rewrite, after the served file contradicted the site's own guides)
 
-The site's own `robots.txt` allows every crawler, including AI crawlers. This is
-the product position: Tools4Market *sells* crawler-policy decisions (the Robots.txt
-Generator / AI Crawler Blocker make them per site), so the host itself stays fully
-open. Blocking AI bots is a per-customer choice, not this site's default. If that
-decision ever changes, change `robots.txt` in `build.mjs` and the copy in the
-homepage FAQ together.
+The site's own `robots.txt` follows the product position: **search engines and AI
+answer engines may crawl; AI training crawlers may not.** That is the stance the
+Robots.txt Generator and AI Crawler Blocker let a customer take per site, so the
+host now takes the same one instead of staying fully open.
+
+- Training crawlers are named and disallowed: `GPTBot`, `ClaudeBot`,
+  `anthropic-ai`, `CCBot`, `Bytespider`, `Amazonbot`, `Applebot-Extended`,
+  `meta-externalagent`, `cohere-ai`, `MistralAI-Training`, `Diffbot`, `omgili`.
+- Indexers and user-triggered fetchers are named and **explicitly allowed**:
+  `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Perplexity-User`,
+  `Claude-SearchBot`, `Claude-User`. Being absent from a block list is not the
+  same as being allowed when an edge prepends its own groups, so the allows are
+  written out rather than implied.
+- `Google-Extended` is not a crawler; it is a control token that switches Gemini
+  training **and** Gemini grounding together. Grounding is how Gemini cites a
+  page, so it is allowed deliberately.
+- `User-agent: *` carries `Content-Signal: search=yes,ai-train=no,use=reference`.
+
+The file is generated in `build.mjs`, not a CDN dashboard. The earlier policy did
+live in the repo, but Cloudflare prepended 47 `Disallow: /` groups to the served
+copy, so what crawlers read was the dashboard's file and not ours. The
+consequence: no test compared the build output to the served file. Now the SEO
+audit parses both per RFC 9309 (group selection, longest-match, allow-beats-disallow)
+and `npm run test:live` asserts the **served** file, so a prepended block cannot
+silently change the verdict. Cloudflare's managed robots.txt is still prepended in
+production; the origin's explicit allow groups win the tie-break, and turning the
+managed file off is an owner action recorded in `suggest.md`.
 
 ## 13. Text-resource analysis (v2.4 — sitemap validator, robots tester)
 

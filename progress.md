@@ -2,6 +2,20 @@
 
 *Append-only. Newest entries at top.*
 
+### Source-link hygiene — v2.17.1 (25 Oct 2026)
+
+**Trigger:** the CEO locked a gate after Day 11 — no primary-doc citation without confirming it returns 200 with the expected content. Applied backwards to the 24-guide library, four citations had rotted.
+
+**Fixed:** the robots meta-tag reference (`…/crawling-indexing/robots/meta-tag`, 404, cited by two guides) → `robots-meta-tag`; the GA4 URL-builder article (`answer/10917986`, 404) → `answer/10917952`; the meta-tags page (`…/crawling-indexing/meta-tag`, 404) → `special-tags`; X’s cards markup reference removed from `open-graph-image-size-2026` rather than replaced, since nothing live documents the same thing.
+
+**New:** `scripts/check-sources.mjs` + `npm run check:sources` — checks all 43 unique `links[]` URLs across 24 guides, fails on 4xx/5xx, and classifies redirects as **moved** (re-point), **locale** (`?hl=`, ignore) or **slash** (ignore). `--strict` fails on moved too. The checker sends `Accept-Language: en` because without it Google localised every docs URL and 14 innocuous fetches looked like drift.
+
+**Five real moves re-pointed:** Google’s HTTP-status doc moved to `/crawling/docs/troubleshooting/http-status-codes`; Facebook’s sharing guide to `/documentation/sharing/webmasters`; three RFCs to their canonical `/rfc/rfcNNNN.html` text. Final: **43/43 reachable, 0 failed, 0 moved**.
+
+**Doc drift fixed:** README said “Eighteen how-to guides” (stale since Day 8) and now lists twenty-four; ARCHITECTURE’s crawler-policy section still described the pre-v2.15 “allows every crawler” position and now describes the shipped policy.
+
+**Tests:** build 81 pages / 44 tools / 24 guides; all 58 citations render; seo-audit **2547/2547**, smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify **73/73**. Deployed `60455cbb`; IndexNow submitted **8 changed URLs**, not all 80.
+
 ### Day-11 guides — v2.17 (25 Oct 2026)
 
 **Trigger:** CEO Day-11 proposal for XML sitemaps, Twitter Cards and schema validation. One candidate did not survive verification: X’s card documentation URL now redirects to `docs.x.com/overview` and the replacement path 404s, so the primary reference no longer exists live; the Card Validator’s preview was removed in 2022 rather than the tool being gone. The slot went to HTTP status codes, sourced from RFC 9110 and Google’s crawling documentation.
