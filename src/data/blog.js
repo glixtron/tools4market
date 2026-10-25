@@ -131,7 +131,7 @@ export const ARTICLES = [
       { q: 'Do I need Schema markup to rank?', a: 'Schema is not a direct ranking factor, but it makes your pages eligible for rich results and it tells search engines what the page is about. Add it where it is accurate — incorrect markup can hurt.' },
     ],
     relatedTools: ['meta-tag-generator', 'robots-txt-generator', 'sitemap-generator', 'serp-preview-tool', 'schema-markup-generator'],
-    relatedGuides: ['core-web-vitals', 'image-seo'],
+    relatedGuides: ['core-web-vitals', 'image-seo', 'title-tag-length-2026', 'open-graph-image-size-2026', 'htaccess-301-redirect'],
     links: [
       { label: 'Google: Search Console starter guide', url: 'https://developers.google.com/search/docs/monitor-debug/search-console-start' },
       { label: 'Google: sitemap build guide', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -458,6 +458,7 @@ export const ARTICLES = [
       { q: 'Do noindex pages waste crawl budget?', a: 'They use some, because Google must fetch the page to see the directive. That is the accepted cost: for pages that are linked and could be indexed, a crawl is required to keep them out of results.' },
     ],
     relatedTools: ['robots-txt-generator', 'web-crawler-audit', 'meta-tag-generator'],
+    relatedGuides: ['htaccess-301-redirect', 'why-is-my-site-not-indexed'],
     links: [
       { label: 'Google: robots.txt introduction', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro' },
       { label: 'Google: robots meta tag, data-nosnippet and X-Robots-Tag', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/meta-tag' },
@@ -521,7 +522,7 @@ export const ARTICLES = [
       { q: 'Will more content or more backlinks get my pages indexed?', a: 'Links and genuine authority help discovery and selection, and unique content gives Google a reason to index. But fix technical blocks first — links to an uncrawlable page accomplish nothing.' },
     ],
     relatedTools: ['web-crawler-audit', 'sitemap-generator', 'robots-txt-generator', 'seo-score-checker'],
-    relatedGuides: ['internal-linking'],
+    relatedGuides: ['internal-linking', 'htaccess-301-redirect'],
     links: [
       { label: 'Google: ask Google to recrawl your URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl' },
       { label: 'Google: build and submit a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -793,6 +794,7 @@ export const ARTICLES = [
       { q: 'Do I need a meta description on every page?', a: 'Write one for every page you want clicked. Google may ignore it and build a snippet from the page, but a good description is used often enough that leaving it empty is a wasted opportunity, not a neutral choice.' },
     ],
     relatedTools: ['meta-description-checker', 'meta-tag-generator', 'serp-preview-tool'],
+    relatedGuides: ['title-tag-length-2026', 'open-graph-image-size-2026'],
     links: [
       { label: 'Google: control your snippets in search results', url: 'https://developers.google.com/search/docs/appearance/snippet' },
       { label: 'Google: meta tags and attributes that Google supports', url: 'https://developers.google.com/search/docs/crawling-indexing/meta-tag' },
@@ -1006,6 +1008,291 @@ export const ARTICLES = [
     links: [
       { label: 'web.dev: Core Web Vitals', url: 'https://web.dev/articles/vitals' },
       { label: 'Google Search Central: page experience', url: 'https://developers.google.com/search/docs/appearance/page-experience' },
+    ],
+  },
+  {
+    slug: 'open-graph-image-size-2026',
+    title: 'Open Graph image size: what 1200x630 actually buys you',
+    focus: 'open graph image size',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Open Graph Image Size: 1200x630 and the Exceptions',
+    metaDesc: 'Open graph image size is 1200x630 almost everywhere, yet the OGP spec sets no dimensions at all. What each platform crops, and the tags that matter more.',
+    intro: 'The open graph image size everyone quotes is 1200x630. That number is a platform convention rather than a rule in the spec, and knowing which part is convention is what keeps a share card from being cropped in the wrong place.',
+    sections: [
+      {
+        h: 'The open graph image size that works almost everywhere',
+        p: [
+          '1200x630 pixels at a 1.91:1 aspect ratio is the size to design for. Facebook popularised that shape and the platforms that unfurl links have converged on it, so one file covers most previews without letterboxing or a hard crop.',
+          'The Open Graph protocol itself does not define an image size. It defines `og:image` as a URL and offers optional `og:image:width` and `og:image:height` so a consumer can reserve space before downloading. Everything about 1200x630 comes from what platforms choose to display, which is why a different number appears whenever one of them changes a card layout.',
+        ],
+        p2: [
+          'Width matters more than height in practice. 1200 pixels is enough for a retina display at the roughly 600-pixel-wide preview a desktop feed uses, and it stays legible in the 350-pixel-wide preview a phone shows. Height beyond 630 mostly gets cropped.',
+        ],
+      },
+      {
+        h: 'What each platform does with the same file',
+        p: [
+          'Facebook and LinkedIn render a wide card at 1.91:1 and crop an image that is not already that shape. LinkedIn has historically authored at 1200x627, a three-pixel difference nobody can see and no designer should chase.',
+          'X has two shapes. A `summary_large_image` card is 1.91:1, commonly authored at 1200x628; a `summary` card is square, where 512x512 works. If `twitter:image` is missing, X falls back to `og:image` - but which card type you get is decided by `twitter:card`, so a wide design can still be presented as a square crop.',
+        ],
+        p2: [
+          'Messaging clients - WhatsApp, Slack, Discord, Telegram - reuse `og:image` and crop it into their own container. None of them documents a size it will honour, so the useful rule is the boring one: keep the subject and any text inside the middle 80% of the frame, and never put meaning in the bottom edge, where some clients overlay a domain or a play button.',
+        ],
+      },
+      {
+        h: 'The tags that matter more than the picture',
+        p: [
+          '`og:image` must be an absolute URL. Relative paths are common in hand-written tags and are the most reliable way to produce a card with no image, because the consumer has no page context to resolve them against. Add `og:image:width` and `og:image:height` at the real pixel dimensions so clients reserve the right box before the bytes arrive.',
+          '`og:url` should be the canonical URL. Without it a link shared with tracking parameters can be treated as its own object and the share counts split. `og:title` and `og:description` decide the text line, and `og:title` is also one of the sources Google may use for a title link, so it should not promise something the page does not deliver.',
+        ],
+        p2: [
+          'For X, add `twitter:card` - `summary_large_image` for a wide design - and `twitter:image` if the card should differ from the Open Graph one. Omitting `twitter:image` is fine; the fallback is well defined.',
+        ],
+      },
+      {
+        h: 'Testing a share card without guessing',
+        p: [
+          'Facebook\'s Sharing Debugger and LinkedIn\'s Post Inspector fetch a URL and show the card the platform will build, including the image it picked. Both cache aggressively: re-scraping refreshes what new shares see, but a preview already cached in someone\'s feed does not change retroactively.',
+          'X shows the card as you compose a post, which is the closest thing it offers to a preview. If a platform has moved its debugger, its own developer documentation is the only source worth trusting - third-party card checkers re-implement a subset and go stale.',
+        ],
+        p2: [
+          'Test the exact URL you intend to share, then one deep URL from the same template. A site-wide image can look fine on the homepage and be wrong on every article, and the template is where that bug lives.',
+        ],
+      },
+      {
+        h: 'Mistakes that cost clicks',
+        p: [
+          'A missing or relative URL is the first. A 4 MB PNG exported at 4000 pixels wide is the second: most platforms cap uploads somewhere between 5 and 8 MB, but a file that size makes the preview slow long before it fails, and it is the same weight problem the image SEO guide describes.',
+          'One site-wide logo for every page is the third. A page-specific card tells someone which article they are about to open; a logo tells them which site they are on, which the domain line already says. Body-copy-sized text is the fourth: at a 350-pixel-wide mobile preview, anything under roughly 40 pixels tall in the source is unreadable.',
+        ],
+        p2: [
+          'Transparency is the last. A PNG with an alpha channel can land on a dark card in one client and a white one in another; flatten it onto a background you control.',
+        ],
+      },
+      {
+        h: 'A sixty-second routine',
+        p: [
+          'Design at 1200x630, keep text large and inside the middle of the frame, export as JPG or PNG under about 500 KB, and point `og:image` at the absolute URL with matching width and height. Add `og:url`, an `og:title` that matches the page, and `twitter:card` if you want the wide X treatment.',
+          'Then paste the URL into two debuggers and look at the mobile preview rather than the desktop one. The Open Graph Generator writes the tag block, the Twitter Card Generator covers the X-specific pair, and the Image Compressor takes the export down to a sensible weight. The meta description length guide covers the text line underneath.',
+        ],
+        p2: [
+          'That is the whole job: ten minutes once per template, and it removes a class of broken previews nobody notices until a link is already shared.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is the standard open graph image size?', a: '1200x630 at a 1.91:1 aspect ratio. Facebook popularised that shape and most unfurlers reuse it, so one file covers Facebook, LinkedIn, X large cards, WhatsApp, Slack and Discord without a hard crop. X also accepts 1200x628 for its large card.' },
+      { q: 'Does the Open Graph protocol define an image size?', a: 'No. The protocol defines og:image as a URL plus optional og:image:width and og:image:height. The 1200x630 figure comes from what platforms display, not from the specification, which is why the number changes when a platform changes its card layout.' },
+      { q: 'What size should an X or Twitter card image be?', a: 'A summary_large_image card is 1.91:1 and is commonly authored at 1200x628. A summary card is square, where 512x512 works. Set twitter:card to summary_large_image if you want the wide treatment; otherwise the image may be cropped square.' },
+      { q: 'Why is my og:image not showing?', a: 'Usually a relative URL, a 404, a cache, or a crawler blocked by robots.txt. Check the absolute URL loads, confirm the image is large enough not to be upscaled, then re-scrape with the platform debugger. Cached previews in existing posts stay as they were.' },
+      { q: 'Should every page have its own open graph image?', a: 'Yes, where it is practical. A page-specific card tells the reader which article they are opening, while a single site-wide logo repeats information the domain line already gives them. Templates make this cheap: one layout, one generated image per page.' },
+      { q: 'Which format and file size should I use?', a: 'JPG or PNG at under about 500 KB. WebP support across unfurlers is uneven, and a heavy file slows the preview even when the platform accepts it. Flatten transparency onto a background you control so the card looks the same in light and dark clients.' },
+    ],
+    relatedTools: ['open-graph-generator', 'twitter-card-generator', 'meta-tag-generator', 'image-compressor'],
+    relatedGuides: ['meta-description-length-2026', 'image-seo', 'website-launch-seo-checklist'],
+    links: [
+      { label: 'The Open Graph protocol', url: 'https://ogp.me/' },
+      { label: 'Facebook: webmasters sharing guide', url: 'https://developers.facebook.com/docs/sharing/webmasters/' },
+      { label: 'X: cards markup reference', url: 'https://developer.x.com/en/docs/x-for-websites/cards/overview/markup' },
+    ],
+  },
+  {
+    slug: 'htaccess-301-redirect',
+    title: '.htaccess 301 redirects: four patterns, one order, no loops',
+    focus: 'htaccess 301 redirect',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: '.htaccess 301 Redirect: Patterns, Order and Testing',
+    metaDesc: '.htaccess 301 redirect rules are Apache-only, order-sensitive and easy to turn into a loop. Four patterns that cover most moves, and how to test one first.',
+    intro: 'An htaccess 301 redirect is the Apache way of telling browsers and crawlers that a URL has moved for good. The rules are short, the ordering is where people get hurt, and the file only works on Apache.',
+    sections: [
+      {
+        h: 'What an htaccess 301 redirect can and cannot do',
+        p: [
+          '`.htaccess` is per-directory configuration for Apache. Two mechanisms handle redirects: `Redirect` from mod_alias for simple path-to-path moves, and `RewriteRule` from mod_rewrite when a pattern or a condition is involved. Neither means anything on nginx, IIS or an edge platform - those have their own syntax, and copying an `.htaccess` file to them produces a 404, not a redirect.',
+          'Two failure modes are worth knowing before editing anything. If the host disables overrides for the directory (`AllowOverride None`), Apache ignores the whole file and nothing happens. If the file contains a syntax error, Apache returns 500 for every URL in that directory - which is why a redirect change belongs in a staging copy, or at least behind a backup of the file.',
+        ],
+        p2: [
+          'What it does well is the thing Google documents: a permanent redirect is a signal that the target should be canonical. `301` and `308` are permanent; `302`, `303` and `307` are temporary, and Google keeps showing the source URL for those.',
+        ],
+      },
+      {
+        h: 'Four patterns that cover most htaccess 301 redirect work',
+        p: [
+          'Single URL, whole domain, www to apex, and http to https. That is the list for a normal migration; anything more specific is usually a discontinued section, and those are just more single-URL rules.',
+          'Read the block in order. `Redirect` is mod_alias and needs a path beginning with a slash. The domain rule must exclude the new domain or it redirects in a circle. The www rule captures the apex in `%1` so paths survive. The HTTPS rule tests `%{HTTPS}` rather than the host, and every mod_rewrite rule ends with `[R=301,L]` so nothing after it runs.',
+        ],
+        pre: [
+          '# 1. One old URL to one new URL (mod_alias)',
+          'Redirect 301 /old-page /new-page',
+          '',
+          '# 2. Every path on an old domain to the same path on a new one',
+          'RewriteEngine On',
+          'RewriteCond %{HTTP_HOST} ^olddomain\\.com$ [NC]',
+          'RewriteRule ^ https://newdomain.com%{REQUEST_URI} [R=301,L]',
+          '',
+          '# 3. www to apex',
+          'RewriteEngine On',
+          'RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]',
+          'RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]',
+          '',
+          '# 4. http to https',
+          'RewriteEngine On',
+          'RewriteCond %{HTTPS} off',
+          'RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]',
+        ].join('\n'),
+        p2: [
+          'One rule per concern, and the http-to-https rule is the one to add last: it will happily fire for internal rewrites otherwise, and the `[L]` flag turns a careless ordering into a loop rather than a longer page.',
+        ],
+      },
+      {
+        h: '301 vs 302: what Google actually does with each',
+        p: [
+          'The old shorthand - "a 301 passes link equity and a 302 does not" - is too strong, and it is repeated in a lot of otherwise good guides. Google follows both. The difference is which URL it treats as canonical: with a permanent redirect the target becomes canonical and results show it; with a temporary one the source stays canonical and the target may still be indexed from other signals.',
+          'Use a temporary redirect only when you intend to put the URL back: a maintenance window, an A/B test, a seasonal page. For a rename or a migration, permanent is the correct signal, and `308` is the HTTP/1.1 equivalent of `301` when the request method has to be preserved.',
+        ],
+        p2: [
+          'Expect one more thing after a move: Google keeps track of both URLs, and the old one can keep appearing occasionally as an alternate name for the new page. That is documented behaviour rather than a redirect bug, and it fades as people get used to the new address.',
+        ],
+      },
+      {
+        h: 'Order, flags and the failures they cause',
+        p: [
+          '`Redirect` directives are evaluated top to bottom and the first match wins, so a broad rule placed early shadows every specific rule after it. Put one-off paths first and the catch-all last. mod_rewrite is a different engine: rules run in file order, `[L]` ends the current round, and an internal rewrite can start a new one. On Apache 2.4, `[END]` stops processing entirely, which is usually what people mean by "last".',
+          'Chains are the quiet failure. `/old` to `/middle` to `/new` works, but every hop is an extra request and an extra chance to break, and Google publishes no hop limit to design against. Redirect straight to the final URL. Loops are the loud one: `/a` to `/b` and `/b` to `/a` gives `ERR_TOO_MANY_REDIRECTS` in the browser and a redirect error in a crawl.',
+        ],
+        p2: [
+          'Query strings have their own trap. `Redirect` keeps the query string by default; a `RewriteRule` without `?` or `[QSA]` can silently drop it. And avoid rules that send every missing path to the homepage: that is a soft 404, and it teaches Google that unrelated URLs resolve to the same content.',
+        ],
+      },
+      {
+        h: 'Testing a redirect before it hurts',
+        p: [
+          'From a terminal, `curl -sI https://example.com/old-page` shows the status line and the `Location` header. Add `-o /dev/null -w "%{http_code} %{redirect_url}"` when you want one line per URL to paste into a checklist, and use `-L` only when you want the final destination rather than the first hop.',
+          'In Search Console, the report that used to be called Coverage is now Page indexing. "Page with redirect" is informational - it means Google followed the redirect - while a redirect error is the thing to fix. Follow each new rule to a 200, confirm the code is 301 rather than 302, and update internal links and the sitemap so the old URL stops being advertised.',
+        ],
+        p2: [
+          'The Web Crawler Audit reports status, the redirect chain and the final URL for one address, which is the quickest way to catch a chain you did not intend. Do that before the rules go live, not after a ranking drop.',
+        ],
+      },
+      {
+        h: 'When a redirect is the wrong answer',
+        p: [
+          'If the content is gone for good and has no replacement, a `410` or a plain `404` is more honest than redirecting to something unrelated. Sending every retired page to the homepage is the classic soft 404, and it spends crawl budget on URLs that will never satisfy anyone.',
+          'For duplicate URLs that both need to exist, a canonical is the right tool; for a page that moved, a redirect is. `noindex` is neither - it removes a page from results but keeps it crawlable, which is why pairing it with a robots.txt disallow defeats both.',
+        ],
+        p2: [
+          'The launch checklist covers redirects in context, and the noindex vs robots.txt guide covers which directive belongs to which problem. If a redirect is live and the page still is not indexed, the diagnostic guide is the next stop.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is an htaccess 301 redirect?', a: 'An .htaccess 301 redirect is an Apache rule that sends a URL to a new location permanently. It is written with Redirect from mod_alias, or with RewriteRule and the [R=301] flag from mod_rewrite. It only applies on Apache; nginx, IIS and edge platforms need their own rules.' },
+      { q: 'Does a 301 redirect pass PageRank?', a: 'Google uses a permanent redirect as a signal that the target should be canonical, so signals consolidate on the new URL. The old claim that a 301 passes PageRank exactly like a direct link is stronger than anything Google documents today: treat it as consolidation over time, not a guaranteed 1:1 transfer.' },
+      { q: 'What is the difference between a 301 and a 302 redirect?', a: 'Both are followed by Googlebot. A 301 (or 308) is permanent: the target becomes canonical and search results show it. A 302 (or 307) is temporary: the source stays canonical and keeps appearing in results. Use a temporary redirect only when the URL is coming back.' },
+      { q: 'How do I redirect www to non-www in .htaccess?', a: 'Enable the rewrite engine, match the www host with RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC], then rewrite to https://%1%{REQUEST_URI} with [R=301,L]. The %1 is the captured apex, so paths survive the redirect. Keep the rule above any catch-all.' },
+      { q: 'Why is my .htaccess redirect not working?', a: 'Check four things: overrides are enabled for the directory, mod_rewrite is loaded, the .htaccess sits in the right directory, and no earlier rule matches first. A syntax error returns 500 for every URL. If the host is nginx or an edge platform, .htaccess is ignored entirely.' },
+      { q: 'Do redirect chains hurt SEO?', a: 'They do not break anything, but each hop is an extra request and an extra point of failure, and signals have further to travel. Redirect straight to the final URL. Google publishes no hop limit, so treat any chain longer than one hop as work to clean up.' },
+    ],
+    relatedTools: ['htaccess-redirect-generator', 'web-crawler-audit', 'canonical-tag-generator', 'sitemap-generator'],
+    relatedGuides: ['website-launch-seo-checklist', 'noindex-vs-robots-txt', 'why-is-my-site-not-indexed'],
+    links: [
+      { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
+      { label: 'Apache: mod_alias redirect directives', url: 'https://httpd.apache.org/docs/current/mod/mod_alias.html' },
+      { label: 'Apache: mod_rewrite reference', url: 'https://httpd.apache.org/docs/current/mod/mod_rewrite.html' },
+    ],
+  },
+  {
+    slug: 'title-tag-length-2026',
+    title: 'Title tag length: what Google truncates, and what it ignores',
+    focus: 'title tag length',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Title Tag Length: Why 60 Characters Is Only a Guess',
+    metaDesc: 'Title tag length has no official limit: Google truncates the title link to fit the device. The practical range, why width decides, and when it gets rewritten.',
+    intro: 'Title tag length is usually taught as a 60-character rule. Google publishes no such limit: it truncates the title link to fit the device, so the real constraint only shows up when you preview it.',
+    sections: [
+      {
+        h: 'Title tag length: the official answer',
+        p: [
+          'Google asks for a `<title>` on every page and says explicitly that there is no limit on how long the element can be. What it truncates is the title link in search results, "typically to fit the device width". So the widely quoted 60 characters is not a rule anyone enforces; it is a shorthand for the width of the space.',
+          'The practical range follows from that. On a desktop result, 50 to 60 characters of ordinary text usually survives intact. On a phone, less does, because the result is narrower and the same string needs more lines than the layout allows.',
+        ],
+        p2: [
+          'The consequence is a writing habit rather than a character limit: put the distinguishing words at the front, because the tail is what disappears first when the line is cut.',
+        ],
+      },
+      {
+        h: 'Where the 60-character rule comes from',
+        p: [
+          'It comes from measurement, not documentation. People measured the pixel width of the title line in desktop results, found something near 600 pixels, and divided by an average character width to get roughly 60. That estimate has been repeated for a decade because it is usually close enough.',
+          'It is a proxy, and it fails in a predictable direction. Character width varies: a title of capital Ws and Ms fills the line much sooner than the same number of i and l characters. Ten wide characters can run out of room while twenty narrow ones still fit.',
+        ],
+        p2: [
+          'That is why a preview beats a counter. The SERP Preview Tool renders the title the way a result would, so the question becomes "does this get cut" rather than "is this 61 characters".',
+        ],
+      },
+      {
+        h: 'When Google rewrites your title',
+        p: [
+          'Title links are generated automatically, and Google picks from several sources: the `<title>` element, the main visible heading, other large text, `og:title`, anchor text pointing at the page, and the site name in structured data. Usually it uses what you wrote. Sometimes it does not.',
+          'The documented triggers are specific rather than mysterious: a half-empty title such as a lone site name, a title carrying a stale year the page has moved past, a title that does not describe the page, boilerplate repeated across many pages, no clear main heading, or a writing system that does not match the content.',
+        ],
+        p2: [
+          'Google publishes no rewrite rate, and the third-party studies that quote one sample different query sets, so a percentage is not worth repeating. If you want a local number, compare the titles you wrote with the title links Search Console shows for your own queries.',
+        ],
+      },
+      {
+        h: 'Writing a title that survives',
+        p: [
+          'Be descriptive and specific about the page, not the site. One title per page, with the brand at the end behind a delimiter if it fits. Include the phrase once if it belongs in the sentence, and leave it out if forcing it would make the title read like a keyword list - stuffing is one of the documented reasons a title gets replaced.',
+          'Match the query the page is for. A title that answers the searcher\'s question tends to be kept; a promotional line tends to be rewritten from the heading that actually describes the page.',
+        ],
+        p2: [
+          'One honest note on click-through rate: it is not a documented ranking input, and Google\'s published ranking systems do not include click data. A better title earns more clicks because clicks are the point of being found, and that is a good enough reason without claiming it moves rankings.',
+        ],
+      },
+      {
+        h: 'Mistakes worth fixing today',
+        p: [
+          'Letting the CMS copy the H1 into the title is the most common. H1s are written for the page and are often longer, vaguer, or missing the phrase a searcher would use. Duplicate titles across pages are next: they make two pages compete for the same description and give Google a reason to generate its own.',
+          'Putting the brand first pushes the page\'s subject out of the visible start. Omitting the title entirely leaves Google to build one from the URL or the first heading. And counting characters instead of previewing is the quiet one - it produces titles that pass the check and still get cut.',
+        ],
+        p2: [
+          'Keep `<title>`, the H1 and `og:title` consistent. Any of them can be used for a title link or a social card, and three different promises on one page is how a result ends up describing something the page does not say.',
+        ],
+      },
+      {
+        h: 'A pre-publish title check',
+        p: [
+          'Five passes: is the phrase in there once, naturally; is the subject in the first few words; is it unique across the site; does the preview survive at desktop and mobile width; and would a person understand the page from the title alone.',
+          'Changes take effect when Google recrawls, which the documentation puts at days to weeks, so a title edit is not an instant fix and repeated tweaking tells you nothing. Set it, request a recrawl, and check the result once.',
+        ],
+        p2: [
+          'The Meta Tag Generator writes the full tag set, and the meta description length guide covers the line underneath, which has its own width problem and its own rules.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is the title tag length limit?', a: 'There is no limit on the title tag itself; Google says so directly. The title link in results is truncated to fit the device width, so 50 to 60 characters is a practical desktop target rather than a rule. Mobile results cut sooner.' },
+      { q: 'Does Google truncate title tag length by pixels or characters?', a: 'Pixel width. The title link is cut to fit the space, and characters are not equally wide, so a title of Ws and Ms runs out of room well before one made of i and l characters. Character counts are an approximation; a preview is the real check.' },
+      { q: 'Will Google rewrite my title tag?', a: 'Sometimes. Google generates title links from the title element, the main heading, other prominent text, og:title, anchor text and the site name. It is more likely to rewrite a half-empty, stale, inaccurate or boilerplate title, or a page with no clear main heading.' },
+      { q: 'Does the title tag affect rankings?', a: 'It is used to understand and describe a page, but it is not a switch you can optimise for a large ranking gain. The measurable effect is on clicks: a specific, accurate title gets chosen more often than a vague one. Click-through rate is not a documented ranking input.' },
+      { q: 'How long should a title tag be for mobile?', a: 'Shorter than desktop, because the result is narrower. Aim for the essential words within roughly the first 45 to 50 characters, front-load the subject, and drop the brand suffix if it pushes the useful part out of view. Preview it rather than count it.' },
+      { q: 'Should the brand name go at the start or end of the title?', a: 'At the end, behind a delimiter, unless the brand is what the searcher typed. Leading with the brand spends the visible part of the title on something the domain line already shows, and pushes the page subject into the part that gets truncated.' },
+    ],
+    relatedTools: ['meta-tag-generator', 'serp-preview-tool', 'meta-description-checker', 'open-graph-generator'],
+    relatedGuides: ['meta-description-length-2026', 'internal-linking', 'website-launch-seo-checklist'],
+    links: [
+      { label: 'Google: influencing title links', url: 'https://developers.google.com/search/docs/appearance/title-link' },
+      { label: 'Google: control your snippets', url: 'https://developers.google.com/search/docs/appearance/snippet' },
     ],
   },
 ];

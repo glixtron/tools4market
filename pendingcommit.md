@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Thirteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below).
+**Status:** ✅ Fourteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below).
+
+## Entry 14 — v2.14 Day-9 guides
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified before commit: build **75 pages / 44 tools / 18 guides**, smoke **44/44**, SEO audit **2368/2368**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **70/70**.
+
+**Subject:** `feat: Day-9 guides — Open Graph image size, .htaccess 301 redirects, title tag length (v2.14)`
+
+**Summary:**
+- **Three guides, all verified missing first** (guides 15 → 18): `open-graph-image-size-2026`, `htaccess-301-redirect`, `title-tag-length-2026`. `.htaccess` had zero mentions; the other two existed only as one step in the launch checklist.
+- **Corrections applied to the pack:** 301/302 reframed as canonicalisation rather than "passes PageRank"; the unpublishable 5-hop limit dropped; "Coverage" → "Page indexing" and redirect entries are informational; the title rewrite rate, CTR lift and CTR-ranking claim removed; the OG click multiplier, 600×315 minimum and per-platform caps removed — the guide now says the OGP spec defines no dimensions; X's retired card validator replaced.
+- **Format:** spec tables and bullet lists converted to prose (the renderer supports neither); redirect patterns use the existing `sections[].pre` code block; the duplicate "FAQ array" blocks dropped.
+- **Cross-links:** launch checklist → all three; meta description guide → both spec sheets; noindex + not-indexed → the redirect guide.
+- **Docs:** `docs/day9/` (3 pack files + `INTEGRATION-NOTES.md`), README/Architecture → 75 pages, 18 guides, v2.14.
+
+**Files in this commit:** `src/data/blog.js` (3 guides + 4 cross-link updates), `docs/day9/*`, `README.md`, `Architecture.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 13 — live-verify accepts the edge scheme hop
 

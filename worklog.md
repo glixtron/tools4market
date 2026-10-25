@@ -6,6 +6,35 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (5th pass) — Day-9 pack: OG images, redirects, title length (v2.14)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner dispatched Day 9 with the files actually attached, after a previous dispatch that existed only in chat. He asked for a gap check against the 15-guide library before anything was written.
+
+**Gap check first: all three cleared.** `.htaccess` appeared **zero** times in the library. Title tags and Open Graph appeared only as a single step inside `website-launch-seo-checklist` and one mention in `screaming-frog-alternative` — sentences, not sections. All three published; guides 15 → 18, pages 72 → 75.
+
+**The pack's slug verification was again incomplete.** It claimed all three tool slugs were verified; `xml-sitemap-generator` does not exist (real slug: `sitemap-generator`), and every link used the wrong `/seo-tools/` and `/web-tools/` scheme for the fourth pack running. `relatedTools` would have dropped the dead slug silently, exactly as it would have with Day 8's `image-optimizer`.
+
+**Format problems the pack could not have known about:** the build renders article prose through `rich()` (bold and inline code only) with one `<p>` per string, so the spec **tables** and bullet **lists** would have shipped as pipe characters and dashes. Converted to prose; the four redirect patterns became a real code block through the existing `sections[].pre` field.
+
+**Fact-checking did the real work again:**
+- **"301 passes PageRank, 302 does not."** Google's current documentation frames this as canonicalisation: both are followed, a permanent redirect makes the target canonical and shows it, a temporary one keeps the source canonical and visible. The 2016 "equivalently to direct links" claim is stronger than anything documented today, so the FAQ says signals consolidate — not a 1:1 transfer.
+- **"Google follows about 5 hops."** Not published. Removed; chains cost a request, and there is no documented limit to design against.
+- **Search Console "Coverage"** is **Page indexing**, and "Page with redirect" is informational — the pack called redirect entries errors, which would have sent readers chasing a healthy state.
+- **Title tags:** the ~600 px/520 px/580 px widths are measurements, not Google guidance (Google publishes no limit and truncates "to fit the device width"). The pack's 30–60% rewrite rate and 5–30% CTR lift have no published source; CTR is not a documented ranking input either. All three removed and replaced with the documented rewrite triggers.
+- **Open Graph:** "unique images earn 2–3× more clicks", the 600×315 minimum and the per-platform 8 MB caps were untraceable. Removed. The guide's spine is the honest version: **the OGP spec defines no image dimensions at all**, so 1200×630 is platform convention.
+- **X's standalone card validator is gone**; the guide points at the composer preview and platform docs instead of a dead URL.
+
+**Cross-linking:** `website-launch-seo-checklist` now links all three new guides, `meta-description-length-2026` links the two spec sheets, and `noindex-vs-robots-txt` / `why-is-my-site-not-indexed` link the redirect guide — so the cluster has inbound links from older pages, not only from itself.
+
+**Verification:** build **75 pages** / 44 tools / **18 guides**; SEO audit **2368/2368** (+77), smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed; IndexNow **74 URLs**; live-verify **70/70**; all three URLs 200 with `BlogPosting` + `FAQPage` + `BreadcrumbList` and a Read next block.
+
+**Pack notes:** `docs/day9/INTEGRATION-NOTES.md` (all three files archived beside it).
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (4th pass) — Day-8 gap-list pack: 3 new guides (v2.13)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

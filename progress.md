@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-9 guides — v2.14 (25 Oct 2026)
+
+**Trigger:** owner dispatched Day 9 with the three posts attached, and asked for the gap check to decide the topics.
+
+**All three published; all three were genuinely new.** `.htaccess` had zero mentions in the 15-guide library; title tags and Open Graph each existed only as one step inside the launch checklist. Guides 15 → 18, pages 72 → 75.
+
+**Facts corrected:** "301 passes PageRank, 302 does not" became the documented canonicalisation difference; the "~5 hop" limit (not published) was removed; Search Console's "Coverage" is "Page indexing" and "Page with redirect" is informational, not an error; the title post's 30–60% rewrite rate, 5–30% CTR lift and CTR-to-rankings implication were removed (none is documented); the OG post's 2–3× click multiplier, 600×315 minimum and per-platform file caps were removed — and the guide now leads with the fact that the OGP spec defines no image dimensions at all. X's retired card validator was replaced with the composer preview.
+
+**Format:** the pack's spec tables and bullet lists cannot render (prose is escaped, one `<p>` per string), so they became prose; the four redirect patterns use the existing `sections[].pre` code block. The separate "FAQ array" blocks were dropped — `article.faqs[]` already generates `FAQPage`.
+
+**Tests:** build 75 pages / 44 tools / 18 guides, seo-audit **2368/2368** (+77), smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify 70/70, IndexNow 74 URLs. Pack notes in `docs/day9/INTEGRATION-NOTES.md`.
+
 ### Day-8 gap-list guides — v2.13 (25 Oct 2026)
 
 **Trigger:** owner dispatched Day 8 built from the gap list rather than cadence — internal linking, image SEO, Core Web Vitals.

@@ -39,7 +39,7 @@ Then open <http://localhost:8090>.
 A clean build prints:
 
 ```
-✔ Built 72 HTML pages (44 tools, 5 categories, 5 policy pages, 15 guides and blog hub) + sitemap.xml, robots.txt, 404.html, assets.
+✔ Built 75 HTML pages (44 tools, 5 categories, 5 policy pages, 18 guides and blog hub) + sitemap.xml, robots.txt, 404.html, assets.
 ```
 
 The build also warns if any page's `<title>` exceeds 60 characters or its meta description exceeds 158 — fix the data file rather than ignoring the warning.
@@ -185,7 +185,7 @@ npm run indexnow           # scripts/indexnow.mjs — submit new/updated URLs to
 
 ### Guides (`/blog/`)
 
-Fifteen how-to guides covering the queries our tools sit next to: robots.txt for search engines and AI crawlers, the website launch SEO checklist, how to block GPTBot, an llms.txt guide, appearing in ChatGPT search, checking whether AI crawlers can reach your site, noindex vs robots.txt, why a site is not indexed, UTM naming conventions, schema markup for AI search, a Screaming Frog alternative comparison, meta description length in 2026, internal linking, image SEO, and Core Web Vitals in 2026. Each guide is a real page — `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author and reviewer, cited sources, and links into the tools it discusses. Articles live in `src/data/blog.js`; the build generates the hub, the article pages, the schema and `sitemap-blog.xml`. A guide can point at other guides through `relatedGuides[]`, which renders a **Read next** block — `relatedTools[]` is tool-slugs-only.
+Eighteen how-to guides covering the queries our tools sit next to: robots.txt for search engines and AI crawlers, the website launch SEO checklist, how to block GPTBot, an llms.txt guide, appearing in ChatGPT search, checking whether AI crawlers can reach your site, noindex vs robots.txt, why a site is not indexed, UTM naming conventions, schema markup for AI search, a Screaming Frog alternative comparison, meta description length in 2026, internal linking, image SEO, Core Web Vitals in 2026, Open Graph image size, .htaccess 301 redirects, and title tag length in 2026. Each guide is a real page — `BlogPosting` + `FAQPage` + `BreadcrumbList` schema, author and reviewer, cited sources, and links into the tools it discusses. Articles live in `src/data/blog.js`; the build generates the hub, the article pages, the schema and `sitemap-blog.xml`. A guide can point at other guides through `relatedGuides[]`, which renders a **Read next** block — `relatedTools[]` is tool-slugs-only.
 
 ### Analytics & cookies (Google Tag Manager + GA4 + Consent Mode v2)
 
@@ -275,7 +275,7 @@ Both layers ship from this single repo to one Cloudflare project — no second s
 
 | Layer | What it is | Where it comes from | Runs on |
 |---|---|---|---|
-| **Frontend** | 72 static pages (HTML/CSS/JS, 44 tools and 15 guides) | `dist/` (built by `node build.mjs`) | Cloudflare static assets (global CDN) |
+| **Frontend** | 75 static pages (HTML/CSS/JS, 44 tools and 18 guides) | `dist/` (built by `node build.mjs`) | Cloudflare static assets (global CDN) |
 | **Backend** | `/api/fetch` live-URL proxy (SSRF-guarded) | `functions/api/fetch.js`, served by `worker.js` | The same Worker (serverless) — or a Pages Function on Path B |
 | **Backend** | `/api/suggest` AI fix suggestions (consent-gated client) | `functions/api/suggest.js`, served by `worker.js` | The same Worker + the `AI` (Workers AI) binding — no API key anywhere |
 
