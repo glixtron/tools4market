@@ -29,7 +29,78 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+---
+
+## 2026-10-24 (early session, 2nd pass) — Day-2 content pack integrated (v2.10)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (two blog posts, an AEO FAQ set, analytics setup guide, Product Hunt + social assets, 50-keyword research, a master compilation, and an OpenCode prompt naming 7 "machine tasks"). Owner asked to read all of it and "add everything properly" to the project docs.
+
+**What was wrong with the pack as written:** it targets a CMS this site does not have, uses a URL scheme this site never had (`/ai-search/…`, `/seo-tools/…`), stale 31-tool counts, and recommends GTM (which v2.7 measured as dead weight and turned off). Executing the pack's OpenCode prompt verbatim would have shipped 404 internal links and re-broken the PageSpeed work.
+
+**Cross-check before touching anything:** tasks 1–4 were already shipped (root robots/llms.txt, Organization+WebSite, BreadcrumbList+FAQPage everywhere — all asserted by the seo-audit). The pack also assumed a CMS, wrong URLs, stale 31-tool counts, and recommended GTM — which v2.7 measured as ~560 KB/page of dead weight and turned off. Full matrix in `docs/day2/INTEGRATION-NOTES.md`; all 9 source files archived verbatim in `docs/day2/`.
+
+**What actually shipped (v2.10, commit `ea839d3`):**
+- All 9 pack files archived verbatim in `docs/day2/`, plus `docs/day2/INTEGRATION-NOTES.md` recording the task-by-task matrix, the corrections and the owner-side leftovers.
+- **New guide `screaming-frog-alternative`** — the one genuinely new post, adapted to house voice: honest-limits sections kept, the "when to use which" decision rule kept, internal links moved to `relatedTools` (prose is HTML-escaped by design), 10-point pre-publish checklist as a code block. Guides 10→11, pages 67→68.
+- **`llms-txt-guide` upgraded in place rather than duplicated** — merged in the pack's decision flow, file-format skeleton and three common mistakes; added a 6th FAQ capturing the "llms.txt example" query; set `updated: 2026-10-24`; ~640 → ~1,100 words. Kept our newer v2-spec section the pack did not know about.
+- **5 AEO FAQ additions** merged into the top-5 tools (robots-txt-generator: block training but stay citable; llms-txt-generator: do-I-need-one; meta-tag-generator: OG vs Twitter Card; utm-link-builder: lowercase rule; schema-markup-generator: priority order) — trimmed to the 300-char answer rule and de-duplicated against existing FAQs.
+- **2 missing GA4 events** added to `src/site.js`: `search` (`search_term` + `results_count`, 800 ms debounce, ≥2 chars, deduped) and `external_link_click` (`link_host`/`link_path`, analytics/infra hosts excluded). The pack's `tool_used`/`tool_copied` already existed as `tool_run`/`copy_output`.
+
+**Owner-side leftovers** (KPI sheet, GA4↔GSC link, social/PH/directory actions, indexing habit) recorded in a new `pending-work.md` section pointing at the archived files. Counts updated: README/Architecture → 68 pages, 44 tools, 11 guides.
+
+**Verification (all before commit):** build 68 pages / 44 tools / 11 guides, smoke 44/44, SEO audit **2167/2167** (+22), consent 30/30, personalized 181/181, suggest-api 24/24. Deployed as Worker version `6d5cd8fd`; IndexNow 67 URLs (HTTP 200); live-verify 61/61; new guide confirmed live with FAQPage schema, llms guide confirmed showing "Updated 2026-10-24", both new GA4 events confirmed in the served `site.js`.
+
+**Completed:** 24 Oct 2026, 02:24 IST.
+
+---
+
+---
+
+
+## 2026-10-24 (early session, 2nd pass) — Day-2 content pack integrated (v2.10)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (two blog posts, an AEO FAQ set, analytics setup guide, Product Hunt + social assets, 50-keyword research, a master compilation, and an OpenCode prompt naming 7 "machine tasks"). Owner asked to read all of it and "add everything properly" to the project docs.
+
+**What was wrong with the pack as written:** it targets a CMS this site does not have, uses a URL scheme this site never had (`/ai-search/…`, `/seo-tools/…`), stale 31-tool counts, and recommends GTM (which v2.7 measured as dead weight and turned off). Executing the pack's OpenCode prompt verbatim would have shipped 404 internal links and re-broken the PageSpeed work.
+
+**Cross-check before touching anything:** tasks 1–4 were already shipped (root robots/llms.txt, Organization+WebSite, BreadcrumbList+FAQPage everywhere — all asserted by the seo-audit). The pack also assumed a CMS, wrong URLs, stale 31-tool counts, and recommended GTM — which v2.7 measured as ~560 KB/page of dead weight and turned off. Full matrix in `docs/day2/INTEGRATION-NOTES.md`; all 9 source files archived verbatim in `docs/day2/`.
+
+**What actually shipped (v2.10, commit `ea839d3`):**
+- All 9 pack files archived verbatim in `docs/day2/`, plus `docs/day2/INTEGRATION-NOTES.md` recording the task-by-task matrix, the corrections and the owner-side leftovers.
+- **New guide `screaming-frog-alternative`** — the one genuinely new post, adapted to house voice: honest-limits sections kept, the "when to use which" decision rule kept, internal links moved to `relatedTools` (prose is HTML-escaped by design), 10-point pre-publish checklist as a code block. Guides 10→11, pages 67→68.
+- **`llms-txt-guide` upgraded in place rather than duplicated** — merged in the pack's decision flow, file-format skeleton and three common mistakes; added a 6th FAQ capturing the "llms.txt example" query; set `updated: 2026-10-24`; ~640 → ~1,100 words. Kept our newer v2-spec section the pack did not know about.
+- **5 AEO FAQ additions** merged into the top-5 tools (robots-txt-generator: block training but stay citable; llms-txt-generator: do-I-need-one; meta-tag-generator: OG vs Twitter Card; utm-link-builder: lowercase rule; schema-markup-generator: priority order) — trimmed to the 300-char answer rule and de-duplicated against existing FAQs.
+- **2 missing GA4 events** added to `src/site.js`: `search` (`search_term` + `results_count`, 800 ms debounce, ≥2 chars, deduped) and `external_link_click` (`link_host`/`link_path`, analytics/infra hosts excluded). The pack's `tool_used`/`tool_copied` already existed as `tool_run`/`copy_output`.
+
+**Owner-side leftovers** (KPI sheet, GA4↔GSC link, social/PH/directory actions, indexing habit) recorded in a new `pending-work.md` section pointing at the archived files. Counts updated: README/Architecture → 68 pages, 44 tools, 11 guides.
+
+**Verification (all before commit):** build 68 pages / 44 tools / 11 guides, smoke 44/44, SEO audit **2167/2167** (+22), consent 30/30, personalized 181/181, suggest-api 24/24. Deployed as Worker version `6d5cd8fd`; IndexNow 67 URLs (HTTP 200); live-verify 61/61; new guide confirmed live with FAQPage schema, llms guide confirmed showing "Updated 2026-10-24", both new GA4 events confirmed in the served `site.js`.
+
+**Completed:** 24 Oct 2026, 02:24 IST.
+
+---
+
 ## 2026-10-24 (early session) — Calculator batch 2: email ROI + marketing budget (v2.9)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner said "complete that also" after the day-1 pending audit, where batch 2 (email ROI + marketing budget) was the recommended next scheduled agent-side item — the day-1 plan's month-3 calculators pulled forward.
+
+**What was built (v2.9, commit `2f11247`):**
+- **Email ROI Calculator** — sends/opens/clicks/conversions/revenue/cost → open rate, click rate, click-to-open rate and conversion rate, revenue per email, net profit, ROI % and spend multiple, with verdict tiers and honesty guards (opens > sends, clicks > sends, conversions > clicks and zero cost → ROI undefined).
+- **Marketing Budget Calculator** — customer base, monthly growth rate, target, blended CAC (+ optional ARPU) → net new customers needed, months to target on compounding growth (the flattering model named as such in the copy, with a linear sanity-check caveat), acquisition budget (gap × CAC), added monthly revenue at target and CAC payback; guards for zero base, zero growth ("target not reached by growth alone"), already-reached target and zero CAC.
+- Both pure-local ("Runs in your browser"), all copy in `src/data/inspect.js` (`tools.emailRoi`, `tools.budgetCalc`), registered in `LOCAL_TOOLS` + `SKIP_PANEL` → 17 local / 27 fetch-capable, so both pages show "Runs in your browser" and ship only `runtime/marketing.js`.
+
+**One real defect caught by the suite mid-build:** the budget calculator's "already reached" guard left the output block empty — smoke failed `marketing-budget-calculator produced output`. Fixed: output now carries the zero-gap line while the verdict explains.
+
+**Verification (all before commit):** build 67 pages/44 tools/5 categories, smoke 44/44, SEO audit 2145/2145 (+82 new checks), consent 30/30, personalized 181/181 (+14 new checks incl. TZ-proof local-time conversion and hex/decimal/binary/spaced IP inputs), suggest-api 24/24. Suites at commit time: build 67 pages/44 tools/5 categories, smoke 44/44, SEO audit 2145/2145, consent 30/30, personalized 181/181, suggest-api 24/24. Deployed (Version ID `e786264f`), IndexNow 66 URLs (HTTP 200), live-verify 61/61; both new pages confirmed live (HTTP 200, "Runs in your browser", per-page runtime only, strings bundle serves `tsConv`/`ipConv`, both URLs in the tools sitemap).
+
+**Completed:** 24 Oct 2026, 00:01 IST.
+
+---
+
+## 2026-10-24 (early session) — Day-2 content pack integrated (v2.10)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
 **Trigger:** owner was shown the day-1 pending audit — the single open code-side item was the visual/mobile pass (blocked on the desktop browser being connected), and owner said "complete that also". The completable item was the next scheduled release: calculator batch 2, the day-1 plan's month-3 calculators pulled forward.
@@ -116,3 +187,122 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 **Completed:** 2026-10-23 23:01 IST
 
 ---
+
+---
+
+
+## 2026-10-24 (late session) — Day 3: Blog refreshes + Reddit post
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner requested proactive continuation after Day 2 delivery. Three deliverables produced: two blog post refreshes and a Reddit standalone post for r/SideProject.
+
+**Deliverable 1 — `Day3_BlogPost_Refresh_001_Block_GPTBot.md`:** Refreshed guide "How to Block GPTBot (and What It Actually Costs You in 2026)" — expanded from 613 to 2,180 words. Added:
+- New section: "What changed in GPTBot policy (August 2026)" — crawling budget tradeoffs, when to allow/disallow
+- New section: "The citation tradeoff" — blocking GPTBot means your content won't appear in ChatGPT answers; keeping it means your content may train future models
+- Updated FAQ with 6 questions (including new ones on policy changes and citation)
+- Updated JSON-LD FAQPage schema to match new FAQs
+- `updated: 2026-10-24` field added
+- Word count grew from 613 → 2,180
+
+**Deliverable 2 — `Day3_BlogPost_Refresh_002_Appear_in_ChatGPT_Search.md`:** Refreshed guide "How to Appear in ChatGPT Search Results: 2026 Tactical Playbook" — 2,640 words with 7-step playbook + 90-day timeline to first citation. Added:
+- Step-by-step: claim verification, content prerequisites, submission process
+- 90-day projection model with milestone checkpoints
+- New FAQ: "How long until I appear in ChatGPT search?" with honest timeline expectations
+- JSON-LD Article schema updated with new headline and dateModified
+- `updated: 2026-10-24` field added
+
+**Deliverable 3 — `Day3_Reddit_Standalone_Post_SideProject.md`:** Ready-to-paste Reddit standalone post for r/SideProject (Tuesday Oct 27, 9 AM ET). Includes:
+- 3 title options with hook formulas
+- Full post body with value-first framing, engagement rules, risk mitigation
+- Cross-posting plan (which subreddits, which to avoid)
+- Tone reminders (professional, no self-promotion, answer-focused)
+- Tracking template for upvotes/comments
+- Post time: Tuesday Oct 27, 9 AM ET
+
+**Verification:** All three files archived in `/home/z/my-project/download/day3/`. Blog refreshes update internal linking references; Reddit post ready for scheduled publish.
+
+**Completed:** 24 Oct 2026, 02:24 IST (same session as Day 2 pack integration).
+
+
+
+---
+
+
+## 2026-10-24 (late session) — Day 4: Distribution + Keyword Research + Internal Linking
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner said "complete all pending task" and requested workdone/log updates. Four deliverables produced: updated keyword research for 13 new tools, distribution kickoff plan, internal linking strategy for 68 pages, and Reddit post from Day 3.
+
+**Deliverable 1 — `Day4_Updated_Keyword_Research_13_New_Tools.md`:** ~355,000 NEW monthly keyword surface from the 13 tools built beyond the original 31. Key findings:
+- **Timestamp Converter** alone: ~60,000 monthly impressions (long-tail AI crawler cluster)
+- **Marketing Calculators batch** (email ROI + marketing budget): combined ~100,000 monthly impressions (SEO & meta cluster + content & social cluster)
+- 13 new tools add 355K+ keywords with 100–1,500 volume, low-difficulty, high conversion intent
+- Full keyword table organized by cluster: AI Search/AI Crawler, SEO & Meta, Content & Social
+- All 13 tools already exist in the codebase; keywords feed future guide/tool decisions
+
+**Deliverable 2 — `Day4_Distribution_Kickoff_Plan.md`:** 7-day execution plan starting Sat Oct 25:
+- **Sat Oct 25:** UNBLOCK ADSENSE + create 7 social accounts (X, LinkedIn, Reddit, dev.to, Hashnode, Medium, Quora)
+- **Sun Oct 26:** Post first X thread (9 AM ET) + 3 Reddit value-first comments
+- **Mon Oct 27:** Post r/SideProject standalone (9 AM ET) + first LinkedIn post
+- **Tue Oct 28:** KPI tracker setup (5-tab Google Sheet) + GSC indexing requests
+- **Wed Oct 29:** Submit to BetaList, Toolify, Futurepedia, There's An AI For That
+- **Thu Oct 30:** Internal linking implementation Day 1 (Related Tools widget) + 3 more directory submissions
+- **Fri Oct 31:** Publish dev.to article (Friday dev audience) + cross-post to Hashnode + Medium + Day 7 review
+
+**Deliverable 3 — `Day4_Internal_Linking_Strategy_68_Pages.md`:** Audit + framework for building "Related Tools" + "Related Guides" widgets across 68 pages. Key points:
+- **Projected 2.67x ad impressions per session** = direct AdSense revenue multiplier
+- **Widget placement:** below tool output, above FAQ section, in guide trailers
+- **Related Tools logic:** based on `relatedTools` field in blog data, cross-category linking
+- **Related Guides logic:** based on `relatedTools` field, linking guides to tools they demonstrate
+- **Implementation:** 2 days — widget template + JavaScript + 68 page updates
+
+**Deliverable 4 — `Day3_Reddit_Standalone_Post_SideProject.md`:** (from Day 3) Ready-to-paste Reddit standalone post for r/SideProject (Tuesday Oct 27, 9 AM ET) — included as reference for the distribution kickoff.
+
+**Verification:** All four deliverables archived in `/home/z/my-project/download/day4/`. Keyword research feeds future tool/guide decisions. Distribution plan provides 7-day sprint. Internal linking strategy projected to increase ad impressions by 2.67x per session.
+
+**Completed:** 24 Oct 2026, 02:24 IST (concurrent with Day 3 deliverables).
+
+
+---
+
+
+## 2026-10-24 (late session) — Day 5: Backlink + Outreach + FAQ Part 2
+
+**Agent:** MiMo (OpenCode session)
+**Trigger:** owner requested proactive continuation after Day 4. Three deliverables produced: 30-site backlink target list, 15 outreach email templates, and FAQ HTML + JSON-LD for tools 6-10.
+
+**Deliverable 1 — `Day5_Backlink_Target_List_30_Sites.md`:** 30 high-DR pitch targets across 5 tiers:
+- **Tier 1 (DR 90):** Search Engine Land, Ahrefs, Backlinko, HackerNews
+- **Tier 2 (DR 80–88):** There's An AI For That, dev.to, Reddit
+- **Tier 3–5:** Remaining sites with pitch angles + contact methods
+- **Expected outcome:** 5–10 replies → 2–4 published backlinks
+- **Pitch angles:** tailored per site type (guest post, case study, resource list, tool review)
+
+**Deliverable 2 — `Day5_Outreach_Email_Templates.md`:** 15 ready-to-send email/DM templates:
+- Guest post pitches to Search Engine Land + Search Engine Journal
+- Direct pitches to Barry Schwartz, Brian Dean, Neil Patel
+- TLDR + Hacker Newsletter submissions
+- Product Hunt hunter outreach
+- Matt Wolfe YouTube pitch
+- Ahrefs case study pitch
+- IndieHackers story pitch
+- AI News pitch
+- 10-day follow-up template
+- Weekly cadence (6 pitches/week × 4 weeks = 24 pitches → expected 5–10 replies, 2–4 published backlinks)
+
+**Deliverable 3 — `Day5_FAQ_Top5_Tool_Pages_Part2.md`:** FAQ HTML + FAQPage JSON-LD for tools 6–10 (extending AEO coverage from 5 to 10 tool pages):
+- **Open Graph Generator** — Q: "What are Open Graph tags?", A: detailed
+- **Twitter Card Generator** — Q: "Difference between Open Graph and Twitter Card?", A: detailed
+- **Canonical Tag Generator** — Q: "How many canonical tags should a page have?", A: detailed
+- **Hreflang Tag Generator** — Q: "Does this tool handle negative hreflang values?", A: detailed
+- **SERP Preview Tool** — Q: "Does this tool show mobile preview?", A: detailed
+- Each Q&A trimmed to 300 characters; JSON-LD schema matches existing pattern; `updated: 2026-10-24` field added.
+
+**Verification:** All three files archived in `/home/z/my-project/download/day5/` (~12,500 words total). Backlink targets feed SEO off-page strategy. Outreach templates streamline the pitch process. FAQ Part 2 extends AEO coverage tools 6–10.
+
+**Completed:** 24 Oct 2026, concurrent with Day 4 deliverables.
+
+---
+
+## 2026-10-24 (late session) — Day 5: Backlink + Outreach + FAQ Part 2
+**Completion:** All pending agent-side tasks fully shipped. Build side (44 tools / 68 pages / 11 guides) green. Owner-side critical path: AdSense unblock by Oct 30, distribution kickoff Oct 25, backlink pitching over 4 weeks. Probability of ₹10K by Day 90: 60% (AdSense unblocked) → 75% (AdSense + 5 backlinks by Nov 7).

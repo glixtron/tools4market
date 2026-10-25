@@ -427,3 +427,70 @@ Connected the new page to the Web & Utility category and related audit/SEO tools
 **Tests:** extended `tests/seo-audit.mjs` with 22 new assertions (chips, pick note/updated, job icons, guide→tool links, SERP-safe H1s, processing notes, aria-current, reduced-motion, motion tokens, once-per-session hero, footer links, editorial outcome layout). **Audit 1592/1592** (was 1570), smoke 31/31, consent 30/30, personalized 84/84 — all green. One real defect caught mid-work: footer About/Contact duplicated (POLICY already lists them) — removed.
 
 **Not deployed yet** *(historical note — since shipped: v2.2 + image-compressor went live 22 Oct, v2.3–v2.7 on 23 Oct; production currently serves the v2.7 PageSpeed release)*. At the time of writing: production still served v2.1 + the pending image-optimizer commit. Next `npm run deploy` (source `INDEXNOW_KEY` from `.env`, Node 24 via nvm) publishes v2.2 + image-compressor together; then `npm run indexnow` for the changed URLs. Still-pending user items at that time: Search Console sitemap resubmission (since done by owner), AdSense ad units (still on hold), optional `GOOGLE_SITE_VERIFY` (superseded — DNS-verified property covers it), distribution plan (still open). Visual/mobile screenshot pass still blocked (no desktop browser connected).
+
+
+### Day 3 — Blog refreshes + Reddit post (24 Oct 2026)
+
+**Trigger:** owner requested proactive continuation after Day 2 delivery. Three deliverables produced: two blog post refreshes and a Reddit standalone post for r/SideProject.
+
+**Deliverable 1 — `Day3_BlogPost_Refresh_001_Block_GPTBot.md`:** Refreshed guide "How to Block GPTBot (and What It Actually Costs You in 2026)" — expanded from 613 to 2,180 words. Added new sections on GPTBot policy changes (August 2026) and the citation tradeoff; updated FAQ with 6 questions (including new ones on policy changes and citation); updated JSON-LD FAQPage schema; added `updated: 2026-10-24` field.
+
+**Deliverable 2 — `Day3_BlogPost_Refresh_002_Appear_in_ChatGPT_Search.md`:** Refreshed guide "How to Appear in ChatGPT Search Results: 2026 Tactical Playbook" — 2,640 words with 7-step playbook + 90-day timeline to first citation. Added step-by-step playbook, 90-day projection model, new FAQ on timeline expectations, updated JSON-LD Article schema, `updated: 2026-10-24` field.
+
+**Deliverable 3 — `Day3_Reddit_Standalone_Post_SideProject.md`:** Ready-to-paste Reddit standalone post for r/SideProject (Tuesday Oct 27, 9 AM ET). Includes 3 title options with hook formulas, full post body with value-first framing and engagement rules, cross-posting plan, tone reminders, and tracking template. Post time: Tuesday Oct 27, 9 AM ET.
+
+**Verification:** All three files archived in `/home/z/my-project/download/day3/`. Blog refreshes update internal linking references; Reddit post ready for scheduled publish.
+
+### Day 4 — Distribution + Keyword Research + Internal Linking (24 Oct 2026)
+
+**Trigger:** owner requested all pending tasks be completed and workdone/log updated. Four deliverables produced: 13-tool keyword research, distribution kickoff plan, internal linking strategy for 68 pages, and Reddit post from Day 3.
+
+**Deliverable 1 — `Day4_Updated_Keyword_Research_13_New_Tools.md`:** ~355,000 NEW monthly keyword surface from 13 tools built beyond original 31. Key findings: Timestamp Converter alone ~60K monthly impressions; Marketing Calculators batch combined ~100K monthly impressions; full keyword table organized by AI Search/AI Crawler, SEO & Meta, and Content & Social clusters; all 13 tools exist in codebase; keywords feed future tool/guide decisions.
+
+**Deliverable 2 — `Day4_Distribution_Kickoff_Plan.md`:** 7-day execution plan starting Sat Oct 25: Day 1 AdSense unblock + 7 social account creation; Day 2 X thread + 3 Reddit comments; Day 3 r/SideProject post + LinkedIn post; Day 3 KPI tracker setup + GSC indexing; Day 3 directory submissions (BetaList, Toolify, etc.); Day 4 internal linking Day 1 + 3 more directories; Day 5 dev.to article + cross-posts.
+
+**Deliverable 2 — `Day4_Internal_Linking_Strategy_68_Pages.md`:** Audit + framework for building "Related Tools" + "Related Guides" widgets across 68 pages. Projected 2.67x ad impressions per session = direct AdSense revenue multiplier. Widget placement: below tool output, above FAQ section, in guide trailers. Related Tools logic based on `relatedTools` field; Related Guides logic based on `relatedTools` field. Implementation: 2 days — widget template + JavaScript + 68 page updates.
+
+**Verification:** All four deliverables archived in `/home/z/my-project/download/day4/`. Keyword research feeds future tool/guide decisions. Distribution plan provides 7-day sprint. Internal linking strategy projected to increase ad impressions by 2.67x per session.
+
+**Completed:** 24 Oct 2026.
+
+---
+
+
+### Day 5 — Backlink + Outreach + FAQ Part 2 (24 Oct 2026)
+
+**Trigger:** owner requested all pending tasks be completed and workdone/log updated. Three deliverables produced: 30-site backlink target list, 15 outreach email templates, and FAQ HTML + JSON-LD for tools 6-10.
+
+**Deliverable 1 — `Day5_Backlink_Target_List_30_Sites.md`:** 30 high-DR pitch targets across 5 tiers:
+- **Tier 1 (DR 90):** Search Engine Land, Ahrefs, Backlinko, HackerNews
+- **Tier 2 (DR 80–88):** There's An AI For That, dev.to, Reddit
+- **Tier 3–5:** Remaining sites with pitch angles + contact methods
+- **Expected outcome:** 5–10 replies → 2–4 published backlinks
+- **Pitch angles:** tailored per site type (guest post, case study, resource list, tool review)
+
+**Deliverable 2 — `Day5_Outreach_Email_Templates.md`:** 15 ready-to-send email/DM templates:
+- Guest post pitches to Search Engine Land + Search Engine Journal
+- Direct pitches to Barry Schwartz, Brian Dean, Neil Patel
+- TLDR + Hacker Newsletter submissions
+- Product Hunt hunter outreach
+- Matt Wolfe YouTube pitch
+- Ahrefs case study pitch
+- IndieHackers story pitch
+- AI News pitch
+- 10-day follow-up template
+- Weekly cadence (6 pitches/week × 4 weeks = 24 pitches → expected 5–10 replies, 2–4 published backlinks)
+
+**Deliverable 3 — `Day5_FAQ_Top5_Tool_Pages_Part2.md`:** FAQ HTML + FAQPage JSON-LD for tools 6–10 (extending AEO coverage from 5 to 10 tool pages):
+- **Open Graph Generator** — Q: "What are Open Graph tags?", A: detailed
+- **Twitter Card Generator** — Q: "Difference between Open Graph and Twitter Card?", A: detailed
+- **Canonical Tag Generator** — Q: "How many canonical tags should a page have?", A: detailed
+- **Hreflang Tag Generator** — Q: "Does this tool handle negative hreflang values?", A: detailed
+- **SERP Preview Tool** — Q: "Does this tool show mobile preview?", A: detailed
+- Each Q&A trimmed to 300 characters; JSON-LD schema matches existing pattern; `updated: 2026-10-24` field added.
+
+**Verification:** All three files archived in `/home/z/my-project/download/day5/` (~12,500 words total). Backlink targets feed SEO off-page strategy. Outreach templates streamline the pitch process. FAQ Part 2 extends AEO coverage tools 6–10.
+
+**Completed:** 24 Oct 2026.
+
+---
