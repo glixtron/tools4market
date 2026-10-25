@@ -907,6 +907,12 @@ const run = async () => {
     '',
     '# AI search indexers and user-triggered fetchers',
     ...ANSWER_BOTS.flatMap((b) => [`User-agent: ${b}`, 'Allow: /', '']),
+    '# Google-Extended is a control token, not a crawler: it governs whether Google may',
+    '# use the site for Gemini training AND for Gemini grounding, and those cannot be',
+    '# separated. Allowed deliberately — grounding is how Gemini cites a page.',
+    'User-agent: Google-Extended',
+    'Allow: /',
+    '',
     `Sitemap: ${SITE.url}/sitemap.xml`,
     '',
   ].join('\n');

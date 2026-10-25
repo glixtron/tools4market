@@ -359,7 +359,7 @@ for (const t of TOOLS) {
   ok('robots.txt: default group allows crawling', /^User-agent: \*$/m.test(robots) && /^Allow: \/$/m.test(robots));
   ok('robots.txt: AI training crawlers blocked', TRAIN.every((b) => robotVerdict(robots, b) === 'block'), TRAIN.filter((b) => robotVerdict(robots, b) !== 'block').join(','));
   ok('robots.txt: AI answer engines allowed', ANSWER.every((b) => robotVerdict(robots, b) === 'allow'), ANSWER.filter((b) => robotVerdict(robots, b) !== 'allow').join(','));
-  ok('robots.txt: Google-Extended not blocked (it bundles Gemini training with grounding)', robotVerdict(robots, 'Google-Extended') === 'allow');
+  ok('robots.txt: Google-Extended explicitly allowed', /^User-agent: Google-Extended\nAllow: \/$/m.test(robots), 'absent means allowed only where nothing else names it — the edge does');
 
   // --- measurement hooks for the 30-day plan (GA4 events + verification hooks)
   const siteJs = read('assets/site.js');

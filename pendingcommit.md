@@ -6,17 +6,17 @@
 ## Entry 16 — v2.15 robots.txt policy
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
-**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **75 pages / 44 tools / 18 guides**, SEO audit **2390/2390**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **72/72**.
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **75 pages / 44 tools / 18 guides**, SEO audit **2390/2390**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**.
 
 **Subject:** `feat: state the crawler policy in the repo, and assert what the edge actually serves (v2.15)`
 
 **Summary:**
 - **The edge was the policy, and it contradicted the repo.** `build.mjs` emitted `User-agent: * / Allow: /`; Cloudflare prepended 47 named `Disallow: /` groups above it. No test compared the two, so the live site blocked the answer-engine fetchers (`ChatGPT-User`, `Perplexity-User`, `Claude-User`) while three published guides told readers to allow them.
-- **Policy now generated from the repo:** training crawlers blocked, six AI search/answer agents explicitly allowed, Content-Signal retained, Google-Extended explained and left allowed.
+- **Policy now generated from the repo:** training crawlers blocked, six AI search/answer agents explicitly allowed, Content-Signal retained, Google-Extended explained and explicitly allowed.
 - **Google-Extended correction:** it is a control token, not a crawler, and it turns Gemini training and Gemini grounding off together — so blocking it also gives up Gemini citations. The guide had it in both the training and answer-engine lists; that is fixed.
 - **Guards:** `seo-audit` asserted "allows every crawler" (would have blocked the fix) and `live-verify` only grepped for two strings (why 47 blocks passed). Both now parse robots.txt into groups and resolve the effective rule per bot per RFC 9309, and the live check runs against the served file.
 
-**Files in this commit:** `build.mjs` (robots emitter), `tests/seo-audit.mjs` (+3 net rules, group parser), `tests/live-verify.mjs` (served-file policy checks), `src/data/blog.js` (Google-Extended correction in the robots guide), `pendingcommit.md`, `progress.md`, `worklog.md`.
+**Files in this commit:** `build.mjs` (robots emitter), `tests/seo-audit.mjs` (+3 net rules, group parser), `tests/live-verify.mjs` (served-file policy checks, +3), `src/data/blog.js` (Google-Extended correction in the robots guide), `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 15 — Launchstag listing badge
 

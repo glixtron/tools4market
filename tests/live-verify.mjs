@@ -123,6 +123,7 @@ const ANSWER_BOTS = ['OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexi
 const TRAIN_BOTS = ['GPTBot', 'ClaudeBot', 'CCBot', 'Bytespider', 'Amazonbot', 'meta-externalagent'];
 ok('robots.txt allows search engines', robotVerdict(robots, 'Googlebot') === 'allow' && robotVerdict(robots, 'Bingbot') === 'allow');
 ok('robots.txt allows AI answer engines (the served file, not just the build)', ANSWER_BOTS.every((b) => robotVerdict(robots, b) === 'allow'), ANSWER_BOTS.filter((b) => robotVerdict(robots, b) !== 'allow').join(','));
+ok('robots.txt allows Google-Extended (Gemini grounding; blocked only if we also give up Gemini citations)', robotVerdict(robots, 'Google-Extended') === 'allow');
 ok('robots.txt blocks AI training crawlers', TRAIN_BOTS.every((b) => robotVerdict(robots, b) === 'block'), TRAIN_BOTS.filter((b) => robotVerdict(robots, b) !== 'block').join(','));
 ok('robots.txt points at our sitemap', robots.includes('Sitemap: ' + ORIGIN + '/sitemap.xml'));
 const missing = await grab(ORIGIN + '/seo-audit-missing-page-check/');
