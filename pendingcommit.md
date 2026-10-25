@@ -1,7 +1,22 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Fourteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below).
+**Status:** ✅ Fifteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below).
+
+## Entry 15 — Launchstag listing badge
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **75 pages**, SEO audit **2387/2387**, smoke **44/44**, consent **30/30**, worker-routing **14/14**, live-verify **70/70**, badge present on the live homepage and a live tool page.
+
+**Subject:** `feat: Launchstag listing badge in the footer + privacy disclosure`
+
+**Summary:**
+- **Badge site-wide in the footer bottom bar**, not homepage-only: `badge-dark.svg`, `target="_blank"`, `rel="noopener"`, `alt="Featured on Launchstag"`, explicit 198x62 with `decoding="async"` and `fetchpriority="low"` so it cannot shift the footer or compete with content.
+- **Layout:** `.footer-bottom` is a wrapping flex row — copyright left, badge right, stacked when narrow. Checked in the browser: image loads (396x124 source), no horizontal overflow.
+- **Privacy:** the hotlinked badge sends IP and user-agent to launchstag.com outside the consent banner; the privacy policy now says so, notes it sets no cookie, and that blocking third-party images disables it safely.
+- **Guard:** homepage audit asserts the badge exists, so a footer refactor cannot silently drop the backlink.
+
+**Files in this commit:** `build.mjs` (footer), `src/style.css` (footer-bottom flex + badge), `src/data/policy.js` (disclosure), `tests/seo-audit.mjs` (+1 badge rule), `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 14 — v2.14 Day-9 guides
 

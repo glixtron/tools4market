@@ -348,6 +348,7 @@ ${body}
   </div>
   <div class="container footer-bottom">
     <p>&copy; ${YEAR} ${SITE.name} &middot; ${SITE.tagline} &middot; <a href="${rel(path, '/privacy-policy/')}">Privacy</a> &middot; <a href="${rel(path, '/terms/')}">Terms</a> &middot; <a href="${rel(path, '/disclaimer/')}">Disclaimer</a> &middot; <a href="#" data-ck-settings>Cookie settings</a></p>
+    <a class="launchstag-badge" href="https://launchstag.com" target="_blank" rel="noopener"><img src="https://launchstag.com/badge-dark.svg" alt="Featured on Launchstag" width="198" height="62" decoding="async" fetchpriority="low"></a>
   </div>
 </footer>
 ${consentBanner(path)}

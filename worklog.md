@@ -6,6 +6,27 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (6th pass) — Launchstag listing badge in the footer
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner submitted the site to Launchstag; publishing the listing requires the badge on the site and a verification click on their side.
+
+**What was added.** The `badge-dark.svg` variant from their snippet, in the footer bottom bar of **every page** rather than the homepage only — a "featured on" credit that appears on one page and not the rest reads as an accident. The anchor and image attributes are theirs (`https://launchstag.com`, `target="_blank"`, `rel="noopener"`, `alt="Featured on Launchstag"`), with `width`/`height` and `decoding="async"` added so the footer does not shift when the SVG lands, and `fetchpriority="low"` so a third-party request never competes with the page's own content.
+
+**Layout.** `.footer-bottom` became a wrapping flex row: copyright links left, badge right, stacked below when the bar is narrow. Verified in the browser: renders 198x62 from a 396x124 source, image completes, no horizontal overflow, 23 footer links unchanged.
+
+**Privacy.** A hotlinked badge sends every visitor's IP address and user agent to launchstag.com, outside the consent banner. That is now stated in the privacy policy's third-party section, including that it sets no cookie and that blocking third-party images disables it without breaking anything — the same standard the site applies to its own analytics claims.
+
+**Performance.** One extra request per page view: a 1.4 KB SVG, cached by their CDN for four hours, below the fold, low priority, explicitly sized. No JavaScript, no cookie, no layout shift.
+
+**Verification:** build 75 pages / 44 tools / 18 guides; SEO audit **2387/2387** (+1: the badge must exist on the homepage, so a footer refactor cannot silently drop the backlink); smoke **44/44**, consent **30/30**, worker-routing **14/14**; deployed; IndexNow 74 URLs; live-verify **70/70**; badge confirmed on the live homepage and a live tool page.
+
+**Owner action:** the listing is published by clicking **Verify now** on Launchstag — their crawler has to see the deployed badge, which is now live.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (5th pass) — Day-9 pack: OG images, redirects, title length (v2.14)
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

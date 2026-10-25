@@ -265,6 +265,9 @@ for (const t of TOOLS) {
   ok('home: breadcrumb not required on home', true);
   ok('home: canonical self-referencing', html.includes('<link rel="canonical" href="https://tools4market.online/">'));
   ok('home: no noindex', !/content="noindex"/i.test(html));
+  // The Launchstag listing is verified by their own crawler; keep the badge in
+  // the build so a footer refactor cannot silently drop the backlink.
+  ok('home: Launchstag badge in the footer', /class="launchstag-badge"[^>]*href="https:\/\/launchstag\.com"/.test(html) && html.includes('https://launchstag.com/badge-dark.svg'));
 }
 
 // ---------- 22 Oct 2026 audit actions: identity, favicon, homepage IA,

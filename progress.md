@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Launchstag badge in the footer (25 Oct 2026)
+
+**Trigger:** the site was submitted to Launchstag; the listing goes live after their verification sees the badge.
+
+**Added:** the dark badge from their snippet in the footer bottom bar of every page, with explicit dimensions and `decoding="async"` so it cannot cause layout shift, and `fetchpriority="low"` so it does not compete with page content. `.footer-bottom` is now a wrapping flex row — copyright left, badge right, stacked on narrow screens.
+
+**Disclosed:** the badge is a third-party request outside the consent banner, so the privacy policy now says it sends IP and user-agent to launchstag.com, sets no cookie, and can be blocked without affecting the site.
+
+**Guard:** the SEO audit asserts the badge on the homepage, so a footer refactor cannot silently remove the backlink.
+
+**Tests:** build 75 pages, seo-audit **2387/2387**, smoke 44/44, consent 30/30, worker-routing 14/14, live-verify 70/70, IndexNow 74 URLs.
+
 ### Day-9 guides — v2.14 (25 Oct 2026)
 
 **Trigger:** owner dispatched Day 9 with the three posts attached, and asked for the gap check to decide the topics.
