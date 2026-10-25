@@ -14,6 +14,8 @@
 
 **Tests:** build 68 pages/44 tools/11 guides, smoke 44/44, seo-audit **2167/2167**, consent 30/30, personalized 181/181.
 
+**AdSense correction in the same pass.** The 24 Oct deploy had pointed `AD_SLOT_*` at `ca-pub-…:0/0` — not a valid `data-ad-slot` (must be numeric), so every page shipped a malformed ad request while two live-verify checks still asserted the old hold policy. Now `slotId()` accepts `ca-pub-…:<digits>` or bare digits and rejects everything else (bad value → reserved space, not a broken unit), `ADSENSE_ENABLED=1` ships the loader independently of whether real units exist, and the two assertions were rewritten for the unblocked policy. Live-verify **65/65**.
+
 ### Day-2 content pack integrated — v2.10 (24 Oct 2026)
 
 **Trigger:** owner's parallel "Day 2" agent session produced a 9-file content pack (blog posts, AEO FAQs, analytics guide, PH/social assets, keyword research + an OpenCode prompt instructing an agent to execute 7 "machine tasks"). Owner: "read all these files also and write everything accordingly".

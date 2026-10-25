@@ -23,7 +23,9 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **Wiring:** header + footer `logo-mark` are now `<img>` (34px, `width`/`height` set — no layout shift; the old gradient tile stays as CSS fallback), `apple-touch-icon` points at the dedicated 180px file, `theme-color` and the PWA manifest move to the logo's `#0b172f`, `favicon.ico` still wraps a PNG so legacy crawlers keep working, and the Organization/BlogPosting `logo` moves from the 1200×630 card to the square 512 tile (Google's logo guidance). `npm run brand` / `npm run brand:og` documented in `design.md` §5.
 
-**Verification:** build 68 pages / 44 tools / 11 guides; smoke **44/44**, SEO audit **2167/2167**, consent **30/30**, personalized **181/181** — all green on the first run after wiring. Rendered header inspected in the desktop browser at 1100px.
+**AdSense correction (same session).** The previous deploy had `AD_SLOT_TOP/CONTENT/SIDEBAR` set to `ca-pub-1509697031230558:0/0`. That is not a slot id — `data-ad-slot` must be the numeric unit id, so every page was shipping a malformed ad request (nothing could fill) while the live-verify suite stayed red on two assertions that still encoded the old "AdSense is on hold" policy. Fixed: `slotId()` normalises `ca-pub-…:<digits>` or bare digits and drops anything else, so a bad value now degrades to reserved space instead of a broken `<ins>`; a new `ADSENSE_ENABLED` switch decouples "ship the loader" (verification + policy review) from "have real units"; `.env` sets `ADSENSE_ENABLED=1` with empty slot ids and a comment naming the exact console path to get them. The two live-verify assertions were rewritten to the new policy (loader exactly once, publisher id, consent-aware; slots either absent or numeric) — suite **61 → 65 checks, 65/65 green**.
+
+**Verification:** build 68 pages / 44 tools / 11 guides; smoke **44/44**, SEO audit **2167/2167**, consent **30/30**, personalized **181/181**, live-verify **65/65**; deployed `8a7dd70a`; IndexNow 67 URLs (HTTP 200); live `logo-mark.png` hash matches the repo byte-for-byte.
 
 **Completed:** 25 Oct 2026.
 

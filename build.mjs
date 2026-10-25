@@ -77,18 +77,32 @@ const INDEXNOW_KEY = (process.env.INDEXNOW_KEY || '').trim();
 if (INDEXNOW_KEY && !/^[a-zA-Z0-9-]{8,128}$/.test(INDEXNOW_KEY)) {
   throw new Error('INDEXNOW_KEY must be 8–128 letters/digits/dashes (got: ' + INDEXNOW_KEY + ')');
 }
-// Per-position AdSense ad unit ids (falls back to a single shared slot)
-const AD_SLOTS = {
-  'top banner': (process.env.AD_SLOT_TOP || '').trim(),
-  'below content': (process.env.AD_SLOT_CONTENT || '').trim(),
-  sidebar: (process.env.AD_SLOT_SIDEBAR || '').trim(),
+// ---- AdSense ------------------------------------------------------------
+// `data-ad-slot` must be the NUMERIC unit id from AdSense → Ads → By ad unit.
+// A value like `ca-pub-123:0/0` is not a slot id: the tag renders, the request
+// is malformed and nothing fills. Accept both shapes defensively and keep only
+// the numeric tail, so a pasted `ca-pub-…:1234567890` still works and a bad
+// value degrades to reserved space instead of a broken unit.
+const slotId = (raw) => {
+  const v = String(raw || '').trim();
+  const m = /^ca-pub-\d+:(\d+)$/.exec(v);
+  if (m) return m[1];
+  return /^\d{6,}$/.test(v) ? v : '';
 };
-// No ad unit ids = no <ins> units can render, so the adsbygoogle.js loader would
-// be pure overhead on every page (150–250 KB parsed, third-party cookies, extra
-// main-thread work — all flagged by PageSpeed while the account is on hold).
-// ads.txt stays published regardless. Set any AD_SLOT_* var and the loader ships
-// again automatically on the next build.
-const AD_SLOTS_ON = Object.values(AD_SLOTS).some(Boolean);
+
+// Per-position AdSense ad unit ids
+const AD_SLOTS = {
+  'top banner': slotId(process.env.AD_SLOT_TOP),
+  'below content': slotId(process.env.AD_SLOT_CONTENT),
+  sidebar: slotId(process.env.AD_SLOT_SIDEBAR),
+};
+
+// Loader policy (owner unblocked AdSense 24 Oct 2026):
+//   ADSENSE_ENABLED=1            → ship adsbygoogle.js (site verification + policy review)
+//   any numeric AD_SLOT_* set    → ship it too, and render real <ins> units
+// No numeric slot yet → reserved-space placeholders only, no broken units.
+const ADSENSE_ENABLED = /^(1|true|yes|on)$/i.test((process.env.ADSENSE_ENABLED || '').trim());
+const AD_SLOTS_ON = ADSENSE_ENABLED || Object.values(AD_SLOTS).some(Boolean);
 
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

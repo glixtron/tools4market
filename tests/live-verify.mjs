@@ -180,13 +180,25 @@ const toolPage = (await grab(ORIGIN + '/tools/case-converter/')).body;
 ok('tool pages carry the consent UI', /id="ck-banner"/.test(toolPage) && !/gtm\.js\?id=GTM-/.test(toolPage));
 const privacy = (await grab(ORIGIN + '/privacy-policy/')).body;
 ok('privacy policy documents cookies/consent', /Cookie settings/.test(privacy) && /Consent Mode/i.test(privacy));
-// The AdSense loader ships only when ad unit ids are configured (AD_SLOT_*).
-// While the account is on hold it stays out of the page; ads.txt remains
-// published so the publisher association is unaffected.
-ok('no AdSense loader while ad slots are unset', !/adsbygoogle\.js\?client=/.test(home));
+// AdSense policy (owner unblocked it 24 Oct 2026): the loader ships on every
+// page — once, with the configured publisher id — and `data-ad-slot` is either
+// absent (reserved space while the units don't exist yet) or a NUMERIC unit id.
+// A value like "ca-pub-…:0/0" is not a slot id and would produce a malformed
+// request, so it is explicitly rejected here.
+{
+  const loaders = (home.match(/pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js\?client=/g) || []).length;
+  ok('AdSense loader present exactly once in <head>', loaders === 1);
+  ok('AdSense loader carries the publisher id', home.includes('adsbygoogle.js?client=ca-pub-1509697031230558'));
+  ok('AdSense loader is consent-aware (ads_data_redaction)', /ads_data_redaction/.test(home));
+}
 ok('ads.txt served with the publisher id', (await grab(ORIGIN + '/ads.txt')).body.includes('pub-1509697031230558'));
 const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
-ok('ad slots reserve space without broken ad units', /class="ad-slot"/.test(toolHtml) && !/data-ad-slot=""/.test(toolHtml) && !/data-ad-slot="ca-pub/.test(toolHtml));
+{
+  const slots = [...toolHtml.matchAll(/data-ad-slot="([^"]*)"/g)].map((m) => m[1]);
+  ok('ad slots reserve space (no CLS)', /class="ad-slot"/.test(toolHtml));
+  ok('ad units use numeric slot ids only', slots.every((v) => /^\d{6,}$/.test(v)));
+  ok('no empty data-ad-slot attributes', !/data-ad-slot=""/.test(toolHtml));
+}
 // ---- Google tag on EVERY live page (not a sample)
 {
   const urls = new Set(all);
