@@ -1,7 +1,24 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Sixteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below).
+**Status:** ✅ Seventeen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below).
+
+## Entry 17 — v2.16 Day-10 guides
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **78 pages / 44 tools / 21 guides** (77 sitemap URLs), SEO audit **2468/2468**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**, IndexNow **77 URLs**.
+
+**Subject:** `feat: Day-10 guides — URL slugs, rel=canonical in practice, hreflang basics (v2.16)`
+
+**Summary:**
+- **Topics chosen by gap, not by volume:** slug had zero mentions and canonical had no guide; hreflang had one aside. Pagination was dropped — `rel=next`/`prev` is no longer used by Google and there is no pagination tool to link a post to.
+- **Three posts, one shape:** `url-slug-best-practices` (844 words), `rel-canonical-tag` (775) and `hreflang-basics` (753) — six prose sections, six FAQs each, tool names only, code blocks via `sections[].pre`.
+- **Primary sources:** Google's URL structure, canonicalisation and localised-versions documentation, RFC 3986 and RFC 6596. No tables or lists because the renderer has neither; no character-count truncation claims.
+- **Stale advice excluded:** no keywords-in-slug ranking claim, no "canonical is a directive", no hreflang language detection or ranking boost, no International Targeting report (retired 2022).
+- **Cross-links:** `htaccess-301-redirect` → slug + canonical; `internal-linking` → slug; `why-is-my-site-not-indexed` → canonical; `screaming-frog-alternative` and `website-launch-seo-checklist` → hreflang.
+- **Two over-length metaDescs** (162 and 159) rewritten to 157 and 151; no test changes were needed — the existing blog rules caught them.
+
+**Files in this commit:** `src/data/blog.js` (3 guides + cross-links), `README.md`, `ARCHITECTURE.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 16 — v2.15 robots.txt policy
 

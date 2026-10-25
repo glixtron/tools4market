@@ -2,6 +2,22 @@
 
 *Append-only. Newest entries at top.*
 
+### Day-10 guides — v2.16 (25 Oct 2026)
+
+**Trigger:** owner authorized Day 10 after the audit corrections, with topics gap-checked against the 18-guide library rather than chosen by keyword volume.
+
+**Gap evidence:** "url slug" had zero mentions (slug itself once, in passing); canonical had no guide and was an aside in six; hreflang had one mention, in the Screaming Frog comparison. Pagination was dropped because `rel=next`/`prev` is no longer used by Google and no pagination tool exists to link the post to.
+
+**Added:** `url-slug-best-practices`, `rel-canonical-tag`, `hreflang-basics` — six prose sections and six FAQs each, 844/775/753 words, tool references by name, code only through `sections[].pre`. Sourced from Google's URL, canonicalisation and localised-versions docs plus RFC 3986 and RFC 6596, not secondhand SEO advice.
+
+**Corrections built in:** keywords in a slug are not a documented ranking factor; a canonical is a signal below a redirect, not a directive, and has no published processing time; hreflang neither detects a page's language nor adds ranking weight; the International Targeting report is gone (2022), so a cluster is validated by comparing the sets. No tables, no bullet lists, no character-count truncation claims.
+
+**Cross-links:** `htaccess-301-redirect` → slug + canonical; `internal-linking` → slug; `why-is-my-site-not-indexed` → canonical; `screaming-frog-alternative` and `website-launch-seo-checklist` → hreflang.
+
+**Tests:** build **78 pages / 44 tools / 21 guides** (77 sitemap URLs), seo-audit **2468/2468**, smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify **73/73**, IndexNow **77 URLs**. Deployed `1227718b`; the first two attempts hit Cloudflare API 500s and were retried unchanged.
+
+**Owner action:** unchanged — AdSense slot ids, Launchstag Verify now, Cloudflare managed robots.txt off.
+
 ### robots.txt policy — v2.15 (25 Oct 2026)
 
 **Trigger:** the owner's Days 0–9 audit found the live site blocking AI crawlers, contradicting the published guides.

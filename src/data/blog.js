@@ -131,7 +131,7 @@ export const ARTICLES = [
       { q: 'Do I need Schema markup to rank?', a: 'Schema is not a direct ranking factor, but it makes your pages eligible for rich results and it tells search engines what the page is about. Add it where it is accurate — incorrect markup can hurt.' },
     ],
     relatedTools: ['meta-tag-generator', 'robots-txt-generator', 'sitemap-generator', 'serp-preview-tool', 'schema-markup-generator'],
-    relatedGuides: ['core-web-vitals', 'image-seo', 'title-tag-length-2026', 'open-graph-image-size-2026', 'htaccess-301-redirect'],
+    relatedGuides: ['core-web-vitals', 'image-seo', 'title-tag-length-2026', 'open-graph-image-size-2026', 'htaccess-301-redirect', 'hreflang-basics'],
     links: [
       { label: 'Google: Search Console starter guide', url: 'https://developers.google.com/search/docs/monitor-debug/search-console-start' },
       { label: 'Google: sitemap build guide', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -522,7 +522,7 @@ export const ARTICLES = [
       { q: 'Will more content or more backlinks get my pages indexed?', a: 'Links and genuine authority help discovery and selection, and unique content gives Google a reason to index. But fix technical blocks first — links to an uncrawlable page accomplish nothing.' },
     ],
     relatedTools: ['web-crawler-audit', 'sitemap-generator', 'robots-txt-generator', 'seo-score-checker'],
-    relatedGuides: ['internal-linking', 'htaccess-301-redirect'],
+    relatedGuides: ['internal-linking', 'htaccess-301-redirect', 'rel-canonical-tag'],
     links: [
       { label: 'Google: ask Google to recrawl your URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl' },
       { label: 'Google: build and submit a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
@@ -720,7 +720,7 @@ export const ARTICLES = [
       { q: 'Do I need to install anything to use a Screaming Frog alternative?', a: 'No. Browser-based audits run on any device with a browser — no download, no licence, no updates. That is the main practical advantage over desktop crawlers for small, frequent checks.' },
     ],
     relatedTools: ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
-    relatedGuides: ['internal-linking', 'core-web-vitals'],
+    relatedGuides: ['internal-linking', 'core-web-vitals', 'hreflang-basics'],
     links: [
       { label: 'Screaming Frog SEO Spider — official site', url: 'https://www.screamingfrog.co.uk/seo-spider/' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
@@ -864,7 +864,7 @@ export const ARTICLES = [
       { q: 'How is internal linking different from backlinks?', a: 'Backlinks come from other sites and take months to earn. Internal links you control, cost nothing, and can be added in a minute. Both move link signals; internal links are the part you can fix today.' },
     ],
     relatedTools: ['web-crawler-audit', 'seo-score-checker', 'url-slug-generator', 'sitemap-generator'],
-    relatedGuides: ['image-seo', 'core-web-vitals'],
+    relatedGuides: ['image-seo', 'core-web-vitals', 'url-slug-best-practices'],
     links: [
       { label: 'Google: links crawlable — make links discoverable', url: 'https://developers.google.com/search/docs/crawling-indexing/links-crawlable' },
       { label: 'Google: SEO starter guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide' },
@@ -1200,7 +1200,7 @@ export const ARTICLES = [
       { q: 'Do redirect chains hurt SEO?', a: 'They do not break anything, but each hop is an extra request and an extra point of failure, and signals have further to travel. Redirect straight to the final URL. Google publishes no hop limit, so treat any chain longer than one hop as work to clean up.' },
     ],
     relatedTools: ['htaccess-redirect-generator', 'web-crawler-audit', 'canonical-tag-generator', 'sitemap-generator'],
-    relatedGuides: ['website-launch-seo-checklist', 'noindex-vs-robots-txt', 'why-is-my-site-not-indexed'],
+    relatedGuides: ['website-launch-seo-checklist', 'noindex-vs-robots-txt', 'why-is-my-site-not-indexed', 'url-slug-best-practices', 'rel-canonical-tag'],
     links: [
       { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
       { label: 'Apache: mod_alias redirect directives', url: 'https://httpd.apache.org/docs/current/mod/mod_alias.html' },
@@ -1293,6 +1293,276 @@ export const ARTICLES = [
     links: [
       { label: 'Google: influencing title links', url: 'https://developers.google.com/search/docs/appearance/title-link' },
       { label: 'Google: control your snippets', url: 'https://developers.google.com/search/docs/appearance/snippet' },
+    ],
+  },
+  {
+    slug: 'url-slug-best-practices',
+    title: 'URL slug best practices: hyphens, case and the parts Google reads',
+    focus: 'url slug',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'URL Slug Best Practices: Hyphens, Case and Length',
+    metaDesc: 'A URL slug is read by people before it is read by Google. Hyphens not underscores, one case, fewer parameters, and how to change one without losing the page.',
+    intro: 'A URL slug is the readable tail of a URL, and most of the advice about it is folklore. Google publishes a short list of requirements and one clear preference: hyphens, not underscores.',
+    sections: [
+      {
+        h: 'What a URL slug is, and what Google actually documents',
+        p: [
+          'The slug is the part of the path that names the page: in `/blog/url-slug-best-practices/`, the slug is the last segment. It is a label for humans, and it is also a string a crawler compares against other strings, which is why small conventions matter more than clever keyword placement.',
+          'Google\'s URL structure documentation is narrower than the advice built on top of it. It asks for URLs that follow IETF STD 66, avoids fragments that change content, and recommends a common encoding for parameters. Descriptive words, hyphens, case and parameters are filed under "make it easy to understand".',
+        ],
+        p2: [
+          'Nothing in that document assigns a ranking weight to keywords in a URL. If you have read that keywords in the slug are a meaningful ranking factor, the claim is not in Google\'s guidance. The honest version is that a clear slug helps people and helps Google tell URLs apart. Write for the first reader.',
+        ],
+      },
+      {
+        h: 'Hyphens, not underscores, and pick one case',
+        p: [
+          'Google recommends hyphens to separate words and says explicitly that it does not recommend underscores, for a historical reason: underscores are used in programming to keep words together, as in `format_date`, while a hyphen reads as a word boundary. `green-dress` is two words; `green_dress` is one token.',
+          'Case is the quieter trap. Google treats `/APPLE` and `/apple` as distinct URLs with their own content. If your server treats them the same, normalise every internal link to one case so a crawler is not offered two versions of one page. The same applies to a trailing slash: `/pricing` and `/pricing/` are separate URLs unless a redirect says otherwise.',
+        ],
+        p2: [
+          'A slug generator is worth using for the mechanical part — lowercase, transliteration, collapsing punctuation — because doing that by hand across a hundred pages is where inconsistency creeps in. The URL Slug Generator also strips stop words and enforces a length cap, both of which are editorial choices rather than rules.',
+        ],
+      },
+      {
+        h: 'Short, descriptive, and in the reader\'s language',
+        p: [
+          'Descriptive beats numeric. Google\'s own example is stark: `example.com/wiki/Aviation` against `index.php?topic=42&area=3a5ebc944f41daa6f849f730f1`. The first can be read aloud; the second cannot. That is the whole argument, and it is about comprehension rather than ranking.',
+          'Use the words your audience uses, and transliterate where the script would otherwise be percent-encoded into noise. Google asks for percent encoding in `href` attributes for non-ASCII characters, so a Japanese slug is fine but the link in your HTML should be encoded.',
+        ],
+        p2: [
+          'There is no published length limit for a slug. The practical ceiling comes from elsewhere: long URLs get truncated in chat apps, analytics reports and shared links, and the useful words are at the cut. Keep the distinguishing words first and the slug survives wherever it is pasted.',
+        ],
+      },
+      {
+        h: 'The slug is rarely the problem — the duplicates are',
+        p: [
+          'Most URL problems are not about the words in the path but about how many paths reach one page. Session IDs, referral parameters, sort orders and filter combinations each mint a new URL for identical content. Google\'s documentation lists exactly these as causes of an unnecessarily high URL count, and warns that the cost is crawl bandwidth.',
+          'Fragments are the other silent multiplier. Google generally does not support URLs that change content after the hash: `/#/pricing` is not a page as far as Search is concerned, and the documented alternative is the History API so each state gets a real path.',
+        ],
+        p2: [
+          'The fix is not a prettier slug. It is a canonical tag for the variants you must keep, a robots.txt rule for the ones you never want crawled, and permanent redirects for the ones that used to be real pages. The canonical and redirect guides cover each of those in turn.',
+        ],
+      },
+      {
+        h: 'Changing a slug without losing the page',
+        p: [
+          'If a slug has to change, the old URL should return a 301 to the new one, permanently. A redirect is the strongest canonicalisation signal Google documents — stronger than a `rel="canonical"` tag — because it says the old address is gone rather than offering a preference.',
+          'Then update what points at it: internal links, the sitemap, the canonical tag on the page itself, and any campaign links you control. A redirect that still has fifty internal links pointing at the old URL is a redirect that keeps being needed.',
+        ],
+        p2: [
+          'Do not reuse a retired slug for unrelated content. The redirect, the inbound links and whatever the old URL earned all travel to the new page, and if the topic changed, that is confusing for readers and for the crawler. Pick a new slug and let the old one redirect to its closest successor.',
+        ],
+      },
+      {
+        h: 'A ten-minute slug check',
+        p: [
+          'Generate the slug, then check five things: it is lowercase and hyphenated, it is short enough to read, it contains the words a person would search for, it does not encode in the path what belongs in a query string, and the page declares itself canonical at exactly that URL.',
+          'Then check the redirect from the old slug, if there was one, and confirm the sitemap lists the new URL only. The URL Slug Generator handles the string, the Canonical Tag Generator writes the self-referencing tag, and the redirect generator plus the Web Crawler Audit cover the move. Ten minutes now is cheaper than explaining a 404 to a client next month.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is a URL slug?', a: 'The last readable segment of a URL path. In `example.com/blog/url-slug-best-practices/`, the slug is `url-slug-best-practices`. It names the page for humans and gives crawlers a stable string to reference.' },
+      { q: 'Should a URL slug contain keywords?', a: 'It should contain the words a person would use to describe the page, which usually includes the topic. Google\'s URL documentation makes no ranking-weight claim for keywords in the path, so treat the slug as clarity rather than a ranking lever, and never stuff it.' },
+      { q: 'Hyphens or underscores in a URL slug?', a: 'Hyphens. Google recommends hyphens to separate words and explicitly does not recommend underscores, because underscores conventionally join words in programming. `green-dress` reads as two words; `green_dress` reads as one.' },
+      { q: 'Does changing a URL slug affect SEO?', a: 'It can, if the old URL is not redirected. A 301 carries the old address to the new one and is the strongest canonicalisation signal Google documents. Without it, inbound links and any accumulated signals stay attached to a URL that now returns 404.' },
+      { q: 'Should I remove stop words from a slug?', a: 'It is cosmetic. There is no documented benefit to dropping "the" or "for" from a path, and removing a word can make the slug harder to read. Keep the words that make the URL understandable and drop the ones that do not.' },
+      { q: 'How long should a URL slug be?', a: 'There is no published limit. The real constraint is where the URL gets truncated — chat apps, analytics, shared links — so front-load the distinguishing words and keep the path as short as it can be while staying descriptive.' },
+    ],
+    relatedTools: ['url-slug-generator', 'canonical-tag-generator', 'htaccess-redirect-generator', 'web-crawler-audit'],
+    relatedGuides: ['htaccess-301-redirect', 'rel-canonical-tag', 'internal-linking'],
+    links: [
+      { label: 'Google: URL structure best practices', url: 'https://developers.google.com/search/docs/crawling-indexing/url-structure' },
+      { label: 'IETF STD 66 (RFC 3986): URI syntax', url: 'https://www.rfc-editor.org/rfc/rfc3986' },
+      { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
+    ],
+  },
+  {
+    slug: 'rel-canonical-tag',
+    title: 'rel=canonical in practice: a hint, four rules, and what breaks it',
+    focus: 'canonical tag',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'rel=canonical: The Tag, the Rules, and What Breaks It',
+    metaDesc: 'A canonical tag is a strong hint, not a command. Google can still pick another URL; here is where the tag goes, the rules it needs, and how to check who won.',
+    intro: 'The canonical tag is the most misunderstood link element in SEO: a preference Google weighs rather than an instruction it obeys, and the ways it breaks are almost all silent.',
+    sections: [
+      {
+        h: 'What a canonical tag tells Google',
+        p: [
+          'A `rel="canonical"` link element says: among these URLs with the same content, prefer this one. Google calls it a strong signal, ranked below a redirect and above sitemap inclusion — and it is a signal, not a directive. Google can and does choose a different URL when other evidence is stronger.',
+          'That ranking decides which tool to reach for. A redirect is strongest because it removes the old URL from the conversation. A canonical keeps both URLs alive and states a preference. Listing a URL in a sitemap is a weaker nudge in the same direction.',
+        ],
+        p2: [
+          'Google also applies signals you never wrote: HTTPS over HTTP, and membership in an hreflang cluster. A canonical that contradicts either is the one that loses.',
+        ],
+      },
+      {
+        h: 'The four rules that make the tag work',
+        p: [
+          'Absolute URL. Google supports relative paths and recommends against them, because the failure mode is a staging copy or a proxy resolving them somewhere unexpected.',
+          'Head only. A canonical link in the body is ignored. If JavaScript adds it, Google asks that the element be injected properly and that the HTML source not contain a different canonical — one URL in the markup and another in script is the clearest way to have neither honoured.',
+          'Self-reference. The canonical page should carry a canonical tag pointing at itself. It looks redundant and is not: it asserts that this URL is the intended one and stops a template-level tag from nominating something else.',
+          'One method. Do not send a canonical HTTP header and a canonical link element with different URLs. Pick one; the header exists mainly for non-HTML files such as PDFs.',
+        ],
+        pre: '<link rel="canonical" href="https://example.com/dresses/green-dresses" />',
+        p2: [
+          'Two conditions come from the hreflang side: the canonical should be in the same language as the page, and internal links should point at the canonical URL rather than a duplicate. A canonical that the site\'s own navigation contradicts is a suggestion the site is arguing with.',
+        ],
+      },
+      {
+        h: 'What silently invalidates a canonical',
+        p: [
+          '`rel="canonical"` carrying `hreflang`, `lang`, `media` or `type` is not used for canonicalisation at all. Google says those attributes mark alternate versions, not canonical ones, and `rel="alternate"` is the element for that job.',
+          'Canonical chains also dilute. If A points to B and B points to C, Google has to resolve the hop, and the chain is usually a symptom of a template edited in two places. Point every duplicate straight at the final URL.',
+        ],
+        p2: [
+          'The rest of the list is about the target. A canonical pointing at a URL that redirects, returns 404, is blocked by robots.txt or carries noindex is pointing at something that cannot be canonical. Google may still index URLs disallowed in robots.txt, without their content, which is why robots.txt is explicitly not a canonicalisation tool.',
+        ],
+      },
+      {
+        h: 'When a canonical is the wrong tool',
+        p: [
+          'If the page moved, redirect. If the page should not appear at all, noindex. A canonical is for two live URLs with substantially the same content where one should represent the other: tracking-parameter variants, print views, sort orders, syndicated copies.',
+          'Do not use a canonical to fix pagination. Page two of a list is not a duplicate of page one — it contains different items — and canonicalising it to page one removes those items from the index. Self-canonical each page and let the links do the work.',
+        ],
+        p2: [
+          'And do not pair a canonical with noindex on the same URL. Google advises against using noindex to select a canonical within a site, because noindex removes the page from Search rather than nominating a replacement. Use rel=canonical for duplicates and noindex for pages you want gone.',
+        ],
+      },
+      {
+        h: 'Checking which URL Google chose',
+        p: [
+          'In Search Console, URL Inspection reports the "Google-selected canonical" for a URL. If it is not the one in your tag, the tag is losing to something: another signal, a redirect, or the absence of a self-reference.',
+          'Then check the plumbing: view source for a second canonical, `curl -sI` for a `Link:` header that disagrees, and the sitemap for a third opinion. All three should name the same URL.',
+        ],
+        p2: [
+          'The Web Crawler Audit reports the canonical a page declares alongside its status and redirect chain, which is enough to catch the common case: a template writing a canonical that no longer matches the page it is on.',
+        ],
+      },
+      {
+        h: 'A ten-minute canonical audit',
+        p: [
+          'Pick the URL that should win. Confirm it returns 200, is not noindex, and carries a self-referencing canonical. Confirm every duplicate points at it in one hop, in the head, as an absolute URL, with no hreflang attribute on the same element. Confirm the sitemap lists only the winner and that internal links agree.',
+          'The Canonical Tag Generator writes the element, the XML Sitemap Generator keeps the sitemap honest, and the .htaccess redirect guide covers the URLs that should not exist at all. The rest is consistency, which is the only part Google actually rewards.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'Is rel=canonical a directive?', a: 'No. Google describes it as a strong signal and may select a different URL when other evidence outweighs it. A redirect is stronger because it removes the old URL; a canonical keeps both alive and states a preference.' },
+      { q: 'Should a page have a canonical tag pointing to itself?', a: 'Yes. A self-referencing canonical states that this URL is the intended one and stops a template-level tag from nominating something else. Google recommends including it on the canonical page itself.' },
+      { q: 'Can a canonical tag point to another domain?', a: 'It can, and Google treats it as a hint. Cross-domain canonicals are common for syndicated content, but they are easy to ignore when the two sites differ in navigation, links or content. A redirect is a stronger statement when you control both.' },
+      { q: 'Can I use canonical and noindex together?', a: 'Google advises against using noindex to choose a canonical within a site, because noindex removes the page from Search entirely rather than nominating a replacement. Use rel=canonical for duplicates and noindex for pages you want gone.' },
+      { q: 'Where does the canonical tag go?', a: 'In the <head>. A rel=canonical link in the body is ignored. Use an absolute URL, and if you inject it with JavaScript, do not also ship a different one in the HTML source.' },
+      { q: 'How long does Google take to honour a canonical?', a: 'Google publishes no timeframe. It is applied when the URL is recrawled and the signals are re-evaluated, which is why a canonical change is confirmed in URL Inspection rather than assumed after a deploy.' },
+    ],
+    relatedTools: ['canonical-tag-generator', 'web-crawler-audit', 'sitemap-generator', 'htaccess-redirect-generator'],
+    relatedGuides: ['htaccess-301-redirect', 'url-slug-best-practices', 'why-is-my-site-not-indexed'],
+    links: [
+      { label: 'Google: specify a canonical URL', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls' },
+      { label: 'Google: what URL canonicalization is', url: 'https://developers.google.com/search/docs/crawling-indexing/canonicalization' },
+      { label: 'RFC 6596: the canonical link relation', url: 'https://www.rfc-editor.org/rfc/rfc6596' },
+    ],
+  },
+  {
+    slug: 'hreflang-basics',
+    title: 'hreflang basics: codes, reciprocity and the x-default fallback',
+    focus: 'hreflang',
+    date: '2026-10-25',
+    updated: '2026-10-25',
+    author: 'Tools4Market Editorial',
+    reviewer: 'Tools4Market',
+    metaTitle: 'Hreflang Basics: Codes, Reciprocity and x-default',
+    metaDesc: 'Hreflang tells Google which language and region a page is for, but only if every version links back. The codes, the fallback, and what voids a cluster.',
+    intro: 'Hreflang is a set of links between language versions of one page, and it only works as a set. A single correct tag proves nothing; one missing return link voids the pair.',
+    sections: [
+      {
+        h: 'What hreflang does — and the two things it does not',
+        p: [
+          'Hreflang declares that several URLs are localized versions of the same content and states the language, and optionally the region, each one serves. Google uses the annotations to return the version matching a searcher\'s language and location.',
+          'It is not language detection. Google says plainly that it does not use hreflang, or the HTML lang attribute, to work out what language a page is written in; that comes from its own analysis. And it is not a ranking boost: the annotations choose among pages that already exist in the index.',
+        ],
+        p2: [
+          'The alternative is a URL structure that makes targeting obvious — a country-code domain, or a subdirectory such as `/de/`. Those help readers, and hreflang still does the explicit mapping, because Google does not infer a target audience from a subdomain name.',
+        ],
+      },
+      {
+        h: 'The codes: language first, region second',
+        p: [
+          'The value is an ISO 639-1 language code and, optionally, an ISO 3166-1 Alpha-2 region, separated by a hyphen. `de` is German anywhere; `de-AT` is German for Austria; `pt-BR` is Portuguese for Brazil.',
+          'A region on its own is invalid, because the first code is always the language. That is why `be` means Belarusian rather than Belgium: Belgian French is `fr-BE`, Belgian Dutch is `nl-BE`, Belgian German is `de-BE`. Google also ignores regions that are not assigned country codes, including `UK`, `EU` and `UN`.',
+        ],
+        p2: [
+          'Two more edges: `es-419` for Latin American Spanish is not supported because it is not an ISO 3166-1 code, and script variants use ISO 15924, so `zh-Hant` and `zh-Hans` are valid with an optional region after them. Codes are case-insensitive; uppercase regions are the convention.',
+        ],
+      },
+      {
+        h: 'Reciprocity: the rule that voids the whole cluster',
+        p: [
+          'Every version must list itself and every other version. If page A points at page B and B does not point back, Google ignores the annotations — an anti-hijack rule, so another site cannot declare itself your alternate.',
+          'The URLs must be fully qualified, scheme included: `https://example.com/de/`, not `//example.com/de/` or `/de/`. They do not have to be on the same domain, which is what makes hreflang usable across a `.de` site and a `.com` site.',
+        ],
+        pre: [
+          '<link rel="alternate" hreflang="en-GB" href="https://example.com/en-gb/" />',
+          '<link rel="alternate" hreflang="en-US" href="https://example.com/en-us/" />',
+          '<link rel="alternate" hreflang="en" href="https://example.com/en/" />',
+          '<link rel="alternate" hreflang="x-default" href="https://example.com/" />',
+        ].join('\n'),
+        p2: [
+          'In practice a broken cluster is usually a template that emits only the other languages, so no page lists itself, or a new locale added to one template and not the rest. Both look fine on the page you happen to be reading.',
+        ],
+      },
+      {
+        h: 'x-default, and the generic-language page',
+        p: [
+          '`x-default` marks the page for visitors whose language matches nothing in the cluster: usually a language selector or a global landing page. It is not a substitute for a real version and does not need a language code of its own.',
+          'For a language with several regional variants, add a generic version too. If you have `en-GB`, `en-US` and `en-AU`, an `en` page gives everyone else an English target instead of falling through to `x-default`. Google recommends exactly this catch-all.',
+        ],
+        p2: [
+          'The fallback is also where auto-redirecting home pages get dangerous: a visitor who lands on a redirect rather than a choice may never see the version they wanted, and a crawler may never see the others.',
+        ],
+      },
+      {
+        h: 'Three ways to publish it, and why one is enough',
+        p: [
+          'HTML `<link>` elements in the head, an HTTP `Link` header, or `<xhtml:link>` entries in the sitemap. Google treats the three as equivalent and says there is no Search benefit to running more than one — only more places to drift.',
+          'The header is the option for non-HTML files such as PDFs. The sitemap option is convenient when the cluster is large and generated. The HTML option is easiest to inspect in view-source, which is why most sites use it.',
+        ],
+        p2: [
+          'Do not combine hreflang with other attributes on the same link element. A `<link rel="alternate" hreflang="de" media="...">` is not a valid combination, and a `rel="canonical"` carrying an `hreflang` attribute is ignored for canonicalisation altogether.',
+        ],
+      },
+      {
+        h: 'Debugging a cluster without the old report',
+        p: [
+          'Search Console used to have an International Targeting report with a country setting and a language tab. Google deprecated it in 2022, so there is no site-wide hreflang error list to read; validation now means fetching the pages and comparing the sets.',
+          'Check four things: every page lists every version including itself; every `href` is absolute; every code is a real language, optionally followed by a real region; and the canonical on each page points at that page rather than at a sibling language. That last one is the classic own-goal — a cluster where every member canonicalises to the English page.',
+        ],
+        p2: [
+          'The Hreflang Tag Generator builds the block from a list of URLs and codes, and the Hreflang Checker reads a page and reports duplicates, malformed codes and missing self-reference. Neither can see the other pages, which is why reciprocity stays a manual check.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is hreflang?', a: 'An annotation telling Google that several URLs are localized versions of the same page, and which language and optionally which region each serves. It can be expressed as link elements, an HTTP header or sitemap entries, and it only works when the pages point at each other.' },
+      { q: 'Does hreflang improve rankings?', a: 'No. It selects among pages that already exist in the index; it does not add ranking weight. What it improves is the match between a searcher\'s language or region and the version they land on.' },
+      { q: 'What happens if hreflang tags are not reciprocal?', a: 'Google ignores the annotations. If page A names page B but B does not name A, the pair is unconfirmed — otherwise any site could declare itself an alternate of yours. Every version must list itself and all the others.' },
+      { q: 'Is x-default required?', a: 'No, but it is recommended when you have a language selector or a global page, because it gives visitors whose language is not in the cluster somewhere deliberate to land. It is not a replacement for a real localized version.' },
+      { q: 'Can hreflang link to a different domain?', a: 'Yes. The URLs must be fully qualified but do not need to share a domain, which is how a country-code domain and a .com can be declared alternates of each other.' },
+      { q: 'Where should hreflang tags go?', a: 'In the <head> as link elements, in an HTTP Link header, or in the sitemap. Google treats the methods as equivalent and sees no benefit in using more than one. Do not attach other attributes such as media to an hreflang link.' },
+    ],
+    relatedTools: ['hreflang-tag-generator', 'hreflang-checker', 'canonical-tag-generator', 'sitemap-generator'],
+    relatedGuides: ['rel-canonical-tag', 'website-launch-seo-checklist', 'screaming-frog-alternative'],
+    links: [
+      { label: 'Google: tell Google about localized versions', url: 'https://developers.google.com/search/docs/specialty/international/localized-versions' },
+      { label: 'Google: managing multi-regional sites', url: 'https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites' },
+      { label: 'Google: specify a canonical URL', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls' },
     ],
   },
 ];

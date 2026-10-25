@@ -6,6 +6,31 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (8th pass) — Day-10 pack: URL slugs, rel=canonical, hreflang (v2.16)
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** owner authorized Day 10 after accepting six audit corrections, with the topics gap-checked against the 18-guide library.
+
+**Why these three, and not pagination.** "URL slug" did not appear in any guide and "slug" appeared once, in passing, inside internal linking; canonical had no guide of its own and was mentioned as an aside in six; hreflang had one mention, in the Screaming Frog comparison. Pagination was considered and dropped: Google no longer uses `rel=next`/`prev`, and there is no pagination tool here to attach the guide to, so it would have been an article with no destination.
+
+**What shipped.** `url-slug-best-practices` (844 words), `rel-canonical-tag` (775) and `hreflang-basics` (753), each six prose sections and six FAQs, in the same data shape as the existing library (`src/data/blog.js`). Tool references are names, not URLs — the audit guard resolves them to `/tools/<slug>/` before review. No tables or bullet lists, because the renderer supports neither; the two posts that need markup use `sections[].pre` for the code block.
+
+**The facts came from the primary documents, not from SEO blogs.** URL structure: IETF STD 66, hyphens recommended and underscores explicitly not, case-sensitivity, fragments that change content unsupported, parameters and session IDs as the real cause of duplicate URLs. Canonicalisation: the tag is a strong signal ranked below a redirect, it belongs in the head, should be absolute, should self-reference, must not carry `hreflang`/`lang`/`media`/`type`, and must not point at a redirect, a 404, a robots-blocked URL or a noindex page. hreflang: ISO 639-1 plus optional ISO 3166-1 Alpha-2, region alone invalid (`be` is Belarusian), `es-419` unsupported, `zh-Hant` via ISO 15924, reciprocity required or the annotations are ignored, `x-default` for the fallback, and the three publication methods treated as equivalent.
+
+**Folklore left out on purpose.** Keywords in a slug are not a documented ranking factor; hreflang does not detect a page's language and does not add ranking weight; a canonical is not a directive and has no published processing time; the Search Console International Targeting report was retired in 2022, so there is no site-wide hreflang error list and the guide says to compare the sets instead. The title-length post from Day 9 already carries the "60 characters is a guess" correction, so the slug post does not repeat it as a length claim.
+
+**Cross-links, so the new posts are not orphans.** `htaccess-301-redirect` now points at both the slug and canonical guides, `internal-linking` at the slug guide, `why-is-my-site-not-indexed` at the canonical guide, and `screaming-frog-alternative` plus `website-launch-seo-checklist` at the hreflang guide. The audit's resolve guard checks every `relatedGuides` slug, and the render check confirms each target appears as a link.
+
+**Verification:** build **78 pages / 44 tools / 21 guides**, sitemap **77 URLs**; SEO audit **2468/2468** (+78, three posts' worth), smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed `1227718b`; IndexNow **77 URLs** (HTTP 200); live-verify **73/73**. All three live URLs return 200 with `BlogPosting`, `FAQPage`, `BreadcrumbList`, a Read next block and the expected code blocks. Two deploy attempts failed first with Cloudflare API 500s on the assets-upload session, then succeeded unchanged.
+
+**Two metaDescs were over the 158-character limit** on first draft (162 and 159, against a 110–158 rule); both were rewritten rather than trimmed mid-word, and the audit now measures 157 and 151.
+
+**Owner actions still open:** paste the three numeric `AD_SLOT_*` ids (blocks revenue), click Verify now on Launchstag, and turn off Cloudflare's managed robots.txt so the repo's policy is the only one served. Distribution kickoff is the other unstarted track.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (7th pass) — robots.txt: the edge was contradicting the repo, and the guides
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
