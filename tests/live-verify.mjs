@@ -60,8 +60,15 @@ out.push('=== HTTPS ===');
   ok('plain http on the apex redirects', httpApex.status === 301 || httpApex.status === 308, 'status ' + httpApex.status + ' ' + (httpApex.error || ''));
   ok('http→https lands on the https canonical origin', loc === ORIGIN + '/', 'location ' + (loc || httpApex.error || ''));
 
+  // Cloudflare's "Always Use HTTPS" normalises the scheme before the Worker runs,
+  // so http://www costs two hops: http→https on www (edge), then www→apex
+  // (Worker). The Worker still resolves www→apex in one hop when it sees the
+  // request first (covered by tests/worker-routing.mjs); here the contract is
+  // that the chain terminates on the https apex without a loop.
   const httpWww = await grab('http://www.' + HOST + '/', { redirect: 'manual' });
-  ok('http://www reaches the https apex in one hop', (httpWww.status === 301 || httpWww.status === 308) && httpWww.headers.get('location') === ORIGIN + '/', 'status ' + httpWww.status + ' location ' + (httpWww.headers.get('location') || httpWww.error || ''));
+  const hop1 = httpWww.headers.get('location') || '';
+  const finalWww = await grab('http://www.' + HOST + '/');
+  ok('http://www upgrades and canonicalises without a loop', hop1.startsWith('https://') && finalWww.url === ORIGIN + '/', 'hop1 ' + (hop1 || httpWww.error || '') + ' final ' + finalWww.url);
 
   const httpDeep = await grab('http://' + HOST + '/tools/robots-txt-generator/?utm_source=test', { redirect: 'manual' });
   ok('http→https preserves path and query', httpDeep.headers.get('location') === ORIGIN + '/tools/robots-txt-generator/?utm_source=test', 'location ' + (httpDeep.headers.get('location') || httpDeep.error || ''));

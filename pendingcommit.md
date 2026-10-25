@@ -27,7 +27,7 @@
 
 **Summary:**
 - **Symptom:** `http://tools4market.online/` returned 200. Both schemes served the site, so every page had two live origins; only `www` redirected.
-- **`worker.js`:** `http:` → `301 https://tools4market.online` + path + query, `Cache-Control: no-store`, placed **before** the `www → apex` rule so `http://www` resolves in one hop. Uses `url.protocol` only (a client-supplied `X-Forwarded-Proto` must not skip it) and exempts localhost for `npm run preview`.
+- **`worker.js`:** `http:` → `301 https://tools4market.online` + path + query, `Cache-Control: no-store`, placed **before** the `www → apex` rule so `http://www` resolves in one hop at the Worker level (the zone's *Always Use HTTPS* now upgrades the scheme first, so live `http://www` is two hops, no loop). Uses `url.protocol` only (a client-supplied `X-Forwarded-Proto` must not skip it) and exempts localhost for `npm run preview`.
 - **`build.mjs`:** `Strict-Transport-Security: max-age=31536000` in the `/*` block of `dist/_headers`. No `includeSubDomains`, no `preload` — both are one-way doors and no subdomain inventory exists.
 - **Tests:** new `tests/worker-routing.mjs` (14 checks, no network — redirect matrix + HSTS/headers shape) wired as `npm run test:worker`; `tests/live-verify.mjs` +5 assertions (65 → 70) for the deployed edge, using `redirect: 'manual'`.
 - **Owner-side:** enable Cloudflare *Always Use HTTPS* as belt-and-braces.
