@@ -38,6 +38,33 @@ const hasFocus = (hay, focus) => {
   return hits >= Math.ceil(words.length * 0.6);
 };
 
+// Effective robots.txt rule for one bot, per RFC 9309 §2.2.1-2.2.2: groups that
+// name the bot are merged, the wildcard group applies only when no group names
+// it, the longest path wins, and an allow/disallow tie resolves to allow.
+const robotVerdict = (txt, bot) => {
+  const groups = [];
+  let cur = null;
+  for (const raw of String(txt || '').split('\n')) {
+    const line = raw.replace(/#.*$/, '').trim();
+    if (!line) continue;
+    const m = line.match(/^([A-Za-z-]+)\s*:\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    const val = m[2].trim();
+    if (key === 'user-agent') {
+      if (!cur || cur.rules.length) { cur = { agents: [], rules: [] }; groups.push(cur); }
+      cur.agents.push(val.toLowerCase());
+    } else if ((key === 'allow' || key === 'disallow') && cur) {
+      cur.rules.push({ allow: key === 'allow', path: val });
+    }
+  }
+  const named = groups.filter((g) => g.agents.includes(bot.toLowerCase()));
+  const applicable = named.length ? named : groups.filter((g) => g.agents.includes('*'));
+  const rootRules = applicable.flatMap((g) => g.rules).filter((r) => r.path === '/');
+  if (!rootRules.length) return 'allow';
+  return rootRules.some((r) => r.allow) ? 'allow' : 'block';
+};
+
 // ---------- site-wide duplicate detection
 const titles = new Map(), descs = new Map(), h1s = new Map();
 const paragraphs = new Map(), faqQs = new Map(), faqAs = new Map(), headings = new Map();
@@ -323,10 +350,16 @@ for (const t of TOOLS) {
   ok('sitemap-tools.xml: no synthetic lastmod on tool URLs', !read('sitemap-tools.xml').includes('<lastmod>'));
   ok('sitemap-pages.xml: no synthetic lastmod on page URLs', !read('sitemap-pages.xml').includes('<lastmod>'));
 
-  // --- crawler policy: search + AI crawlers allowed by default (deliberate,
-  //     documented choice — the robots.txt generator is where blocking happens)
+  // --- crawler policy: search + AI answer engines allowed, AI training blocked.
+  //     This is the same split the AI Crawler Blocker generates and the AI-crawler
+  //     guides recommend; it is asserted here so the policy cannot drift silently.
   const robots = read('robots.txt');
-  ok('robots.txt: default policy allows every crawler', robots.includes('User-agent: *') && robots.includes('Allow: /') && !/User-agent:\s+(GPTBot|ClaudeBot|PerplexityBot|Google-Extended)/.test(robots));
+  const TRAIN = ['GPTBot', 'ClaudeBot', 'CCBot', 'Bytespider', 'Amazonbot', 'Applebot-Extended', 'meta-externalagent', 'MistralAI-Training'];
+  const ANSWER = ['OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User', 'Claude-SearchBot', 'Claude-User'];
+  ok('robots.txt: default group allows crawling', /^User-agent: \*$/m.test(robots) && /^Allow: \/$/m.test(robots));
+  ok('robots.txt: AI training crawlers blocked', TRAIN.every((b) => robotVerdict(robots, b) === 'block'), TRAIN.filter((b) => robotVerdict(robots, b) !== 'block').join(','));
+  ok('robots.txt: AI answer engines allowed', ANSWER.every((b) => robotVerdict(robots, b) === 'allow'), ANSWER.filter((b) => robotVerdict(robots, b) !== 'allow').join(','));
+  ok('robots.txt: Google-Extended not blocked (it bundles Gemini training with grounding)', robotVerdict(robots, 'Google-Extended') === 'allow');
 
   // --- measurement hooks for the 30-day plan (GA4 events + verification hooks)
   const siteJs = read('assets/site.js');

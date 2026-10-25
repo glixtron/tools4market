@@ -875,7 +875,41 @@ const run = async () => {
   const sitemapChildren = ['/sitemap-pages.xml', '/sitemap-tools.xml', '/sitemap-blog.xml'];
   await writeFile(R + 'dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapChildren.map((s) => `  <sitemap><loc>${SITE.url}${s}</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
 
-  const robots = `# Tools4Market robots.txt\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE.url}/sitemap.xml\n`;
+  // robots.txt is policy, not boilerplate. Search engines and AI answer engines
+  // may crawl; AI training crawlers may not. Keep it here — version-controlled
+  // and asserted by the audit — rather than in a CDN dashboard toggle, because
+  // the two drifting apart is how the live site spent a week contradicting its
+  // own AI-crawler guides.
+  const TRAINING_BOTS = [
+    'GPTBot', 'ClaudeBot', 'anthropic-ai', 'CCBot', 'Bytespider', 'Amazonbot',
+    'Applebot-Extended', 'meta-externalagent', 'cohere-ai', 'MistralAI-Training',
+    'Diffbot', 'omgili',
+  ];
+  // Indexers and user-triggered fetchers: these are the AI-search traffic.
+  const ANSWER_BOTS = [
+    'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User',
+    'Claude-SearchBot', 'Claude-User',
+  ];
+  const robots = [
+    '# Tools4Market robots.txt',
+    '# Policy: search engines and AI answer engines may crawl; AI training crawlers may not.',
+    '# Google-Extended is deliberately absent: it is a control token, not a crawler, and it',
+    '# switches off Gemini training and Gemini grounding together — grounding is how Gemini',
+    '# cites a page. Rationale: /blog/robots-txt-for-search-and-ai-crawlers/',
+    '',
+    'User-agent: *',
+    'Content-Signal: search=yes,ai-train=no,use=reference',
+    'Allow: /',
+    '',
+    '# AI training crawlers',
+    ...TRAINING_BOTS.map((b) => `User-agent: ${b}`),
+    'Disallow: /',
+    '',
+    '# AI search indexers and user-triggered fetchers',
+    ...ANSWER_BOTS.flatMap((b) => [`User-agent: ${b}`, 'Allow: /', '']),
+    `Sitemap: ${SITE.url}/sitemap.xml`,
+    '',
+  ].join('\n');
   await writeFile(R + 'dist/robots.txt', robots);
 
   // ---- llms.txt: curated markdown map of the site for AI tools that read it.

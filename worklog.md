@@ -6,6 +6,29 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-25 (7th pass) — robots.txt: the edge was contradicting the repo, and the guides
+
+**Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
+**Trigger:** the owner's Days 0–9 audit reported "ALL AI crawlers are disallowed, opposite to Day 1" and asked for a policy decision.
+
+**What was actually true.** The repo's `build.mjs` emitted `User-agent: * / Allow: /` and nothing else. The live file served 47 named `Disallow: /` groups above it, plus a Content-Signal line, wrapped in `# BEGIN/END Cloudflare Managed Content`. So this was never the site's policy: Cloudflare's edge was prepending one, the origin was appending another, and no test compared them. The audit's attribution was wrong; its observation was right.
+
+**It was also overstated.** `OAI-SearchBot` and `PerplexityBot` were not named, so they fell under `*` (`Allow: /`, `search=yes`): AI *search indexing* was allowed the whole time. What the edge blocked was training crawlers **and** the user-triggered fetchers — `ChatGPT-User`, `Perplexity-User`, `Claude-User` — which is the half that decides whether an assistant can read a page it is asked about. "Invisible to AI search" was the wrong diagnosis, and it would have led to unblocking everything instead of the four bots that mattered.
+
+**Decision: Path A, written down in the repo.** robots.txt is now generated from two arrays in `build.mjs` — training crawlers blocked, six search/answer agents explicitly allowed — with the Content-Signal line kept. The policy lives in version control because a dashboard toggle is how it drifted in the first place.
+
+**One nuance the audit missed, and the guide had wrong.** `Google-Extended` is not a crawler: it has no HTTP user agent of its own and is a control token Google's crawls consult. It switches Gemini training **and Gemini grounding** off together — grounding being how Gemini Apps cite a page. Blocking it is therefore not free, and the guide had listed it in *both* the training-crawler list and the answer-engine list, which is self-contradictory. The guide now explains the bundled trade-off, and this site leaves the token allowed, deliberately, because citations are the point. The rest of the training crawlers stay blocked.
+
+**The guard that was missing.** `tests/seo-audit.mjs` asserted the opposite of the new policy (`default policy allows every crawler`) and would have blocked this fix; `tests/live-verify.mjs` only checked that the strings `User-agent: *` and `Allow: /` existed somewhere, which is why 47 blocks passed for a week. Both now parse the file into groups and resolve the effective rule per bot using RFC 9309 §2.2.1–2.2.2 (merge matching groups, wildcard only when no group names the bot, longest path wins, allow wins ties). The live check reads **the served file**, which is the whole point: a build-time assertion cannot see an edge injection.
+
+**Verification:** build 75 pages / 44 tools / 18 guides; SEO audit **2390/2390** (+3 net); smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**; deployed `b1a2eda8`; IndexNow **74 URLs**; live-verify **72/72** (first run caught a transient 500 on one blog URL during propagation, clean on re-run); `ChatGPT-User`, `OAI-SearchBot`, `PerplexityBot` and `Perplexity-User` now resolve to allow on the live file, `GPTBot`/`ClaudeBot`/`CCBot` to block.
+
+**Owner action still required:** the Cloudflare managed block is still prepended (the served file is 219 lines, ours starts at 175). The origin's explicit `Allow` groups win on RFC 9309 tie-breaking, but relying on four different vendor parsers all implementing that is not a policy. Turn off the managed robots.txt in the Cloudflare dashboard so there is one source of truth; after that the file is ours alone and the live check keeps it honest.
+
+**Completed:** 25 Oct 2026.
+
+---
+
 ## 2026-10-25 (6th pass) — Launchstag listing badge in the footer
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

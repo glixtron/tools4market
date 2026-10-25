@@ -34,6 +34,35 @@ async function grab(url, opts = {}) {
 }
 const ct = (r) => (r.headers.get('content-type') || '').split(';')[0];
 
+// Effective robots.txt rule for one bot, per RFC 9309 §2.2.1-2.2.2: groups that
+// name the bot are merged, the wildcard group applies only when no group names
+// it, the longest path wins, and an allow/disallow tie resolves to allow.
+// This is the check that would have caught the edge injecting a block for the
+// answer-engine fetchers while the origin file said `Allow: /`.
+const robotVerdict = (txt, bot) => {
+  const groups = [];
+  let cur = null;
+  for (const raw of String(txt || '').split('\n')) {
+    const line = raw.replace(/#.*$/, '').trim();
+    if (!line) continue;
+    const m = line.match(/^([A-Za-z-]+)\s*:\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    const val = m[2].trim();
+    if (key === 'user-agent') {
+      if (!cur || cur.rules.length) { cur = { agents: [], rules: [] }; groups.push(cur); }
+      cur.agents.push(val.toLowerCase());
+    } else if ((key === 'allow' || key === 'disallow') && cur) {
+      cur.rules.push({ allow: key === 'allow', path: val });
+    }
+  }
+  const named = groups.filter((g) => g.agents.includes(bot.toLowerCase()));
+  const applicable = named.length ? named : groups.filter((g) => g.agents.includes('*'));
+  const rootRules = applicable.flatMap((g) => g.rules).filter((r) => r.path === '/');
+  if (!rootRules.length) return 'allow';
+  return rootRules.some((r) => r.allow) ? 'allow' : 'block';
+};
+
 // ---- DNS
 out.push('=== DNS (authoritative) ===');
 ok('apex NS delegated to Cloudflare', dig(HOST, 'NS').some((n) => n.includes('ns.cloudflare.com')), dig(HOST, 'NS').join(' '));
@@ -90,7 +119,11 @@ for (const [p, want, label] of [
   ok(`${label}: 200 + ${want}`, r.status === 200 && ct(r) === want, 'status ' + r.status + ' ct ' + ct(r) + ' ' + (r.error || ''));
 }
 const robots = (await grab(ORIGIN + '/robots.txt')).body;
-ok('robots.txt allows crawling', /User-agent:\s*\*/.test(robots) && /Allow:\s*\/\s*$/m.test(robots));
+const ANSWER_BOTS = ['OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User', 'Claude-SearchBot', 'Claude-User'];
+const TRAIN_BOTS = ['GPTBot', 'ClaudeBot', 'CCBot', 'Bytespider', 'Amazonbot', 'meta-externalagent'];
+ok('robots.txt allows search engines', robotVerdict(robots, 'Googlebot') === 'allow' && robotVerdict(robots, 'Bingbot') === 'allow');
+ok('robots.txt allows AI answer engines (the served file, not just the build)', ANSWER_BOTS.every((b) => robotVerdict(robots, b) === 'allow'), ANSWER_BOTS.filter((b) => robotVerdict(robots, b) !== 'allow').join(','));
+ok('robots.txt blocks AI training crawlers', TRAIN_BOTS.every((b) => robotVerdict(robots, b) === 'block'), TRAIN_BOTS.filter((b) => robotVerdict(robots, b) !== 'block').join(','));
 ok('robots.txt points at our sitemap', robots.includes('Sitemap: ' + ORIGIN + '/sitemap.xml'));
 const missing = await grab(ORIGIN + '/seo-audit-missing-page-check/');
 ok('unknown URL returns branded, noindex 404', missing.status === 404 && missing.body.includes('Page not found') && /<meta name="robots" content="noindex"/.test(missing.body), 'status ' + missing.status);

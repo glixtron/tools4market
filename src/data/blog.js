@@ -24,7 +24,7 @@ export const ARTICLES = [
       {
         h: 'The AI crawlers you now have to decide about',
         p: [
-          'The crawler list grew a category in 2024: alongside Googlebot and Bingbot there are now training crawlers (GPTBot, Google-Extended, ClaudeBot, Bytespider, Amazonbot, CCBot, MistralAI-Training), answer-engine fetchers (PerplexityBot, ChatGPT-User, Claude-User, Amazonbot-User, Google-Extended), and AI agents (Applebot-Extended, meta-externalagent, cohere-ai, Diffbot). They are not interchangeable: one may be used to train a model, another to fetch pages live and cite them in an answer, and a third to index your pages for an assistant to read on demand.',
+          'The crawler list grew a category in 2024. Alongside Googlebot and Bingbot there are training crawlers (GPTBot, ClaudeBot, Bytespider, Amazonbot, CCBot, MistralAI-Training), AI search indexers and user-triggered fetchers (OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot, Claude-User), and AI agents (Applebot-Extended, meta-externalagent, cohere-ai, Diffbot). They are not interchangeable: one may be used to train a model, another to index pages for an assistant, and a third to fetch a page live when a user asks about it. `Google-Extended` belongs in none of those lists, because it is not a crawler at all — it is a control token that Google\'s own crawls consult to decide whether content may be used for Gemini training and for Gemini grounding.',
           'That distinction decides your policy. Many publishers now want training crawlers blocked while allowing the answer-engine fetchers that send real readers to the site, because those fetchers are the traffic. Our **AI Crawler Blocker** tool generates a robots.txt with per-bot presets for exactly this split — block training, allow search and answer engines — and our **robots.txt generator** covers the classic search-bot side.',
         ],
       },
@@ -32,7 +32,7 @@ export const ARTICLES = [
         h: 'Templates: allow everything, block the training bots, block everything',
         p: [
           '**Allow everything** is the default and is right for most sites: a single `User-agent: * / Allow: /` group plus a sitemap line. If you have nothing to hide and you want AI citations and traffic, blocking training crawlers costs you nothing you can measure.',
-          '**Block the training bots, keep the readers** is the pattern most content sites now use. Group the training crawlers together and disallow them, then allow the general group. The `Google-Extended` token is Google\'s opt-out for Gemini training and Vertex AI grounding, and it is independent of `Googlebot`, so blocking it does not affect your search rankings.',
+          '**Block the training bots, keep the readers** is the pattern most content sites now use. Group the training crawlers together and disallow them, then allow the general group. One token does not fit that split: `Google-Extended` is not a crawler but a control token that switches Gemini training and Gemini grounding off together, so blocking it also gives up being cited in Gemini Apps. Googlebot is unaffected either way, so it is a deliberate trade rather than a search penalty.',
           '**Block everything** is for staging environments, internal tools and anything with a paywall. It stops crawlers entirely — and therefore stops search engines from seeing the noindex tag if that is what you were relying on.',
         ],
       },
