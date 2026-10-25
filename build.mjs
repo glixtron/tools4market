@@ -1033,6 +1033,7 @@ ${feedItems}
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000
 `);
   // Cloudflare Pages supports host-level redirects in _redirects, but Workers Static
   // Assets rejects them ("Only relative URLs are allowed", error 100324). So the

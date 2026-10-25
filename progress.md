@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+### HTTPS enforced on both hosts (25 Oct 2026)
+
+**The report was accurate:** `http://tools4market.online/` answered **200**. The certificate was fine — there was simply no rule treating plain HTTP as a different origin, so every page had two live URLs. Cloudflare's *Always Use HTTPS* zone setting looks to be off as well.
+
+**Two changes.** `worker.js` now redirects `http:` → `https://tools4market.online` with `301` (path and query preserved, `no-store`), positioned **before** the `www → apex` redirect so `http://www` resolves in one hop. The check deliberately ignores `X-Forwarded-Proto` — client-spoofable — and exempts localhost so `npm run preview` keeps working. The generated `_headers` now sends `Strict-Transport-Security: max-age=31536000` (no `includeSubDomains`, no `preload`: both are irreversible and no subdomain inventory exists yet).
+
+**New guard:** `tests/worker-routing.mjs` (`npm run test:worker`, 14 checks) tests the routing matrix against `worker.js` directly — no deploy, no network — and asserts the HSTS/still-present-security-header shape of `dist/_headers`. `tests/live-verify.mjs` gained four assertions (65 → 69) for the deployed edge.
+
+**Owner-side follow-up:** turn on Cloudflare **Always Use HTTPS**.
+
 ### Day-7 pack integrated — v2.12 (25 Oct 2026)
 
 **Trigger:** owner dispatched Day 7 — FAQ Part 4 (tools 16–20), three long-tail posts, an internal-linking widget template.

@@ -23,6 +23,26 @@ export default {
     const url = new URL(request.url);
     const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
 
+    // ---- one-hop redirect: plain http -> https, and www -> apex ----------
+    // Cloudflare terminates TLS, so an http:// request reaches the Worker with
+    // an http: URL. Without this, the apex answers 200 over plain HTTP as well
+    // as HTTPS — two live origins for every page, which splits link equity and
+    // serves the site unencrypted to anyone who types the bare domain.
+    // Order matters: http://www → https://apex in a single hop, never a chain.
+    // `url.protocol` is the client-facing scheme, so no forwarded header is
+    // trusted here — a spoofed X-Forwarded-Proto must not be able to skip it.
+    // Localhost is exempt so `npm run preview` still works.
+    const local = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host.endsWith('.localhost');
+    if (!local && url.protocol === 'http:') {
+      return new Response(null, {
+        status: 301,
+        headers: {
+          'Location': CANONICAL_ORIGIN + url.pathname + url.search,
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
+
     // ---- one-hop canonical redirect: www -> apex -------------------------
     if (host === 'www.' + CANONICAL_HOST) {
       return new Response(null, {

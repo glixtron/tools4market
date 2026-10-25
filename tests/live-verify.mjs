@@ -50,6 +50,27 @@ const apex = await grab(ORIGIN + '/', { redirect: 'manual' });
 ok('apex serves 200 without redirect', apex.status === 200, 'status ' + apex.status + ' ' + (apex.error || ''));
 out.push('');
 
+// ---- HTTPS enforcement (owner request, 25 Oct 2026)
+// The apex used to answer 200 over plain http as well as https, so the site had
+// two live origins for every page. These four checks are the regression guard.
+out.push('=== HTTPS ===');
+{
+  const httpApex = await grab('http://' + HOST + '/', { redirect: 'manual' });
+  const loc = httpApex.headers.get('location') || '';
+  ok('plain http on the apex redirects', httpApex.status === 301 || httpApex.status === 308, 'status ' + httpApex.status + ' ' + (httpApex.error || ''));
+  ok('http→https lands on the https canonical origin', loc === ORIGIN + '/', 'location ' + (loc || httpApex.error || ''));
+
+  const httpWww = await grab('http://www.' + HOST + '/', { redirect: 'manual' });
+  ok('http://www reaches the https apex in one hop', (httpWww.status === 301 || httpWww.status === 308) && httpWww.headers.get('location') === ORIGIN + '/', 'status ' + httpWww.status + ' location ' + (httpWww.headers.get('location') || httpWww.error || ''));
+
+  const httpDeep = await grab('http://' + HOST + '/tools/robots-txt-generator/?utm_source=test', { redirect: 'manual' });
+  ok('http→https preserves path and query', httpDeep.headers.get('location') === ORIGIN + '/tools/robots-txt-generator/?utm_source=test', 'location ' + (httpDeep.headers.get('location') || httpDeep.error || ''));
+
+  const hsts = apex.headers.get('strict-transport-security') || '';
+  ok('HSTS advertised on https responses', /max-age=\d{7,}/.test(hsts), 'hsts ' + (hsts || '(none)'));
+}
+out.push('');
+
 // ---- core files
 out.push('=== Core files ===');
 for (const [p, want, label] of [

@@ -1,7 +1,23 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Ten entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below).
+**Status:** ✅ Eleven entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below).
+
+## Entry 11 — HTTPS enforcement (plain http → https)
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
+**Status:** ✅ Committed, pushed, deployed same day. Cross-verified before commit: build **69 pages / 44 tools / 12 guides**, smoke **44/44**, SEO audit **2189/2189**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **69/69**.
+
+**Subject:** `fix: force https — 301 plain http to the canonical origin, add HSTS`
+
+**Summary:**
+- **Symptom:** `http://tools4market.online/` returned 200. Both schemes served the site, so every page had two live origins; only `www` redirected.
+- **`worker.js`:** `http:` → `301 https://tools4market.online` + path + query, `Cache-Control: no-store`, placed **before** the `www → apex` rule so `http://www` resolves in one hop. Uses `url.protocol` only (a client-supplied `X-Forwarded-Proto` must not skip it) and exempts localhost for `npm run preview`.
+- **`build.mjs`:** `Strict-Transport-Security: max-age=31536000` in the `/*` block of `dist/_headers`. No `includeSubDomains`, no `preload` — both are one-way doors and no subdomain inventory exists.
+- **Tests:** new `tests/worker-routing.mjs` (14 checks, no network — redirect matrix + HSTS/headers shape) wired as `npm run test:worker`; `tests/live-verify.mjs` +4 assertions (65 → 69) for the deployed edge, using `redirect: 'manual'`.
+- **Owner-side:** enable Cloudflare *Always Use HTTPS* as belt-and-braces.
+
+**Files in this commit:** `worker.js`, `build.mjs`, `tests/worker-routing.mjs`, `tests/live-verify.mjs`, `package.json`, `README.md`, `Architecture.md`, `suggest.md`, `pendingcommit.md`, `progress.md`, `worklog.md`.
 
 ## Entry 10 — v2.10 Day-2 content pack integration
 
