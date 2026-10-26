@@ -30,7 +30,7 @@
 
 **`docs/founder-actions.md`** §4 updated with a “what the free tier actually gives” column and the measured facts; its deliverables section now points at `docs/day12/` instead of promising four documents.
 
-**A seventh correction, this time to the CEO's corrections file.** Its step 4 verifies the dofollow attribute with `curl -sI` on the listing URL. Headers carry no HTML; `rel` is on the `<a>` in the body. Measured on our own footer: zero `rel=` matches from `-I`, the anchor from `-s`. §4 now holds the working check, the three outcomes, and the warning that tools.cafe's client-rendered pages return no outbound anchors to `curl` at all — an empty result there means “not server-rendered”, not “no link”.
+**A seventh correction, this time to the CEO's corrections file.** Its step 4 verifies the dofollow attribute with `curl -sI` on the listing URL. Headers carry no HTML; `rel` is on the `<a>` in the body. Measured on our own footer: zero `rel=` matches from `-I`, the anchor from `-s`. §4 now holds the working check and the three outcomes, and its example was corrected after testing: tools.cafe's index and category pages carry no outbound product anchors, but the `/p/<slug>` detail page is server-rendered and its Visit button is a plain dofollow anchor (`rel="noopener noreferrer"`, with a `?ref=tools.cafe` parameter). An empty result means the wrong page was fetched, not that the page is client-rendered.
 
 **Files:** `docs/day12/` (5 new), `scripts/check-social.mjs` (new), `package.json` (`check:social`), `docs/founder-actions.md`, `worklog.md`, `progress.md`, `pendingcommit.md`, `suggest.md`.
 

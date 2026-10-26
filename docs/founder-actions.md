@@ -204,7 +204,14 @@ curl -sL "LISTING_URL" | grep -o '<a[^>]*href="https://tools4market.online[^"]*"
 | `<a>` with no `rel`, or `rel="noopener"` only | dofollow | done, nothing more to place |
 | nothing | the page renders the link client-side, or there is no link | open the listing in a browser and inspect the element. An empty `grep` is not evidence of no link |
 
-The last row is the one that costs an afternoon: tools.cafe is a Next.js app, and fetching its homepage and a category page returned no outbound product anchors at all — the listings are client-rendered. A `curl` check there finds nothing whether or not the link exists, so it has to be a browser check.
+The last row is the one that costs an afternoon, and the first version of this section got the example wrong. tools.cafe's homepage and category pages return no outbound product anchors — they link internally to `/p/<slug>` — but the **detail page is server-rendered**. Fetched 26 Oct 2026:
+
+```
+$ curl -sL https://tools.cafe/p/clerk | grep -o '<a[^>]*clerk\.com[^>]*>'
+<a href="https://clerk.com/?ref=tools.cafe" target="_blank" rel="noopener noreferrer" class="btn btn-stamp">
+```
+
+Three things follow. The check works there, so an empty result usually means you fetched the index or a category page rather than the listing — confirm the URL before concluding anything. Their outbound link carries `?ref=tools.cafe`, so match on the domain, not on an exact URL. And the anchor has no `nofollow`, which is what a dofollow listing looks like in the raw HTML.
 
 ### Skipped, with reasons
 
