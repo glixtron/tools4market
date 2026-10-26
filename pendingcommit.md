@@ -16,6 +16,8 @@
 
 **Placement:** 156 total — 44 top (tools), 68 content (44 tools + 24 guides), 44 sidebar (tools). Guides get one unit each; two ads in an article is where reading suffers, so the sidebar was deliberately not wired there.
 
+**Follow-on: Auto ads and Auto optimise were both ON, now OFF.** The loader ships on all 81 pages so Google can verify the site, and Auto ads reads that as permission to place ads on its own terms — including the homepage and inside the tool area, where there is no exclusion that means “not inside this div.” Both are off as of 26 Oct; served markup was unchanged afterwards (3 / 1 / 0) and `test:live` stayed 78/78. Documented in `docs/founder-actions.md` §1 with the trade stated: Auto ads can earn more, and we are buying layout control and the brand claim instead.
+
 ## Entry 21 — Content ad unit in the guides, activating with one id
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026

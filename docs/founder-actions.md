@@ -37,6 +37,23 @@ There are two, and the difference matters because one of them makes “paste the
 
 **156 placements across 68 pages.** Guides carry one unit, tool pages three, the homepage none. Verified after deploy by sweeping all 68 URLs, not a sample: every tool page 3 units, every guide 1, home 0. `test:live` is **78/78**. The homepage still has no slot in the template; adding one is a layout decision, not a missing id.
 
+### Keep Auto ads and Auto optimise OFF — both were ON
+
+`Ads → By site` showed **Auto ads ON** and **Auto optimise ON** for `tools4market.online` (26 Oct 2026). Both were turned off the same night. Turn them off again if Google re-enables them, and never switch them on to "fill the empty slots."
+
+The reason is structural, not stylistic. The build ships the plain `adsbygoogle.js` loader on **all 81 pages** — that is what lets Google crawl and verify the site — and Auto ads treats that loader as permission to place ads wherever its engine decides. It has no concept of our `tool-shell` boundary.
+
+| Setting | On | Off |
+|---|---|---|
+| Auto ads | Ads can appear on the homepage, category and policy pages, and inside the tool area | Only the 156 manual `<ins>` placements render |
+| Auto optimise | Google runs density/size experiments on our layout | Layout stays as shipped |
+
+The homepage FAQ makes a public claim — *"ads in reserved spaces around the tools and never inside the tool itself"* — and Auto ads is the one setting that can falsify it without a code change. Page exclusions (`0`) cannot fix this: there is no exclusion that means "not inside this div."
+
+**Verified after switching both off:** served markup unchanged (3 slots on a tool page, 1 on a guide, 0 on the homepage), `test:live` **78/78**. Manual units do not depend on either setting.
+
+**Where approval status actually appears:** not on the *By site* tab, which has no status column. It is on **Home** ("Your site is ready" / "Getting ready") or under **Sites**.
+
 If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
 
 - the loader `adsbygoogle.js?client=ca-pub-1509697031230558` is on every page (asserted by `npm run test:live`);
