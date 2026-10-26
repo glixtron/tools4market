@@ -1,7 +1,34 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Nineteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below).
+**Status:** ✅ Twenty entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below).
+
+## Entry 20 — Day-12 founder-side writing, and a verification pass that contradicted the brief four times
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026
+**Status:** ✅ Committed and pushed. Cross-verified: build **81 pages / 44 tools / 24 guides**, SEO audit **2547/2547**, smoke **44/44**, social **18/18 within limit**. No runtime files changed, so no deploy and no IndexNow.
+
+**Subject:** `docs: Day-12 founder-side deliverables (PH, directories, outreach, social)`
+
+**Summary:**
+- **`docs/day12/Day12_ProductHunt_Package.md`** — name, tagline (47 chars), short and long descriptions, five gallery concepts at 1270×760, maker's first comment, pre-launch email, launch-day timeline, and a “what not to say” list.
+- **`docs/day12/Day12_Directory_Descriptions.md`** — 60 / 160 / 305-word variants (measured: 60, 160 words / 994 chars, 305), verb-first feature bullets for tools.cafe's “≥3, start with a verb” rule, per-directory field map with the limits each live form actually enforces, the AlternativeTo “alternative to” mapping, and the badge decision.
+- **`docs/day12/Day12_Outreach_Pitches.md`** — five channels ranked by expected value; SEJ's contributor terms quoted verbatim (exclusive, 100% original, regular slot, disclosure, no promotional links or CTAs, no wholly AI-generated articles) and the honest consequence that it is a column, not a backlink; SEOFOMO sponsorship enquiry; HN Show HN notes rather than a script, because HN's guidelines forbid generated text; Indie Hackers outline; Search Engine Roundtable held back with a reason; blocked-targets table.
+- **`docs/day12/Day12_Social_Posts.md`** — 3 X threads (18 tweets), 3 Reddit posts (r/SideProject, r/SEO, r/webdev), 5 comment templates, corrected posting calendar.
+- **`docs/day12/README.md`** — index plus a 32-entry verification table recording how each source was checked and what it returned.
+- **`scripts/check-social.mjs`** + `npm run check:social` — parses the tweet blocks, measures raw and X-weighted length (links = 23 chars, bare domains included), fails over 280.
+
+**Corrections the verification forced:**
+1. **“Sunday Oct 26”** — 26 Oct 2026 is a **Monday**; launch calendar rebuilt and the Tuesday–Thursday recommendation applied.
+2. **AlternativeTo `/add-app/`** — the brief said “403 to curl, works in a browser”. It is a **404 in a real browser**, as are `/manage/add-app/`, `/submit/`, `/apps/new/`, `/new-app/`. No logged-out add control exists; the 403 was Cloudflare hiding a dead URL.
+3. **LaunchBuff** — “permanent dofollow listings” is wrong. Free = **nofollow**, badge required, free entry **paused with a ~1-year queue**; dofollow starts at **$19**. Recommendation changed to skip it, and the paid alternative is named as a paid link rather than a directory.
+4. **“Alternative to QRCodeGenerator”** — **no QR tool exists** among the 44. Mapping dropped.
+5. **Search Engine Land “invite-only”** — site fails a Cloudflare challenge in a real browser too, so the earlier quote is recorded as **unverified**, not repeated.
+6. **SaaSCity + tools.cafe** — both free tiers require **their badge on the site**, a visible change across 81 pages; escalated as a decision rather than an assumed freebie.
+
+**`docs/founder-actions.md`** §4 updated with a “what the free tier actually gives” column and the measured facts; its deliverables section now points at `docs/day12/` instead of promising four documents.
+
+**Files:** `docs/day12/` (5 new), `scripts/check-social.mjs` (new), `package.json` (`check:social`), `docs/founder-actions.md`, `worklog.md`, `progress.md`, `pendingcommit.md`, `suggest.md`.
 
 ## Entry 19 — Source-link hygiene, a citation checker, and founder-ops prep
 

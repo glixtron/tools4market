@@ -2,6 +2,22 @@
 
 *Append-only. Newest entries at top.*
 
+### Day 12 — founder-side writing, and four corrections found by verifying the brief (26 Oct 2026)
+
+**Trigger:** the owner chose “pause content, prep founder ops” on Day 12 and authorised the four writing deliverables that need no account access: the Product Hunt package, per-directory descriptions, five outreach pitches, and six social posts.
+
+**Shipped:** `docs/day12/` — four documents plus an index. The index carries a 30-URL verification table with how each source was checked (browser vs `curl`), because the difference decided two of the answers.
+
+**What verification changed.** Six statements in the brief were wrong. The launch thread was scheduled for “Sunday Oct 26”; 26 Oct 2026 is a **Monday**. AlternativeTo's `/add-app/` was recorded as “403 to curl, works in a browser” — it is a **404 in a real browser**, along with five other candidate paths, so the submission is login-gated rather than blocked by a bot check. LaunchBuff's “permanent dofollow listings” are a **nofollow** link on the free tier, behind a **~1-year queue**, with dofollow starting at $19. The brief's “alternative to QRCodeGenerator” mapping has **no corresponding tool** in the catalogue. Search Engine Land's “invite-only” policy could not be re-checked at all — the site fails a Cloudflare challenge in a real browser — so it is now recorded as unverified rather than repeated. And both SaaSCity and tools.cafe require **their badge on the site** for the free tier.
+
+**Four soft-200 traps found.** `/write-for-sej/` serves a directory roundup; Content Marketing Institute returns `<title>news` for every path tested. Same failure mode the guide citations had: a 200 proves a page exists, not that it says what you think.
+
+**The plan that came out of it.** Free tiers only — no paid dofollow links, because that is a link scheme whatever the seller calls the listing fee. tools.cafe first (30-day queue), then SaaSHub and AlternativeTo, then Launchstag (badge already shipped), then SaaSCity (364-day queue, submit and forget), Product Hunt as a launch rather than a submission, and LaunchBuff skipped.
+
+**New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
+
+**Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.
+
 ### Source-link hygiene — v2.17.1 (25 Oct 2026)
 
 **Trigger:** the CEO locked a gate after Day 11 — no primary-doc citation without confirming it returns 200 with the expected content. Applied backwards to the 24-guide library, four citations had rotted.

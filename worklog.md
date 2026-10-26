@@ -6,7 +6,7 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
-## 2026-10-25 (10th pass) — Source-link hygiene: five dead citations fixed, a checker to stop the next one
+## 2026-10-25→26 (10th pass) — Source-link hygiene: five dead citations fixed, a checker to stop the next one
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)
 **Trigger:** the CEO locked a new gate after the Day-11 verification — never cite a primary-doc URL as authority without confirming it returns 200 with the expected content. Applying that gate retroactively to the 24 guides found citations that had quietly rotted.
@@ -29,9 +29,23 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **`pending-work.md` was three weeks stale and actively wrong** — production described as v2.5 `0e496a9d`, AdSense described as on hold (lifted 24 Oct), and the loader described as not shipping without slot ids (it ships whenever `ADSENSE_ENABLED=1`). Corrected, with the owner-side work now pointing at the runbook instead of being duplicated.
 
-**Owner actions still open:** AdSense slot ids, Launchstag Verify now, Cloudflare managed robots.txt off, distribution kickoff.
+**Day 12 (26 Oct) — the four writing deliverables, and a verification pass that contradicted the brief four times.** The owner authorised the writing work that does not need an account, so `docs/day12/` now holds four documents and an index: the Product Hunt package (tagline, descriptions, five gallery concepts, maker comment, pre-launch email, launch-day timeline), the directory descriptions (60 / 160 / 305-word variants, verb-first bullets, per-directory field limits, the AlternativeTo mapping), the five outreach pitches with SEJ's contributor rules quoted verbatim, and the six social posts with corrected dates.
 
-**Completed:** 25 Oct 2026.
+**The verification was worth more than the copy.** Six statements in the brief were wrong: (1) “Sunday Oct 26” — 26 Oct 2026 is a **Monday**, so the launch calendar was off by a day and the Tuesday–Thursday recommendation moved with it; (2) AlternativeTo's `/add-app/` “returns 403 to curl, works in a browser” — it returns **404 in a real browser**, and so do five other candidate paths, so the submission is simply login-gated and the 403 was Cloudflare hiding a dead URL; (3) LaunchBuff's “permanent dofollow listings” — the free tier is a **nofollow** link, requires their badge, and free entry is **paused with a ~1-year queue**, with dofollow starting at $19, which makes it a paid link rather than a directory; (4) the “alternative to QRCodeGenerator” mapping — **there is no QR tool among the 44**; (5) Search Engine Land's “invite-only, no unsolicited pitches” — the site is behind a Cloudflare challenge that a real browser also fails, so the earlier quote is recorded as **unverified** instead of repeated; (6) SaaSCity and tools.cafe were filed as free, and both require **their badge on your site** for the free tier — a visible change across 81 pages that needs a decision first.
+
+**Thirty-two sources, checked properly, and four soft-200 traps found.** `/write-for-sej/` returns 200 and serves “20 Web Directories You'll Still Want To Use”; `contentmarketinginstitute.com/contribute/` returns 200 with `<title>news` for every path tested. Same class of error as the guide citations: a 200 is not evidence. Final tally: 16 verified with the expected content, 4 soft-200 traps, 6 confirmed dead or absent, 4 blocked by bot protection and 2 login-gated.
+
+**Two new facts that change the plan.** tools.cafe is the only free tier measured in weeks rather than a year (30-day queue, dofollow after badge verification), and three of the seven directories — tools.cafe, Launchstag, LaunchBuff — are one operator family (tools.cafe's footer lists both as “Partner Sites”). Seven submissions, five businesses.
+
+**`npm run check:social` added.** It measures all 18 tweets against X's 280-character limit on both raw and weighted length (links count as 23 characters, bare domains included, because a tweet can pass one measure and fail the other). All 18 pass. The 160-word description variant is 994 characters — deliberately inside tools.cafe's 1,000-character field, which it missed by eleven before the trim.
+
+**`docs/founder-actions.md` §4 corrected in place**, with a “what the free tier actually gives” column, and its deliverables list now points at the folders instead of promising them.
+
+**Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**. No runtime files changed, so no redeploy and no IndexNow.
+
+**Owner actions still open:** AdSense console state (then slot ids), Cloudflare managed robots.txt decision, Launchstag Verify screenshot or listing URL, distribution kickoff — plus the new badge decision for tools.cafe and SaaSCity.
+
+**Completed:** 26 Oct 2026.
 
 ---
 

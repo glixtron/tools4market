@@ -169,15 +169,17 @@ A free browser-tools site is not a SaaS with self-serve software, and several �
 
 ### Submit to these
 
-| Directory | Why it fits | First action |
-|---|---|---|
-| **Product Hunt** | Highest-authority launch platform; the referral traffic is the real value, not the nofollow link | Create account, prepare 3 gallery images + a 60-word description, then schedule a launch |
-| **AlternativeTo** | Built on “alternative to X” queries — our strongest angle is *Screaming Frog alternative* | Submit via `/add-app/` (returns 403 to `curl`, works in a browser) |
-| **SaaSHub** | Comparison and discovery; our comparison guide already targets this intent | `saashub.com/submit` |
-| **tools.cafe** | Curated builder-tool directory, dofollow badge, editorial review 2–7 days | `tools.cafe/submit` |
-| **Launchstag** | Badge model, dofollow, permanent indexed listing (see §3) | Claim the listing, then the dashboard |
-| **LaunchBuff** | Bracket-format launch competition, permanent dofollow listings | `launchbuff.com` |
-| **SaaSCity** | Badge-model dofollow directory | `saascity.io` |
+*Measured against the live pages on 26 Oct 2026. Copy to paste, field limits and the badge decision are in [`docs/day12/Day12_Directory_Descriptions.md`](day12/Day12_Directory_Descriptions.md).*
+
+| Directory | Why it fits | What the free tier actually gives | First action |
+|---|---|---|---|
+| **Product Hunt** | Highest-authority launch platform; the referral traffic is the real value, not the nofollow link | Nofollow, no badge, no queue | Package ready in [`day12/Day12_ProductHunt_Package.md`](day12/Day12_ProductHunt_Package.md); `/posts/new` needs a login |
+| **AlternativeTo** | Built on “alternative to X” queries — our strongest angle is *Screaming Frog alternative* | No badge required; the listing is the point, not the link | **Sign in first.** `/add-app/` is now a 404 in a browser; the form only appears for logged-in users |
+| **SaaSHub** | Comparison and discovery; our comparison guide already targets this intent | No badge mentioned; paid “Feature My Product” is optional and skippable | `saashub.com/services/submit` |
+| **tools.cafe** | Curated builder-tool directory, badge model, dofollow | Dofollow **once the badge is verified**, **30-day queue**, badge required | `tools.cafe/submit` — decide the badge first (§6 of the Day 12 file) |
+| **Launchstag** | Badge model, dofollow, permanent indexed listing (see §3) | Dofollow, badge required — and it is **already in our footer** | Claim the listing, then the dashboard |
+| **LaunchBuff** | Fortnightly tournament, permanent listing pages | **Nofollow**, badge required, and free entry is **paused with a ~1-year queue**. Dofollow starts at $19 | Skip the free tier. A paid dofollow link is a link scheme, not a directory listing |
+| **SaaSCity** | Badge-model dofollow directory | Dofollow, **no map placement**, badge required, **~364-day review queue** | `saascity.io/submit` — submit now, forget it for a year |
 
 ### Skipped, with reasons
 
@@ -190,12 +192,14 @@ I would not. Seven dormant profiles are a liability: they rank for your brand na
 
 ### What I can prepare without your accounts
 
-- The Product Hunt package: tagline, 60-word description, first comment, three image specs.
-- Per-directory descriptions at the length each one allows.
-- Five outreach pitches for the guides that already exist (sitemaps, status codes, structured data, hreflang, llms.txt) — each one a genuine gap in most SEO blogs.
-- Social bios and a two-week posting calendar with the first six posts drafted.
+All four are written, as of 26 Oct 2026, in [`docs/day12/`](day12/):
 
-None of that needs an account. Say the word and it becomes the next deliverable.
+- **Product Hunt package** — tagline, short and long description, five gallery concepts, maker's first comment, pre-launch email, launch-day timeline, and a “what not to say” list. → [`day12/Day12_ProductHunt_Package.md`](day12/Day12_ProductHunt_Package.md)
+- **Per-directory descriptions** — 60 / 160 / 305-word variants, verb-first feature bullets, per-directory field limits, and the AlternativeTo mapping. → [`day12/Day12_Directory_Descriptions.md`](day12/Day12_Directory_Descriptions.md)
+- **Five outreach pitches** — SEJ (with their rules quoted verbatim), SEOFOMO sponsorship, HN Show HN, Indie Hackers, and Search Engine Roundtable held back with a reason. Plus a blocked-target table. → [`day12/Day12_Outreach_Pitches.md`](day12/Day12_Outreach_Pitches.md)
+- **Six social posts** — three X threads, three Reddit posts, five comment templates, and a corrected posting calendar. → [`day12/Day12_Social_Posts.md`](day12/Day12_Social_Posts.md)
+
+None of it needed an account. The verification pass behind it found four errors in this file and in the brief it came from — the corrected table above is the result.
 
 ---
 
