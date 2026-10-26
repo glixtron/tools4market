@@ -10,7 +10,7 @@
 
 | # | Item | Blocked on | Time | Effect when done |
 |---|---|---|---|---|
-| 1 | AdSense slot ids | Owner (5 min) — **and possibly approval** | 5–10 min | First revenue, once approved |
+| 1 | AdSense slot ids | **Started** — top slot serving; content + sidebar still empty | 5 min | Revenue on 44 tool pages now; guides still placeholder |
 | 2 | Cloudflare managed robots.txt | Owner decision + toggle | 3 min | Cleaner policy file; **costs edge enforcement** |
 | 3 | Launchstag Verify | Owner, in the listing dashboard | 2 min | Listing + dofollow badge link |
 | 4 | Distribution | Owner accounts | 1–3 h, spread out | Referral traffic + backlinks |
@@ -26,6 +26,8 @@ There are two, and the difference matters because one of them makes “paste the
 **State A — pre-approval.** The console opens on a *Get started* / *Sites* flow and asks you to place the AdSense code and **Request review**. There is no *Ads → By ad unit* menu, because ad units are not offered until the site is approved. Google's own guidance is explicit that you cannot show ads until the site is approved; the code goes in first, the review follows.
 
 **State B — approved.** The console has *Ads → Overview → By ad unit*, and you can create units.
+
+**Where we are, 26 Oct 2026:** State B. The owner produced a unit snippet, which means the *By ad unit* menu exists. `AD_SLOT_TOP=2947820780` is deployed (Worker `63919b77`) and serving on the 44 tool pages; `AD_SLOT_CONTENT` and `AD_SLOT_SIDEBAR` are still empty, so the 24 guides and the homepage carry the loader with reserved placeholders and no unit.
 
 If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
 

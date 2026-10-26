@@ -20,6 +20,8 @@
 
 **The dofollow check in the CEO's file does not work, and §4 of the runbook now says so.** Step 4 verifies the link attribute with `curl -sI`, which returns headers — `rel` lives in the body. On our own footer, `curl -sI` finds zero `rel=` strings while `curl -s` returns the anchor. The runbook's replacement reads the body and greps for the anchor pointing at our domain, and records why an empty result is not evidence. Then the example in that section was tested against a live listing and found wrong: tools.cafe's index and category pages carry no outbound product anchors, but `/p/<slug>` is server-rendered and its Visit button is a plain dofollow anchor (`rel="noopener noreferrer"`, with a `?ref=tools.cafe` parameter). An empty result means the wrong page was fetched, not that the page is client-rendered.
 
+**The first ad is serving.** One AdSense unit (`2947820780`) is now deployed as the top slot on the 44 tool pages — Worker `63919b77`, loader on all 81 pages, `test:live` 73/73. The 24 guides and the homepage still carry the loader with empty placeholders, because the content and sidebar slot ids were not supplied. `ads.txt` was already correct.
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.
