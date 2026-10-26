@@ -1639,6 +1639,10 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
   text-align: center;
 }
 .tool-side .ad-slot { min-height: 260px; }
+/* Empty slots hold their height so enabling a unit shifts nothing, but they
+   must not look like content. No border, no label, nothing for a reader to
+   mistake for an unfinished page. */
+.ad-slot--empty { border: 0; background: none; }
 
 /* ================================================================
    INLINE TABLE (keyword density)

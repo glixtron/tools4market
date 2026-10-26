@@ -368,7 +368,11 @@ const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' 
 const adSlot = (label) => {
   const slot = AD_SLOTS[label] || '';
   if (!ADSENSE_CLIENT || !slot) {
-    return `<div class="ad-slot" role="complementary" aria-label="Advertisement space">Ad space${label ? ' &middot; ' + label : ''}</div>`;
+    // Reserved space only: no dashed box, no label. A unit can go live at any
+    // time, and "Ad space · below content" is placeholder chrome that reads as
+    // an unfinished site. The height stays reserved so enabling the unit shifts
+    // nothing (no CLS), and the empty node is hidden from assistive tech.
+    return `<div class="ad-slot ad-slot--empty" aria-hidden="true"></div>`;
   }
   return `<div class="ad-slot" role="complementary" aria-label="Advertisement">
   <ins class="adsbygoogle" style="display:block" data-ad-client="${esc(ADSENSE_CLIENT)}" data-ad-slot="${esc(slot)}" data-ad-format="auto" data-full-width-responsive="true"></ins>

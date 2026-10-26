@@ -18,6 +18,8 @@
 
 **Follow-on: the deploy that shipped it briefly lost the ads.** For ~30 minutes the apex served the pre-ad build — three placeholders, no loader, byte-identical to the build before `63919b77` — and `test:live` passed 73/73 through it because its only AdSense assertion was the homepage loader. A redeploy restored it (`5bb3791a`), and wrangler reported “No updated asset files to upload”, so this looks like edge/version skew rather than a bad build. The verification gap was real either way: `.ad-slot` count is identical for a placeholder and a unit. `test:live` now asserts the configured top unit is in the served HTML, exactly one `<ins>`, and that guides stay slot-free only while `AD_SLOT_CONTENT` is unset — **76 assertions**.
 
+**Follow-on: empty slots lost their placeholder chrome.** Two of three placements are unset, so all 44 tool pages carried dashed “Ad space · …” boxes. The reserved height is required (enabling a unit must not shift text) but the label and border read as an unfinished site the day before distribution starts. Empty slots are now an empty `aria-hidden` node with the same 90px / 260px reserved height and no chrome. Deployed `873a855a`; live check confirms two empty slots, no “Ad space” strings, top unit intact, `test:live` 76/76.
+
 ## Entry 20 — Day-12 founder-side writing, and a verification pass that contradicted the brief four times
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026
