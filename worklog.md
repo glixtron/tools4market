@@ -47,6 +47,8 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **`docs/founder-actions.md` §4 corrected in place**, with a “what the free tier actually gives” column, and its deliverables list now points at the folders instead of promising them.
 
+**A seventh error, this time inside the CEO's corrections file.** Its step 4 says to verify the dofollow attribute “via `curl -sI` on the listing URL”. That cannot work: `-I` fetches headers only, and `rel` is an attribute on the `<a>` in the body. Measured on our own footer, which definitely carries `rel="noopener"`, `curl -sI https://tools4market.online/ | grep -ci 'rel='` returns **0** while the body returns the anchor. §4 now carries the working check — fetch the body, grep for the anchor whose `href` points at our domain, read its `rel` — plus the three outcomes. The third outcome matters most: tools.cafe is a Next.js app and returns no outbound product anchors to `curl` at all, so an empty result there is “not server-rendered”, not “no link”, and the check has to happen in a browser.
+
 **Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**; 35 sources checked (18 verified, 4 soft-200 traps, 7 dead, 4 blocked, 2 login-gated). No runtime files changed, so no redeploy and no IndexNow.
 
 **Owner actions still open:** AdSense console state (then slot ids), Cloudflare managed robots.txt decision, Launchstag Verify screenshot or listing URL, distribution kickoff — plus the new badge decision for tools.cafe and SaaSCity.

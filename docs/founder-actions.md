@@ -181,6 +181,31 @@ A free browser-tools site is not a SaaS with self-serve software, and several �
 | **LaunchBuff** | Fortnightly tournament, permanent listing pages | **Nofollow**, badge required, and free entry is **paused with a ~1-year queue**. Dofollow starts at $19 | Skip the free tier. A paid dofollow link is a link scheme, not a directory listing |
 | **SaaSCity** | Badge-model dofollow directory | Dofollow, **no map placement**, badge required, **~364-day review queue** | `saascity.io/submit` — submit now, forget it for a year |
 
+### After a listing goes live: checking the link attribute
+
+The step that circulates — and that appeared in the Day 12 corrections file — is `curl -sI` on the listing URL. It cannot work. `-I` fetches headers only, and `rel` is an attribute on the `<a>` element in the body. Measured on our own footer, which definitely carries `rel="noopener"`:
+
+```
+$ curl -sI https://tools4market.online/ | grep -ci 'rel='
+0
+$ curl -s https://tools4market.online/ | grep -o '<a[^>]*launchstag[^>]*>'
+<a class="launchstag-badge" href="https://launchstag.com" target="_blank" rel="noopener">
+```
+
+So the check has to read the body, and it has to read the anchor pointing at **us**, not any anchor on the page — a listing can link to the homepage in one place and to the listing in another:
+
+```
+curl -sL "LISTING_URL" | grep -o '<a[^>]*href="https://tools4market.online[^"]*"[^>]*>'
+```
+
+| Output | Means | Action |
+|---|---|---|
+| `<a>` with `rel="nofollow"`, `sponsored` or `ugc` | the link does not pass PageRank | the free tier is not what the pricing page said. Record it in `suggest.md`; do not buy the upgrade to “fix” it |
+| `<a>` with no `rel`, or `rel="noopener"` only | dofollow | done, nothing more to place |
+| nothing | the page renders the link client-side, or there is no link | open the listing in a browser and inspect the element. An empty `grep` is not evidence of no link |
+
+The last row is the one that costs an afternoon: tools.cafe is a Next.js app, and fetching its homepage and a category page returned no outbound product anchors at all — the listings are client-rendered. A `curl` check there finds nothing whether or not the link exists, so it has to be a browser check.
+
 ### Skipped, with reasons
 
 - **G2, Capterra, GetApp** — require a base of verified customer reviews to surface in a category. A free, no-signup tools site has no review-collecting mechanism, so a listing would sit unfilled and unranked. Revisit only if we ever add accounts.
