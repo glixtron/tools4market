@@ -22,6 +22,8 @@
 
 **The first ad is serving.** One AdSense unit (`2947820780`) is now deployed as the top slot on the 44 tool pages — Worker `63919b77`, loader on all 81 pages, `test:live` 73/73. The 24 guides and the homepage still carry the loader with empty placeholders, because the content and sidebar slot ids were not supplied. `ads.txt` was already correct.
 
+**The guides had no ad slot at all, so one was wired in.** The tool pages carry three placements each (132 slots across 44 pages); the 24 guides carried the loader and nothing to fill. `build.mjs` now renders the content unit after the second section of every guide, but only when `AD_SLOT_CONTENT` exists — a mid-article placeholder would compete with the prose, unlike the boxes beside a tool. Tested with a dummy id, rebuilt clean, deployed `9f619bfe`. A content id now covers 68 pages rather than 44; the homepage has no slot and that is a layout decision.
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.

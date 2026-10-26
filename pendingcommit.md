@@ -1,7 +1,20 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Twenty entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below).
+**Status:** ✅ Twenty-one entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below). (21) Content ad unit in guides (below).
+
+## Entry 21 — Content ad unit in the guides, activating with one id
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026
+**Status:** ✅ Committed and deployed (`9f619bfe`). Live: guides render no slot until `AD_SLOT_CONTENT` is set; the 44 tool pages are unchanged. `test:live` 73/73, SEO audit 2547/2547.
+
+**Subject:** `feat: content ad unit in guides when AD_SLOT_CONTENT is set`
+
+**Why:** the brief assumed the two remaining units would monetise the guides. They would not. The build carried 132 ad slots, all on the 44 tool pages; the guide template had none, and still would after the ids were pasted.
+
+**Change:** `adSlot('below content')` after the second section of every guide, rendered only when `AD_SLOT_CONTENT` holds an id — checked first with a dummy id (one unit per guide, correct position), then rebuilt clean and deployed. A content id now covers 68 pages instead of 44.
+
+**Trade, stated:** this puts an ad inside long-form reading. Placement is after the second section, never inside a code block or the FAQ, and the CSS reserves the height so enabling it shifts no text. If guides should stay ad-free, deleting one line before the id ships is the whole revert. The homepage has no slot at all; adding one is a layout decision, not a config value.
 
 ## Entry 20 — Day-12 founder-side writing, and a verification pass that contradicted the brief four times
 

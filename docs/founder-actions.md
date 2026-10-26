@@ -27,7 +27,7 @@ There are two, and the difference matters because one of them makes “paste the
 
 **State B — approved.** The console has *Ads → Overview → By ad unit*, and you can create units.
 
-**Where we are, 26 Oct 2026:** State B. The owner produced a unit snippet, which means the *By ad unit* menu exists. `AD_SLOT_TOP=2947820780` is deployed (Worker `63919b77`) and serving on the 44 tool pages; `AD_SLOT_CONTENT` and `AD_SLOT_SIDEBAR` are still empty, so the 24 guides and the homepage carry the loader with reserved placeholders and no unit.
+**Where we are, 26 Oct 2026:** State B. The owner produced a unit snippet, which means the *By ad unit* menu exists. `AD_SLOT_TOP=2947820780` is deployed and serving on the 44 tool pages. `AD_SLOT_CONTENT` and `AD_SLOT_SIDEBAR` are empty, so those 88 placements stay as placeholders there. The 24 guides render a content unit after their second section as soon as `AD_SLOT_CONTENT` is set (Worker `9f619bfe`), which takes one content id from 44 monetised pages to 68. The homepage has no ad slot in the template at all — adding one is a layout decision, not a missing id.
 
 If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
 

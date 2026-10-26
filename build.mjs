@@ -694,13 +694,19 @@ function articlePage(a) {
   const next = (a.relatedGuides || []).map((s) => ARTICLES.find((x) => x.slug === s)).filter(Boolean);
   const words = a.sections.reduce((n, s) => n + [...(s.p || []), ...(s.p2 || [])].join(' ').split(/\s+/).filter(Boolean).length, 0);
   const paras = (list) => list.map((p) => `<p>${rich(p)}</p>`).join('\n');
+  // Guides carry a content unit after the second section, not a placeholder.
+  // Tool pages can afford a permanent dashed box because the slot sits outside
+  // the interaction area; mid-article an empty box competes with the prose for
+  // nothing, so this only renders once AD_SLOT_CONTENT holds a real id. The
+  // slot keeps its reserved height in CSS, so enabling it does not shift text.
+  const midAd = AD_SLOTS['below content'] ? '\n' + adSlot('below content') : '';
   return `<div class="container">
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/blog/')}">Guides</a> <span class="breadcrumb-sep">/</span> <span>${esc(a.title)}</span></nav>
   <article class="policy article">
     <h1>${esc(a.title)}</h1>
     <p class="article-meta">Published <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.updated && a.updated !== a.date ? ` &middot; Updated <time datetime="${esc(a.updated)}">${fmtDate(a.updated)}</time>` : ''} &middot; By ${esc(a.author)}${a.reviewer ? ' &middot; Reviewed by ' + esc(a.reviewer) : ''} &middot; ${words} words</p>
     <p class="lead">${rich(a.intro)}</p>
-    ${a.sections.map((s) => `<h2>${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}`).join('\n')}
+    ${a.sections.map((s, i) => `<h2>${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}${i === 1 ? midAd : ''}`).join('\n')}
     ${a.links && a.links.length ? `<h2>Sources and further reading</h2>\n<ul>${a.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener nofollow" target="_blank">${esc(l.label)}</a></li>`).join('\n')}</ul>` : ''}
     <h2>Frequently asked questions</h2>
     ${a.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${rich(f.a)}</p></details>`).join('\n')}
