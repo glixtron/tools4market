@@ -14,6 +14,10 @@
 
 **The plan that came out of it.** Free tiers only — no paid dofollow links, because that is a link scheme whatever the seller calls the listing fee. tools.cafe first (30-day queue), then SaaSHub and AlternativeTo, then Launchstag (badge already shipped), then SaaSCity (364-day queue, submit and forget), Product Hunt as a launch rather than a submission, and LaunchBuff skipped.
 
+**The Indie Hackers post is written** (`Day12_IndieHackers_Post.md`): the directory research as a 707-word post with three title options, posting mechanics, and four drafted replies. It is the only asset in the folder that is useful to someone who never visits the site, which is the only reliable reason anything travels on IH.
+
+**Two badge emails drafted, and reading the FAQ changed the order of operations.** tools.cafe's badge snippet lives in the listing dashboard *after* go-live and placement is “a required condition of the listing”, so the badge question has to be answered before submitting — not after a 30-day wait. Both support addresses are published (`support@tools.cafe`, `support@saascity.io`).
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.

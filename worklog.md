@@ -39,9 +39,15 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **`npm run check:social` added.** It measures all 18 tweets against X's 280-character limit on both raw and weighted length (links count as 23 characters, bare domains included, because a tweet can pass one measure and fail the other). All 18 pass. The 160-word description variant is 994 characters — deliberately inside tools.cafe's 1,000-character field, which it missed by eleven before the trim.
 
+**The Indie Hackers post, written in full.** The CEO endorsed the directory research as the highest-return distribution action, and the reasoning is sound: it is the only item in the folder that is useful to someone who never visits the site. `Day12_IndieHackers_Post.md` is a 707-word post — seven directories, what the free tier actually gives, three findings, the paid-link decision — plus three title options, posting mechanics, and four drafted replies for the questions it will attract (“what's the DR?”, “you're just advertising”, “G2 is missing”, “just pay the $19”). It ships with a warning the CEO's brief does not carry: change the sentences to your own voice, because a post that reads like a committee wrote it gets one polite upvote and no replies.
+
+**Two badge emails, drafted rather than described.** Both directories publish a support address (`support@tools.cafe`, `support@saascity.io`), so the badge question is a five-minute job instead of a contact-form roulette. Reading tools.cafe's FAQ to write it surfaced a sequencing gate that changes the order of operations: their badge snippet lives in the listing dashboard **after go-live**, and placement is “a required condition of the listing”. So you cannot place the badge before you submit — the question has to be answered first, or you discover in 30 days that the listing is live and not dofollow.
+
+**The calendar moved a day, and not because of the brief.** Today's 09:00 ET slot had already passed by the time the work landed, so the launch thread starts Tuesday 27 Oct rather than Monday 26. The third thread then slips to Monday 2 Nov instead of Saturday 31 — a four-day gap costs less than posting to an SEO audience on a Saturday.
+
 **`docs/founder-actions.md` §4 corrected in place**, with a “what the free tier actually gives” column, and its deliverables list now points at the folders instead of promising them.
 
-**Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**. No runtime files changed, so no redeploy and no IndexNow.
+**Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**; 35 sources checked (18 verified, 4 soft-200 traps, 7 dead, 4 blocked, 2 login-gated). No runtime files changed, so no redeploy and no IndexNow.
 
 **Owner actions still open:** AdSense console state (then slot ids), Cloudflare managed robots.txt decision, Launchstag Verify screenshot or listing URL, distribution kickoff — plus the new badge decision for tools.cafe and SaaSCity.
 

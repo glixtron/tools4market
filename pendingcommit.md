@@ -15,7 +15,9 @@
 - **`docs/day12/Day12_Directory_Descriptions.md`** — 60 / 160 / 305-word variants (measured: 60, 160 words / 994 chars, 305), verb-first feature bullets for tools.cafe's “≥3, start with a verb” rule, per-directory field map with the limits each live form actually enforces, the AlternativeTo “alternative to” mapping, and the badge decision.
 - **`docs/day12/Day12_Outreach_Pitches.md`** — five channels ranked by expected value; SEJ's contributor terms quoted verbatim (exclusive, 100% original, regular slot, disclosure, no promotional links or CTAs, no wholly AI-generated articles) and the honest consequence that it is a column, not a backlink; SEOFOMO sponsorship enquiry; HN Show HN notes rather than a script, because HN's guidelines forbid generated text; Indie Hackers outline; Search Engine Roundtable held back with a reason; blocked-targets table.
 - **`docs/day12/Day12_Social_Posts.md`** — 3 X threads (18 tweets), 3 Reddit posts (r/SideProject, r/SEO, r/webdev), 5 comment templates, corrected posting calendar.
-- **`docs/day12/README.md`** — index plus a 32-entry verification table recording how each source was checked and what it returned.
+- **`docs/day12/Day12_IndieHackers_Post.md`** — the directory research as a full 707-word post, three title options, posting mechanics, four drafted replies, what not to do. The highest-return item in the folder.
+- **Two badge emails** drafted into `Day12_Directory_Descriptions.md` §6, against published support addresses, with the sequencing gate that tools.cafe's FAQ reveals: the badge snippet only exists after go-live, and placement is a required condition — so the question must be answered before submitting.
+- **`docs/day12/README.md`** — index plus a 35-entry verification table recording how each source was checked and what it returned.
 - **`scripts/check-social.mjs`** + `npm run check:social` — parses the tweet blocks, measures raw and X-weighted length (links = 23 chars, bare domains included), fails over 280.
 
 **Corrections the verification forced:**

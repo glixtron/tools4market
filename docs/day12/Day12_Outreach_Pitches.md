@@ -224,6 +224,8 @@ Most Show HNs get single-digit points and no traffic. That is the base rate, not
 
 ### The post I would write: the directory research, not the product
 
+**Full draft, ready to edit and post: [`Day12_IndieHackers_Post.md`](Day12_IndieHackers_Post.md).** The outline below is the reasoning behind it; the other file is the post.
+
 Pitching “here is my tool” on IH gets a handful of polite upvotes. Pitching “here is what I measured about the directories you are all being told to submit to” gets replies, because it is the same work everyone else is doing badly and nobody publishes the numbers.
 
 **Title:** `I checked the free tier of 7 startup directories. Four weren't what the listicles said.`

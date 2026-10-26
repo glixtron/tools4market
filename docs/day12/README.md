@@ -10,6 +10,7 @@ Day 12 was not a content day. The build is done and the guides are shipped, so t
 | [`Day12_Directory_Descriptions.md`](Day12_Directory_Descriptions.md) | Three description lengths (60 / 160 / 305 words), verb-first feature bullets, per-directory field map with verified limits, AlternativeTo “alternative to” mapping, the badge decision | Submitting to any directory |
 | [`Day12_Outreach_Pitches.md`](Day12_Outreach_Pitches.md) | Five channels ranked by expected value, SEJ's contributor rules quoted verbatim, SEOFOMO sponsorship enquiry, HN Show HN notes, Indie Hackers post outline, blocked-targets table | Pitching, or deciding not to |
 | [`Day12_Social_Posts.md`](Day12_Social_Posts.md) | 3 X threads (18 tweets, all ≤280 chars, script-verified), 3 Reddit posts, 5 comment templates, corrected posting calendar | The two-week distribution kickoff |
+| [`Day12_IndieHackers_Post.md`](Day12_IndieHackers_Post.md) | The directory research written as a full post (707 words), three title options, posting mechanics, four drafted replies, what not to do | **First.** This is the highest-return item in the folder and it is useful to people who never visit the site |
 
 Everything here is copy you can paste, except where it deliberately is not: the HN comment and the SEJ application are **notes**, because both platforms explicitly prohibit generated text and a pasted paragraph would be recognised and punished.
 
@@ -41,6 +42,9 @@ Every URL cited in the four documents, with how it was checked, what it returned
 | `tools.cafe/submit` | 200 | “Place an order — submit your product · tools.cafe” — tagline 0/100, description 100–1,000 chars, features ≥3 verb-first | ✅ Form verified |
 | `tools.cafe/pricing` | 200 | Free queue **30 days**, badge required, dofollow after verification; $15 / $29 tiers; DR 68 and 177,250 visits/30d are **their claims** | ✅ Verified |
 | `tools.cafe/` (footer) | 200 | “Partner Sites: Launchstag · Launchbuff · Launchbison” | ✅ Network confirmed |
+| `tools.cafe/faq` | 200 | Badge “is a required condition of the listing”; snippet lives in the dashboard **after go-live**; `support@tools.cafe` | ✅ Badge sequencing confirmed |
+| `saascity.io/contact` | 200 | Contact page; `support@saascity.io` | ✅ Address confirmed |
+| `saascity.io/faq` | 404 | — | ❌ No FAQ page at that path |
 | `saashub.com/services/submit` | 200 | “Submit a Product” — accepted: “Most software products and apps”, “websites … leaders in a specific niche”; paid “Feature My Product” | ✅ Verified |
 | `saashub.com/submit` | 200 | Their own **list of 110 submission sites**, not a product form | ⚠️ Wrong page for our purpose |
 | `producthunt.com/posts/new` | 200 → `/login` | Login wall | 🔒 Login-gated; field limits unverified |
@@ -71,7 +75,7 @@ Every URL cited in the four documents, with how it was checked, what it returned
 | `practicalecommerce.com/contribute` | 404 | — | ❌ No route |
 | `reddit.com/r/{SEO,webdev,SideProject}/about/rules` | 403 | Login required; rules panel does not render logged out | 🚫 Unverified — read the sidebar |
 
-**Totals:** 32 entries checked (some cover several URLs) · **16 verified** with the expected content · **4 soft-200 traps** · **6 confirmed dead or absent** · **4 blocked** by bot protection · **2 login-gated**.
+**Totals:** 35 entries checked (some cover several URLs) · **18 verified** with the expected content · **4 soft-200 traps** · **7 confirmed dead or absent** · **4 blocked** by bot protection · **2 login-gated**.
 
 ---
 
@@ -84,7 +88,9 @@ These are the same four from `docs/founder-actions.md`, and they are still the o
 3. **Launchstag “Verify now”** — a screenshot or the listing URL. Three plausible meanings are written up; none can be confirmed from outside.
 4. **Distribution** — X + Reddit (recommended) or the seven accounts. If X + Reddit, `Day12_Social_Posts.md` is the first two weeks.
 
-One new decision comes out of this folder: **the badges.** tools.cafe and SaaSCity both require their badge on the site for the free tier, and Launchstag's is already in the footer. Three 198×62 images in the footer is a visible change to 81 pages. `Day12_Directory_Descriptions.md` §6 sets out three options and recommends asking each verifier whether a text link passes before shipping anything.
+Two new decisions come out of this folder. The first is **the Indie Hackers post** — it is written and ready, and it is the only item here that is useful to a stranger who never visits the site.
+
+The second is **the badges.** tools.cafe and SaaSCity both require their badge on the site for the free tier, and Launchstag's is already in the footer. Three 198×62 images in the footer is a visible change to 81 pages. `Day12_Directory_Descriptions.md` §6 sets out three options and recommends asking each verifier whether a text link passes before shipping anything.
 
 ---
 

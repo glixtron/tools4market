@@ -157,6 +157,73 @@ Three ways to resolve it, in order of preference:
 
 What I would not do: add three badge images optimistically and hope. That is a visible change to 81 pages made on a guess about a third party's verifier.
 
+### The two emails — send these before submitting
+
+Both sites publish a support address, so this is a five-minute job rather than a contact-form roulette. `support@tools.cafe` is on their FAQ; `support@saascity.io` is on their contact page.
+
+**One sequencing detail that decides the order for tools.cafe:** their FAQ says the badge snippet is in the listing dashboard *after your tool goes live*, and that placing it “is a required condition of the listing”. So for them the order is submit → go live → badge → verified → dofollow. You cannot place the badge first, because it does not exist yet. That means the question below has to be answered *before* you submit, or you find out in 30 days with a listing that is live and not dofollow.
+
+**Email 1 — tools.cafe**
+
+```
+Subject: Badge requirement — does a text link pass verification?
+
+Hi,
+
+I'm submitting a free browser-based tools site (44 SEO and marketing tools, no
+account, no usage limits) to the free queue and I want to get the badge right
+before my go-live date rather than after it.
+
+Two questions:
+
+1. The FAQ says placing the badge is a required condition of the listing. Does a
+   plain text link in the site footer pass verification, or is the badge image
+   itself required? I'm asking because the footer already carries a partner badge
+   and I'd rather not stack four images on every page if a text link satisfies
+   the same requirement.
+
+2. Should the badge link to the listing page or to tools.cafe generally? I'll
+   hard-code the listing URL once it exists, but I'd like to confirm that's what
+   you check for.
+
+Happy to place whatever you need — I just want to ship it once.
+
+Thanks,
+[name]
+tools4market.online
+```
+
+**Email 2 — SaaSCity**
+
+```
+Subject: Free tier badge — is a text link acceptable?
+
+Hi,
+
+I'm submitting a free browser-based tools site (44 SEO and marketing tools, no
+signup) and I'm working through the free-tier requirements.
+
+The pricing page lists "embed directory badge on your site" for the free plan.
+Does a plain text link in the footer satisfy that, or does it have to be the badge
+image? I'm trying to avoid stacking several directory badges in the footer, so if
+a text link passes your check I'd rather do that.
+
+Also: should the link point at my listing page or at saascity.io? I'll use the
+listing URL once it's assigned.
+
+Thanks,
+[name]
+tools4market.online
+```
+
+**What the answers mean:**
+
+| Answer | What to do |
+|---|---|
+| Both accept a text link | Ship one `Listed on: …` footer row, three plain links, no images. Zero design cost, no extra requests. |
+| Images required | Ship the badges one at a time as each listing goes live, and hard-code the listing URL in the `href`. Accept the footer cost knowingly. |
+| No answer within a week | Submit to SaaSHub and AlternativeTo first (neither needs a badge) and treat the two badge sites as pending. Do not guess. |
+
 **Site-side change if badges are needed:** `build.mjs` already renders the Launchstag badge in the footer; adding siblings is a small template edit, and the `test:live` suite would need a companion assertion so a badge cannot silently disappear. Say which option you want and I will wire it.
 
 ---

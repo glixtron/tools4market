@@ -17,6 +17,8 @@ That matters for two reasons, and neither is pedantic:
 
 Corrected dates are in §9. Everything else in the brief's social plan survives.
 
+There is a second, smaller drift to note: **today's 09:00 ET slot has already passed**, so the sequence starts Tuesday 27 Oct rather than today. Posting a launch thread into a dead afternoon is worse than waiting a day for a weekday morning — the thread is not time-sensitive, and the calendar in §9 reflects the shift.
+
 ---
 
 ## 1. House rules for every post
@@ -473,14 +475,16 @@ never the same content on two platforms on the same day.
 
 | Date | Day | Time | What | Where |
 |---|---|---|---|---|
-| 26 Oct | **Mon** | 09:00 | Thread 1 — launch | X |
-| 26 Oct | Mon | 14:00 | Post 1 — build story | r/SideProject |
-| 27 Oct | Tue | — | Reply to everything from day 1 | both |
-| 28 Oct | Wed | 09:00 | Thread 2 — philosophy | X |
-| 28 Oct | Wed | 10:00 | Post 2 — the robots.txt finding | r/SEO |
-| 30 Oct | Fri | 09:00 | Thread 3 — AI-search toolkit | X |
-| 30 Oct | Fri | 10:00 | Post 3 — the proxy endpoint | r/webdev |
-| 2 Nov | Mon | — | One reply-post per platform: the directory research (see `Day12_Outreach_Pitches.md` §5) | IH |
+| 27 Oct | **Tue** | 09:00 | Thread 1 — launch | X |
+| 27 Oct | Tue | 14:00 | Post 1 — build story | r/SideProject |
+| 28 Oct | **Wed** | 09:00 | **Directory research post** — the highest-return item; full draft in [`Day12_IndieHackers_Post.md`](Day12_IndieHackers_Post.md) | **Indie Hackers** |
+| 29 Oct | Thu | — | Reply to everything from the first two days | all |
+| 29 Oct | Thu | 09:00 | Thread 2 — philosophy | X |
+| 29 Oct | Thu | 10:00 | Post 2 — the robots.txt finding | r/SEO |
+| 2 Nov | Mon | 09:00 | Thread 3 — AI-search toolkit | X |
+| 2 Nov | Mon | 10:00 | Post 3 — the proxy endpoint | r/webdev |
+
+**Why the third thread slips to Monday rather than running on Saturday.** The brief's “one every two days” cadence lands thread 3 on 31 Oct, a Saturday, when the SEO audience it is written for is not at a keyboard. A four-day gap is a smaller cost than a dead posting day. Weekday beats cadence.
 
 If a post gets removed: **do not repost it the same day.** Read the removal
 reason, fix the actual cause, wait a week. A second removal in the same subreddit
