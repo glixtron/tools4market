@@ -261,6 +261,27 @@ const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
   ok('ad units use numeric slot ids only', slots.every((v) => /^\d{6,}$/.test(v)));
   ok('no empty data-ad-slot attributes', !/data-ad-slot=""/.test(toolHtml));
 }
+// A configured unit must actually be in the served HTML. Counting `.ad-slot`
+// divs does not catch a regression: a placeholder and a real unit both render
+// one. On 26 Oct the apex served the pre-ad build for ~30 minutes after a
+// deploy and this suite still passed, because it only checked the loader on the
+// homepage. These assertions compare the live unit against the environment that
+// built it, so a deploy that loses the ad fails here instead of quietly costing
+// revenue.
+{
+  const wantTop = (process.env.AD_SLOT_TOP || '').trim();
+  if (/^\d{6,}$/.test(wantTop)) {
+    ok('configured top unit is in the served HTML', toolHtml.includes(`data-ad-slot="${wantTop}"`));
+    ok('top unit renders one <ins> block', (toolHtml.match(/class="adsbygoogle"/g) || []).length === 1);
+  }
+  const guideHtml = (await grab(ORIGIN + '/blog/xml-sitemap-best-practices/')).body;
+  const wantContent = (process.env.AD_SLOT_CONTENT || '').trim();
+  if (/^\d{6,}$/.test(wantContent)) {
+    ok('configured content unit is in the served guides', guideHtml.includes(`data-ad-slot="${wantContent}"`));
+  } else {
+    ok('guides stay slot-free while AD_SLOT_CONTENT is unset', !/class="ad-slot"/.test(guideHtml));
+  }
+}
 // ---- Google tag on EVERY live page (not a sample)
 {
   const urls = new Set(all);

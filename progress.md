@@ -24,6 +24,8 @@
 
 **The guides had no ad slot at all, so one was wired in.** The tool pages carry three placements each (132 slots across 44 pages); the 24 guides carried the loader and nothing to fill. `build.mjs` now renders the content unit after the second section of every guide, but only when `AD_SLOT_CONTENT` exists — a mid-article placeholder would compete with the prose, unlike the boxes beside a tool. Tested with a dummy id, rebuilt clean, deployed `9f619bfe`. A content id now covers 68 pages rather than 44; the homepage has no slot and that is a layout decision.
 
+**A deploy briefly served the pre-ad build, and the test suite did not notice.** For roughly thirty minutes the apex returned placeholders with no loader; `test:live` passed because it only asserted the loader on the homepage. A redeploy restored it, and wrangler reported no asset changes — edge or version skew, not a bad build. `test:live` now asserts the configured unit is present in the served HTML (top unit present, exactly one `<ins>`, guide slot-free only while the content id is unset): **76/76**. Counting `.ad-slot` divs was never evidence, because a placeholder renders one too.
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.

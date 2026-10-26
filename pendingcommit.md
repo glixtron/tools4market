@@ -16,6 +16,8 @@
 
 **Trade, stated:** this puts an ad inside long-form reading. Placement is after the second section, never inside a code block or the FAQ, and the CSS reserves the height so enabling it shifts no text. If guides should stay ad-free, deleting one line before the id ships is the whole revert. The homepage has no slot at all; adding one is a layout decision, not a config value.
 
+**Follow-on: the deploy that shipped it briefly lost the ads.** For ~30 minutes the apex served the pre-ad build — three placeholders, no loader, byte-identical to the build before `63919b77` — and `test:live` passed 73/73 through it because its only AdSense assertion was the homepage loader. A redeploy restored it (`5bb3791a`), and wrangler reported “No updated asset files to upload”, so this looks like edge/version skew rather than a bad build. The verification gap was real either way: `.ad-slot` count is identical for a placeholder and a unit. `test:live` now asserts the configured top unit is in the served HTML, exactly one `<ins>`, and that guides stay slot-free only while `AD_SLOT_CONTENT` is unset — **76 assertions**.
+
 ## Entry 20 — Day-12 founder-side writing, and a verification pass that contradicted the brief four times
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026
