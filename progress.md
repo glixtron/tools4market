@@ -32,6 +32,8 @@
 
 **Auto ads and Auto optimise were both ON, and both are now OFF.** The loader ships on all 81 pages, so Auto ads had standing permission to place ads on the homepage and inside the tool UI — the one claim the site makes about advertising. Switching both off changed no served markup (3 slots on a tool page, 1 on a guide, 0 on the homepage) and `test:live` stayed 78/78; manual units are independent. The rule and the reasoning are in `docs/founder-actions.md` §1.
 
+**AdSense site status measured: `Getting ready`.** Review opened 21 Oct 2026 23:26 IST, five days ago, `ads.txt` Authorised, no policy flags. Blank reserved slots are therefore expected rather than a placement fault, and the correct action is none — touching the loader or re-requesting review would restart the clock. Revisit on 4 Nov if unchanged.
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.

@@ -54,6 +54,12 @@ The homepage FAQ makes a public claim — *"ads in reserved spaces around the to
 
 **Where approval status actually appears:** not on the *By site* tab, which has no status column. It is on **Home** ("Your site is ready" / "Getting ready") or under **Sites**.
 
+**Measured status, 26 Oct 2026 — `Sites` tab:** approval status **`Getting ready`**, status details `—`, **ads.txt `Authorised`**, last updated **21 Oct 2026 23:26 IST**. Five days under review with nothing flagged.
+
+That makes the blank reserved boxes on every page **expected**, not a placement fault: ads do not serve until the site review closes. Do not remove or edit the AdSense code to "tidy up" the empty slots — the review is evaluating the loader it found, and pulling it restarts the clock. Do not re-request review or create extra units either; there is no action available while the status reads `Getting ready`.
+
+If the status is still `Getting ready` on **4 Nov** (two weeks from submission), then re-request review and read **Policy centre** for a reason. Before that, checking daily changes nothing.
+
 If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
 
 - the loader `adsbygoogle.js?client=ca-pub-1509697031230558` is on every page (asserted by `npm run test:live`);
