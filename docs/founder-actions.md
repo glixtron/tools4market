@@ -1,0 +1,209 @@
+# Founder actions
+
+*The owner-side work that blocks revenue and traffic. Everything in this file needs a browser session with an account I do not have: AdSense, Cloudflare dashboard, Launchstag, and the social/directory accounts. The site-side prerequisites are done.*
+
+*Last verified against production 26 Oct 2026 (Worker `60455cbb`, v2.17.1). Each item records what I could measure, what I could only read from vendor documentation, and what I could not verify at all — so nothing here reads more certain than it is.*
+
+---
+
+## Status
+
+| # | Item | Blocked on | Time | Effect when done |
+|---|---|---|---|---|
+| 1 | AdSense slot ids | Owner (5 min) — **and possibly approval** | 5–10 min | First revenue, once approved |
+| 2 | Cloudflare managed robots.txt | Owner decision + toggle | 3 min | Cleaner policy file; **costs edge enforcement** |
+| 3 | Launchstag Verify | Owner, in the listing dashboard | 2 min | Listing + dofollow badge link |
+| 4 | Distribution | Owner accounts | 1–3 h, spread out | Referral traffic + backlinks |
+
+---
+
+## 1. AdSense — the revenue blocker
+
+### First, find out which state the account is in
+
+There are two, and the difference matters because one of them makes “paste the slot ids” impossible.
+
+**State A — pre-approval.** The console opens on a *Get started* / *Sites* flow and asks you to place the AdSense code and **Request review**. There is no *Ads → By ad unit* menu, because ad units are not offered until the site is approved. Google's own guidance is explicit that you cannot show ads until the site is approved; the code goes in first, the review follows.
+
+**State B — approved.** The console has *Ads → Overview → By ad unit*, and you can create units.
+
+If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
+
+- the loader `adsbygoogle.js?client=ca-pub-1509697031230558` is on every page (asserted by `npm run test:live`);
+- `ads.txt` at the root carries `google.com, pub-1509697031230558, DIRECT, f08c47fec0942fa0`;
+- the three reserved slots are outside the tool interaction area, so ads never break a tool;
+- privacy policy, terms and disclaimer pages exist;
+- consent mode is wired, so EEA/UK/CH visitors get non-personalised ads until they accept.
+
+What I cannot tell you from here is the verdict. That is one screen in the console.
+
+### State B — create the units and set the ids
+
+1. AdSense → **Ads** → **By ad unit** → **Display ads** → **Create**.
+2. Create three units, named so you can tell them apart later: `T4M top banner`, `T4M below content`, `T4M sidebar`.
+3. For each, click the **`<>`** (Get code) icon. The snippet looks like this, and the number you need is `data-ad-slot`:
+
+   ```
+   <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-1509697031230558"
+        data-ad-slot="1234567890"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+   ```
+
+4. Paste the three numbers into `.env` in this repo:
+
+   ```
+   AD_SLOT_TOP=1234567890
+   AD_SLOT_CONTENT=2345678901
+   AD_SLOT_SIDEBAR=3456789012
+   ```
+
+   Only the number. `ca-pub-…:1234567890` is also accepted; anything else is refused, deliberately.
+
+5. `set -a && source .env && set +a && npm run deploy`
+
+**These are build-time values, not Worker variables.** `build.mjs` reads them and bakes `data-ad-slot` into the HTML; `worker.js` never reads them. Adding them in the Cloudflare dashboard therefore does **nothing at all** — which is what this README told you to do until 26 Oct. If any `AD_SLOT_*` already exists as a Worker variable, delete it: it is not just redundant, it is misleading, because it looks like the job is done.
+
+That mismatch also means the “5-minute action” framing was wrong: following the old instruction produced no change on the site, with no error to explain why. The build now names a rejected value instead of silently falling back to a placeholder.
+
+### Verify it worked
+
+```
+npm run build                      # must NOT print "ℹ AdSense loader on, 0 ad units"
+curl -s https://tools4market.online/ | grep -o 'data-ad-slot="[0-9]*"'
+npm run test:live                  # 73 checks, including the loader + ads.txt
+```
+
+A build that prints `⚠ AdSense: N slot id(s) not numeric and ignored` means a value was rejected and a reserved placeholder shipped in its place — the page looks finished and earns nothing. That failure mode shipped once before (24 Oct), which is why the warning now exists.
+
+### Honest expectations
+
+Ad revenue on a free-tools site with no traffic is zero regardless of slot ids; the ids are a prerequisite, not a result. Do not treat “ads are live” as a milestone — treat *sessions* as the milestone, and the ids as something that must already be true when sessions arrive.
+
+---
+
+## 2. Cloudflare managed robots.txt — a trade, not a cleanup
+
+### What the served file actually is (measured today)
+
+| Measure | Value |
+|---|---|
+| Total lines served | 225 |
+| Cloudflare's prepended block | lines 1–173 |
+| Our file starts | line 175 |
+| `Google-Extended: Disallow: /` | line 53 (Cloudflare) |
+| `Google-Extended: Allow: /` | line 222 (ours) |
+| Verdict per bot | training crawlers blocked, six answer agents allowed, Google-Extended allowed — `npm run test:live` asserts all of it against the **served** file |
+
+So the merge currently resolves correctly. `Google-Extended` is the interesting case: Cloudflare says `Disallow: /`, we say `Allow: /`, and RFC 9309 §2.2.2 combines the groups for a matching user-agent and resolves equal-length rules in favour of allow. Correct on paper, and correct in Google's implementation — but it depends on a tie-break, and not every parser implements the longest-match rule.
+
+### The toggle (per Cloudflare's docs, updated 22 Oct 2026)
+
+1. Cloudflare dashboard → the `tools4market.online` zone → **Security Settings** (`/security/settings`).
+2. Filter by **Bot traffic**.
+3. **Configure AI bot policies**.
+4. The managed block is generated from these policies. **Training** set to *Disallow* is what produces the `Disallow: /` groups; **Enable Bot Preference Sync** is what makes Cloudflare prepend them.
+
+Turning **Enable Bot Preference Sync** off serves the origin file unchanged. Setting **Training** back from *Disallow* to allow also removes the prepend, and it removes the edge block too.
+
+### The part the earlier recommendation missed
+
+Cloudflare's docs state that with Bot Preference Sync on and Training set to *Disallow*, the setting also **enables edge blocking for AI training crawlers**. Turning it off therefore costs two things at once: the redundant prepend *and* the only technical enforcement of the training block we have. Our origin `robots.txt` is a request, not a wall.
+
+That flips the recommendation:
+
+- **Leave it on** if you want enforcement. The cost is a 173-line preamble, an `Allow`/`Disallow` tie-break for `Google-Extended`, and a policy file no single document fully owns.
+- **Turn it off** if you want one authoritative file. The cost is that training crawlers are back to trusting your `robots.txt`.
+
+My reading: for a site that wants to be **cited** by AI answer engines, the enforcement is worth little and the ambiguity is worth less. The bots we care about — `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Claude-SearchBot`, `Google-Extended` — are all *allowed* either way. Turning it off makes the file we publish the file crawlers read, and the live test already proves the policy holds without it. But this is a policy decision about training data, not a technical one, so it is yours.
+
+**After toggling, verify:** `curl -s https://tools4market.online/robots.txt | head -3` should show `# Tools4Market robots.txt`. If the managed block persists, Cloudflare's community has reports of the setting not clearing promptly (Sept 2026); purging the cache for `/robots.txt` is the next step. `npm run test:live` will fail loudly if the served policy drifts, whichever way you decide.
+
+---
+
+## 3. Launchstag — “Verify now” is a claim-and-badge step
+
+### What Launchstag documents
+
+Their FAQ describes exactly one ownership flow, and it is not called “Verify”:
+
+1. The product page shows **Claim this listing** (for listings added by someone else).
+2. You enter your email and receive a secure claim link.
+3. Claiming unlocks the **listing dashboard**, where the badge snippet lives.
+4. A **verified badge** means the listing is claimed by the founder or an authorised representative — it signals the information is current, not that a crawler passed.
+
+Their own directory guide describes the incentive plainly: directories like Launchstag use a **badge model** — you place their badge on your site and the listing carries a **dofollow** backlink. That is why the badge is in our footer.
+
+### What our side already has (measured in the live HTML)
+
+```html
+<a class="launchstag-badge" href="https://launchstag.com" target="_blank" rel="noopener">
+  <img src="https://launchstag.com/badge-dark.svg" alt="Featured on Launchstag" width="198" height="62">
+</a>
+```
+
+Plain `<a href>`, no `nofollow`, image served from their domain, present in the footer of **every** page. Nothing else is needed on this side.
+
+### So “Verify now” is one of three things
+
+1. **Badge verification in the dashboard** — a button that re-crawls the site to confirm the badge is installed before granting the dofollow link. Most likely, and our markup should pass.
+2. **Email-address verification during claim** — a link in the claim email. Expires; re-request if stale.
+3. **A different service entirely** — several directories email “verify your listing” after submission, and the note may be from one of those, not Launchstag.
+
+### If it fails, check in this order
+
+- Is the listing claimed? The badge grants nothing on its own — the dofollow link comes with the claimed listing.
+- Has the listing gone live? Submissions enter a queue with a go-live date; verification before that date has nothing to verify. Launchstag sells queue-skipping from $15; the free queue is free and slower.
+- Does their verifier expect the badge to link to the **listing**, not the homepage? Ours links to `https://launchstag.com`. If their checker wants the listing URL, the fix is one line in `build.mjs` once the listing URL exists — send it to me and I will wire it.
+- Does their crawler see the footer? It is static HTML, server-rendered, in every page, no JavaScript required. If it does not see it, the problem is on their side.
+
+**What I need from you:** a screenshot of the screen showing “Verify now”, or the URL of the listing. Without one of those, this item stays a guess, and I would rather say so than invent a procedure for a third-party dashboard I cannot log into.
+
+---
+
+## 4. Distribution — seven directories that fit, five that do not
+
+A free browser-tools site is not a SaaS with self-serve software, and several “top directory” lists assume exactly that. Filtering for fit, and checking that the submission path exists:
+
+### Submit to these
+
+| Directory | Why it fits | First action |
+|---|---|---|
+| **Product Hunt** | Highest-authority launch platform; the referral traffic is the real value, not the nofollow link | Create account, prepare 3 gallery images + a 60-word description, then schedule a launch |
+| **AlternativeTo** | Built on “alternative to X” queries — our strongest angle is *Screaming Frog alternative* | Submit via `/add-app/` (returns 403 to `curl`, works in a browser) |
+| **SaaSHub** | Comparison and discovery; our comparison guide already targets this intent | `saashub.com/submit` |
+| **tools.cafe** | Curated builder-tool directory, dofollow badge, editorial review 2–7 days | `tools.cafe/submit` |
+| **Launchstag** | Badge model, dofollow, permanent indexed listing (see §3) | Claim the listing, then the dashboard |
+| **LaunchBuff** | Bracket-format launch competition, permanent dofollow listings | `launchbuff.com` |
+| **SaaSCity** | Badge-model dofollow directory | `saascity.io` |
+
+### Skipped, with reasons
+
+- **G2, Capterra, GetApp** — require a base of verified customer reviews to surface in a category. A free, no-signup tools site has no review-collecting mechanism, so a listing would sit unfilled and unranked. Revisit only if we ever add accounts.
+- **BetaList** — pre-launch only. We are live; submitting now is a mismatch the reviewer will catch.
+
+### On “create 7 social accounts”
+
+I would not. Seven dormant profiles are a liability: they rank for your brand name with no activity, and they split what little posting energy exists. For a free SEO-tools site the referral traffic comes from two places — **X** (where SEO practitioners argue) and **Reddit** (where they search), with **LinkedIn** a distant third for the B2B angle. Two accounts run properly beat seven run never. If you want the list anyway, say so and I will write the bios; the decision is yours, the reasoning is above.
+
+### What I can prepare without your accounts
+
+- The Product Hunt package: tagline, 60-word description, first comment, three image specs.
+- Per-directory descriptions at the length each one allows.
+- Five outreach pitches for the guides that already exist (sitemaps, status codes, structured data, hreflang, llms.txt) — each one a genuine gap in most SEO blogs.
+- Social bios and a two-week posting calendar with the first six posts drafted.
+
+None of that needs an account. Say the word and it becomes the next deliverable.
+
+---
+
+## What I need from you
+
+1. **AdSense:** which state the console is in (A or B). If B, the three numeric slot ids.
+2. **Cloudflare:** keep the managed block (enforcement) or drop it (one authoritative file). I recommend dropping it.
+3. **Launchstag:** a screenshot of the “Verify now” screen, or the listing URL.
+4. **Distribution:** start with X + Reddit, or the seven accounts as listed?
+
+Everything above is reversible and none of it touches the site's code except the badge URL in §3.

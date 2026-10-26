@@ -3,12 +3,15 @@
 **Prepared:** 23 October 2026
 **Status:** ✅ Nineteen entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below).
 
-## Entry 19 — Source-link hygiene and a citation checker
+## Entry 19 — Source-link hygiene, a citation checker, and founder-ops prep
 
-**Branch:** `audit-growth-plan-v2.1` · **Date:** 25 Oct 2026
-**Status:** ✅ Committed, pushed, deployed same day. Cross-verified: build **81 pages / 44 tools / 24 guides**, SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**, sources **43/43 reachable**.
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 25–26 Oct 2026
+**Status:** ✅ Three commits, all pushed and deployed. Cross-verified: build **81 pages / 44 tools / 24 guides**, SEO audit **2547/2547**, smoke **44/44**, consent **30/30**, personalized **181/181**, worker-routing **14/14**, live-verify **73/73**, sources **43/43 reachable**.
 
-**Subject:** `fix: repair five dead guide citations and add a source-link checker`
+**Subjects:**
+1. `fix: repair five dead guide citations and add a source-link checker` (`2983706`, deployed `60455cbb`)
+2. `build: warn when AdSense slot ids are malformed or no ad units are live` (`52f144f`)
+3. `docs: founder-actions runbook for the four console-side blockers`
 
 **Summary:**
 - **Four rotted citations found by applying the new gate retroactively:** the robots meta-tag reference (404, cited by two guides) → `robots-meta-tag`; the GA4 URL-builder article (404) → `answer/10917952`; the meta-tags page (404) → `special-tags`; X’s cards markup reference removed from `open-graph-image-size-2026` rather than replaced, because nothing live says the same thing.
@@ -17,8 +20,11 @@
 - **Doc drift fixed:** README still said “Eighteen how-to guides” (stale since Day 8); ARCHITECTURE still described the pre-v2.15 “allows every crawler” robots policy.
 - **IndexNow submitted 8 changed URLs**, not all 80 — the protocol asks for new or materially changed URLs.
 - **AdSense build warning:** a malformed `AD_SLOT_*` used to fall back to a placeholder silently; the build now prints the offending variable, plus an “0 ad units” notice while the slots are empty.
+- **`docs/founder-actions.md` (new):** the owner-side console work in one place — AdSense (pre-approval vs approved, reading a slot id, verifying), the Cloudflare robots trade with the measured file, Launchstag claim-and-badge, and seven directories filtered for fit.
+- **Two documentation bugs fixed:** README told the owner to set `AD_SLOT_*` as Cloudflare Worker variables, but they are build-time values that `worker.js` never reads — so the step changed nothing and errored nowhere. And the earlier Cloudflare advice omitted that the same toggle also disables edge blocking for training crawlers.
+- **`pending-work.md` corrected:** it described production as v2.5 `0e496a9d`, AdSense as on hold, and the loader as not shipping.
 
-**Files in this commit:** `src/data/blog.js` (citation repairs), `scripts/check-sources.mjs` (new), `package.json` (`check:sources`), `build.mjs` (AdSense warnings), `README.md`, `ARCHITECTURE.md`, `pendingcommit.md`, `progress.md`, `worklog.md`, `suggest.md`.
+**Files across these commits:** `src/data/blog.js` (citation repairs), `scripts/check-sources.mjs` (new), `package.json` (`check:sources`), `build.mjs` (AdSense warnings), `docs/founder-actions.md` (new), `README.md`, `ARCHITECTURE.md`, `pending-work.md`, `pendingcommit.md`, `progress.md`, `worklog.md`, `suggest.md`.
 
 ## Entry 18 — v2.17 Day-11 guides
 

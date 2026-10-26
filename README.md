@@ -299,7 +299,7 @@ Everything optional is switched by an environment variable at build time — the
 | `GA_ID` | Google Analytics 4 measurement id (default `G-6B4GGFC96K`). Injects **one** `gtag.js` tag per page, immediately after `<head>`, with IP anonymisation and Consent Mode v2 defaults |
 | `GTM_ID` | Google Tag Manager container (default `GTM-P6P4FLGB`). Injected on every page — head script + noscript iframe — and gated by the cookie-consent banner (Consent Mode v2). |
 | `ADSENSE_CLIENT` | Swaps the `.ad-slot` placeholders for real `<ins class="adsbygoogle">` units and writes `ads.txt` with your publisher id |
-| `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` | Per-position AdSense ad-unit ids (falls back to one shared slot) |
+| `AD_SLOT_TOP` / `AD_SLOT_CONTENT` / `AD_SLOT_SIDEBAR` | Per-position AdSense ad-unit ids — **build-time only**, baked into the HTML. Unset or non-numeric → that slot keeps its reserved height and shows a placeholder |
 | `BING_VERIFY` | Bing Webmaster Tools verification id (default set) — also shipped as `/BingSiteAuth.xml` |
 | `GOOGLE_SITE_VERIFY` | Google Search Console verification token → `<meta name="google-site-verification">`. Empty by default: the domain property is verified via a DNS TXT record |
 | `INDEXNOW_KEY` | IndexNow key (generate one 32-char hex string once). The build then publishes `/{key}.txt` so `npm run indexnow` can submit changed URLs to Bing/Yandex/Seznam. **The key must be stable across builds**. Locally, put it in a gitignored `.env` file at the repo root (`INDEXNOW_KEY=…`) and `source .env` before building/deploying — the live key is already published |
@@ -376,9 +376,20 @@ grep -rn "TODO-DOMAIN" .     # must return nothing
 **Consent-aware by design:** the loader is present in the HTML (required for verification), but Google's Consent Mode v2 state decides what actually happens — in the EEA/UK/Switzerland `ad_storage` is `denied` until the visitor accepts, so Google serves **limited, non-personalised ads** and sets no ad cookies. The banner's **Ads** toggle controls it.
 
 **To switch on real ads:**
-1. AdSense console → *Ad units* → create three display units (top banner, below content, sidebar) and copy their ids.
-2. Cloudflare → Worker → *Settings → Variables and Secrets* → add `AD_SLOT_TOP`, `AD_SLOT_CONTENT`, `AD_SLOT_SIDEBAR` → redeploy. Each slot then renders a real `<ins class="adsbygoogle">` unit; until then the reserved placeholder stays (no broken units, no layout shift). The value must be the numeric `data-ad-slot` id (6+ digits); `ca-pub-<digits>:<digits>` is also accepted. Anything else is ignored by design, and the build now prints a `⚠ AdSense: … not numeric and ignored` line naming the variable — a malformed id otherwise ships a page that looks finished and earns nothing. `ℹ AdSense loader on, 0 ad units` means the placeholders are still in place.
-3. AdSense console → tick *"I've placed the code"* → **Request review**.
+1. AdSense console → *Ad units* → create three display units (top banner, below content, sidebar) and copy their numeric ids.
+2. Put them in `.env` in the repo root and rebuild + deploy:
+
+   ```
+   AD_SLOT_TOP=1234567890
+   AD_SLOT_CONTENT=2345678901
+   AD_SLOT_SIDEBAR=3456789012
+   ```
+
+   `set -a && source .env && set +a && npm run deploy`
+
+   **These are build-time values, not Worker variables.** `build.mjs` reads them and bakes `data-ad-slot` into the HTML; `worker.js` never reads them, so adding them in the Cloudflare dashboard has no effect at all. The value must be the numeric `data-ad-slot` id (6+ digits); `ca-pub-<digits>:<digits>` is also accepted. Anything else is refused by design, and the build prints `⚠ AdSense: … not numeric and ignored` naming the variable — a malformed id otherwise ships a page that looks finished and earns nothing. `ℹ AdSense loader on, 0 ad units` means the placeholders are still in place.
+
+3. AdSense console → tick *"I've placed the code"* → **Request review**. If the console has no *Ads → By ad unit* menu yet, the site is still pre-approval and there are no ids to paste — see [`docs/founder-actions.md`](docs/founder-actions.md) §1.
 
 **Rules:** nothing may ever sit inside the tool interaction area (rules.md §5) — the reserved slots are outside it by construction.
 

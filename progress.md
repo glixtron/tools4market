@@ -16,6 +16,10 @@
 
 **AdSense silent failure closed:** `slotId()` maps an unrecognised `AD_SLOT_*` to “no slot”, so a malformed id ships a finished-looking page that earns nothing — the exact bug that shipped `ca-pub-…:0/0` on 24 Oct. The build now prints `⚠ AdSense: … not numeric and ignored` with the offending variable, and `ℹ AdSense loader on, 0 ad units` while the placeholders are still in place. Verified against a bogus id, a bare numeric id, and the current empty env. No dist change, so no redeploy.
 
+**Founder-ops runbook (`docs/founder-actions.md`):** the owner chose to pause content and prepare the console-side work. One authoritative procedure now covers AdSense (both account states, reading a slot id, verifying), the Cloudflare robots trade with the measured served file, Launchstag’s claim-and-badge flow, and seven directories filtered for fit with five excluded and why.
+
+**Two documentation bugs found while writing it:** the README told the owner to set `AD_SLOT_*` as **Cloudflare Worker variables**, but they are build-time values baked into the HTML — `worker.js` never reads them, so the documented step changed nothing and reported no error. README now says `.env` + `npm run deploy`. And the earlier Cloudflare recommendation ignored that the same toggle also disables **edge blocking** for training crawlers; the runbook presents it as a trade with the numbers attached (225-line served file, our block from 175, `Google-Extended` `Disallow` at 53 vs `Allow` at 222). `pending-work.md` was three weeks stale — v2.5 `0e496a9d`, AdSense “on hold”, loader “not shipping” — and is corrected.
+
 **Tests:** build 81 pages / 44 tools / 24 guides; all 58 citations render; seo-audit **2547/2547**, smoke 44/44, consent 30/30, personalized 181/181, worker-routing 14/14, live-verify **73/73**. Deployed `60455cbb`; IndexNow submitted **8 changed URLs**, not all 80.
 
 ### Day-11 guides — v2.17 (25 Oct 2026)
