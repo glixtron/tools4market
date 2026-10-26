@@ -28,6 +28,8 @@
 
 **Empty ad slots no longer look unfinished.** The two unset placements rendered dashed “Ad space · …” boxes on all 44 tool pages. They now hold the same reserved height as an empty aria-hidden node — no border, no label — so a unit can be enabled without shifting text and without placeholder chrome in front of tomorrow's visitors. Deployed `873a855a`, `test:live` 76/76.
 
+**All three ad units are serving — 156 placements on 68 pages.** Content (`9083278862`) and sidebar (`3751273162`) added to `.env` and deployed `e50f904f`. A full sweep confirmed 44/44 tool pages with three units, 24/24 guides with one, zero on the homepage — no sampling. `test:live` is 78/78 after its unit-count assertion was generalised from “exactly one” to “exactly the configured set”.
+
 **New tooling:** `scripts/check-social.mjs` + `npm run check:social` — 18 tweets, raw and X-weighted length (links = 23 chars, bare domains included), all within 280. The 160-word description variant is 994 characters, deliberately inside tools.cafe's 1,000-character limit.
 
 **Tests:** build 81 pages / 44 tools / 24 guides; SEO audit **2547/2547**; smoke **44/44**; social **18/18**. No runtime changes, so no deploy and no IndexNow.

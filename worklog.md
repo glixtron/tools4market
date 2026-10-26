@@ -61,7 +61,9 @@ Reading `build.mjs` before deploying also closed a half-step: `AD_SLOTS_ON` is t
 
 **Empty slots stopped advertising their emptiness.** With two of the three placements unset, every tool page carried dashed “Ad space · below content” and “Ad space · sidebar” boxes. The reserved height is the point — enabling a unit must not shift text — but the chrome reads as an unfinished site, and the distribution kickoff is tomorrow. Empty slots now render an empty, `aria-hidden` node with the same reserved height and no border or label. Deployed `873a855a`; live check: two empty slots, zero “Ad space” strings, the top unit unchanged, `test:live` **76/76**.
 
-**Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**; 35 sources checked (18 verified, 4 soft-200 traps, 7 dead, 4 blocked, 2 login-gated); live-verify **76/76**. No content changed, so no IndexNow.
+**All three units are live: 156 placements across 68 pages.** The owner created the content (`9083278862`) and sidebar (`3751273162`) units and supplied the snippets. Both written to `.env`, deployed `e50f904f`. Verified by sweep rather than sample — all 44 tool pages carry exactly three units, all 24 guides exactly one, the homepage zero. `test:live` initially failed its own “one `<ins>`” assertion because it had been written when only the top unit existed; the assertion now compares the served page against the configured set (every configured unit present, one `<ins>` each, nothing unconfigured), which stays true as placements change. **78/78.**
+
+**Verification:** build **81 pages / 44 tools / 24 guides**; SEO audit **2547/2547**; smoke **44/44**; social **18/18 within limit**; 35 sources checked (18 verified, 4 soft-200 traps, 7 dead, 4 blocked, 2 login-gated); live-verify **78/78**. No content changed, so no IndexNow.
 
 **Owner actions still open:** AdSense console state (then slot ids), Cloudflare managed robots.txt decision, Launchstag Verify screenshot or listing URL, distribution kickoff — plus the new badge decision for tools.cafe and SaaSCity.
 

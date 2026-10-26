@@ -1,7 +1,20 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Twenty-one entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below). (21) Content ad unit in guides (below).
+**Status:** ✅ Twenty-two entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below). (21) Content ad unit in guides (below). (22) All three ad units live (below).
+
+## Entry 22 — All three ad units commissioned
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 26 Oct 2026
+**Status:** ✅ Committed, deployed `e50f904f`. Live sweep of all 68 URLs: 44/44 tool pages with three units, 24/24 guides with one, homepage zero. `test:live` 78/78, SEO audit 2547/2547.
+
+**Subject:** `ads: content and sidebar units live on 68 pages`
+
+**What changed:** owner supplied two unit ids. `AD_SLOT_CONTENT=9083278862`, `AD_SLOT_SIDEBAR=3751273162` in the gitignored `.env`, rebuild and deploy. No source changed for the ids themselves — the slots were already wired.
+
+**Test correction, not a papering-over:** the suite failed on deploy because it asserted the tool page had exactly one `<ins>`, which was true when only the top unit existed. It now asserts the served page against the configured set: every configured unit present, one `<ins>` each, and no unit outside that set. `test:live` is 78/78 and stays correct as placements change.
+
+**Placement:** 156 total — 44 top (tools), 68 content (44 tools + 24 guides), 44 sidebar (tools). Guides get one unit each; two ads in an article is where reading suffers, so the sidebar was deliberately not wired there.
 
 ## Entry 21 — Content ad unit in the guides, activating with one id
 

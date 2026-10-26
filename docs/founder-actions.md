@@ -10,7 +10,7 @@
 
 | # | Item | Blocked on | Time | Effect when done |
 |---|---|---|---|---|
-| 1 | AdSense slot ids | **Started** — top slot serving; content + sidebar still empty | 5 min | Revenue on 44 tool pages now; guides still placeholder |
+| 1 | AdSense slot ids | **Done** 26 Oct — three units serving | — | Revenue on 68 pages, 156 placements |
 | 2 | Cloudflare managed robots.txt | Owner decision + toggle | 3 min | Cleaner policy file; **costs edge enforcement** |
 | 3 | Launchstag Verify | Owner, in the listing dashboard | 2 min | Listing + dofollow badge link |
 | 4 | Distribution | Owner accounts | 1–3 h, spread out | Referral traffic + backlinks |
@@ -27,7 +27,15 @@ There are two, and the difference matters because one of them makes “paste the
 
 **State B — approved.** The console has *Ads → Overview → By ad unit*, and you can create units.
 
-**Where we are, 26 Oct 2026:** State B. The owner produced a unit snippet, which means the *By ad unit* menu exists. `AD_SLOT_TOP=2947820780` is deployed and serving on the 44 tool pages. `AD_SLOT_CONTENT` and `AD_SLOT_SIDEBAR` are empty, so those 88 placements stay as placeholders there. The 24 guides render a content unit after their second section as soon as `AD_SLOT_CONTENT` is set (Worker `9f619bfe`), which takes one content id from 44 monetised pages to 68. The homepage has no ad slot in the template at all — adding one is a layout decision, not a missing id.
+**Where we are, 26 Oct 2026:** State B, complete. All three units are configured and serving (Worker `e50f904f`):
+
+| Env | Slot | Where it renders | Pages |
+|---|---|---|---|
+| `AD_SLOT_TOP` | `2947820780` | above the tool | 44 tools |
+| `AD_SLOT_CONTENT` | `9083278862` | after section 2 of a guide; below the tool page body | 24 guides + 44 tools |
+| `AD_SLOT_SIDEBAR` | `3751273162` | beside the tool, full width under 1024px | 44 tools |
+
+**156 placements across 68 pages.** Guides carry one unit, tool pages three, the homepage none. Verified after deploy by sweeping all 68 URLs, not a sample: every tool page 3 units, every guide 1, home 0. `test:live` is **78/78**. The homepage still has no slot in the template; adding one is a layout decision, not a missing id.
 
 If you are in State A, the next action is **not** pasting ids. It is: confirm the code is detected, click **Request review**, and wait. The site side is already correct for review:
 

@@ -270,14 +270,18 @@ const toolHtml = (await grab(ORIGIN + '/tools/meta-tag-generator/')).body;
 // revenue.
 {
   const wantTop = (process.env.AD_SLOT_TOP || '').trim();
-  if (/^\d{6,}$/.test(wantTop)) {
-    ok('configured top unit is in the served HTML', toolHtml.includes(`data-ad-slot="${wantTop}"`));
-    ok('top unit renders one <ins> block', (toolHtml.match(/class="adsbygoogle"/g) || []).length === 1);
+  const wantContent = (process.env.AD_SLOT_CONTENT || '').trim();
+  const wantSidebar = (process.env.AD_SLOT_SIDEBAR || '').trim();
+  const configured = [wantTop, wantContent, wantSidebar].filter((v) => /^\d{6,}$/.test(v));
+  if (configured.length) {
+    ok('every configured unit is in the served tool HTML', configured.every((id) => toolHtml.includes(`data-ad-slot="${id}"`)));
+    ok('tool page renders one <ins> per configured unit', (toolHtml.match(/class="adsbygoogle"/g) || []).length === configured.length);
+    ok('tool page carries no unit outside the configured set', [...toolHtml.matchAll(/data-ad-slot="([^"]*)"/g)].length === configured.length);
   }
   const guideHtml = (await grab(ORIGIN + '/blog/xml-sitemap-best-practices/')).body;
-  const wantContent = (process.env.AD_SLOT_CONTENT || '').trim();
   if (/^\d{6,}$/.test(wantContent)) {
     ok('configured content unit is in the served guides', guideHtml.includes(`data-ad-slot="${wantContent}"`));
+    ok('guide carries exactly one unit', (guideHtml.match(/class="adsbygoogle"/g) || []).length === 1);
   } else {
     ok('guides stay slot-free while AD_SLOT_CONTENT is unset', !/class="ad-slot"/.test(guideHtml));
   }
