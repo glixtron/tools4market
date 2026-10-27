@@ -75,7 +75,7 @@ A VPN or a login wall isn't a dead end. It's just the other mode.
 ```
 Inside: meta, OG, Twitter Card, canonical, hreflang and schema generators.
 SERP preview, crawler audit, robots.txt generator + tester, llms.txt,
-sitemaps, redirects, UTMs, JSON, JWTs, image compression, 6 calculators.
+sitemaps, redirects, UTMs, JSON, JWTs, image compression, 7 calculators.
 ```
 
 **Tweet 5/6**
@@ -89,7 +89,7 @@ would have cited them.
 
 **Tweet 6/6**
 ```
-Free. No signup. No limits. 24 guides, every one sourced from primary docs
+Free. No signup. No quota. 24 guides, every one sourced from primary docs
 instead of another SEO blog.
 
 tools4market.online
