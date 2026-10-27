@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+### Kickoff slips one day: the date was a day behind and no accounts existed (27 Oct 2026)
+
+**What was wrong.** The task list for the day began “today is Mon 26 Oct”. It was **Tue 27 Oct, 09:30 ET** — 30 minutes past the 09:00 slot the launch thread was scheduled for. Checked directly rather than assumed: `x.com/tools4market`, `x.com/tools4marketHQ` and `reddit.com/user/tools4market` all report no such account. Setup had not happened, so the kickoff could not.
+
+**What changed.** The whole sequence shifts one day, and the dates in `docs/day12/Day12_Social_Posts.md` §2–§9 and the Indie Hackers post were corrected to match: thread 1 + r/SideProject **28 Oct**, IH **29 Oct**, thread 2 + r/SEO **30 Oct**, thread 3 + r/webdev **3 Nov**. Thread 3 stays off the weekend for the same reason as before — the cadence now lands on Sunday rather than Saturday.
+
+**Two claims fixed before posting.** “6 calculators” became “7” (seven pages carry the word; six was marketing-only arithmetic), and “No limits” became “No signup. No quota.” (the fetch proxy caps at 1.5 MB and 12 s, and no per-user quota exists).
+
+**New risk on the record.** Both accounts will be days old when they first post; subreddit age/karma gates are the likely cause of a silent removal, and they are documented in §10 rather than assumed away.
+
 ### Day 12 — founder-side writing, and four corrections found by verifying the brief (26 Oct 2026)
 
 **Trigger:** the owner chose “pause content, prep founder ops” on Day 12 and authorised the four writing deliverables that need no account access: the Product Hunt package, per-directory descriptions, five outreach pitches, and six social posts.

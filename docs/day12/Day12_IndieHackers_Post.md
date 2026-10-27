@@ -1,6 +1,6 @@
 # Day 12 — Indie Hackers post (the one worth publishing this week)
 
-**Prepared:** 26 Oct 2026 · **Target:** Indie Hackers · **Publish:** Wed 28 Oct, 09:00 ET
+**Prepared:** 26 Oct 2026 · **Target:** Indie Hackers · **Publish:** Thu 29 Oct, 09:00 ET
 
 *This is the highest-return item in the Day 12 folder, and it is not about the product. It is the directory research, written for people who are about to waste the same afternoon.*
 
@@ -119,7 +119,7 @@ No affiliate links, and nothing in this post is paid for.
 ## 4. Posting mechanics
 
 1. **Post it as a normal post**, not through the Products DB. The Products DB entry is a separate, quieter action you can do later; the post is the thing that gets read.
-2. **Morning, midweek.** Wednesday 09:00 ET. A weekend post on a B2B-adjacent site is wasted.
+2. **Morning, midweek.** Thursday 09:00 ET. A weekend post on a B2B-adjacent site is wasted.
 3. **No link in the body except the disclosure line.** One link at the end, after the value. If people want the site, they will click the disclosure.
 4. **Reply to every comment for the first four hours.** This is the whole difference between a post and a conversation, and IH rewards the second.
 5. **Do not cross-post the identical text to Reddit.** The r/SideProject version in `Day12_Social_Posts.md` is a build story, not this. Same facts, different post — otherwise it reads as syndication and both get ignored.

@@ -6,6 +6,23 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-27 (11th pass) — The kickoff date was a day behind, and the accounts did not exist
+
+**Agent:** DeepSeek (OpenCode session)
+**Trigger:** the CEO's task list opened with “today is Mon 26 Oct”. The clock said otherwise.
+
+**The date was wrong.** `date` returns **Tue 27 Oct 2026, 19:00 IST / 09:30 ET** — the day the launch thread was scheduled for, not the day before it. The 09:00 ET slot had passed half an hour earlier. A plan built on “today is setup day” therefore turned two setup tasks into blockers on a slot that was already open.
+
+**The blockers were real.** Rather than ask whether the accounts existed, I checked the public handles: `x.com/tools4market` and `x.com/tools4marketHQ` both return *“This account doesn't exist”*, and `reddit.com/user/tools4market` returns *“nobody on Reddit goes by that name.”* No accounts. So 27 Oct is setup day, and the sequence moves one day: thread 1 and r/SideProject **Wed 28 Oct**, the Indie Hackers post **Thu 29 Oct**, thread 2 and r/SEO **Fri 30 Oct**, thread 3 and r/webdev **Tue 3 Nov**. The reasoning that moved thread 3 off the weekend survives the shift — the “every two days” cadence now lands on Sunday 1 Nov instead of Saturday, so the Tuesday choice is unchanged in kind.
+
+**Two claims in thread 1 would have been checked by a reply.** It said “6 calculators”; seven tool pages carry the word (reading time, ROI, ROAS, CAC, CPC/CPM/CPA, email ROI, marketing budget), and six is only true if you silently mean the marketing ones. It said “No limits”; the fetch proxy caps a page at **1.5 MB** and **12 seconds**, though there is no per-user rate limit or quota anywhere in the worker. Changed to “7 calculators” and “No signup. No quota.” — `quota` is the precise word, because the site has no allowance and does have physics. Thread 2's “No usage limit” was already accurate and is untouched.
+
+**Recorded as a new risk, not a solved one:** both accounts will be days old when they post, and subreddit age/karma gates are the usual cause of a silent removal. Written into §10 rather than papered over.
+
+**Verification:** `check:social` **18/18 within 280 chars**; SEO audit **2547/2547**. No site build change, so no deploy and no IndexNow.
+
+---
+
 ## 2026-10-25→26 (10th pass) — Source-link hygiene: five dead citations fixed, a checker to stop the next one
 
 **Agent:** MiMo (OpenCode session, `ses_ea01d3779ffe…`)

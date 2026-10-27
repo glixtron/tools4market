@@ -17,7 +17,9 @@ That matters for two reasons, and neither is pedantic:
 
 Corrected dates are in §9. Everything else in the brief's social plan survives.
 
-There is a second, smaller drift to note: **today's 09:00 ET slot has already passed**, so the sequence starts Tuesday 27 Oct rather than today. Posting a launch thread into a dead afternoon is worse than waiting a day for a weekday morning — the thread is not time-sensitive, and the calendar in §9 reflects the shift.
+There is a second, smaller drift to note: **the original 09:00 ET slot had already passed**, so the sequence moved to Tuesday 27 Oct. Posting a launch thread into a dead afternoon is worse than waiting a day for a weekday morning.
+
+**Revised 27 Oct 2026 — the sequence moves one more day.** Neither account existed on kickoff day. Checked directly rather than assumed: `x.com/tools4market` and `x.com/tools4marketHQ` both return *"This account doesn't exist"*, and `reddit.com/user/tools4market` returns *"nobody on Reddit goes by that name."* So 27 Oct becomes setup day and the sequence starts **Wednesday 28 Oct**. The calendar in §9 reflects it. Two consequences worth planning around: a one-day-old Reddit account may be filtered by subreddit age/karma gates, and a brand-new X account has no follower base to seed a thread — neither is fixable by waiting, so both are noted in §10 rather than solved.
 
 ---
 
@@ -40,7 +42,7 @@ npm run check:social
 
 ---
 
-## 2. X thread 1 — the launch (Monday 26 Oct, 09:00 ET)
+## 2. X thread 1 — the launch (Wednesday 28 Oct, 09:00 ET)
 
 **Purpose:** say what the thing is, in the voice of someone who was annoyed by the alternative. Six tweets.
 
@@ -97,7 +99,7 @@ tools4market.online
 
 ---
 
-## 3. X thread 2 — the philosophy (Wednesday 28 Oct, 09:00 ET)
+## 3. X thread 2 — the philosophy (Friday 30 Oct, 09:00 ET)
 
 **Purpose:** the argument, not the product. This is the thread most likely to be quoted back at you, so every claim in it is one the site can defend on a page.
 
@@ -153,7 +155,7 @@ tools4market.online
 
 ---
 
-## 4. X thread 3 — the AI-search toolkit (Friday 30 Oct, 09:00 ET)
+## 4. X thread 3 — the AI-search toolkit (Tuesday 3 Nov, 09:00 ET)
 
 **Purpose:** the most useful thread of the three for a stranger who never clicks. If it gets saved and not liked, it did its job.
 
@@ -211,7 +213,7 @@ Generators for all three, plus a per-bot tester: tools4market.online
 
 ---
 
-## 5. Reddit post 1 — r/SideProject (Monday 26 Oct, 14:00 ET)
+## 5. Reddit post 1 — r/SideProject (Wednesday 28 Oct, 14:00 ET)
 
 **Why this subreddit:** it is the one place on the list where a build story is on-topic by definition, and where “no revenue yet” is a normal thing to say rather than a red flag.
 
@@ -277,7 +279,7 @@ sidebar first — see §10.
 
 ---
 
-## 6. Reddit post 2 — r/SEO (Wednesday 28 Oct, 10:00 ET)
+## 6. Reddit post 2 — r/SEO (Friday 30 Oct, 10:00 ET)
 
 **Why this one is not about the product:** r/SEO removes tool promotion on sight,
 and rightly. What it does reward is a specific, checkable finding that contradicts
@@ -348,7 +350,7 @@ together into a paragraph.
 
 ---
 
-## 7. Reddit post 3 — r/webdev (Friday 30 Oct, 10:00 ET)
+## 7. Reddit post 3 — r/webdev (Tuesday 3 Nov, 10:00 ET)
 
 **Why this one is technical:** r/webdev will not care about SEO tools, but it will
 care about a proxy endpoint that has to be safe, cheap and fast while 44 tools
@@ -470,21 +472,22 @@ is not supported by anything public.
 
 ## 9. Calendar — corrected dates
 
-26 Oct 2026 is a **Monday**. Times are US Eastern. One post per platform per day;
-never the same content on two platforms on the same day.
+Slipped one day on 27 Oct 2026 because the accounts did not exist yet. Times are US
+Eastern. One post per platform per day; never the same content on two platforms on
+the same day.
 
 | Date | Day | Time | What | Where |
 |---|---|---|---|---|
-| 27 Oct | **Tue** | 09:00 | Thread 1 — launch | X |
-| 27 Oct | Tue | 14:00 | Post 1 — build story | r/SideProject |
-| 28 Oct | **Wed** | 09:00 | **Directory research post** — the highest-return item; full draft in [`Day12_IndieHackers_Post.md`](Day12_IndieHackers_Post.md) | **Indie Hackers** |
-| 29 Oct | Thu | — | Reply to everything from the first two days | all |
-| 29 Oct | Thu | 09:00 | Thread 2 — philosophy | X |
-| 29 Oct | Thu | 10:00 | Post 2 — the robots.txt finding | r/SEO |
-| 2 Nov | Mon | 09:00 | Thread 3 — AI-search toolkit | X |
-| 2 Nov | Mon | 10:00 | Post 3 — the proxy endpoint | r/webdev |
+| 28 Oct | **Wed** | 09:00 | Thread 1 — launch | X |
+| 28 Oct | Wed | 14:00 | Post 1 — build story | r/SideProject |
+| 29 Oct | **Thu** | 09:00 | **Directory research post** — the highest-return item; full draft in [`Day12_IndieHackers_Post.md`](Day12_IndieHackers_Post.md) | **Indie Hackers** |
+| 30 Oct | Fri | — | Reply to everything from the first two days | all |
+| 30 Oct | Fri | 09:00 | Thread 2 — philosophy | X |
+| 30 Oct | Fri | 10:00 | Post 2 — the robots.txt finding | r/SEO |
+| 3 Nov | **Tue** | 09:00 | Thread 3 — AI-search toolkit | X |
+| 3 Nov | Tue | 10:00 | Post 3 — the proxy endpoint | r/webdev |
 
-**Why the third thread slips to Monday rather than running on Saturday.** The brief's “one every two days” cadence lands thread 3 on 31 Oct, a Saturday, when the SEO audience it is written for is not at a keyboard. A four-day gap is a smaller cost than a dead posting day. Weekday beats cadence.
+**Why the third thread slips to Tuesday rather than running on Sunday.** The brief's “one every two days” cadence lands thread 3 on 1 Nov, a Sunday, when the SEO audience it is written for is not at a keyboard. A two-day gap is a smaller cost than a dead posting day. Weekday beats cadence.
 
 If a post gets removed: **do not repost it the same day.** Read the removal
 reason, fix the actual cause, wait a week. A second removal in the same subreddit
@@ -494,6 +497,13 @@ usually means a ban, and the account is worth more than the post.
 
 ## 10. What I could not verify
 
+- **Account age and karma gates.** Neither account existed on 27 Oct 2026, so
+  both will be days old when the first posts go out. Many subreddits filter posts
+  from new or low-karma accounts automatically; the rules page usually states the
+  threshold, but it is only readable once logged in. Check r/SideProject's rule
+  list before the 28 Oct post, and do not treat a silent removal as a content
+  problem — it is usually the age gate. This replaces the earlier plan of posting
+  into accounts warmed by a few days of comments.
 - **Subreddit rules.** `reddit.com/r/*/about/rules` returns 403 to a script and
   the rules panel does not render for a logged-out browser session. So the three
   posts above are written to be safe under the strictest common reading — no link
