@@ -115,7 +115,12 @@ A build that prints `⚠ AdSense: N slot id(s) not numeric and ignored` means a 
 
 `.env` is gitignored, so a second checkout — the Desktop copy, a fresh clone, another machine — has no ad configuration at all. `npm run deploy` there builds a site with no loader and no units, and nothing fails. That is how the site lost every placement on **28 Oct 2026** (two deploys, 15:08 and 15:09 UTC) with a green deploy log; `npm run test:live` was the only thing that noticed, and it failed 8 checks.
 
-Copy `.env` into whichever checkout you deploy from, or deploy from the one that has it. `npm run deploy` now refuses to publish a build with no loader unless `ALLOW_ADS_OFF=1` is set, so the mistake fails before the upload instead of after it.
+Copy `.env` into whichever checkout you deploy from, or deploy from the one that has it. Two guards now stand in the way, and they fail in opposite places:
+
+- **`ads.config.json`** (committed) records that this site runs ads. `build.mjs` refuses to build when it says `true` and the environment has no AdSense config — so a CI build, a fresh clone or a second machine fails at build time instead of publishing. Override with `ALLOW_ADS_OFF=1`.
+- **`scripts/check-deploy.mjs`** reads the built HTML before upload and refuses to publish a build with no loader, whatever the reason.
+
+Intent has to live in git because `.env` cannot travel. On 28 Oct the site lost every placement three times in one day — twice from a shell without `.env` sourced, once from a checkout that had no `.env` at all — and every deploy log was green.
 
 ### Honest expectations
 

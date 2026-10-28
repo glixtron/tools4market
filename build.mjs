@@ -104,23 +104,23 @@ const AD_SLOTS = {
 const ADSENSE_ENABLED = /^(1|true|yes|on)$/i.test((process.env.ADSENSE_ENABLED || '').trim());
 const AD_SLOTS_ON = ADSENSE_ENABLED || Object.values(AD_SLOTS).some(Boolean);
 
-// Build guard (27 Oct 2026). A deploy ran from a shell where `.env` had not been
-// sourced, so the build shipped no loader and no units, and nothing failed: the
-// site lost every ad placement for ~40 minutes with a green deploy log. The
-// configuration lives in a gitignored `.env`, which means the *absence* of an
-// environment variable is indistinguishable from a deliberate decision to run
-// without ads. `.env` is the record of intent, so compare against it.
-if (!ADSENSE_ENABLED && !process.env.ALLOW_ADS_OFF) {
-  const envFile = await readFile(R + '.env', 'utf8').catch(() => null);
-  if (envFile && /^ADSENSE_ENABLED\s*=\s*(1|true|yes|on)\s*$/im.test(envFile)) {
-    console.error(
-      '\n!! Ads are configured ON in .env but this build has no AdSense environment.\n' +
-      '!! Shipping it would publish the site with no loader and no ad units.\n\n' +
-      '   Fix:  set -a && source .env && set +a && npm run deploy\n' +
-      '   Or, for a deliberately ad-free build:  ALLOW_ADS_OFF=1 npm run build\n'
-    );
-    process.exit(1);
-  }
+// Build guard (27–28 Oct 2026). Ads disappeared from the live site three times in
+// one day: twice from a shell where `.env` was not sourced, and once from a
+// checkout that had no `.env` at all. Every build was green, because the absence
+// of an environment variable cannot be told apart from a decision to run without
+// ads. `.env` records intent locally but is gitignored, so intent has to live in
+// the repo: ads.config.json says what this site is, `.env` says how to reach it.
+// ALLOW_ADS_OFF=1 is the explicit override for a deliberately ad-free build.
+const ADS_INTENT = await readFile(R + 'ads.config.json', 'utf8').then(JSON.parse).catch(() => ({}));
+if (ADS_INTENT.adsEnabled && !ADSENSE_ENABLED && !process.env.ALLOW_ADS_OFF) {
+  console.error(
+    '\n!! ads.config.json says this site runs ads, but this build has no AdSense environment.\n' +
+    '!! Shipping it would publish 80 pages with no loader and no ad units.\n\n' +
+    '   Fix:  set -a && source .env && set +a && npm run deploy\n' +
+    '   If this checkout has no .env, copy one from the machine that has it.\n' +
+    '   Or, for a deliberately ad-free build:  ALLOW_ADS_OFF=1 npm run build\n'
+  );
+  process.exit(1);
 }
 
 const esc = (s) => String(s ?? '')

@@ -1,0 +1,4 @@
+{
+  "adsEnabled": true,
+  "_why": "Intent that has to survive a checkout. `.env` is gitignored, so a deploy from CI, a fresh clone or a second machine has no way to know ads were expected — and on 28 Oct 2026 that shipped an ad-free site three times in one day, with every build green. build.mjs refuses to build when this is true and the environment carries no AdSense configuration. Set it to false only when the site is deliberately ad-free, and then set it back."
+}
