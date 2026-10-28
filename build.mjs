@@ -926,9 +926,7 @@ const run = async () => {
   const robots = [
     '# Tools4Market robots.txt',
     '# Policy: search engines and AI answer engines may crawl; AI training crawlers may not.',
-    '# Google-Extended is deliberately absent: it is a control token, not a crawler, and it',
-    '# switches off Gemini training and Gemini grounding together — grounding is how Gemini',
-    '# cites a page. Rationale: /blog/robots-txt-for-search-and-ai-crawlers/',
+    '# Rationale, including the Google-Extended trade: /blog/robots-txt-for-search-and-ai-crawlers/',
     '',
     'User-agent: *',
     'Content-Signal: search=yes,ai-train=no,use=reference',
