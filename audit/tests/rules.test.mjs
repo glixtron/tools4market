@@ -216,6 +216,35 @@ quiet('skip-link', goodPage());
   passed += 13;
 }
 
+// ---- the site-wide checks, which run once per audit rather than per page ---
+{
+  const { runCross } = await import('../cross.mjs');
+  const base = { urls: ['https://tools4market.online/'], sitemaps: [], index: { locs: [] } };
+  const now = Date.now();
+  const stale = runCross({
+    pages: [],
+    site: { ...base, dist: { exists: true, builtAt: now - 86_400_000, newestSource: now, stale: true, pages: 81 } },
+    catalog: { tools: [], articles: [] },
+  }).filter((f) => f.id === 'dist-stale');
+  assert.equal(stale.length, 1, 'dist-stale must fire when dist predates source');
+  assert.equal(stale[0].severity, 'blocker', 'a stale dist invalidates the whole report');
+
+  const fresh = runCross({
+    pages: [],
+    site: { ...base, dist: { exists: true, builtAt: now, newestSource: now - 86_400_000, stale: false, pages: 81 } },
+    catalog: { tools: [], articles: [] },
+  }).filter((f) => f.id === 'dist-stale');
+  assert.equal(fresh.length, 0, 'dist-stale must stay quiet on a current build');
+
+  const never = runCross({
+    pages: [],
+    site: { ...base, dist: { exists: false, builtAt: null, newestSource: now, stale: true, pages: 0 } },
+    catalog: { tools: [], articles: [] },
+  }).filter((f) => f.id === 'dist-stale');
+  assert.equal(never.length, 1, 'dist-stale must fire when dist was never built');
+  passed += 3;
+}
+
 if (failures.length) {
   console.error('\nFAILURES');
   failures.forEach((f) => console.error(' ✗ ' + f));

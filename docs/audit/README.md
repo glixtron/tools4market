@@ -66,7 +66,7 @@ Thresholds live in `audit/rules/catalog.json` — no rule hardcodes a number.
 | `assets` | img-alt, img-dimensions, html-weight, render-blocking-script, h1-missing, skip-link |
 | `links` | vague-anchor, empty-href, internal-link-density, javascript-href |
 | `brand` | ad-inside-tool, ad-placeholder-chrome, ad-slot-empty-with-unit, adsense-loader-once, ad-unit-count, ad-client-matches |
-| `cross` | broken-internal, orphan-page, tool/guide-missing-from-sitemap, sitemap-lists-unknown-*, related-slug-unresolved, duplicate-title/description/h1, sitemap-empty, sitemap-lastmod-missing, sitemap-index-incomplete |
+| `cross` | dist-stale, broken-internal, orphan-page, tool/guide-missing-from-sitemap, sitemap-lists-unknown-*, related-slug-unresolved, duplicate-title/description/h1, sitemap-empty, sitemap-lastmod-missing, sitemap-index-incomplete |
 
 Severities: **blocker** (10), **major** (4), **minor** (1), **info** (0). A site score of 100 is reserved for a run with no findings at all.
 
@@ -87,6 +87,10 @@ Step 3 is the point of the whole system. A rule that never fires is indistinguis
 The rule tests it structurally: it compares each ad's character offset against the `tool-shell` region in the served document. A claim in marketing copy becomes a build invariant.
 
 The ad rules compare the served page with the `.env` that built it, so an ad-free build fails them — correctly, because `.env` says ads are on. When the build was ad-free **on purpose** (`ALLOW_ADS_OFF=1`), pass `--no-ads`: the three config-coupled rules (loader, unit count, client) stand down and the layout rules stay active. A run that cannot tell intent from accident would teach people to ignore it.
+
+## A dist audit trusts its input, so it checks the input
+
+`npm run audit:dist` describes `dist/`, and `dist/` is gitignored: a second checkout that has not rebuilt since a pull holds an old build. The audit compares the newest source mtime (all of `src/` plus `build.mjs`) with `dist/index.html` and reports `dist-stale` as a **blocker** when the source is newer by more than a minute. A stale build is not a site defect, but a report about one is worse than no report.
 
 ## Known limits, stated rather than discovered later
 

@@ -9,7 +9,7 @@
 //
 // Zero dependencies, like the rest of the repo.
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -174,6 +174,55 @@ export function createReader({ target = 'live', cache = false } = {}) {
 }
 
 /**
+ * How old is `dist/` relative to the source that should have produced it?
+ *
+ * A dist audit is only meaningful if dist was built from the current tree. On a
+ * second checkout that has not rebuilt since a pull, `npm run audit:dist` happily
+ * audits a week-old build and reports its findings as if they were the site's —
+ * the exact confusion this tool exists to prevent, one level up. Compare the
+ * newest source mtime with dist/index.html rather than trusting either alone.
+ */
+async function distFreshness() {
+  const newestUnder = async (dir) => {
+    let newest = 0;
+    const walk = async (d) => {
+      let entries;
+      try { entries = await readdir(d, { withFileTypes: true }); } catch { return; }
+      for (const e of entries) {
+        const p = path.join(d, e.name);
+        if (e.isDirectory()) await walk(p);
+        else {
+          const st = await stat(p).catch(() => null);
+          if (st && st.mtimeMs > newest) newest = st.mtimeMs;
+        }
+      }
+    };
+    await walk(dir);
+    return newest;
+  };
+
+  const builtPath = path.join(DIST, 'index.html');
+  const builtStat = await stat(builtPath).catch(() => null);
+  if (!builtStat) return { exists: false, builtAt: null, newestSource: null, stale: true, pages: 0 };
+
+  const [src, build] = await Promise.all([newestUnder(path.join(ROOT, 'src')), stat(path.join(ROOT, 'build.mjs')).catch(() => null)]);
+  const newestSource = Math.max(src, build ? build.mtimeMs : 0);
+  const pages = await readdir(DIST, { withFileTypes: true })
+    .then((es) => es.filter((e) => e.isDirectory()).length)
+    .catch(() => 0);
+
+  return {
+    exists: true,
+    builtAt: builtStat.mtimeMs,
+    newestSource,
+    // A minute of slack: build.mjs writes index.html before it copies the last
+    // asset, so a build started seconds after an edit can otherwise look stale.
+    stale: newestSource > builtStat.mtimeMs + 60_000,
+    pages,
+  };
+}
+
+/**
  * Stage 1 — discover every URL the audit must cover.
  *
  * The sitemap index is the source of truth, so an orphan page is detected by
@@ -209,6 +258,7 @@ export async function discover({ target = 'live', origin = ORIGIN, cache = false
     target,
     origin: base,
     read,
+    dist: target === 'dist' ? await distFreshness() : null,
     index: { url: base + '/sitemap.xml', status: indexRes.status, body: indexRes.body, locs: indexLocs },
     sitemaps,
     urls,

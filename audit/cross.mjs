@@ -27,6 +27,30 @@ export function runCross({ pages, site, catalog }) {
   const findings = [];
   const add = (f) => findings.push({ page: f.page || '(site)', ...f });
 
+  // ---- 0. is the thing being audited the thing that was built? -----------
+  // A dist audit is a claim about source that has been built. If dist predates
+  // the source, every finding below is about a build nobody is serving — and the
+  // report will look authoritative while being a week out of date.
+  if (site.dist && site.dist.stale) {
+    const age = (ms) => {
+      const h = (Date.now() - ms) / 36e5;
+      return h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`;
+    };
+    add({
+      id: 'dist-stale',
+      severity: 'blocker',
+      group: 'cross',
+      page: '(site)',
+      message: site.dist.exists
+        ? `dist/ was built ${age(site.dist.builtAt)} ago but source changed ${age(site.dist.newestSource)} ago`
+        : 'dist/ has never been built',
+      fix: site.dist.exists
+        ? 'This report describes an old build, not the site. Run `npm run build` first — and if this checkout was just pulled, rebuild before reading any finding here.'
+        : 'Run `npm run build` (it needs the environment for ads: `set -a && source .env && set +a`).',
+      evidence: site.dist,
+    });
+  }
+
   const sitemapSet = new Set(site.urls.map(normalise).filter(Boolean));
   const byUrl = new Map(pages.map((p) => [normalise(p.url), p]));
 

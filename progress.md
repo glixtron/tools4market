@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+### A second ad-less deploy, from a checkout with no `.env` (28 Oct 2026)
+
+**15:08 and 15:09 UTC:** two deploys published the site with no AdSense loader and no units on 80 pages. The morning's guard could not catch it — it compares `.env` with the environment, and there was no `.env` in the checkout that deployed.
+
+**Caught and restored:** `test:live` failed 8 of 78 checks; the audit blocked on all 80 URLs. Redeployed `a43ee451`, 78/78, three units serving.
+
+**Guard:** `npm run deploy` now runs `scripts/check-deploy.mjs`, which reads the built `dist/index.html` and refuses to upload without a loader unless `ALLOW_ADS_OFF=1`. Checking the artefact is the only way to catch a missing configuration file: intent lives in `.env`, and absent is indistinguishable from deliberate.
+
+**Also:** `audit:dist` now reports `dist-stale` as a blocker when the source is newer than `dist/`, after a second checkout reported on a five-day-old build.
+
 ### Sitemap audit pipeline — and a live deploy that had lost every ad (28 Oct 2026)
 
 **Built:** `audit/` — discover → fetch → parse → rules → cross → report, 47 rules, no dependencies, `npm run audit` / `audit:dist` / `audit:strict` / `test:audit`. Every finding carries a fix that names the file, and `docs/audit/latest.json` is committed so two runs can be diffed.

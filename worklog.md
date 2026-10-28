@@ -19,11 +19,17 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **A second real defect, found the same way.** The homepage logo had `href=""`: `rel('/', '/')` collapsed to an empty string, so the logo link went nowhere. Fixed to `./` in `rel()` and deployed (`299a6ffd`). The rule that caught it — `empty-href` — ignores `href="#"`, because the cookie-settings control is an anchor with a JS handler and that is a legitimate pattern.
 
+**And one that only appeared in the second checkout.** Running `audit:dist` in `~/Desktop/Tools4market` after a pull reported "98.1/100, 21 blockers" — about the build from 23 Oct that was still sitting in its gitignored `dist/`, not about the site. A dist audit trusts its input, so the input is now checked: `dist-stale` compares the newest source mtime with `dist/index.html` and blocks the report when the source is newer. Verified both ways — 6-day-old dist → one blocker, rebuilt dist → none.
+
 **One false alarm fixed before the tool could be trusted.** `ALLOW_ADS_OFF=1` is the documented way to build without ads, and auditing that build against `.env` produced **148 blockers** on a site doing exactly what it was told. `--no-ads` now stands the three config-coupled rules (loader, unit count, client) down while leaving the layout rules active, and the fixture suite asserts both directions: silent with the flag, firing without it.
 
 **Current state: 0 blockers, 0 majors, 4 minors, 80 info.** The minors are one heading skip on `/blog/` (h1 → h3), one image without dimensions on the OG image tester, and no `<lastmod>` in `sitemap-pages.xml` / `sitemap-tools.xml`. The info findings are all the missing skip link, which is a real accessibility gap and a cheap fix. Live and `--dist` now agree exactly: `--diff` returns zero one-sided findings, which is the evidence that what is deployed is what was built.
 
-**Verification:** audit **47 rules / 70 fixture assertions**; `seo-audit` **2547/2547**; smoke **44/44**; `test:live` **78/78**; `audit:dist` and `--diff` clean; SEO audit unchanged by the `rel()` fix. Deploys `dd94bfbc` (restore), `299a6ffd` (logo). No content changed, so no IndexNow.
+**The audit earned its keep twice more, hours after it shipped.** A pushed dist audit run in the second checkout reported "98.1/100, 21 blockers" about a build from **23 Oct** still sitting in its gitignored `dist/` — a report about nothing current, which is the failure the tool exists to prevent, one level up. Fixed with a `dist-stale` blocker: newest source mtime (`src/**`, `build.mjs`) versus `dist/index.html`, more than a minute of slack for the build's own write order. Verified with a 6-day-old timestamp and with a rebuilt one.
+
+**Then the live site lost every ad again, and this time it was not the same cause.** Two deploys went out at **15:08 and 15:09 UTC** from a checkout with **no `.env` at all** — the build guard from the morning compares `.env` against the environment, which is silent when there is no file to compare. Version `af13998c` served 80 pages with no loader and no units. Caught by `npm run test:live` (70/78) and by the audit's `adsense-loader-once` blocker on all 80 URLs; restored with `a43ee451`, 78/78. `scripts/check-deploy.mjs` now inspects the artefact instead of the intention: `npm run deploy` refuses to upload a build with no loader unless `ALLOW_ADS_OFF=1`. Verified all three directions — ad-free build exits 1, flag overrides, real build passes.
+
+**Verification:** audit **47 rules / 73 fixture assertions**; `seo-audit` **2547/2547**; smoke **44/44**; `test:live` **78/78**; `audit:dist` and `--diff` clean; SEO audit unchanged by the `rel()` fix. Deploys `dd94bfbc` (restore), `299a6ffd` (logo). No content changed, so no IndexNow.
 
 ---
 

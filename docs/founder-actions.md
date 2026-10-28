@@ -106,10 +106,16 @@ That mismatch also means the “5-minute action” framing was wrong: following 
 ```
 npm run build                      # must NOT print "ℹ AdSense loader on, 0 ad units"
 curl -s https://tools4market.online/ | grep -o 'data-ad-slot="[0-9]*"'
-npm run test:live                  # 73 checks, including the loader + ads.txt
+npm run test:live                  # 78 checks, including the loader + ads.txt
 ```
 
 A build that prints `⚠ AdSense: N slot id(s) not numeric and ignored` means a value was rejected and a reserved placeholder shipped in its place — the page looks finished and earns nothing. That failure mode shipped once before (24 Oct), which is why the warning now exists.
+
+### Deploying from a checkout without `.env`
+
+`.env` is gitignored, so a second checkout — the Desktop copy, a fresh clone, another machine — has no ad configuration at all. `npm run deploy` there builds a site with no loader and no units, and nothing fails. That is how the site lost every placement on **28 Oct 2026** (two deploys, 15:08 and 15:09 UTC) with a green deploy log; `npm run test:live` was the only thing that noticed, and it failed 8 checks.
+
+Copy `.env` into whichever checkout you deploy from, or deploy from the one that has it. `npm run deploy` now refuses to publish a build with no loader unless `ALLOW_ADS_OFF=1` is set, so the mistake fails before the upload instead of after it.
 
 ### Honest expectations
 

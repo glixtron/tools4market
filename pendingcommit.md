@@ -6,7 +6,7 @@
 ## Entry 23 — Sitemap audit pipeline, and the deploy it caught serving no ads
 
 **Branch:** `audit-growth-plan-v2.1` · **Date:** 28 Oct 2026
-**Status:** ✅ Committed. Deploys `dd94bfbc` (ad restore) and `299a6ffd` (logo href fix). Audit 47 rules / 70 fixture assertions; `test:live` 78/78; SEO audit 2547/2547; smoke 44/44.
+**Status:** ✅ Committed. Deploys `dd94bfbc` (ad restore) and `299a6ffd` (logo href fix). Audit 47 rules / 73 fixture assertions; `test:live` 78/78; SEO audit 2547/2547; smoke 44/44.
 
 **Subject:** `feat: sitemap audit pipeline (80 URLs, 47 rules, per-page fixes)`
 
@@ -18,7 +18,11 @@
 
 **Also fixed:** the homepage logo's `href=""` — `rel('/', '/')` returned an empty string for a same-path link. Now `./`.
 
+**One stale input caught:** `audit:dist` in a second checkout reported on a five-day-old build sitting in gitignored `dist/`. The `dist-stale` blocker now compares source mtime with `dist/index.html` and refuses to present the report as current.
+
 **One false alarm removed:** auditing an `ALLOW_ADS_OFF=1` build against `.env` reported 148 blockers on a correct build. `--no-ads` now stands down the three config-coupled rules; fixtures assert both directions.
+
+**A second, different ad-less deploy, same day:** two deploys at 15:08/15:09 UTC came from a checkout with no `.env`, which the morning guard cannot see (no file, no comparison). `npm run deploy` now runs `scripts/check-deploy.mjs` — it reads the built `dist/index.html` and refuses to upload without a loader unless `ALLOW_ADS_OFF=1`. Restored `a43ee451`, 78/78. Also added `dist-stale` to the audit, after a second checkout reported on a five-day-old build.
 
 **Findings left open (4 minor, 80 info):** heading skip on `/blog/`, one image without dimensions, no `<lastmod>` on two sitemaps, no skip link anywhere.
 

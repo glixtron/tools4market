@@ -8,7 +8,7 @@
     "build": "node build.mjs",
     "postinstall": "node build.mjs || true",
     "serve": "node serve-dev.mjs",
-    "deploy": "node build.mjs && npx wrangler deploy",
+    "deploy": "node build.mjs && node scripts/check-deploy.mjs && npx wrangler deploy",
     "preview": "npx wrangler dev",
     "test": "node tests/smoke.mjs",
     "test:seo": "node tests/seo-audit.mjs",
