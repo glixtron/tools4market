@@ -16,7 +16,7 @@ const byId = new Map(rules.map((r) => [r.id, r]));
 
 const ctx = {
   catalog,
-  env: { configured: true, client: 'ca-pub-1509697031230558', slots: { top: '2947820780', content: '9083278862', sidebar: '3751273162' } },
+  env: { enabled: true, configured: true, client: 'ca-pub-1509697031230558', slots: { top: '2947820780', content: '9083278862', sidebar: '3751273162' } },
   groupOf: (p) => (p === '/' ? 'home' : p.startsWith('/tools/') ? 'tools' : p.startsWith('/blog/') && p !== '/blog/' ? 'blog' : 'pages'),
   toolOf: (p) => (/^\/tools\/[a-z0-9-]+\/$/.test(p) ? { slug: 'x', name: 'X', focus: 'meta tag generator' } : null),
   articleOf: (p) => (/^\/blog\/[a-z0-9-]+\/$/.test(p) ? { slug: 'g', focus: 'xml sitemap', relatedTools: ['a', 'b', 'c'], links: [] } : null),
@@ -166,6 +166,21 @@ quiet('ad-unit-count', goodPage());
 quiet('focus-in-title', goodPage());
 quiet('faq-schema-matches-visible', goodPage());
 quiet('skip-link', goodPage());
+
+// ---- a deliberately ad-free build is not a broken build ----------------
+// `ALLOW_ADS_OFF=1` is a documented way to build without ads. The three rules
+// that compare the page with `.env` must stay silent when the run says the ads
+// are off on purpose, or the flag produces 148 blockers on a correct build.
+{
+  const adsOff = { ...ctx, env: { ...ctx.env, enabled: false } };
+  const bare = goodPage({ ads: { units: [], divs: [], loaderCount: 0 } });
+  quiet('adsense-loader-once', bare, adsOff);
+  quiet('ad-unit-count', bare, adsOff);
+  quiet('ad-client-matches', bare, adsOff);
+  // ...but the same page is a blocker when the ads were expected.
+  fires('adsense-loader-once', bare, ctx);
+  fires('ad-unit-count', bare, ctx);
+}
 
 // ---- the parser agrees with the rules about a real document ------------
 {

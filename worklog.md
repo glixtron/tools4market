@@ -19,9 +19,11 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 **A second real defect, found the same way.** The homepage logo had `href=""`: `rel('/', '/')` collapsed to an empty string, so the logo link went nowhere. Fixed to `./` in `rel()` and deployed (`299a6ffd`). The rule that caught it — `empty-href` — ignores `href="#"`, because the cookie-settings control is an anchor with a JS handler and that is a legitimate pattern.
 
+**One false alarm fixed before the tool could be trusted.** `ALLOW_ADS_OFF=1` is the documented way to build without ads, and auditing that build against `.env` produced **148 blockers** on a site doing exactly what it was told. `--no-ads` now stands the three config-coupled rules (loader, unit count, client) down while leaving the layout rules active, and the fixture suite asserts both directions: silent with the flag, firing without it.
+
 **Current state: 0 blockers, 0 majors, 4 minors, 80 info.** The minors are one heading skip on `/blog/` (h1 → h3), one image without dimensions on the OG image tester, and no `<lastmod>` in `sitemap-pages.xml` / `sitemap-tools.xml`. The info findings are all the missing skip link, which is a real accessibility gap and a cheap fix. Live and `--dist` now agree exactly: `--diff` returns zero one-sided findings, which is the evidence that what is deployed is what was built.
 
-**Verification:** audit **47 rules / 65 fixture assertions**; `seo-audit` **2547/2547**; smoke **44/44**; `test:live` **78/78**; `audit:dist` and `--diff` clean; SEO audit unchanged by the `rel()` fix. Deploys `dd94bfbc` (restore), `299a6ffd` (logo). No content changed, so no IndexNow.
+**Verification:** audit **47 rules / 70 fixture assertions**; `seo-audit` **2547/2547**; smoke **44/44**; `test:live` **78/78**; `audit:dist` and `--diff` clean; SEO audit unchanged by the `rel()` fix. Deploys `dd94bfbc` (restore), `299a6ffd` (logo). No content changed, so no IndexNow.
 
 ---
 

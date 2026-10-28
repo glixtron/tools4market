@@ -1,6 +1,6 @@
 # Sitemap audit — 2026-10-28
 
-**Target:** dist  ·  **URLs:** 80  ·  **Crawl:** 320 ms  ·  **Rules:** 47  ·  **Score:** 99.9/100
+**Target:** dist  ·  **URLs:** 80  ·  **Crawl:** 306 ms  ·  **Rules:** 47  ·  **Score:** 99.9/100
 
 | Severity | Count |
 |---|---|

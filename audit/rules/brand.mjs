@@ -58,7 +58,8 @@ export const rules = [
     id: 'adsense-loader-once',
     group: 'brand',
     severity: 'blocker',
-    test(p) {
+    test(p, ctx) {
+      if (!ctx.env.enabled) return null;
       if (p.ads.loaderCount === 1) return null;
       return {
         message: p.ads.loaderCount === 0 ? 'AdSense loader missing' : `AdSense loader appears ${p.ads.loaderCount} times`,
@@ -71,6 +72,7 @@ export const rules = [
     group: 'brand',
     severity: 'blocker',
     test(p, ctx) {
+      if (!ctx.env.enabled) return null;
       const expected = ctx.expectedUnits(p.path);
       if (expected === null) return null; // config unknown, nothing to compare
       if (p.ads.units.length === expected) return null;
@@ -86,7 +88,7 @@ export const rules = [
     group: 'brand',
     severity: 'major',
     test(p, ctx) {
-      if (!ctx.env.client) return null;
+      if (!ctx.env.enabled || !ctx.env.client) return null;
       for (const u of p.ads.units) {
         if (u.client && u.client !== ctx.env.client) {
           return {

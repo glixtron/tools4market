@@ -30,6 +30,7 @@ Useful flags:
 node audit/pipeline.mjs --diff            # live vs dist, finding by finding
 node audit/pipeline.mjs --only=tools      # one section (skips site-wide checks)
 node audit/pipeline.mjs --cache           # reuse responses for an hour
+node audit/pipeline.mjs --no-ads          # audit a deliberately ad-free build
 node audit/pipeline.mjs --no-write        # console only
 node audit/pipeline.mjs --dump            # print parsed Page objects, run no rules
 node audit/pipeline.mjs --concurrency=3   # be gentler on the origin
@@ -84,6 +85,8 @@ Step 3 is the point of the whole system. A rule that never fires is indistinguis
 > Ads are placed in reserved spaces around the tools and never inside the tool itself.
 
 The rule tests it structurally: it compares each ad's character offset against the `tool-shell` region in the served document. A claim in marketing copy becomes a build invariant.
+
+The ad rules compare the served page with the `.env` that built it, so an ad-free build fails them — correctly, because `.env` says ads are on. When the build was ad-free **on purpose** (`ALLOW_ADS_OFF=1`), pass `--no-ads`: the three config-coupled rules (loader, unit count, client) stand down and the layout rules stay active. A run that cannot tell intent from accident would teach people to ignore it.
 
 ## Known limits, stated rather than discovered later
 

@@ -12,6 +12,7 @@
 //   npm run audit:dist                  audit the local build
 //   npm run audit:strict                exit non-zero on blockers
 //   node audit/pipeline.mjs --diff      compare live against dist, finding by finding
+//   node audit/pipeline.mjs --no-ads    audit a deliberately ad-free build (ALLOW_ADS_OFF=1)
 //   node audit/pipeline.mjs --no-write  console only, write nothing
 //   node audit/pipeline.mjs --only=tools
 //   node audit/pipeline.mjs --dump      print parsed Page objects, run no rules
@@ -48,7 +49,7 @@ async function loadConfig() {
 /** Read the ad configuration the site was built with. */
 async function loadEnv() {
   const raw = await readFile(path.join(ROOT, '.env'), 'utf8').catch(() => null);
-  if (!raw) return { configured: false, client: null, slots: {} };
+  if (!raw) return { enabled: true, configured: false, client: null, slots: {} };
   const get = (k) => (new RegExp(`^${k}\\s*=\\s*(.*)$`, 'm').exec(raw) || [, ''])[1].trim();
   const slots = {
     top: /^\d{6,}$/.test(get('AD_SLOT_TOP')) ? get('AD_SLOT_TOP') : null,
@@ -56,7 +57,7 @@ async function loadEnv() {
     sidebar: /^\d{6,}$/.test(get('AD_SLOT_SIDEBAR')) ? get('AD_SLOT_SIDEBAR') : null,
   };
   const clientMatch = /ca-pub-\d+/.exec(get('ADSENSE_CLIENT')) || /ca-pub-\d+/.exec(raw);
-  return { configured: Object.values(slots).some(Boolean), client: clientMatch ? clientMatch[0] : null, slots };
+  return { enabled: true, configured: Object.values(slots).some(Boolean), client: clientMatch ? clientMatch[0] : null, slots };
 }
 
 /** The context a rule sees. Built once, shared by every page. */
@@ -158,6 +159,12 @@ async function main() {
   const only = opt('only');
   const config = await loadConfig();
   const env = await loadEnv();
+  // `ALLOW_ADS_OFF=1 npm run build` is a documented, legitimate way to produce an
+  // ad-free build (guard in build.mjs). Comparing that build against `.env` would
+  // report 148 blockers on a site that is doing exactly what it was told, which is
+  // the fastest way to teach someone to ignore the report. The flag states the
+  // intent the build could not record.
+  if (flag('no-ads')) env.enabled = false;
   const ctx = makeContext({ config, env });
 
   if (flag('dump')) {
