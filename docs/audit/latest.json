@@ -1,0 +1,806 @@
+{
+  "generatedAt": "2026-10-28T15:03:00.660Z",
+  "target": "live",
+  "pageCount": 80,
+  "elapsedMs": 1257,
+  "origin": "https://tools4market.online",
+  "score": 99.9,
+  "totals": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 4,
+    "info": 80
+  },
+  "byGroup": {
+    "home": {
+      "pages": 1,
+      "score": 100,
+      "blocker": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "pages": {
+      "pages": 11,
+      "score": 100,
+      "blocker": 0,
+      "major": 0,
+      "minor": 1
+    },
+    "tools": {
+      "pages": 44,
+      "score": 100,
+      "blocker": 0,
+      "major": 0,
+      "minor": 1
+    },
+    "blog": {
+      "pages": 24,
+      "score": 100,
+      "blocker": 0,
+      "major": 0,
+      "minor": 0
+    }
+  },
+  "findings": [
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "heading-order",
+      "severity": "minor",
+      "group": "onpage",
+      "page": "/blog/",
+      "message": "Heading jumps h1 → h3 at \"Categories\"",
+      "fix": "Do not skip a level. An h3 directly under an h2 is fine; an h3 directly under an h1, or h4 under an h2, breaks outline parsing for screen readers and for passage extraction.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/seo-tools/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/ai-search-tools/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/content-social-tools/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/web-utility-tools/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/marketing-tools/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/about/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/contact/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/privacy-policy/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/terms/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/disclaimer/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/meta-tag-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/open-graph-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/twitter-card-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/canonical-tag-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/hreflang-tag-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/schema-markup-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/serp-preview-tool/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/meta-description-checker/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/web-crawler-audit/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/seo-score-checker/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "img-dimensions",
+      "severity": "minor",
+      "group": "assets",
+      "page": "/tools/og-image-tester/",
+      "message": "1 image(s) without width/height",
+      "fix": "Declare intrinsic dimensions. Without them the browser reflows when the image loads, which is the layout shift CLS measures.",
+      "evidence": {
+        "sources": [
+          null
+        ]
+      }
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/og-image-tester/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/hreflang-checker/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/robots-txt-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/robots-txt-tester/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/ai-crawler-blocker/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/llms-txt-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/url-slug-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/utm-link-builder/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/keyword-density-checker/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/hashtag-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/case-converter/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/duplicate-line-remover/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/lorem-ipsum-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/reading-time-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/htaccess-redirect-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/sitemap-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/sitemap-validator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/password-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/base64-encoder-decoder/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/url-encoder-decoder/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/uuid-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/jwt-decoder/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/user-agent-parser/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/ics-calendar-generator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/image-compressor/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/json-validator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/timestamp-converter/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/ip-converter/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/roi-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/roas-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/cac-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/ad-metrics-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/email-roi-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/tools/marketing-budget-calculator/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/robots-txt-for-search-and-ai-crawlers/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/website-launch-seo-checklist/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/how-to-block-gptbot/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/llms-txt-guide/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/appear-in-chatgpt-search/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/check-ai-crawler-access/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/noindex-vs-robots-txt/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/why-is-my-site-not-indexed/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/utm-naming-conventions/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/schema-markup-for-ai-search/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/screaming-frog-alternative/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/meta-description-length-2026/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/internal-linking/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/image-seo/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/core-web-vitals/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/open-graph-image-size-2026/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/htaccess-301-redirect/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/title-tag-length-2026/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/url-slug-best-practices/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/rel-canonical-tag/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/hreflang-basics/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/xml-sitemap-best-practices/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/test-structured-data/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "skip-link",
+      "severity": "info",
+      "group": "assets",
+      "page": "/blog/http-status-codes-seo/",
+      "message": "No skip link",
+      "fix": "A \"skip to content\" link as the first focusable element is the cheapest accessibility win on a page with a long nav.",
+      "evidence": null
+    },
+    {
+      "id": "sitemap-lastmod-missing",
+      "severity": "minor",
+      "group": "cross",
+      "page": "https://tools4market.online/sitemap-pages.xml",
+      "message": "https://tools4market.online/sitemap-pages.xml has no <lastmod>",
+      "fix": "lastmod is the one sitemap hint Google says it uses. Emit the content date, not the build date, or omit it everywhere — a build-date lastmod trains Google to ignore the field.",
+      "evidence": null
+    },
+    {
+      "id": "sitemap-lastmod-missing",
+      "severity": "minor",
+      "group": "cross",
+      "page": "https://tools4market.online/sitemap-tools.xml",
+      "message": "https://tools4market.online/sitemap-tools.xml has no <lastmod>",
+      "fix": "lastmod is the one sitemap hint Google says it uses. Emit the content date, not the build date, or omit it everywhere — a build-date lastmod trains Google to ignore the field.",
+      "evidence": null
+    }
+  ]
+}

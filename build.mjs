@@ -104,6 +104,25 @@ const AD_SLOTS = {
 const ADSENSE_ENABLED = /^(1|true|yes|on)$/i.test((process.env.ADSENSE_ENABLED || '').trim());
 const AD_SLOTS_ON = ADSENSE_ENABLED || Object.values(AD_SLOTS).some(Boolean);
 
+// Build guard (27 Oct 2026). A deploy ran from a shell where `.env` had not been
+// sourced, so the build shipped no loader and no units, and nothing failed: the
+// site lost every ad placement for ~40 minutes with a green deploy log. The
+// configuration lives in a gitignored `.env`, which means the *absence* of an
+// environment variable is indistinguishable from a deliberate decision to run
+// without ads. `.env` is the record of intent, so compare against it.
+if (!ADSENSE_ENABLED && !process.env.ALLOW_ADS_OFF) {
+  const envFile = await readFile(R + '.env', 'utf8').catch(() => null);
+  if (envFile && /^ADSENSE_ENABLED\s*=\s*(1|true|yes|on)\s*$/im.test(envFile)) {
+    console.error(
+      '\n!! Ads are configured ON in .env but this build has no AdSense environment.\n' +
+      '!! Shipping it would publish the site with no loader and no ad units.\n\n' +
+      '   Fix:  set -a && source .env && set +a && npm run deploy\n' +
+      '   Or, for a deliberately ad-free build:  ALLOW_ADS_OFF=1 npm run build\n'
+    );
+    process.exit(1);
+  }
+}
+
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -115,7 +134,11 @@ function rel(from, to) {
   let i = 0;
   while (i < f.length && i < t.length && f[i] === t[i]) i++;
   const tail = t.slice(i).join('/');
-  return '../'.repeat(f.length - i) + tail + (tail && to.endsWith('/') ? '/' : '');
+  // Same path: `tail` is empty and the concatenation collapsed to "", which
+  // produced `href=""` on the homepage logo (found by the 27 Oct sitemap audit).
+  // "./" is the correct relative self-reference.
+  if (!tail) return f.length - i === 0 ? './' : '../'.repeat(f.length - i);
+  return '../'.repeat(f.length - i) + tail + (to.endsWith('/') ? '/' : '');
 }
 
 // escape, then re-allow **bold** and `code` markers for our own content

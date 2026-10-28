@@ -6,6 +6,25 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-10-28 (12th pass) — A sitemap audit that found a live deploy serving no ads
+
+**Agent:** DeepSeek (OpenCode session)
+**Trigger:** owner asked for a pipeline that audits every URL in the sitemap with our own tools, reports per-page findings and suggests fixes.
+
+**Built `audit/` — six stages, 47 rules, zero dependencies.** Discover (sitemap index → 80 URLs, plus robots/llms/rss) → fetch (concurrency 6, manual redirect chains so a 302 where a 301 belongs is visible) → parse (HTML → a `Page` object with head, JSON-LD, headings, links, images, ads, prose, FAQ and the character offsets of the tool regions) → rules → cross (link graph, orphans, catalogue ↔ sitemap diff, duplicate titles) → report (markdown for humans, JSON for diffs). `npm run audit`, `audit:dist`, `audit:strict`, and `test:audit` for fixtures. Thresholds live in `audit/rules/catalog.json` — no rule hardcodes a number.
+
+**Its first full run found a live incident.** All 80 URLs returned 200 and every page looked clean, so the site appeared healthy. It was not: the deploy at **13:43 UTC that day** had shipped a build with no `ADSENSE_ENABLED` and no slots — **no loader, no units, on 80 pages** — because it ran from a shell where `.env` was never sourced. The audit's `ad-unit-count` rule compares the served page with the `.env` that built it, which is the check `test:live` does not make. Redeployed with the environment (`dd94bfbc`), restored to 3 units on tool pages, 1 on guides, 0 on the homepage, `test:live` **78/78**. Text content was byte-identical to our build, so the only thing missing was revenue.
+
+**Two guards so it cannot recur silently.** `build.mjs` now refuses to build when `.env` declares ads on but the environment does not, with an `ALLOW_ADS_OFF=1` escape for a deliberately ad-free build. And the audit's own rule set now treats a served/config mismatch as a **blocker**, not a note.
+
+**A second real defect, found the same way.** The homepage logo had `href=""`: `rel('/', '/')` collapsed to an empty string, so the logo link went nowhere. Fixed to `./` in `rel()` and deployed (`299a6ffd`). The rule that caught it — `empty-href` — ignores `href="#"`, because the cookie-settings control is an anchor with a JS handler and that is a legitimate pattern.
+
+**Current state: 0 blockers, 0 majors, 4 minors, 80 info.** The minors are one heading skip on `/blog/` (h1 → h3), one image without dimensions on the OG image tester, and no `<lastmod>` in `sitemap-pages.xml` / `sitemap-tools.xml`. The info findings are all the missing skip link, which is a real accessibility gap and a cheap fix. Live and `--dist` now agree exactly: `--diff` returns zero one-sided findings, which is the evidence that what is deployed is what was built.
+
+**Verification:** audit **47 rules / 65 fixture assertions**; `seo-audit` **2547/2547**; smoke **44/44**; `test:live` **78/78**; `audit:dist` and `--diff` clean; SEO audit unchanged by the `rel()` fix. Deploys `dd94bfbc` (restore), `299a6ffd` (logo). No content changed, so no IndexNow.
+
+---
+
 ## 2026-10-27 (11th pass) — The kickoff date was a day behind, and the accounts did not exist
 
 **Agent:** DeepSeek (OpenCode session)

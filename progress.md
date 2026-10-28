@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Sitemap audit pipeline — and a live deploy that had lost every ad (28 Oct 2026)
+
+**Built:** `audit/` — discover → fetch → parse → rules → cross → report, 47 rules, no dependencies, `npm run audit` / `audit:dist` / `audit:strict` / `test:audit`. Every finding carries a fix that names the file, and `docs/audit/latest.json` is committed so two runs can be diffed.
+
+**Its first run found a live incident.** A deploy at 13:43 UTC had shipped the site with no AdSense loader and no units on 80 pages, from a shell where `.env` was never sourced. The pages were all 200, all clean, text-identical to the build — only the revenue was missing. Redeployed with the environment (`dd94bfbc`), 78/78 restored.
+
+**Prevention, not a note.** `build.mjs` now refuses to build when `.env` says ads are on but the environment disagrees (`ALLOW_ADS_OFF=1` overrides), and the audit escalates a served/config mismatch to a blocker.
+
+**Also fixed:** the homepage logo had `href=""` — `rel('/', '/')` collapsed to an empty string. Now `./`, deployed `299a6ffd`.
+
+**Result:** 0 blockers, 0 majors, 4 minors, 80 info. Live and dist agree exactly under `--diff`.
+
 ### Kickoff slips one day: the date was a day behind and no accounts existed (27 Oct 2026)
 
 **What was wrong.** The task list for the day began “today is Mon 26 Oct”. It was **Tue 27 Oct, 09:30 ET** — 30 minutes past the 09:00 slot the launch thread was scheduled for. Checked directly rather than assumed: `x.com/tools4market`, `x.com/tools4marketHQ` and `reddit.com/user/tools4market` all report no such account. Setup had not happened, so the kickoff could not.

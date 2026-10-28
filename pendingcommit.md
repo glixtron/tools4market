@@ -1,7 +1,24 @@
 # Pending Commit
 
 **Prepared:** 23 October 2026
-**Status:** ✅ Twenty-two entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below). (21) Content ad unit in guides (below). (22) All three ad units live (below).
+**Status:** ✅ Twenty-three entries, all committed and pushed. (1) Image-optimizer commit `5837fb7` on `origin/main`. (2) v2.2 Human-First design refinement on `audit-growth-plan-v2.1`. (3) v2.3 analyze-anywhere + AI fix suggestions on `audit-growth-plan-v2.1` — committed + pushed same day, `main` fast-forwarded. (4) v2.4 growth-plan review + three new tools (below). (5) v2.5 social + hreflang checkers (below). (6) v2.6 marketing calculators + fifth category (below). (7) v2.7 PageSpeed deep fix (below). (8) v2.8 timestamp + IP converters (below). (9) v2.9 calculator batch 2 (below). (10) v2.10 Day-2 content pack integration (below). (11) HTTPS enforcement — plain http → https + HSTS (below). (12) Day-8 gap-list guides — internal linking, image SEO, Core Web Vitals (below). (13) live-verify hop assertion fix (below). (14) Day-9 guides — Open Graph image size, .htaccess redirects, title tag length (below). (15) Launchstag listing badge (below). (16) robots.txt policy — training blocked, answer engines allowed (below). (17) Day-10 guides — URL slugs, canonical, hreflang (below). (18) Day-11 guides — XML sitemaps, structured-data validation, HTTP status codes (below). (19) Source-link hygiene + `check:sources` (below). (20) Day-12 founder-side writing + `check:social` (below). (21) Content ad unit in guides (below). (22) All three ad units live (below). (23) Sitemap audit pipeline + the ad-less deploy it caught (below).
+
+## Entry 23 — Sitemap audit pipeline, and the deploy it caught serving no ads
+
+**Branch:** `audit-growth-plan-v2.1` · **Date:** 28 Oct 2026
+**Status:** ✅ Committed. Deploys `dd94bfbc` (ad restore) and `299a6ffd` (logo href fix). Audit 47 rules / 65 fixture assertions; `test:live` 78/78; SEO audit 2547/2547; smoke 44/44.
+
+**Subject:** `feat: sitemap audit pipeline (80 URLs, 47 rules, per-page fixes)`
+
+**What shipped:** `audit/` with six stages — discover, fetch (manual redirect chains), parse, rules, cross, report — plus `npm run audit`, `audit:dist`, `audit:strict`, `test:audit`, thresholds in `audit/rules/catalog.json`, markdown + JSON outputs in `docs/audit/`, and a README that states the limits rather than letting someone discover them.
+
+**What it caught on the first full run:** the live site was serving a build with no AdSense loader and no units on all 80 pages, from a deploy at 13:43 UTC that ran without `.env`. Every page was HTTP 200 and text-identical to our build, so nothing looked wrong. Restored by redeploying with the environment.
+
+**Prevention:** `build.mjs` refuses to build when `.env` declares AdSense on but the environment does not (`ALLOW_ADS_OFF=1` overrides). The audit escalates a served-versus-configured mismatch to blocker.
+
+**Also fixed:** the homepage logo's `href=""` — `rel('/', '/')` returned an empty string for a same-path link. Now `./`.
+
+**Findings left open (4 minor, 80 info):** heading skip on `/blog/`, one image without dimensions, no `<lastmod>` on two sitemaps, no skip link anywhere.
 
 ## Entry 22 — All three ad units commissioned
 

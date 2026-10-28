@@ -1,0 +1,57 @@
+{
+  "//": "Every threshold the audit uses. Rules read this file, never a literal, so a limit has one home and a change is reviewable in one diff. The numbers mirror tests/seo-audit.mjs, which enforces the same limits against the source data.",
+
+  "severityWeights": { "blocker": 10, "major": 4, "minor": 1, "info": 0 },
+
+  "onpage": {
+    "titleMin": 25,
+    "titleMax": 60,
+    "descMin": 110,
+    "descMax": 158,
+    "h1Min": 1,
+    "h1Max": 1
+  },
+
+  "content": {
+    "guideProseMin": 600,
+    "toolProseMin": 250,
+    "faqMin": 4,
+    "faqMax": 6,
+    "relatedToolsMin": 3,
+    "outboundLinksMin": 2
+  },
+
+  "assets": {
+    "htmlMaxBytes": 160000,
+    "imgAltRequired": true
+  },
+
+  "cross": {
+    "orphanCheck": true,
+    "duplicateTitles": true
+  },
+
+  "structure": {
+    "//": "Per-template expectations, by URL prefix. Used by the schema and brand rules.",
+    "tools": {
+      "jsonld": ["WebApplication", "FAQPage", "BreadcrumbList"],
+      "adUnits": 3,
+      "faqVisible": true
+    },
+    "blog": {
+      "jsonld": ["BlogPosting", "BreadcrumbList", "FAQPage"],
+      "adUnits": 1,
+      "faqVisible": true
+    },
+    "home": {
+      "jsonld": ["WebSite", "Organization", "FAQPage"],
+      "adUnits": 0,
+      "faqVisible": true
+    },
+    "pages": {
+      "jsonld": [],
+      "adUnits": 0,
+      "faqVisible": false
+    }
+  }
+}
