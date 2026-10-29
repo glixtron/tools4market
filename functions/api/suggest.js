@@ -43,6 +43,10 @@ const TOOLS = {
     title: 'Write a replacement Twitter/X card title for this page.',
     description: 'Write a replacement Twitter/X card description for this page.',
   },
+  'website-audit': {
+    title: 'Write a replacement <title> tag for this page.',
+    description: 'Write a replacement meta description for this page.',
+  },
 };
 
 const STYLE = {

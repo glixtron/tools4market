@@ -1863,6 +1863,18 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
 .sig-fail .sig-dot { background: var(--c-danger); }
 .sig-none { background: var(--c-surface-2); color: var(--c-muted); }
 .sig-none .sig-dot { background: var(--c-muted); }
+/* Website Audit (site-audit.js): the minor severity row (between warn and
+   info), the per-finding fix line, its evidence snippet, and the handoff link
+   into the tool or guide that does the job. */
+.sig-minor { background: var(--c-accent-soft); color: var(--c-text-2); }
+.sig-minor .sig-dot { background: var(--c-accent); }
+.sig-body .wa-fix { display: block; margin-top: 4px; }
+.sig-body .wa-ev {
+  display: block; margin-top: 4px; padding: 4px 7px; border-radius: var(--radius-xs);
+  background: var(--c-surface); color: var(--c-muted);
+  font-family: var(--font-mono); font-size: .74rem; line-height: 1.45; word-break: break-all;
+}
+.sig-body .wa-tool { margin-top: 7px; font-size: .78rem; padding: 5px 11px; }
 .inspect-tip {
   margin-top: 10px; padding: 10px 12px; border-radius: var(--radius-xs);
   background: var(--c-accent-soft); color: var(--c-text-2); font-size: .86rem; line-height: 1.5;

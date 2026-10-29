@@ -16,6 +16,7 @@
     "test:worker": "node tests/worker-routing.mjs",
     "test:live": "node tests/live-verify.mjs",
     "test:audit": "node audit/tests/rules.test.mjs",
+    "test:audit-api": "node tests/audit-batch-test.mjs",
     "audit": "node audit/pipeline.mjs",
     "audit:dist": "node audit/pipeline.mjs --dist",
     "audit:strict": "node audit/pipeline.mjs --strict",

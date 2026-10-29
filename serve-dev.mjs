@@ -8,6 +8,8 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, extname, normalize } from 'node:path';
+import { handleAuditBatch } from './functions/api/audit-batch.js';
+import { handleSuggest } from './functions/api/suggest.js';
 
 const R = fileURLToPath(new URL('.', import.meta.url));
 const DIST = join(R, 'dist');
@@ -94,6 +96,31 @@ async function serveStatic(res, pathname) {
   }
 }
 
+// Host a Worker API handler in Node: buffer the request, rebuild it against
+// this server's origin (the handlers enforce same-origin on Origin), and pass
+// the Response back untouched. Used by /api/audit-batch and /api/suggest so
+// localhost runs the same code paths as the deployed Worker.
+async function runWorker(handler, req, reqUrl) {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  const raw = Buffer.concat(chunks);
+  const headers = new Headers();
+  for (const [k, v] of Object.entries(req.headers)) {
+    if (Array.isArray(v)) v.forEach((x) => headers.append(k, x));
+    else if (v != null) headers.set(k, v);
+  }
+  const request = new Request('http://localhost:' + PORT + reqUrl.pathname, {
+    method: req.method,
+    headers,
+    body: ['GET', 'HEAD'].includes(req.method) ? undefined : raw,
+  });
+  const out = await handler(request, process.env);
+  const buf = Buffer.from(await out.arrayBuffer());
+  const h = {};
+  out.headers.forEach((v, k) => { h[k] = v; });
+  return { status: out.status, headers: h, body: buf };
+}
+
 createServer(async (req, res) => {
   const reqUrl = new URL(req.url, 'http://localhost:' + PORT);
   if (reqUrl.pathname === '/api/fetch') {
@@ -102,5 +129,16 @@ createServer(async (req, res) => {
     if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed.' });
     return apiFetch(res, reqUrl);
   }
+  if (reqUrl.pathname === '/api/audit-batch' || reqUrl.pathname === '/api/suggest') {
+    try {
+      const handler = reqUrl.pathname === '/api/audit-batch' ? handleAuditBatch : handleSuggest;
+      const out = await runWorker(handler, req, reqUrl);
+      res.writeHead(out.status, out.headers);
+      res.end(out.body);
+    } catch (e) {
+      json(res, 500, { ok: false, error: String((e && e.message) || e) });
+    }
+    return;
+  }
   return serveStatic(res, reqUrl.pathname);
-}).listen(PORT, () => console.log('Tools4Market dev server → http://localhost:' + PORT + '/  (static + /api/fetch proxy)'));
+}).listen(PORT, () => console.log('Tools4Market dev server → http://localhost:' + PORT + '/  (static + /api/fetch + /api/audit-batch + /api/suggest)'));

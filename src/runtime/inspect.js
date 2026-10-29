@@ -702,6 +702,9 @@
     'ip-converter': 1,
     'email-roi-calculator': 1,
     'marketing-budget-calculator': 1,
+    // Owns its URL field and drives a whole-site crawl — the single-page
+    // analyze panel has nothing to offer here (inspect.js isn't even loaded).
+    'website-audit': 1,
   };
 
   function mount(root, slug) {

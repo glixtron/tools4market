@@ -577,3 +577,119 @@ export const SCORE = {
     noQuery: 'Add a target phrase to score topical placement. Without it, the query factor is excluded from the score.',
   },
 };
+
+// Website Audit tool (slug: website-audit) — all user-facing strings for the
+// crawl-orchestration runtime (src/runtime/site-audit.js), emitted at build
+// time as window.T4M_WA. No hardcoded copy in the runtime (rules.md §3).
+export const SITE_AUDIT = {
+  idle: 'Enter your website address to start. The audit reads your sitemap and checks up to 100 pages.',
+  badUrl: 'Enter a full URL, e.g. https://your-site.com',
+  badHost: 'Enter a public website address (its homepage), e.g. https://your-site.com',
+  starting: 'Reading robots.txt and sitemap.xml…',
+  discovered: 'Found {n} page(s) in the sitemap. Starting the crawl…',
+  crawling: 'Audited {m} of {n} pages…',
+  noPages: 'Your sitemap listed no page URLs, so there is nothing to crawl. Publish a sitemap and run the audit again.',
+  links: 'Checking link targets ({m} of {n})…',
+  cross: 'Cross-checking pages for duplicates, orphans and broken links…',
+  done: 'Audit complete: {n} page(s) checked, {f} finding(s).',
+  stopped: 'Audit stopped at {m} of {n} pages. Press Resume to continue, or start over.',
+  resumed: 'Resuming the audit of {url}…',
+  failed: 'The audit request failed. Check the site is publicly reachable, then try again.',
+  noReport: 'Run an audit first — the report copies once the crawl finishes.',
+  scoreLine: 'Site audit score: {s}/100',
+  scoreNote: 'Deductions are this tool’s checklist weights ({b} per blocker, {g} per major, {m} per minor) across the crawled pages — not Google ranking weights. The score summarises the findings below; it does not predict rankings or traffic.',
+  emptyReport: 'No findings — every check passed on the crawled pages.',
+  findingsHeader: 'Findings ({n})',
+  fixHeader: 'How to fix, in priority order',
+  pagesHeader: 'Pages audited ({n})',
+  pageRow: '{path} — HTTP {status}, {w} words, {l} internal link(s)',
+  copyLabel: 'Copy report',
+  resumeLabel: 'Resume audit of {url}',
+  runLabel: 'Audit Website',
+  runningLabel: 'Audit running…',
+  stopLabel: 'Stop',
+  sev: { blocker: 'Blocker', major: 'Major', minor: 'Minor', info: 'Info' },
+  grp: { technical: 'Technical', onpage: 'On-page', schema: 'Structured data', content: 'Content', assets: 'Assets', links: 'Links', cross: 'Cross-page' },
+  ai: {
+    locked: 'AI drafting follows your cookie consent.',
+    manage: 'Open consent settings',
+    pending: 'Drafting a suggestion…',
+    fail: 'The AI draft is unavailable right now.',
+    btn: 'Draft a fix with AI',
+    copy: 'Copy',
+    applied: 'Suggestion ready — review it before you paste it into your page.',
+  },
+  // finding id → the destination that actually does this job. `path` is a full
+  // site path (/tools/… for tools, /blog/… for guides) so a handoff can land on
+  // a guide when the fix is editorial. Tool paths also carry ?url=&title=&desc=
+  // (the crawled page's snapshot) which site.js prefills on arrival.
+  toolFor: {
+    'title-length': { path: '/tools/serp-preview-tool/', label: 'Write a better title' },
+    'title-present': { path: '/tools/meta-tag-generator/', label: 'Add a title tag' },
+    'desc-length': { path: '/tools/serp-preview-tool/', label: 'Write a better description' },
+    'duplicate-title': { path: '/tools/serp-preview-tool/', label: 'Compare the duplicate titles' },
+    'duplicate-description': { path: '/tools/meta-description-checker/', label: 'Compare the duplicate descriptions' },
+    'h1-count': { path: '/tools/seo-score-checker/', label: 'Check the heading structure' },
+    'h1-missing': { path: '/tools/seo-score-checker/', label: 'Check the heading structure' },
+    'heading-order': { path: '/tools/seo-score-checker/', label: 'Fix heading order' },
+    'duplicate-h1': { path: '/tools/seo-score-checker/', label: 'Fix duplicate H1s' },
+    'thin-content': { path: '/tools/keyword-density-checker/', label: 'Check keyword focus' },
+    'prose-min': { path: '/tools/keyword-density-checker/', label: 'Check keyword focus' },
+    'focus-in-title': { path: '/tools/keyword-density-checker/', label: 'Check keyword focus' },
+    'focus-in-description': { path: '/tools/keyword-density-checker/', label: 'Check keyword focus' },
+    'focus-in-heading': { path: '/tools/keyword-density-checker/', label: 'Check keyword focus' },
+    'jsonld-present': { path: '/tools/schema-markup-generator/', label: 'Add structured data' },
+    'jsonld-valid': { path: '/tools/schema-markup-generator/', label: 'Fix the structured data' },
+    'jsonld-expected-types': { path: '/tools/schema-markup-generator/', label: 'Add structured data' },
+    'faq-schema-matches-visible': { path: '/tools/schema-markup-generator/', label: 'Fix the FAQ markup' },
+    'broken-internal': { path: '/tools/web-crawler-audit/', label: 'Inspect the broken page' },
+    'dead-external': { path: '/tools/web-crawler-audit/', label: 'Inspect the outbound link' },
+    'http-status': { path: '/tools/web-crawler-audit/', label: 'Inspect the response' },
+    'url-resolves-to-itself': { path: '/tools/web-crawler-audit/', label: 'Inspect the redirect chain' },
+    'orphan-page': { path: '/tools/web-crawler-audit/', label: 'Inspect the orphan page' },
+    'empty-href': { path: '/tools/web-crawler-audit/', label: 'Inspect this page' },
+    'javascript-href': { path: '/tools/web-crawler-audit/', label: 'Inspect this page' },
+    'redirect-permanent': { path: '/tools/htaccess-redirect-generator/', label: 'Write a clean redirect' },
+    'sitemap-missing': { path: '/tools/sitemap-generator/', label: 'Generate a sitemap' },
+    'sitemap-unreachable': { path: '/tools/sitemap-generator/', label: 'Generate a sitemap' },
+    'sitemap-empty': { path: '/tools/sitemap-generator/', label: 'Generate a sitemap' },
+    'robots-missing': { path: '/tools/robots-txt-generator/', label: 'Write a robots.txt' },
+    'robots-disallowed': { path: '/tools/robots-txt-tester/', label: 'Test this URL against robots.txt' },
+    'og-complete': { path: '/tools/open-graph-generator/', label: 'Fix the social card' },
+    'twitter-complete': { path: '/tools/twitter-card-generator/', label: 'Fix the social card' },
+    'og-image-dimensions': { path: '/blog/open-graph-image-size-2026/', label: 'See the social image size guide' },
+    'canonical-present': { path: '/tools/canonical-tag-generator/', label: 'Fix the canonical tag' },
+    'canonical-matches-sitemap-url': { path: '/tools/canonical-tag-generator/', label: 'Fix the canonical tag' },
+    'img-alt': { path: '/blog/image-seo/', label: 'See the image SEO checklist' },
+    'img-dimensions': { path: '/blog/image-seo/', label: 'See the image size rules' },
+    'vague-anchor': { path: '/blog/internal-linking/', label: 'Improve link anchor text' },
+    'internal-link-density': { path: '/blog/internal-linking/', label: 'Improve internal linking' },
+    'outbound-links': { path: '/blog/internal-linking/', label: 'Review your outbound links' },
+    'title-present': { path: '/tools/meta-tag-generator/', label: 'Add a title tag' },
+    'html-lang': { path: '/blog/hreflang-basics/', label: 'See the lang attribute rules' },
+    'viewport': { path: '/blog/website-launch-seo-checklist/', label: 'See the mobile pre-launch check' },
+    'html-content-type': { path: '/tools/web-crawler-audit/', label: 'Inspect the response' },
+    'html-weight': { path: '/blog/core-web-vitals/', label: 'See the page weight rules' },
+    'render-blocking-script': { path: '/blog/core-web-vitals/', label: 'See how render-blocking is measured' },
+    'faq-count': { path: '/tools/schema-markup-generator/', label: 'Structure your FAQ block' },
+    'no-searchaction': { path: '/tools/schema-markup-generator/', label: 'Edit your search schema' },
+    'breadcrumb-positions': { path: '/tools/schema-markup-generator/', label: 'Fix the breadcrumb schema' },
+    'noindex-in-sitemap': { path: '/blog/noindex-vs-robots-txt/', label: 'See noindex vs sitemap rules' },
+    // Deliberately unmapped: `skip-link` (accessibility). No tool or guide on
+    // the site does this job, and a button to the wrong one would promise what
+    // the destination cannot deliver — the finding keeps its fix text only.
+    // Brand rules (ad-*), webapplication-offer and related-tools-rendered are
+    // stood down for third-party sites and cannot fire.
+  },
+  // Handoff prefill overrides (site.js prefillFromParams): target slug → the
+  // field ids that don't follow the generic -url/-title/-desc conventions.
+  // Generic matching covers every other target (sp-url, sc2-title…); these four
+  // are the exceptions: canonical-as-page-url, the description textarea, the
+  // sitemap URL list, the robots path test.
+  handoff: {
+    'meta-tag-generator': { url: 'mt-canonical' },
+    'meta-description-checker': { desc: 'md-text' },
+    'sitemap-generator': { url: 'sm-urls' },
+    'robots-txt-tester': { url: 'rt-path' },
+  },
+};

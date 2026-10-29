@@ -11,6 +11,7 @@
 
 import { onRequestGet } from './functions/api/fetch.js';
 import { handleSuggest } from './functions/api/suggest.js';
+import { handleAuditBatch } from './functions/api/audit-batch.js';
 
 // Canonical host. The apex serves the site; www is redirected here in one hop
 // (path + query preserved) so there is never a redirect chain or a loop, and
@@ -86,6 +87,20 @@ export default {
     if (url.pathname === '/api/suggest' || url.pathname === '/api/suggest/') {
       try {
         return await handleSuggest(request, env);
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String((e && e.message) || e) }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      }
+    }
+
+    // ---- backend: the Website Audit tool's fetch+parse+rules pipeline -----
+    // Browser drives the crawl in batches; every HTTP fetch, parse and rule run
+    // happens here (discover → pages → links → cross). Same-origin only.
+    if (url.pathname === '/api/audit-batch' || url.pathname === '/api/audit-batch/') {
+      try {
+        return await handleAuditBatch(request, env);
       } catch (e) {
         return new Response(JSON.stringify({ ok: false, error: String((e && e.message) || e) }), {
           status: 502,

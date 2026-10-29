@@ -157,6 +157,53 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     } catch (e) { /* private mode: no animation */ }
   }
 
+  // Deep-link handoff: another tool's report links here with ?url=&title=&desc=
+  // (the audited page's snapshot), and the fields are filled on arrival so the
+  // tool opens already loaded with that page. Phase 'tool' runs before the
+  // analyze panel mounts and fills the tool's own fields, firing input so live
+  // tools render with the data; phase 'panel' lands the URL in the analyze
+  // panel when the tool itself has no URL field. Both run before the markRun
+  // listeners attach — a prefilled arrival is not a visitor "run".
+  function prefillFromParams(root, phase) {
+    var params;
+    try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
+    var url = params.get('url') || '';
+    var title = params.get('title') || '';
+    var desc = params.get('desc') || '';
+    if (!url && !title && !desc) return;
+    // Target-specific overrides for fields that break the -url/-title/-desc
+    // conventions (canonical-as-page-url, textarea fields, path tests).
+    var W = window.T4M_WA || {};
+    var map = (W.handoff && W.handoff[root.getAttribute('data-tool')]) || {};
+
+    function byId(id) {
+      if (!id) return null;
+      var f = document.getElementById(id);
+      return f && root.contains(f) ? f : null;
+    }
+    function set(field, value) {
+      if (!field || !value) return false;
+      field.value = value;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      return true;
+    }
+    if (phase === 'panel') {
+      if (!url) return;
+      // Only when no tool field already took the URL — otherwise the panel
+      // would queue a second fetch of the same page.
+      var taken = root.querySelector('input[id$="-url"]');
+      if (taken && taken.value === url) return;
+      var mapped = byId(map.url);
+      if (mapped && mapped.value === url) return;
+      var panel = root.querySelector('.inspect-url');
+      if (panel) panel.value = url;
+      return;
+    }
+    if (url) set(byId(map.url), url) || set(root.querySelector('input[id$="-url"]'), url);
+    if (title) set(byId(map.title), title) || set(root.querySelector('input[id$="-title"], textarea[id$="-title"]'), title);
+    if (desc) set(byId(map.desc), desc) || set(root.querySelector('input[id$="-desc"], textarea[id$="-desc"]'), desc);
+  }
+
   function initTool() {
     const root = document.getElementById('tool-root');
     if (!root) return;
@@ -167,16 +214,19 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     }
     track('tool_open', { tool_slug: slug });
     rememberTool(slug);
+    // Handoff prefill: the tool's own listeners are live, markRun isn't attached yet.
+    prefillFromParams(root, 'tool');
+    // "Analyze your own page first" panel — injected after the tool so its fields exist.
+    if (window.T4M_INSPECT && window.T4M_INSPECT.mount) {
+      try { window.T4M_INSPECT.mount(root, slug); } catch (err) { /* non-fatal */ }
+    }
+    prefillFromParams(root, 'panel');
     // Tools compute live as you type, so the first interaction inside the shell
     // is the "run". Fires once per page view.
     let ran = false;
     const markRun = () => { if (ran) return; ran = true; track('tool_run', { tool_slug: slug }); };
     root.addEventListener('input', markRun);
     root.addEventListener('change', markRun);
-    // "Analyze your own page first" panel — injected after the tool so its fields exist.
-    if (window.T4M_INSPECT && window.T4M_INSPECT.mount) {
-      try { window.T4M_INSPECT.mount(root, slug); } catch (err) { /* non-fatal */ }
-    }
   }
 
   // Guide→tool CTA clicks and contact/feedback clicks (the growth loop's

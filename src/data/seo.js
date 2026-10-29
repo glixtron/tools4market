@@ -527,4 +527,54 @@ ${f.url('hlc-self', 'This page’s own URL (for the self-reference check)', 'htt
 ${outputArea('hlc-list', 'Annotations')}
 ${note('Codes, duplicates and self-reference are validated in your browser; reciprocity must be confirmed on each alternate page.')}`,
   },
+
+  // ---------------------------------------------------------- 12
+  {
+    slug: 'website-audit',
+    name: 'Website Audit',
+    cat: 'seo',
+    icon: '🔍',
+    card: 'Crawl up to 100 pages and get every on-page, technical and link issue, with fixes.',
+    usedFor: 'for a full-site to-do list before a launch',
+    updated: '2026-10-29',
+    keywords: 'website audit seo audit site audit crawl audit url audit full site check',
+    focus: 'website audit',
+    h1: 'Free Website Audit — Crawl Your Site, Find What to Fix',
+    metaTitle: 'Free Website Audit — Crawl Up to 100 Pages Online',
+    metaDesc: 'Free website audit: crawl up to 100 pages of any public site and get 40+ on-page, technical and link checks with a prioritized fix list. No signup.',
+    intro: 'This website audit reads your sitemap, crawls up to 100 pages and checks each one with the same 40+ on-page, technical, content and link rules our own audits run. Every finding shows its evidence, a plain-language fix, and the tool that does the job.',
+    sections: [
+      { h: 'What this website audit checks', p: ['The crawl covers five layers. Technical: HTTP status, redirect chains, canonical tags, robots directives, language declaration, viewport and content type. On-page: title and description lengths against the accepted ranges, heading order, H1 count. Structured data: whether JSON-LD parses and matches what the page visibly shows. Content and assets: word count, image alt text, intrinsic dimensions, HTML weight. And links: vague anchors, javascript: hrefs, internal-link density — plus site-wide cross-checks that need the whole crawl: duplicate titles, duplicate descriptions, duplicate H1s, orphan pages nothing links to, broken internal links and dead outbound links.', 'Every threshold is the same one our own site audits enforce — this tool runs the identical rule engine against your pages, not a simplified copy. Findings are ordered by severity: blockers are broken or unreachable things, majors are defects that cost you visibility, minors are hygiene, info is context.'] },
+      { h: 'How the crawl works', p: ['The audit starts at your robots.txt and sitemap.xml (a sitemap index is followed up to three files deep), keeps the page URLs on your own domain, and caps the crawl at 100 pages. Each page is fetched by our server in small batches — your browser never contacts your host directly — then parsed and run through the rule engine. After the pages, the crawl checks up to 100 of the link targets it found, so broken internal links and dead outbound links are detected by fetching the target, not by guessing.', 'Progress renders as it goes: findings appear batch by batch and the score updates live. You can stop at any point and resume from where you left off within the same browser session. Nothing about your site is stored after the run — the report lives in your browser until you close or re-run it.'] },
+      { h: 'How to work through the results', p: ['Fix blockers first: a 404 inside your own site or a page that will not load wastes both visitor trust and crawl budget, and nothing else matters until it resolves. Then the majors — duplicate titles and descriptions mean two pages compete for one query and search engines pick the wrong one; thin pages rarely rank; missing alt text is the most common accessibility failure on the web. Minors are worth a pass once the majors are done.', 'Check whether a finding repeats across many pages before editing anything. A defect on one page is a page edit; the same defect on every page is a template edit, and fixing the template once clears the whole group. When a title or description finding fires, the report offers an AI draft built from that page’s actual content — review it before using it, and keep the part that names what the page really does.'] },
+      { h: 'What this audit cannot see', p: ['This is a crawl of what your server returns, not a browser session: pages that render their content only through JavaScript will look thin here even when visitors see a full page — paste the rendered HTML into the SEO Score Checker for those. The audit has no access to Google Search Console, so it cannot report impressions, queries, index coverage or which canonical Google actually selected. It does not measure backlinks, page speed on real devices, or keyword demand.', 'Treat the score as a checklist summary that makes two runs comparable — this deploy removed six points, this fix added four back — not as a prediction of rankings. The value is in the finding list: each item names the page, shows the evidence it fetched, and says what to change.'] },
+    ],
+    faqs: [
+      { q: 'How many pages does this website audit crawl?', a: 'Up to 100 pages, discovered from your sitemap.xml (a sitemap index is followed up to three files deep). The crawl cap keeps a single run fast and free; run it again after publishing to re-check.' },
+      { q: 'Does the website audit use Google’s data?', a: 'No. It fetches your public pages and checks them against documented on-page, technical and link thresholds. It has no access to Search Console, so index status, impressions and queries are outside its view.' },
+      { q: 'Is my site or the report stored anywhere?', a: 'No. Pages are fetched on demand for the run, and the report stays in your browser. Closing the tab or starting a new audit discards it.' },
+      { q: 'Why does a page I can open fail the audit?', a: 'The audit reads the server’s HTML like a crawler does — no JavaScript rendering, no login, no region unblocking. A page that only renders through scripts will look thin here; use the SEO Score Checker with pasted rendered HTML for that case.' },
+      { q: 'Can it audit a staging or private site?', a: 'Only pages publicly reachable from our server can be crawled. Private, password-protected or IP-restricted staging sites cannot be fetched; audit the production site or paste individual pages into the single-page tools.' },
+    ],
+    html: `
+${f.url('wa-url', 'Website URL to audit', 'https://your-site.com')}
+<div class="btn-row">
+  <button type="button" class="btn" id="wa-run">Audit Website</button>
+  <button type="button" class="btn btn-ghost" id="wa-stop" hidden>Stop audit</button>
+  <button type="button" class="btn btn-ghost" id="wa-resume" hidden></button>
+  <button type="button" class="btn btn-ghost" id="wa-copy-report" data-copy data-copy-text="">Copy report</button>
+</div>
+<div class="stat-line" id="wa-status" aria-live="polite"></div>
+<div class="score-wrap" id="wa-score" hidden>
+  <div class="score-ring" id="wa-ring"><span id="wa-ring-num">0</span></div>
+  <div class="score-meta">
+    <p class="score-label">Site audit score</p>
+    <p class="score-grade" id="wa-grade"></p>
+    <p class="score-note" id="wa-note"></p>
+  </div>
+</div>
+${outputArea('wa-pages', 'Pages audited')}
+${outputArea('wa-out', 'Findings and fixes')}
+${note('Pages are fetched and checked by our server; your browser never contacts the audited site. The score summarizes the checks listed below — it is not a Google score or a ranking prediction.')}`,
+  },
 ];
