@@ -946,7 +946,7 @@ export const ARTICLES = [
     title: 'Core Web Vitals: what LCP, CLS and INP actually measure',
     focus: 'core web vitals',
     date: '2026-10-25',
-    updated: '2026-10-25',
+    updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
     metaTitle: 'Core Web Vitals in 2026: LCP, CLS and INP Explained',
@@ -954,21 +954,21 @@ export const ARTICLES = [
     intro: 'Core Web Vitals are three numbers Google collects from real browsers. They are not the same as your Lighthouse score, and understanding that difference is most of the work.',
     sections: [
       {
-        h: 'The three Core Web Vitals and their thresholds',
+        h: 'Types of Core Web Vitals',
         p: [
           'Largest Contentful Paint times how long the largest element in the viewport takes to render: good under 2.5 seconds, poor past 4.0. Cumulative Layout Shift scores unexpected movement: good under 0.1, poor past 0.25. Interaction to Next Paint times the delay between a tap and the next frame that shows a response: good under 200 milliseconds, poor past 500.',
           'Google evaluates the 75th percentile of real users over a 28-day window, per page group. That detail matters. A fast desktop visit does not cancel out a slow phone, and one good day does not clear a bad month.',
         ],
       },
       {
-        h: 'LCP: the largest element, not the first byte',
+        h: 'What is LCP in Core Web Vitals?',
         p: [
           'Find the element before changing anything. In Chrome DevTools the Performance panel marks the LCP element on a recorded load, and PageSpeed Insights names it too. Usually it is a hero image, a large heading, or a block of text waiting on a web font. The fix depends entirely on which one it is.',
           'When it is an image, resize and compress it, preload it, and stop lazy-loading it. When it is text, the font is usually the culprit: preload the file, use `font-display: swap`, and cut the weights you actually load. Render-blocking CSS and JavaScript delay all three cases, so defer whatever the first paint does not need.',
         ],
       },
       {
-        h: 'CLS: reserve the space before you fill it',
+        h: 'What is CLS in Core Web Vitals?',
         p: [
           'Layout shift is what happens when content moves after the user has seen it. Images without `width` and `height` are the classic cause; web fonts that load late and change text metrics are the second; banners, cookie bars and embeds injected above existing content are the third. Each one is fixable by reserving space in advance.',
           'Shifts the user causes — opening a menu, expanding a section — do not count. The score is about surprises, which is why a page that jumps around on load can score worse than a page that looks busier but stays still.',
