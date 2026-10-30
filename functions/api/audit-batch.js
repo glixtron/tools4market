@@ -27,7 +27,7 @@
 import { parsePage } from '../../audit/parse.mjs';
 import { rules as ENGINE_RULES } from '../../audit/rules/index.mjs';
 import { normalise } from '../../audit/cross.mjs';
-import CATALOG from '../../audit/rules/catalog.json' assert { type: 'json' };
+import CATALOG from '../../audit/rules/catalog.json' with { type: 'json' };
 
 // 2 MB — mode=cross posts the page summaries BACK to the server, so on a
 // 100-page crawl with link lists this is a few hundred KB. Cloudflare's own
