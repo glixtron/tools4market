@@ -20,6 +20,13 @@
 - **Pending Work**: None
 - **Documentation**: All docs updated to reflect completed work
 
+## Deployment — Oct 30, 2026
+
+- Pushed to `origin/main` (`7801b54..c01ef6a`) and deployed to Cloudflare Workers.
+- Version ID `d4ab063f-d9d3-47fb-9c3a-ad321278ef31`, startup 2 ms, `env.AI` + `env.ASSETS` bound.
+- Live homepage confirms the promotion: job card #1 and the editor's pick are both the Website Audit (`/tools/website-audit/` → 200).
+- **Fixed a deploy-blocking bug**: `functions/api/audit-batch.js` imported `catalog.json` with `assert { type: 'json' }`, which Node ≥20.10 and current V8 (the Workers runtime) reject — the endpoint failed at module load. Changed to `with { type: 'json' }`; `/api/audit-batch` now loads and returns `ok:true` in production.
+
 ## Next Steps
 
 - Verify end-to-end browser verification on a real site
