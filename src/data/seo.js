@@ -537,6 +537,11 @@ ${note('Codes, duplicates and self-reference are validated in your browser; reci
     card: 'Crawl up to 100 pages and get every on-page, technical and link issue, with fixes.',
     usedFor: 'for a full-site to-do list before a launch',
     updated: '2026-10-29',
+    pickWhy: 'One run crawls up to 100 pages, checks 40+ rules on each and hands back a prioritized fix list — every finding carries a plain-language fix and the tool that does the job. Free, no signup, no limits.',
+    pickSample: `404  /contact-old/     Broken internal link — remove or redirect
+desc /pricing/         Meta description 210 chars — trim to 155
+dup  title × 3 pages   /blog/, /blog/page/2/ +1 — write unique titles
+Score 74/100 · 100 pages · 12 fixes prioritized`,
     keywords: 'website audit seo audit site audit crawl audit url audit full site check',
     focus: 'website audit',
     h1: 'Free Website Audit — Crawl Your Site, Find What to Fix',

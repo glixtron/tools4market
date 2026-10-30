@@ -91,6 +91,14 @@ export { POLICY };
 // not with the full inventory). One high-intent entry point per category.
 // ---------------------------------------------------------------------------
 export const JOBS = [
+  // Main tool: Full end-to-end website audit with AI-powered enhancement
+  {
+    title: 'Audit any live site with 73 rules and AI fixes',
+    blurb: 'Comprehensive analysis with 73 audit rules, visitor-friendly fixes, and AI-powered enhancement suggestions. Free, no signup, works on any page.',
+    path: '/tools/website-audit/',
+    cta: 'Start Website Audit',
+    icon: 'browser-check',
+  },
   {
     title: 'Make a page ready for search',
     blurb: 'Write the meta tags, preview the snippet and check the signals search engines read first.',
@@ -130,9 +138,8 @@ export const JOBS = [
 
 // Example searches shown as one-click chips under the hero search field.
 // They double as an empty-state suggestion when nothing matches.
-export const SEARCH_EXAMPLES = ['meta', 'robots', 'UTM', 'schema', 'audit'];
+export const SEARCH_EXAMPLES = ['meta', 'robots', 'UTM', 'schema', 'audit', 'enhance'];
 
-// ---------------------------------------------------------------------------
 // Editor's pick — rotates weekly (the week number picks the entry, so the card
 // changes on its own every Monday). Swap or reorder this list to re-curate.
 // Each entry carries a `note` ("why this week" editorial line) and points at a
@@ -155,6 +162,10 @@ export const EDITOR_PICKS = [
   {
     slug: 'utm-link-builder',
     note: 'Every campaign report is only as clean as the links that feed it.',
+  },
+  {
+    slug: 'website-audit',
+    note: 'One run crawls up to 100 pages, checks 40+ rules on each and hands back a prioritized fix list — the closest thing here to a full-site to-do list.',
   },
 ];
 

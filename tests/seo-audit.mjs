@@ -7,7 +7,7 @@
 // Prints a per-defect report; exits non-zero if anything fails.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { TOOLS, CATEGORIES } from '../src/data/index.js';
+import { TOOLS, CATEGORIES, JOBS, SEARCH_EXAMPLES, EDITOR_PICKS } from '../src/data/index.js';
 import { ARTICLES } from '../src/data/blog.js';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
@@ -319,7 +319,9 @@ for (const t of TOOLS) {
   ok('home: task-language search placeholder', home.includes('Search tools by task'));
   ok('home: editor pick card links a live tool', /<aside class="pick-card"[\s\S]{0,600}?<a href="tools\/[a-z0-9-]+\/">/.test(home));
   ok('home: pick card shows a real output preview', home.includes('class="pick-sample"'));
-  ok('home: five "start with your job" paths', home.includes('id="start-with-your-job"') && (home.match(/class="job-card"/g) || []).length === 5);
+  ok('home: every "start with your job" path renders as a job card', home.includes('id="start-with-your-job"') && (home.match(/class="job-card"/g) || []).length === JOBS.length, `${(home.match(/class="job-card"/g) || []).length} cards vs ${JOBS.length} jobs`);
+  ok('home: Website Audit is the first job card (main tool)', /<a class="job-card" href="tools\/website-audit\/"/.test(home));
+  ok('home: Website Audit is a lead editor pick', EDITOR_PICKS.some((p) => p.slug === 'website-audit'));
   ok('home: five numbered outcome categories', (home.match(/class="outcome-card"/g) || []).length === 5);
   ok('home: guides framed as "show the work"', home.includes('Guides that show the work'));
   ok('home: contact / feedback CTA', home.includes('Suggest a tool') && home.includes('Report a bug') && /href="contact\/"/.test(home));
@@ -379,7 +381,7 @@ for (const t of TOOLS) {
 
   // --- task-oriented search: example chips + a helpful (not blank) empty state
   const chips = (home.match(/class="sx-chip"/g) || []).length;
-  ok('home: five example search chips (meta/robots/UTM/schema/audit)', chips === 5, chips + ' chips');
+  ok(`home: every example search chip renders (${SEARCH_EXAMPLES.join('/')})`, chips === SEARCH_EXAMPLES.length, chips + ' chips');
   ok('home: chips wired to the search field (data-q)', home.includes('data-q="meta"') && home.includes('data-q="audit"'));
   ok('home: search empty state offers concrete suggestions', home.includes('id="search-empty"') && /try .{0,12}meta/i.test(home) && home.includes('robots'));
   ok('site.js: example chips run the search filter', siteJs.includes('.sx-chip'));
@@ -390,7 +392,7 @@ for (const t of TOOLS) {
 
   // --- job cards use the 1.5px line-icon family (no emoji in primary UI)
   const jobIcons = (home.match(/class="job-icon"/g) || []).length;
-  ok('home: five job cards carry line icons', jobIcons === 5, jobIcons + ' icons');
+  ok('home: every job card carries a line icon', jobIcons === JOBS.length, jobIcons + ' icons');
   ok('job icons: 1.5px stroke, rounded caps, currentColor', (home.match(/stroke-width="1.5"/g) || []).length >= 4);
 
   // --- guide cards: editorial date + topic label + "use this tool" bridge

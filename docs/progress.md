@@ -11,6 +11,7 @@
 - **VISITOR_FIX**: Map of 11 visitor-friendly fixes for each rule has been added
 - **Handoff Map**: 11 tool destinations configured for site-specific fixes (meta-tag-generator, meta-description-checker, sitemap-generator, robots-txt-generator, open-graph-generator, twitter-card-generator, canonical-tag-generator, keyword-density-checker, web-crawler-audit, hp-score-checker)
 - **SITE_AUDIT**: ToolFor mapping updated to include all 11 rule IDs
+- **Homepage**: Website Audit is now the **main tool** — job card #1 and lead editor pick, with 6 job cards / 6 search chips / 6 icons (tests derive counts from data)
 
 ## Status
 
