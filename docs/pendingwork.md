@@ -2,15 +2,25 @@
 
 ## Status
 
-**No pending work.** All tasks have been completed.
+**No pending code work.** Site-side work is caught up; everything outstanding is founder-side.
 
+- **47 tools / 84 pages / 24 guides** — `regex-tester` and `qr-code-generator` added 31 Oct 2026
 - All 47 audit rules implemented and verified
-- All 45 tool pages smoke-tested
+- All 47 tool pages smoke-tested (`npm test` → 47/47)
+- SEO audit **2672/0** · consent pass · worker-routing pass
 - All 43 audit-batch tests passing
 - All 24 suggest API tests passing
 - VISITOR_FIX map added with 11 rule entries
 - Handoff map with 11 tool destinations configured
 - SITE_AUDIT toolFor mapping updated
+
+### Decisions waiting on the owner
+
+- [ ] **Ratify or reject the vendored QR encoder** (`src/vendor/qrcode.js`, MIT). The build still has zero npm dependencies, but rules.md §3 says "no npm dependencies" — the cleanest wording is "no npm *build* dependencies; third-party browser code must be vendored, licensed and loaded only on the page that needs it."
+
+### Remaining (founder-side, not code)
+
+See [`docs/founder-actions.md`](founder-actions.md): AdSense review re-check 4 Nov, tools.cafe + SaaSHub submissions, X/Reddit warm-up, Indie Hackers post rewrite, Product Hunt launch.
 
 ## Completed Tasks
 
@@ -23,6 +33,6 @@
 
 ## Next Steps
 
-- End-to-end browser verification on a real website
-- Deploy the audit tool to production
+- ~~End-to-end browser verification on a real website~~ — the audit tool's four modes are covered by `tests/audit-batch-test.mjs` (43 checks) and its report rendering by `npm test`; a manual crawl in a real browser session is still worth doing once, not blocking
+- ~~Deploy the audit tool to production~~ — live since 30 Oct 2026 (`/tools/website-audit/`)
 - Monitor and maintain the audit pipeline

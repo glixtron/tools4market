@@ -702,6 +702,10 @@
     'ip-converter': 1,
     'email-roi-calculator': 1,
     'marketing-budget-calculator': 1,
+    // Pure-local checkers: the analyse panel fetches a page, which is no use
+    // to a pattern tester or a QR encoder that never reads a URL.
+    'regex-tester': 1,
+    'qr-code-generator': 1,
     // Owns its URL field and drives a whole-site crawl — the single-page
     // analyze panel has nothing to offer here (inspect.js isn't even loaded).
     'website-audit': 1,

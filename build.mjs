@@ -19,7 +19,7 @@ const YEAR = new Date().getFullYear();
 // (Suggestion logged 23 Oct in suggest.md; implemented here for the v2.11 mark.)
 const ASSET_V = await (async () => {
   const h = createHash('sha256');
-  const dirs = ['src/assets', 'src/runtime', 'src/data', 'src/fonts'];
+  const dirs = ['src/assets', 'src/runtime', 'src/data', 'src/fonts', 'src/vendor'];
   const files = ['src/style.css', 'src/site.js'];
   for (const d of dirs) {
     try {
@@ -204,10 +204,16 @@ const SLUG_RUNTIME = { 'website-audit': 'site-audit.js' };
 // engine entirely — website-audit owns its URL field and crawls server-side,
 // so the panel would be dead weight on the page.
 const NO_PANEL = new Set(['website-audit']);
+// A tool that needs a self-contained third-party library ships it as one extra
+// classic script, loaded before the category runtime that calls it. Currently
+// one: the QR encoder (MIT, Kazuhiko Arase), vendored in src/vendor/ rather
+// than installed — the build still has no npm dependencies.
+const VENDOR_SCRIPTS = { 'qr-code-generator': ['vendor/qrcode.js'] };
 function pageScripts(path, tool) {
   const files = ['site.js'];
   if (tool) {
-    files.push('inspect-strings.js', 'runtime/' + (SLUG_RUNTIME[tool.slug] || RUNTIME_FILE[tool.cat]));
+    files.push('inspect-strings.js', ...(VENDOR_SCRIPTS[tool.slug] || []));
+    files.push('runtime/' + (SLUG_RUNTIME[tool.slug] || RUNTIME_FILE[tool.cat]));
     if (!LOCAL_TOOLS.has(tool.slug) && !NO_PANEL.has(tool.slug)) files.push('runtime/inspect.js');
     if (AUDIT_SLUGS.has(tool.slug)) files.push('runtime/audit.js');
   }
@@ -445,6 +451,7 @@ const LOCAL_TOOLS = new Set([
   'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
   'json-validator', 'roi-calculator', 'roas-calculator', 'cac-calculator', 'ad-metrics-calculator',
   'timestamp-converter', 'ip-converter', 'email-roi-calculator', 'marketing-budget-calculator',
+  'regex-tester', 'qr-code-generator',
 ]);
 // Honest card copy where the two stock notes don't fit: website-audit has no
 // single-page panel (it crawls), and local tools have no server round-trip.
@@ -1042,6 +1049,12 @@ ${feedItems}
   await copyJsWithMap(R + 'src/site.js', R + 'dist/assets/site.js');
   for (const f of ['seo.js', 'ai-search.js', 'content.js', 'web.js', 'marketing.js', 'inspect.js', 'audit.js', 'site-audit.js']) {
     await copyJsWithMap(R + 'src/runtime/' + f, R + 'dist/assets/runtime/' + f);
+  }
+  // Vendored third-party libraries: copied verbatim (their own licence headers
+  // stay intact) and only onto the tool pages that reference them.
+  await mkdir(R + 'dist/assets/vendor', { recursive: true });
+  for (const f of await readdir(R + 'src/vendor')) {
+    await copyFile(R + 'src/vendor/' + f, R + 'dist/assets/vendor/' + f);
   }
   await mkdir(R + 'dist/fonts', { recursive: true });
   for (const f of await readdir(R + 'src/fonts')) {

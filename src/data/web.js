@@ -576,4 +576,117 @@ ${note('Parsed in this browser with JSON.parse — your document is never upload
   <button type="button" class="btn" id="ip-conv">Convert</button>
   ${outputBlock('ip-out', 'Converted IP address')}`,
     },
+
+  // ---------------------------------------------------------- regex tester
+  {
+    slug: 'regex-tester',
+    name: 'Regex Tester',
+    cat: 'web',
+    icon: '🔍',
+    card: 'Test a regular expression against real text and see every match, flag and capture group live.',
+    usedFor: 'for checking a pattern before you ship it',
+    keywords: 'regex tester regular expression test pattern match capture group javascript flags online',
+    focus: 'regex tester',
+    h1: 'Free Regex Tester — Test Patterns Online, No Signup',
+    metaTitle: 'Free Regex Tester — Test Patterns & Matches Online',
+    metaDesc: 'Test any regular expression with this free regex tester: see every match and capture group as you type, spot flag mistakes and syntax errors before you ship.',
+    intro: 'This regex tester runs your pattern against the text you paste and lists every match with its position and capture groups, so you can see what a regular expression actually matches before it ships.',
+    sections: [
+      { h: 'What this regex tester does', p: [
+        'A regular expression is a compact rule for finding text: one pattern, written once, that can match thousands of lines at a time. The gap between writing a pattern and trusting it is where most bugs live, because a pattern can quietly match far more or far less than you intended. This regex tester closes that gap by running your pattern against the text you paste and reporting the result immediately — every match, the position where it started, and what each capture group held. Nothing is uploaded: the text stays in the tab, so an unpublished config or a client log never leaves your machine.',
+        'The report separates two things that are easy to confuse. The match list shows the exact substrings the pattern found, in the order they appear, each with its start and end offset so you can find the same text in a large file. Under every match the capture groups are numbered the way JavaScript numbers them: group zero is the whole match, group one is the first pair of parentheses, and named groups are listed under the name you gave them. When the pattern finds nothing, the tester says so plainly rather than leaving an empty box.',
+      ] },
+      { h: 'How to use this regex tester', p: [
+        'Type the pattern into the Pattern box without the surrounding slashes — the tester builds the regular expression object for you, and the flag checkboxes decide how it behaves. Paste the text you want to search into the test area below and the result updates as you type, so there is no Apply button to forget. A broken pattern never breaks the page either: the status line quotes the message the JavaScript engine returned and points at the character or flag that caused it, and the output clears until the pattern parses again.',
+        'The flags are the part people get wrong most often. Global keeps searching after the first hit, and without it you only ever see the first match even though the pattern is correct. Case-insensitive is the difference between finding every casing of a word and only the capitalised one. Multiline changes what the anchors mean, so a caret starts each line instead of the whole text, while dotAll lets a dot cross line breaks and unicode makes character classes respect code points rather than UTF-16 units. If a pattern works in your editor and fails in the browser, the engine is usually the reason, not your spelling.',
+      ] },
+      { h: 'JavaScript regular expressions: limits worth knowing', p: [
+        'This tester uses the engine your browser uses, which is JavaScript rather than Perl, Python or PCRE. Most everyday syntax behaves the same, but the edges differ: JavaScript supports lookbehind and named groups, while possessive quantifiers and atomic groups are not available at all, and some escapes you know from shell tools mean something slightly different. Unicode-aware matching is opt-in through the unicode flag, which is why a pattern that handles accented letters correctly in one tool can look for the wrong bytes here. If a pattern works in your editor and fails in the browser, the engine is usually the reason, not your spelling.',
+        'Two habits keep a pattern honest. Test against text that includes the awkward cases — empty lines, accents, emoji, very long runs and the near-miss that should not match — because a tidy sample proves very little and the failure will arrive in production otherwise. And prefer the smallest pattern that matches what you mean: a broad one may work today and become unreadable in six months, while a named group and a short comment in the surrounding code do more for maintainability than a clever trick.',
+      ] },
+    ],
+    faqs: [
+      { q: 'Is this regex tester free to use?', a: 'Yes — this regex tester is free, needs no signup and runs entirely in your browser, so any text you paste is processed locally and never uploaded or stored.' },
+      { q: 'What flags can I test with this regex tester?', a: 'It exposes the flags JavaScript supports: global, case-insensitive, multiline, dotAll, unicode and sticky. Each checkbox changes how the same regex tester treats the text you paste.' },
+      { q: 'Does it handle lookbehind and named groups?', a: 'Yes. Modern browsers support lookbehind assertions and named capture groups, and named groups are listed alongside the numbered ones. An unsupported feature returns the engine error unchanged.' },
+      { q: 'Why does my pattern match an empty string?', a: 'Quantifiers such as an asterisk or a question mark are allowed to match nothing, so a pattern succeeds with zero characters at every position. The tester reports those zero-length matches instead of looping.' },
+      { q: 'Can I test Python or PHP patterns in this regex tester?', a: 'You can, but this regex tester runs JavaScript syntax. Everyday patterns port unchanged, while engine-specific features such as atomic groups or possessive quantifiers report an error here and work elsewhere.' },
+    ],
+    html: `
+${f.text('rt-pattern', 'Pattern', '\\b\\d{4}-\\d{2}-\\d{2}\\b')}
+<div class="field-row">
+${f.check('rt-f-g', 'g — global (every match)', true)}
+${f.check('rt-f-i', 'i — ignore case')}
+${f.check('rt-f-m', 'm — multiline anchors')}
+${f.check('rt-f-s', 's — dot matches newline')}
+${f.check('rt-f-u', 'u — unicode')}
+</div>
+${f.textarea('rt-text', 'Test string', 'Paste the text you want to search…', 6)}
+<p class="tool-note" id="rt-stats"></p>
+${outputArea('rt-out', 'Matches and capture groups')}
+${note('Patterns run locally with JavaScript\u2019s RegExp engine — nothing you paste leaves the page.')}`,
+  },
+
+  // ---------------------------------------------------------- QR code generator
+  {
+    slug: 'qr-code-generator',
+    name: 'QR Code Generator',
+    cat: 'web',
+    icon: '🔳',
+    card: 'Turn any text or link into a scannable QR code and download it as PNG or SVG, free.',
+    usedFor: 'for links, WiFi details and print',
+    keywords: 'qr code generator create qr code png svg download url wifi free online',
+    focus: 'qr code generator',
+    h1: 'Free QR Code Generator — No Signup, No Limits',
+    metaTitle: 'Free QR Code Generator — PNG & SVG Download',
+    metaDesc: 'Create a QR code free with this QR code generator: enter a link or text, pick the size and error level, then download a PNG or SVG ready to print. No signup.',
+    intro: 'This QR code generator turns a link, message or WiFi detail into a scannable code you can preview instantly and download as PNG or SVG — generated in your browser with no signup.',
+    sections: [
+      { h: 'How this QR code generator works', p: [
+        'A QR code is a two-dimensional barcode: a square of black and white modules that stores bytes in a pattern a camera can decode. Encoding happens here in the page, so the text you type is turned into a module grid by your own browser and never sent to a service that could log it. Enter a link, a short message, a contact record or a WiFi configuration, choose how large you want the image and how much damage it should tolerate, and the preview updates as you type.',
+        'The generator grows the code to fit the data: a short URL needs only a small grid, while a paragraph pushes it to a denser one, and the quiet border around the edge stays intact so scanners can find the edges. What you see in the preview is exactly what the downloaded file contains — the PNG is rendered from the same grid at the size you picked, and the SVG is the grid itself as vector shapes, which is the version to use when something will be printed and scaled.',
+      ] },
+      { h: 'Choosing a size and an error correction level', p: [
+        'Size matters less than the physical space the code occupies when it is finally placed. For a screen, 256 pixels is comfortable; for anything printed, start at 512 and go to 1024 if the code will sit on a poster, a menu or a window where people scan from a step or two back. The practical rule is that a code should be about a tenth of the distance it is scanned from across, and that a quiet zone of clear space around the border is what lets a camera lock on in poor light.',
+        'Error correction is about survival, not quality. The four levels reserve roughly 7, 15, 25 and 30 percent of the code for redundancy, so a damaged or partly covered code still decodes. Higher levels make the pattern denser rather than sharper, which is why the middle setting suits most jobs: enough redundancy to survive a coffee ring or a thumb, without the extra clutter that comes with the top level. Choose the highest level only when the code will be printed small, placed outdoors or likely to be written on.',
+      ] },
+      { h: 'What you can encode, and how to check it', p: [
+        'Plain text and links are the obvious uses, but the same square handles a WiFi configuration in the standard WIFI format, a short contact record, a one-time code for an internal tool or a sentence of instruction for a printed card. Keep the payload short and the modules stay readable: a code that has to hold a long paragraph becomes a fine grid that cheap phone cameras struggle with at an angle, so link to a page rather than embedding the whole page.',
+        'Check the result the way your visitor will — scan it with a phone before printing a run, from the angle and distance the poster will be read at, and confirm the decoded text is exactly what you intended. A trailing space or a missing protocol is the usual surprise: some scanners will not repair a link that begins without one, so include it when the payload is a web address. Once it scans cleanly at size, the downloaded file is ready for print, slides or the web.',
+      ] },
+    ],
+    faqs: [
+      { q: 'Is this QR code generator free to use?', a: 'Yes. This QR code generator is free with no signup and no watermark, and it runs in your browser, so the text you encode is never sent to a server or stored anywhere.' },
+      { q: 'What is the difference between PNG and SVG from this QR code generator?', a: 'PNG is a fixed-pixel image suited to screens and most print. SVG is vector, so it scales to any size without blurring — the better choice for logos, signage and anything that will be enlarged.' },
+      { q: 'Which error correction level should I pick?', a: 'Levels L, M, Q and H recover roughly 7, 15, 25 and 30 percent of the code. M suits most uses; pick H when the code will be small, damaged, written on or printed somewhere busy.' },
+      { q: 'Can I make a WiFi QR code with this QR code generator?', a: 'Yes. Enter the standard WIFI string with the network name and password in the format WIFI:T:WPA;S:network;P:password;; and most phone cameras will offer to join the network when scanned.' },
+      { q: 'Why will my QR code not scan?', a: 'Usual causes are a code printed too small, no clear border around it, or a link missing its protocol. Keep the quiet zone, size it for the distance it will be read from, and test with a phone before printing.' },
+    ],
+    html: `
+${f.text('qr-text', 'Text or link to encode', 'https://tools4market.online')}
+<div class="field-row">
+${f.select('qr-size', 'Image size', [
+      { v: '256', l: '256 px — screens' },
+      { v: '512', l: '512 px — print' },
+      { v: '1024', l: '1024 px — large print' },
+    ], '512')}
+${f.select('qr-ec', 'Error correction', [
+      { v: 'L', l: 'L — 7% recovery' },
+      { v: 'M', l: 'M — 15% recovery' },
+      { v: 'Q', l: 'Q — 25% recovery' },
+      { v: 'H', l: 'H — 30% recovery' },
+    ], 'M')}
+</div>
+<div class="btn-row">
+  <button type="button" class="btn" id="qr-run">Generate QR code</button>
+  <button type="button" class="btn btn-secondary" id="qr-png" data-download="">Download PNG</button>
+  <button type="button" class="btn btn-secondary" id="qr-svg" data-download="">Download SVG</button>
+</div>
+<p class="tool-note" id="qr-stats"></p>
+<div class="output">
+  <div class="output-head"><span>Preview</span></div>
+  <div id="qr-out" class="output-area" aria-live="polite"></div>
+</div>
+${note('Encoded in your browser by a vendored MIT-licensed encoder — the text you enter is never uploaded.')}`,
+  },
   ];

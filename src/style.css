@@ -1439,6 +1439,21 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
   background: var(--c-surface-2);
 }
 
+/* QR code preview: square, centred, capped to the panel it sits in. The SVG
+   carries width/height attributes, so `auto` on both keeps the aspect ratio
+   when max-width/max-height scale it down. */
+.qr-preview {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 340px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+}
+
 .btn-copy {
   background: var(--c-primary);
   color: #fff;

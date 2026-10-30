@@ -1136,4 +1136,235 @@
     root.addEventListener('input', update);
     update();
   };
+
+  // ---------------------------------------------------------- regex tester
+  T['regex-tester'] = function (root) {
+    var pat = $(root, 'rt-pattern');
+    var txt = $(root, 'rt-text');
+    var out = $(root, 'rt-out');
+    var stats = $(root, 'rt-stats');
+    var KEYS = ['g', 'i', 'm', 's', 'u'];
+
+    function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+    function flags() {
+      var f = '';
+      for (var i = 0; i < KEYS.length; i++) {
+        var c = $(root, 'rt-f-' + KEYS[i]);
+        if (c && c.checked) f += KEYS[i];
+      }
+      return f;
+    }
+
+    function update() {
+      if (!out || !stats) return;
+      clear(out);
+      var source = pat ? pat.value : '';
+      var text = txt ? txt.value : '';
+      if (!source) { stats.textContent = 'Enter a pattern to test.'; return; }
+
+      var f = flags();
+      var re;
+      try {
+        re = new RegExp(source, f);
+      } catch (e) {
+        stats.textContent = 'Invalid pattern: ' + String((e && e.message) || e);
+        return;
+      }
+      if (!text) { stats.textContent = 'Paste some text to search.'; return; }
+
+      var matches = [], m, guard = 0, looping = f.indexOf('g') !== -1 || f.indexOf('y') !== -1;
+      try {
+        if (!looping) {
+          m = re.exec(text);
+          if (m) matches.push(m);
+        } else {
+          while ((m = re.exec(text)) !== null && guard++ < 5000) {
+            matches.push(m);
+            if (m[0] === '') re.lastIndex++; // zero-length match: never loop
+          }
+        }
+      } catch (e) {
+        stats.textContent = 'Could not run the pattern: ' + String((e && e.message) || e);
+        return;
+      }
+
+      if (!matches.length) { stats.textContent = 'No matches in this text.'; return; }
+      stats.textContent = matches.length + (matches.length === 1 ? ' match' : ' matches') +
+        ' \u00b7 ' + text.length + ' characters tested \u00b7 flags: ' + (f || 'none');
+
+      var list = el('ul');
+      for (var i = 0; i < matches.length && i < 200; i++) {
+        var g = matches[i];
+        var li = el('li');
+        li.appendChild(el('span', '', '# ' + (i + 1) + '  \u201c' + g[0] + '\u201d  at ' + g.index + '\u2013' + (g.index + g[0].length)));
+        if (g.length > 1 || (g.groups && Object.keys(g.groups).length)) {
+          var inner = el('ul');
+          for (var k = 1; k < g.length; k++) {
+            inner.appendChild(el('li', '', 'group ' + k + ': ' + (g[k] === undefined ? '(not set)' : '\u201c' + g[k] + '\u201d')));
+          }
+          if (g.groups) {
+            for (var name in g.groups) {
+              if (Object.prototype.hasOwnProperty.call(g.groups, name)) {
+                inner.appendChild(el('li', '', 'group ' + name + ': ' + (g.groups[name] === undefined ? '(not set)' : '\u201c' + g.groups[name] + '\u201d')));
+              }
+            }
+          }
+          li.appendChild(inner);
+        }
+        list.appendChild(li);
+      }
+      out.appendChild(list);
+      if (matches.length > 200) out.appendChild(el('div', '', 'Showing the first 200 matches.'));
+    }
+
+    root.addEventListener('input', update);
+    root.addEventListener('change', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- QR code generator
+  T['qr-code-generator'] = function (root) {
+    var textIn = $(root, 'qr-text');
+    var sizeSel = $(root, 'qr-size');
+    var ecSel = $(root, 'qr-ec');
+    var out = $(root, 'qr-out');
+    var stats = $(root, 'qr-stats');
+    var runBtn = $(root, 'qr-run');
+    var pngBtn = $(root, 'qr-png');
+    var svgBtn = $(root, 'qr-svg');
+    var current = null; // { q, size, text, ec }
+    var NS = 'http://www.w3.org/2000/svg';
+    var QUIET = 4;
+
+    function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+
+    // The encoder takes an explicit type number, so grow it until the payload
+    // fits instead of guessing: a short URL lands small, a long one lands larger.
+    function encode(text, ec) {
+      if (typeof window.qrcode !== 'function') return null;
+      for (var n = 1; n <= 40; n++) {
+        try {
+          var q = window.qrcode(n, ec);
+          q.addData(text);
+          q.make();
+          return q;
+        } catch (e) { /* capacity exceeded at this size — try the next */ }
+      }
+      return null;
+    }
+
+    function pathFor(q) {
+      var count = q.getModuleCount(), d = '';
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (q.isDark(r, c)) d += 'M' + (c + QUIET) + ' ' + (r + QUIET) + 'h1v1h-1z';
+        }
+      }
+      return d;
+    }
+
+    function previewSvg(q, size) {
+      var count = q.getModuleCount(), total = count + QUIET * 2;
+      var svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'qr-preview');
+      svg.setAttribute('viewBox', '0 0 ' + total + ' ' + total);
+      svg.setAttribute('width', String(size));
+      svg.setAttribute('height', String(size));
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'QR code preview');
+      var bg = document.createElementNS(NS, 'rect');
+      bg.setAttribute('width', String(total));
+      bg.setAttribute('height', String(total));
+      bg.setAttribute('fill', '#ffffff');
+      svg.appendChild(bg);
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', pathFor(q));
+      path.setAttribute('fill', '#000000');
+      svg.appendChild(path);
+      return svg;
+    }
+
+    function svgMarkup() {
+      if (!current) return null;
+      var count = current.q.getModuleCount(), total = count + QUIET * 2;
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="' + current.size + '" height="' + current.size +
+        '" viewBox="0 0 ' + total + ' ' + total + '"><rect width="' + total + '" height="' + total +
+        '" fill="#ffffff"/><path d="' + pathFor(current.q) + '" fill="#000000"/></svg>';
+    }
+
+    // Canvas is only reached on download, and only where the browser supports
+    // it — the preview above is plain SVG, so the tool still works without one.
+    function pngUrl() {
+      if (!current) return null;
+      var count = current.q.getModuleCount(), total = count + QUIET * 2;
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext && canvas.getContext('2d');
+      if (!ctx || typeof canvas.toDataURL !== 'function') return null;
+      var scale = Math.max(1, Math.round(current.size / total));
+      var dim = total * scale;
+      canvas.width = dim;
+      canvas.height = dim;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = '#000000';
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (current.q.isDark(r, c)) ctx.fillRect((c + QUIET) * scale, (r + QUIET) * scale, scale, scale);
+        }
+      }
+      try { return canvas.toDataURL('image/png'); } catch (e) { return null; }
+    }
+
+    function save(href, filename, mime) {
+      var a = document.createElement('a');
+      a.href = href;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (mime === 'image/png') setTimeout(function () { URL.revokeObjectURL(href); }, 500);
+      if (window.T4M_TRACK) {
+        try { window.T4M_TRACK('download_output', { tool_slug: 'qr-code-generator', file_name: filename }); } catch (e) { /* analytics never blocks a download */ }
+      }
+    }
+
+    function generate() {
+      if (!out || !stats) return;
+      clear(out);
+      var text = textIn ? textIn.value : '';
+      if (!text) { stats.textContent = 'Enter a link or some text to encode.'; current = null; return; }
+      var ec = ecSel && ecSel.value ? ecSel.value : 'M';
+      var size = parseInt(sizeSel && sizeSel.value, 10) || 512;
+      var q = encode(text, ec);
+      if (!q) {
+        stats.textContent = 'That text is too long for one QR code \u2014 shorten it, or link to a page instead.';
+        current = null;
+        return;
+      }
+      current = { q: q, size: size, text: text, ec: ec };
+      out.appendChild(previewSvg(q, size));
+      var n = q.getModuleCount();
+      stats.textContent = 'QR code generated \u00b7 ' + n + '\u00d7' + n + ' modules \u00b7 error correction ' +
+        ec + ' \u00b7 ' + size + ' px.';
+    }
+
+    root.addEventListener('input', generate);
+    root.addEventListener('change', generate);
+    if (runBtn) runBtn.addEventListener('click', generate);
+    if (pngBtn) pngBtn.addEventListener('click', function () {
+      if (!current) generate();
+      if (!current) return;
+      var url = pngUrl();
+      if (!url) { stats.textContent = 'PNG export is not available in this browser \u2014 the SVG download still works.'; return; }
+      save(url, 'qr-code.png', 'image/png');
+    });
+    if (svgBtn) svgBtn.addEventListener('click', function () {
+      if (!current) generate();
+      var markup = svgMarkup();
+      if (!markup) return;
+      var url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml;charset=utf-8' }));
+      save(url, 'qr-code.svg');
+    });
+    generate();
+  };
 })();
