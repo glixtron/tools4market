@@ -158,7 +158,7 @@ export const ARTICLES = [
         ],
       },
       {
-        h: 'How to block GPTBot: the exact robots.txt',
+        h: 'GPTBot robots.txt: how to block it',
         p: [
           'Add one group to the robots.txt file at the root of your domain:',
         ],
@@ -975,7 +975,7 @@ export const ARTICLES = [
         ],
       },
       {
-        h: 'INP: the metric that replaced FID',
+        h: 'What is INP in Core Web Vitals?',
         p: [
           'Interaction to Next Paint replaced First Input Delay in March 2024. FID measured only the input delay before a handler started; INP measures the whole interaction, including the work the handler does and the frame that finally paints. It is stricter, and it fails pages that looked fine under FID.',
           'The cause is almost always a long task on the main thread. Break work into chunks, move non-urgent work to an idle callback, and audit third-party scripts before optimising your own. On this site, removing Google Tag Manager took roughly 560 KB of script off every page view — more than any handler rewrite would have saved.',
@@ -1104,7 +1104,7 @@ export const ARTICLES = [
     title: '.htaccess 301 redirects: four patterns, one order, no loops',
     focus: 'htaccess 301 redirect',
     date: '2026-10-25',
-    updated: '2026-10-25',
+    updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
     metaTitle: '.htaccess 301 Redirect: Patterns, Order and Testing',
@@ -1122,7 +1122,7 @@ export const ARTICLES = [
         ],
       },
       {
-        h: 'Four patterns that cover most htaccess 301 redirect work',
+        h: 'How to write a 301 redirect in htaccess (four patterns)',
         p: [
           'Single URL, whole domain, www to apex, and http to https. That is the list for a normal migration; anything more specific is usually a discontinued section, and those are just more single-URL rules.',
           'Read the block in order. `Redirect` is mod_alias and needs a path beginning with a slash. The domain rule must exclude the new domain or it redirects in a circle. The www rule captures the apex in `%1` so paths survive. The HTTPS rule tests `%{HTTPS}` rather than the host, and every mod_rewrite rule ends with `[R=301,L]` so nothing after it runs.',
@@ -1212,7 +1212,7 @@ export const ARTICLES = [
     title: 'Title tag length: what Google truncates, and what it ignores',
     focus: 'title tag length',
     date: '2026-10-25',
-    updated: '2026-10-25',
+    updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
     metaTitle: 'Title Tag Length: Why 60 Characters Is Only a Guess',
@@ -1220,7 +1220,7 @@ export const ARTICLES = [
     intro: 'Title tag length is usually taught as a 60-character rule. Google publishes no such limit: it truncates the title link to fit the device, so the real constraint only shows up when you preview it.',
     sections: [
       {
-        h: 'Title tag length: the official answer',
+        h: 'What is the length of a title tag?',
         p: [
           'Google asks for a `<title>` on every page and says explicitly that there is no limit on how long the element can be. What it truncates is the title link in search results, "typically to fit the device width". So the widely quoted 60 characters is not a rule anyone enforces; it is a shorthand for the width of the space.',
           'The practical range follows from that. On a desktop result, 50 to 60 characters of ordinary text usually survives intact. On a phone, less does, because the result is narrower and the same string needs more lines than the layout allows.',
@@ -1386,7 +1386,7 @@ export const ARTICLES = [
     title: 'rel=canonical in practice: a hint, four rules, and what breaks it',
     focus: 'canonical tag',
     date: '2026-10-25',
-    updated: '2026-10-25',
+    updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
     metaTitle: 'rel=canonical: The Tag, the Rules, and What Breaks It',
@@ -1394,7 +1394,7 @@ export const ARTICLES = [
     intro: 'The canonical tag is the most misunderstood link element in SEO: a preference Google weighs rather than an instruction it obeys, and the ways it breaks are almost all silent.',
     sections: [
       {
-        h: 'What a canonical tag tells Google',
+        h: 'What is rel=canonical?',
         p: [
           'A `rel="canonical"` link element says: among these URLs with the same content, prefer this one. Google calls it a strong signal, ranked below a redirect and above sitemap inclusion — and it is a signal, not a directive. Google can and does choose a different URL when other evidence is stronger.',
           'That ranking decides which tool to reach for. A redirect is strongest because it removes the old URL from the conversation. A canonical keeps both URLs alive and states a preference. Listing a URL in a sitemap is a weaker nudge in the same direction.',
