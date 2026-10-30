@@ -4,7 +4,7 @@
 
 **Main Tool Complete** — The Website Audit Tool is now the primary feature of the platform, ready for production deployment.
 
-- **Audit Rules**: All 73 audit rules pass (73/73)
+- **Audit Rules**: All 47 audit rules pass (47/47). 41 apply to a third-party site — the 6 `brand`-group rules (our own ad layout policy) are stood down by `functions/api/audit-batch.js`, which is why the tool page says "40+."
 - **Tool Pages**: All 45 tool pages pass smoke test (45/45)
 - **Audit Batch Tests**: All 43 tests pass (43/43)
 - **Suggest API Tests**: All 24 tests pass (24/24)

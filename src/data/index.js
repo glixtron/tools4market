@@ -93,8 +93,8 @@ export { POLICY };
 export const JOBS = [
   // Main tool: Full end-to-end website audit with AI-powered enhancement
   {
-    title: 'Audit any live site with 73 rules and AI fixes',
-    blurb: 'Comprehensive analysis with 73 audit rules, visitor-friendly fixes, and AI-powered enhancement suggestions. Free, no signup, works on any page.',
+    title: 'Audit any live site with 40+ rules and AI fixes',
+    blurb: 'Comprehensive analysis with 40+ audit rules, visitor-friendly fixes, and AI-powered enhancement suggestions. Free, no signup, works on any page.',
     path: '/tools/website-audit/',
     cta: 'Start Website Audit',
     icon: 'browser-check',

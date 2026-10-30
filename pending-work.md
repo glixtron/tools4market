@@ -1,5 +1,7 @@
 # Pending Work
 
+> **SUPERSEDED — 30 Oct 2026.** The live tracker is [`docs/pendingwork.md`](docs/pendingwork.md). Its status lines below are frozen at 26 Oct 2026 ("44 tools", Phase 2 "in progress", AdSense hold notes) and are now wrong: the site builds 45 tools / 82 pages, the Website Audit tool is shipped, and AdSense serves three units. Read `docs/pendingwork.md` for current state; keep this file only for the Phase 1–3 history it records.
+
 *Living tracker — update after every session. Last updated: 26 Oct 2026 — v2.17.1 shipped (`60455cbb`): 81 pages, 44 tools, 24 guides. **AdSense is unblocked** (owner lifted the hold 24 Oct); the loader ships and `ads.txt` is published, and the remaining step is slot ids (or site approval, whichever comes first). **Owner-side console work is now documented step by step in [`docs/founder-actions.md`](docs/founder-actions.md)** — that file, not this list, is the source for AdSense, Cloudflare robots, Launchstag and distribution.*
 
 ## 👤 Owner follow-ups — launch and growth

@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.17 · 25 Oct 2026 · 44 tools, 81 generated HTML pages, 24 guides*
+*Version: 2.17 · 25 Oct 2026 · 45 tools, 82 generated HTML pages, 24 guides*
 
 ---
 
@@ -129,8 +129,8 @@ Tools4market/
 ├── README.md                    ← Build, deploy, how-to-add-tool guide
 ├── rules.md                     ← Non-negotiable quality rules
 ├── RESEARCH-AND-PLAN.md         ← Market research & revenue strategy
-├── progress.md                  ← Append-only build log
-├── pending-work.md              ← Remaining work tracker by phase
+├── docs/progress.md             ← Append-only build log (moved from root, 30 Oct 2026)
+├── docs/pendingwork.md          ← Remaining work tracker (moved from root, 30 Oct 2026)
 └── projectreport.md             ← Stakeholder status report
 ```
 

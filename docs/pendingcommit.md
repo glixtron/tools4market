@@ -4,7 +4,7 @@
 
 **No pending commits.** All work has been completed and merged.
 
-- All 73 audit rules have been implemented and tested
+- All 47 audit rules have been implemented and tested
 - All 45 tool pages have passed smoke tests
 - All 43 audit-batch tests pass
 - All 24 suggest API tests pass

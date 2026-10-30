@@ -4,7 +4,7 @@
 
 **No pending work.** All tasks have been completed.
 
-- All 73 audit rules implemented and verified
+- All 47 audit rules implemented and verified
 - All 45 tool pages smoke-tested
 - All 43 audit-batch tests passing
 - All 24 suggest API tests passing
@@ -14,7 +14,7 @@
 
 ## Completed Tasks
 
-1. Implemented 73 audit rules with shared rule engine subset
+1. Implemented 47 audit rules with shared rule engine subset (41 apply to third-party sites; the 6 `brand`-group rules are our own ad-layout policy)
 2. Added personalized fixes with handoff links for each rule
 3. Created 11 rule-specific visitor fixes (title-present, desc-length, http-status, etc.)
 4. Configured 11 site-specific tool destinations (meta-tag-generator, meta-description-checker, etc.)

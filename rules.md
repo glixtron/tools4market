@@ -37,7 +37,7 @@
 
 - One page = one search intent. No cannibalisation: before adding a tool, check it doesn't duplicate an existing page's target keyword.
 - Long-tail blog posts always link to their tool; tools link back to 2–3 posts (once blog exists).
-- No thin content: if a page can't justify 250+ unique words, it doesn't ship (expand later per pending-work.md).
+- No thin content: if a page can't justify 250+ unique words, it doesn't ship (expand later per `docs/pendingwork.md`).
 - Titles/descriptions written for US search intent; avoid India-only phrasing.
 - Schema honesty: only mark up what's genuinely on the page.
 
@@ -50,8 +50,8 @@
 
 ## 6. Process rules
 
-- **End-of-task ritual (mandatory):** before finishing any task, open `suggest.md` and `pendingcommit.md`, understand any pending development recorded there, cross-verify it (build + tests), then commit and push it along with your own work. If either file is missing, create/initialize it rather than skipping the step.
-- Every structural decision lands in Architecture.md; every feature change updates pending-work.md + progress.md.
+- **End-of-task ritual (mandatory):** before finishing any task, open `suggest.md` and `docs/pendingcommit.md`, understand any pending development recorded there, cross-verify it (build + tests), then commit and push it along with your own work. If either file is missing, create/initialize it rather than skipping the step.
+- Every structural decision lands in Architecture.md; every feature change updates `docs/pendingwork.md` + `docs/progress.md`. (The trackers moved from the repo root into `docs/` on 30 Oct 2026: `docs/pendingwork.md` supersedes root `pending-work.md`, and `docs/pendingcommit.md` supersedes root `pendingcommit.md`. Root `progress.md` and `worklog.md` remain the historical build logs through 28 Oct and are still read for context.)
 - After any change to `src/`, run `node build.mjs` — `dist/` is never hand-edited.
 - Test in browser before declaring a tool done (browser-use skill).
 - `SITE.url` in build.mjs is now **`https://tools4market.online`** (domain purchased 20 Oct 2026) — the apex is the canonical host; `www` must 301 → apex (zone-level Cloudflare Redirect Rule). Override with the `SITE_URL` build env var if the host ever changes.
