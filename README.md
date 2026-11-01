@@ -421,5 +421,3 @@ Run this in order — each step depends on the previous one.
 ## License / notes
 
 All tool logic runs in the visitor's browser; no user data is collected or transmitted. That is both the product promise and the AdSense-safety design (Architecture.md §1).
-
-<!-- auto-deploy webhook retrigger 20261101T064937Z -->
