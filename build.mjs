@@ -1218,8 +1218,10 @@ ${feedItems}
   }
   // social share image (og:image / twitter:image) — pre-rendered, brand palette
   await copyFile(R + 'src/assets/og-image.png', R + 'dist/assets/og-image.png');
-  for (const ic of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo-mark.png']) {
-    await copyFile(R + 'src/assets/' + ic, R + 'dist/assets/' + ic);
+  for (const ic of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo-mark.png', 'hero_scene.jpg']) {
+    const src = R + 'src/assets/' + ic;
+    try { await copyFile(src, R + 'dist/assets/' + ic); }
+    catch { /* missing source asset — keep build working */ }
   }
   // PWA manifest (installability + mobile polish)
   await writeFile(R + 'dist/manifest.webmanifest', JSON.stringify({
