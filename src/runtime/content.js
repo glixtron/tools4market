@@ -11,6 +11,57 @@
   }
   function chip(kind, text) { return el('span', 'chip ' + kind, text); }
 
+  // ---- shared visual helpers (mirrors marketing.js) ----
+  function kpiTile(label, value, delta, deltaDir, barPct) {
+    var tile = document.createElement('div');
+    tile.className = 'stat-tile';
+    tile.innerHTML =
+      '<span class="stat-tile-label">' + label + '</span>' +
+      '<span class="stat-tile-value">' + value + '</span>' +
+      (delta != null
+        ? '<span class="stat-tile-delta ' + deltaDir + '">' +
+            (deltaDir === 'flat' ? '' : (deltaDir === 'up' ? '▲ ' : '▼ ')) + delta + '</span>'
+        : '') +
+      (barPct != null
+        ? '<div class="stat-tile-bar"><i style="width:' + Math.max(2, Math.min(100, barPct)) + '%"></i></div>'
+        : '');
+    return tile;
+  }
+  function barChart(title, sub, rows, opts) {
+    opts = opts || {};
+    var card = document.createElement('div');
+    card.className = 'chart-card';
+    var head = document.createElement('div');
+    head.innerHTML = '<p class="chart-title">' + title + '</p>' +
+      (sub ? '<p class="chart-sub">' + sub + '</p>' : '');
+    card.appendChild(head);
+    var chart = document.createElement('div');
+    chart.className = 'bar-chart';
+    var colors = opts.colors || [opts.color1 || 'var(--c-chart-1)', opts.color2 || 'var(--c-chart-3)'];
+    rows.forEach(function (r, i) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var lbl = document.createElement('div');
+      lbl.className = 'bar-label';
+      lbl.textContent = r.label;
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = '0%';
+      fill.style.background = (Array.isArray(colors[i]) ? colors[i].join(',') : colors[i]);
+      track.appendChild(fill);
+      var val = document.createElement('div');
+      val.className = 'bar-val';
+      val.innerHTML = r.val + (r.unit ? ' <small>' + r.unit + '</small>' : '');
+      row.appendChild(lbl); row.appendChild(track); row.appendChild(val);
+      chart.appendChild(row);
+      requestAnimationFrame(function () { fill.style.width = Math.max(2, Math.min(100, r.pct)) + '%'; });
+    });
+    card.appendChild(chart);
+    return card;
+  }
+
   // ---------------------------------------------------------- url slug generator
   T['url-slug-generator'] = function (root) {
     var out = $(root, 'sl-out');
@@ -137,17 +188,20 @@
         }
       }
 
+      var statsTiles = $(root, 'kd-stats-tiles');
+      if (statsTiles) {
+        statsTiles.innerHTML = '';
+        statsTiles.appendChild(kpiTile('Words', String(words.length), uniq.size > 0 ? 'tracked' : '', words.length > 0 ? 'up' : 'flat'));
+        var uniq = new Set(words);
+        statsTiles.appendChild(kpiTile('Unique terms', String(uniq.size), uniq.size > 0 ? 'of ' + words.length : '', uniq.size > 0 ? 'up' : 'flat'));
+        statsTiles.appendChild(kpiTile('Reading time', Math.max(1, Math.ceil(words.length / 200)) + ' min', words.length > 200 ? 'long form' : words.length > 0 ? 'short' : '', words.length > 200 ? 'flat' : (words.length > 0 ? 'flat' : 'flat')));
+      }
       var stats = $(root, 'kd-stats');
-      stats.textContent = '';
-      stats.appendChild(el('span', null, 'Words: '));
-      stats.appendChild(el('strong', null, String(words.length)));
-      var uniq = new Set(words);
-      stats.appendChild(el('span', null, 'Unique: '));
-      stats.appendChild(el('strong', null, String(uniq.size)));
-      stats.appendChild(el('span', null, 'Reading time: '));
-      stats.appendChild(el('strong', null, Math.max(1, Math.ceil(words.length / 200)) + ' min'));
-      stats.appendChild(!words.length ? chip('warn', 'paste text to analyse')
-        : (grams[1].size ? chip('good', 'term frequency calculated') : chip('warn', 'only stop words found')));
+      if (stats) {
+        stats.textContent = '';
+        stats.appendChild(!words.length ? chip('warn', 'paste text to analyse')
+          : (grams[1].size ? chip('good', 'term frequency calculated') : chip('warn', 'only stop words found')));
+      }
 
       if (targetReport) {
         targetReport.textContent = '';
@@ -173,18 +227,34 @@
         }
       }
 
+      var vis = $(root, 'kd-vis');
       out.textContent = '';
       if (!words.length) {
         out.appendChild(el('p', null, copy.pastedText || 'Paste text here; analysis runs in your browser.'));
+        if (vis) vis.innerHTML = '';
         return;
       }
       if (!singleWords.length && stop) {
         out.appendChild(el('p', null, 'Only stop words were found — turn off the stop-word filter above, or add more content words.'));
+        if (vis) vis.innerHTML = '';
         return;
       }
       [1, 2, 3].forEach(function (n) {
         if (counts[n] > 0) out.appendChild(table(n, grams[n]));
       });
+      // Visual summary: top 10 single-word terms as a bar chart
+      if (vis && grams[1] && grams[1].size) {
+        vis.innerHTML = '';
+        var top = Array.from(grams[1].entries())
+          .sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); })
+          .slice(0, 10);
+        var maxC = top.length ? top[0][1] : 1;
+        vis.appendChild(barChart('Most frequent terms', 'Top ' + top.length + ' single words — share of all term rows', top.map(function (p) {
+          return { label: p[0], val: String(p[1]), pct: Math.max(2, (p[1] / maxC) * 100) };
+        })));
+      } else if (vis) {
+        vis.innerHTML = '';
+      }
     }
     root.addEventListener('input', update);
     root.addEventListener('change', update);

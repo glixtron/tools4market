@@ -51,11 +51,12 @@ ${f.check('mt-charset', 'Add charset (UTF-8)', true)}
 ${f.check('mt-viewport', 'Add responsive viewport tag', true)}
 </div>
 ${f.check('mt-og', 'Include basic Open Graph tags', true)}
-<p class="preview-label">Title and description preview (not a live Google result)</p>
-<div class="google-preview">
-  <div class="gp-url" id="mt-prev-url">example.com</div>
-  <div class="gp-title" id="mt-prev-title">Page title</div>
-  <div class="gp-desc" id="mt-prev-desc">Meta description…</div>
+<div class="seo-preview-card seo-preview-card--google">
+  <div class="seo-preview-head"><span class="seo-preview-thumb" aria-hidden="true"></span><span class="seo-preview-name">Google search result</span></div>
+  <div class="seo-preview-url" id="mt-prev-url">example.com</div>
+  <div class="seo-preview-title" id="mt-prev-title">Page title</div>
+  <div class="seo-preview-desc" id="mt-prev-desc">Meta description…</div>
+  <div class="seo-preview-meta"><span>About this result</span><span>Preview estimate only</span></div>
 </div>
 ${outputBlock('mt-out', 'Head HTML')}`,
   },
@@ -100,8 +101,8 @@ ${f.select('og-type', 'Type (og:type)', [
       { v: 'video.other', l: 'video' },
     ])}
 ${f.text('og-site', 'Site name (og:site_name)', 'Example Blog')}
-<p class="preview-label">Facebook / LinkedIn share preview</p>
-<div class="fb-preview">
+<p class="preview-label">Share preview — Facebook / LinkedIn</p>
+<div class="seo-preview-card seo-preview-card--social">
   <div class="fb-img" id="og-prev-img">Image preview appears here</div>
   <div class="fb-body">
     <div class="fb-domain" id="og-prev-domain">example.com</div>
@@ -148,8 +149,8 @@ ${f.text('tw-creator', 'Author handle (twitter:creator)', '@authorhandle')}
 ${f.text('tw-title', 'Title', 'How we cut LCP from 4.2s to 1.1s')}
 ${f.text('tw-desc', 'Description', 'The exact checklist we used, with before/after numbers.')}
 ${f.url('tw-image', 'Image URL', 'https://example.com/images/cover.jpg')}
-<p class="preview-label">X (Twitter) card preview</p>
-<div class="x-preview">
+<p class="preview-label">Share preview — X / Twitter</p>
+<div class="seo-preview-card x-preview">
   <div class="x-img" id="tw-prev-img">Image preview appears here</div>
   <div class="x-body">
     <div class="x-title" id="tw-prev-title">Title</div>
@@ -397,6 +398,7 @@ ${f.url('ca-url', 'Page URL to audit', 'https://your-site.com/your-page')}
     <p class="score-note" id="ca-note"></p>
   </div>
 </div>
+<div id="ca-vis" class="kpi-strip"></div>
 ${outputArea('ca-out', 'Per-check report')}
 <p class="preview-label">Prioritized fixes</p>
 ${outputArea('ca-fixes', 'Fix these first')}
@@ -447,6 +449,7 @@ ${f.text('sc2-query', 'Optional target search phrase', '', 'Example: local SEO a
     <p class="score-note" id="sc2-note"></p>
   </div>
 </div>
+<div id="sc2-vis" class="kpi-strip"></div>
 ${outputArea('sc2-out', 'Factor breakdown')}
 <p class="preview-label">Checks to review first (ordered by checklist weight)</p>
 ${outputArea('sc2-fixes', 'Fix these first')}
@@ -491,6 +494,13 @@ ${f.url('ogit-url', 'Image URL (og:image or any image)', 'https://example.com/so
 </div>
 <p class="tool-note" id="ogit-stats"></p>
 <p class="tool-note" id="ogit-detail"></p>
+${note('The preview loads the image directly from its host — the same way social platforms fetch it. Nothing is uploaded.')}
+<div class="preview-label" style="margin-top:18px">Crop comparison — drag the handle to compare the original with a centered 1.91:1 social-card crop</div>
+<div class="compare" id="ogit-compare" hidden>
+  <img class="frame frame--bottom" id="ogit-compare-after" alt="Cropped to 1.91:1" decoding="async">
+  <div class="frame frame--top"><img id="ogit-compare-before" alt="Original" decoding="async"></div>
+  <div class="handle" id="ogit-compare-handle" role="slider" aria-label="Crop comparison slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"><span class="handle-label">Drag</span></div>
+</div>
 ${note('The preview loads the image directly from its host — the same way social platforms fetch it. Nothing is uploaded.')}`,
   },
 

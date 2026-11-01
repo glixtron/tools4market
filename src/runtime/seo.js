@@ -483,21 +483,75 @@
     var stats = root.querySelector('#ogit-stats');
     var detail = root.querySelector('#ogit-detail');
     var preview = root.querySelector('#ogit-preview');
+    var compare = root.querySelector('#ogit-compare');
+    var beforeImg = root.querySelector('#ogit-compare-before');
+    var afterImg = root.querySelector('#ogit-compare-after');
+    var handle = root.querySelector('#ogit-compare-handle');
+    var dragging = false;
+
+    function cropStyle() {
+      if (!afterImg || !beforeImg) return;
+      var w = beforeImg.naturalWidth || 1, h = beforeImg.naturalHeight || 1;
+      if (!w || !h) return;
+      var ratio = 1.91; // 1.91:1 social card
+      var cropW = w, cropH = w / ratio;
+      if (cropH > h) { cropH = h; cropW = h * ratio; }
+      var left = (w - cropW) / 2, top = (h - cropH) / 2;
+      afterImg.style.width = (cropW * 2) + 'px';
+      afterImg.style.height = (cropH * 2) + 'px';
+      afterImg.style.objectPosition = (-left * 2) + 'px ' + (-top * 2) + 'px';
+    }
+    function setPos(pct) {
+      if (!compare || !handle) return;
+      pct = Math.max(0, Math.min(100, pct));
+      handle.style.left = pct + '%';
+      if (beforeImg) beforeImg.parentElement.style.width = pct + '%';
+      if (handle) handle.setAttribute('aria-valuenow', Math.round(pct));
+    }
+    function onMove(e) {
+      if (!dragging || !compare) return;
+      var rect = compare.getBoundingClientRect();
+      var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      setPos((x / rect.width) * 100);
+    }
+    function onUp() { dragging = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); }
+    function onHandleDown(e) {
+      e.preventDefault();
+      dragging = true;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onUp);
+      onMove(e);
+    }
 
     function update() {
       var u = (urlIn.value || '').trim();
       if (!/^https?:\/\//i.test(u)) {
         preview.removeAttribute('src');
         preview.setAttribute('hidden', '');
+        if (compare) compare.setAttribute('hidden', '');
         stats.textContent = COPY.empty || '';
         detail.textContent = '';
         return;
       }
       stats.textContent = tpl(COPY.loading || 'Loading the image from {v}…', { v: u });
       detail.textContent = '';
+      if (compare) compare.setAttribute('hidden', '');
+      var loaded = false;
       preview.onload = function () {
+        if (loaded) return; loaded = true;
         var w = preview.naturalWidth, h = preview.naturalHeight;
         preview.removeAttribute('hidden');
+        if (compare) {
+          compare.removeAttribute('hidden');
+          beforeImg.src = u;
+          afterImg.src = u;
+          setPos(50);
+          // afterImg needs layout first; crop on next frame
+          requestAnimationFrame(cropStyle);
+          requestAnimationFrame(cropStyle);
+        }
         var ratio = h ? (w / h) : 0;
         var ratioLine = ratio >= 1.7 && ratio <= 2.1 ? (COPY.ratioWide || '')
           : (ratio >= 0.95 && ratio <= 1.05 ? (COPY.ratioSquare || '') : (COPY.ratioOther || ''));
@@ -509,10 +563,13 @@
       };
       preview.onerror = function () {
         preview.setAttribute('hidden', '');
+        if (compare) compare.setAttribute('hidden', '');
         stats.textContent = tpl(COPY.loadFail || 'The image could not be loaded from {v}.', { v: u });
       };
       preview.src = u;
     }
+    if (handle) handle.addEventListener('mousedown', onHandleDown);
+    if (handle) handle.addEventListener('touchstart', onHandleDown, { passive: false });
     root.addEventListener('input', update);
     update();
   };

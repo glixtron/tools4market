@@ -39,6 +39,57 @@
     root.addEventListener('change', fn);
   }
 
+  // ---- visual helpers: KPI tiles, bar chart, verdict chip (rendered next to output) ----
+  function kpiTile(label, value, delta, deltaDir, barPct) {
+    var tile = document.createElement('div');
+    tile.className = 'stat-tile';
+    tile.innerHTML =
+      '<span class="stat-tile-label">' + label + '</span>' +
+      '<span class="stat-tile-value">' + value + '</span>' +
+      (delta != null
+        ? '<span class="stat-tile-delta ' + deltaDir + '">' +
+            (deltaDir === 'flat' ? '' : (deltaDir === 'up' ? '▲ ' : '▼ ')) + delta + '</span>'
+        : '') +
+      (barPct != null
+        ? '<div class="stat-tile-bar"><i style="width:' + Math.max(2, Math.min(100, barPct)) + '%"></i></div>'
+        : '');
+    return tile;
+  }
+  function barChart(title, sub, rows, opts) {
+    opts = opts || {};
+    var card = document.createElement('div');
+    card.className = 'chart-card';
+    var head = document.createElement('div');
+    head.innerHTML = '<p class="chart-title">' + title + '</p>' +
+      (sub ? '<p class="chart-sub">' + sub + '</p>' : '');
+    card.appendChild(head);
+    var chart = document.createElement('div');
+    chart.className = 'bar-chart';
+    var colors = opts.colors || [opts.color1 || 'var(--c-chart-1)', opts.color2 || 'var(--c-chart-3)'];
+    rows.forEach(function (r, i) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var lbl = document.createElement('div');
+      lbl.className = 'bar-label';
+      lbl.textContent = r.label;
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = '0%';
+      fill.style.background = (Array.isArray(colors[i]) ? colors[i].join(',') : colors[i]);
+      track.appendChild(fill);
+      var val = document.createElement('div');
+      val.className = 'bar-val';
+      val.innerHTML = r.val + (r.unit ? ' <small>' + r.unit + '</small>' : '');
+      row.appendChild(lbl); row.appendChild(track); row.appendChild(val);
+      chart.appendChild(row);
+      requestAnimationFrame(function () { fill.style.width = Math.max(2, Math.min(100, r.pct)) + '%'; });
+    });
+    card.appendChild(chart);
+    return card;
+  }
+
   // ---------------------------------------------------------- ROI calculator
   T['roi-calculator'] = function (root) {
     var C = TOOLTXT.roiCalc || {};
@@ -70,6 +121,16 @@
         : pct < 100 ? (C.vStrong || '')
         : (C.vExceptional || '');
       set(out, verdict, profitLine + '\n' + roiLine, tier + ' ' + (C.note || ''));
+
+      // ---- visual: KPI tiles + bar chart alongside the text output ----
+      var vis = $(root, 'roic-vis');
+      if (vis) {
+        var revBars = rev > 0 ? (inv > 0 ? Math.min(100, (rev / (inv * 4)) * 100) : 100) : 2;
+        vis.innerHTML = '';
+        vis.appendChild(kpiTile('Revenue', money(rev, c), profit >= 0 ? 'Profitable' : 'Loss', profit >= 0 ? 'up' : 'down', revBars));
+        vis.appendChild(kpiTile('Net profit', money(profit, c), fmt(pct) + '% ROI', pct >= 0 ? (pct >= 25 ? 'up' : 'flat') : 'down', pct >= 0 ? Math.min(100, pct * 2) : 4));
+        vis.appendChild(kpiTile('Spend multiple', fmt(mult) + '×', mult >= 1 ? 'Recovered' : 'Not yet', mult >= 1 ? 'up' : 'down', mult >= 1 ? Math.min(100, (mult - 0.5) * 60) : 4));
+      }
     }
     on(root, update);
     update();
@@ -138,6 +199,25 @@
       } else {
         set(out, verdict, body, C.ltvHint || '');
       }
+
+      var vis = $(root, 'cacc-vis');
+      if (vis) {
+        vis.innerHTML = '';
+        vis.appendChild(kpiTile('CAC', money(cac, c) + ' / cust', l > 0 && cac > 0 ? fmt(ratio) + '× LTV:CAC' : '', l > 0 && cac > 0 ? (ratio >= 3 ? 'up' : ratio >= 1 ? 'flat' : 'down') : 'flat', l > 0 && cac > 0 && ratio > 0 ? Math.min(100, ratio / 5 * 100) : 4));
+        if (l > 0 && cac > 0) {
+          vis.appendChild(barChart('LTV:CAC ratio context', '1× = break-even, 3× is the healthy band', [
+            { label: 'Your ratio', val: fmt(ratio) + '×', pct: Math.min(100, ratio / 5 * 100), color1: 'var(--c-chart-3)' },
+            { label: '1× (break-even)', val: '1×', pct: 20, color1: 'var(--c-danger)' },
+            { label: '3× (healthy)', val: '3×', pct: 60, color1: 'var(--c-warn)' },
+            { label: '5× (strong)', val: '5×', pct: 100, color1: 'var(--c-success)' },
+          ]));
+        } else {
+          vis.appendChild(barChart('Spend & customers', 'Inputs', [
+            { label: 'Spend', val: money(s, c), pct: 40 },
+            { label: 'New customers', val: String(n), pct: n > 0 ? Math.min(100, n / (s || 1) * 20) : 4 },
+          ]));
+        }
+      }
     }
     on(root, update);
     update();
@@ -170,6 +250,23 @@
       if (!i || !k) missing.push(C.ctrNeed || '');
       if (!v) missing.push(C.zeroConv || C.cpaNeed || '');
       set(out, verdict, rows.join('\n'), (missing.join(' ').trim() ? 'Missing inputs: ' + missing.join(' ') : '') + ' ' + (C.note || ''));
+
+      var vis = $(root, 'amc-vis');
+      if (vis) {
+        vis.innerHTML = '';
+        var rows2 = [];
+        if (k) rows2.push({ label: 'CPC', val: money(s / k, c), pct: Math.min(100, (s / k) / (i || 1) * 60) });
+        if (i) rows2.push({ label: 'CPM', val: money((s / i) * 1000, c), pct: Math.min(100, ((s / i) * 1000) * 0.4) });
+        if (i && k) rows2.push({ label: 'CTR', val: fmt((k / i) * 100) + '%', pct: Math.min(100, (k / i) * 10000) });
+        if (v) rows2.push({ label: 'CPA', val: money(s / v, c), pct: Math.min(100, (s / v) * 4) });
+        if (rows2.length) {
+          vis.appendChild(barChart('Ad rates at a glance', 'The four ratios from four inputs', rows2));
+        } else {
+          vis.appendChild(barChart('Spend only', 'Add impressions, clicks or conversions to see the rates', [
+            { label: 'Ad spend', val: money(s, c), pct: 30 },
+          ]));
+        }
+      }
     }
     on(root, update);
     update();
@@ -213,6 +310,20 @@
         vText = roi < 0 ? (C.vNeg || '') : roi < 50 ? (C.vThin || '') : roi < 200 ? (C.vSteady || '') : (C.vStrong || '');
       }
       set(out, verdict, lines.filter(Boolean).join('\n'), vText);
+
+      var vis = $(root, 'erc-vis');
+      if (vis) {
+        vis.innerHTML = '';
+        var roi = i > 0 ? (profit / i * 100) : 0;
+        vis.appendChild(kpiTile('Email ROI', roi ? fmt(roi) + '%' : '—', profit >= 0 ? 'Profitable' : 'Loss', profit >= 0 ? 'up' : 'down', i > 0 ? Math.min(100, roi * 1.5) : 4));
+        if (s > 0) {
+          vis.appendChild(barChart('Funnel', 'Open → Click → Convert (of ' + fmt(s) + ' sent)', [
+            { label: 'Opened', val: pct(o, s), pct: Math.min(100, (o / s) * 100 * 6) },
+            { label: 'Clicked', val: pct(k, s), pct: Math.min(100, (k / s) * 100 * 15) },
+            { label: 'Converted', val: pct(cv, s), pct: Math.min(100, (cv / s) * 100 * 40) },
+          ]));
+        }
+      }
     }
     on(root, update);
     update();
@@ -257,6 +368,24 @@
         lines.push(C.cacZero || '');
       }
       set(out, verdict, lines.filter(Boolean).join('\n'), vText);
+
+      var vis = $(root, 'mbc-vis');
+      if (vis) {
+        vis.innerHTML = '';
+        var gap = t - b;
+        var gapPct = t > b ? Math.min(100, (gap / t) * 100) : 6;
+        vis.appendChild(kpiTile('Target gap', fmt(gap) + ' customers', g > 0 ? fmt(Math.log(t / b) / Math.log(1 + g)) + ' months' : '—', g > 0 && months_calc() <= 12 ? 'up' : 'flat', gapPct));
+        if (cc > 0) {
+          vis.appendChild(kpiTile('Acquisition budget', money(gap * cc, c), cc + ' CAC', 'flat', 70));
+        }
+        vis.appendChild(barChart('Growth projection', 'Current base → target (compounding, where rate > 0)', [
+          { label: 'Current base', val: fmt(b), pct: b > 0 ? Math.min(100, (b / t) * 100) : 8 },
+          { label: 'Remaining gap', val: fmt(gap), pct: Math.min(100, gapPct), color1: 'var(--c-chart-2)' },
+        ]));
+      }
+    }
+    function months_calc() {
+      return g > 0 ? Math.ceil(Math.log(t / b) / Math.log(1 + g)) : (t - b);
     }
     on(root, update);
     update();

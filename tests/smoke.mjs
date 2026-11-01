@@ -14,13 +14,15 @@ import path from 'node:path';
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
 const DIST = path.join(ROOT, 'dist');
 
+// Serve dist/ assets over a virtual http: loader so scripts with local URLs resolve.
+// jsdom's ResourceLoader defines fetch(url, options) returning Uint8Array/Buffer.
 class LocalLoader extends ResourceLoader {
-  fetch(url) {
+  fetch(url, options) {
     const u = new URL(url);
-    if (u.hostname !== 'localhost') return null; // block external assets
+    if (u.hostname !== 'localhost') return null;
     const p = decodeURIComponent(u.pathname);
     const file = path.join(DIST, p.endsWith('/') ? p + 'index.html' : p);
-    try { return Promise.resolve(readFileSync(file)); } catch { return Promise.reject(new Error('404 ' + p)); }
+    try { return readFileSync(file); } catch { return null; }
   }
 }
 

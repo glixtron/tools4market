@@ -474,21 +474,75 @@ function homeBody() {
   const cats = Object.values(CATEGORIES);
   const pickCat = CATEGORIES[PICK.cat];
   const latest = [...ARTICLES].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3);
-  return `<section class="hero">
-  <div class="container hero-grid">
-    <div class="hero-copy">
-      <p class="hero-eyebrow">Browser-based tools &mdash; no signup, no limits</p>
-      <h1>Find the right tool. Finish the job.</h1>
-      <p class="hero-sub">Browser-based utilities for SEO, AI-search visibility, content operations and everyday web work. Most tools process your input in your browser, and the core tools need no signup.</p>
-      <div class="hero-search">
-        <input type="search" id="tool-search" placeholder="Search tools by task: ${SEARCH_EXAMPLES.join(', ')}&hellip;" aria-label="Search tools by task" aria-describedby="hero-hint">
-      </div>
-      <div class="search-examples" role="group" aria-label="Example searches">
-        <span class="sx-label">Try:</span>
-        ${SEARCH_EXAMPLES.map((q) => `<button type="button" class="sx-chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}
-      </div>
-      <p class="hero-hint" id="hero-hint">${TOOLS.length} tools &middot; ${cats.length} categories &middot; free forever</p>
-    </div>
+
+  // Homepage proof strip — trust signals the visitor sees before scrolling.
+  // Keep this list honest and current; each chip names a real property.
+  const PROOF = [
+    { label: 'No signup', sub: 'no account, no limits' },
+    { label: '47 tools', sub: 'one free directory' },
+    { label: 'In-browser', sub: 'text & images stay local' },
+    { label: 'AI crawler presets', sub: '18+ bots covered' },
+    { label: 'Live page checks', sub: 'any public URL' },
+  ];
+
+  return `
+<!-- ============ HERO — copy + task search on the left, editor's pick + proof on the right ============ -->
+<section class="hero">
+  <div class="hero-visual" aria-hidden="true">
+    <img class="heroscene" src="${av(path, '/assets/hero_scene.jpg')}" alt="" width="1600" height="1067" decoding="async">
+    <svg class="heroscene" viewBox="0 0 600 760" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hero-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#243b63"/>
+          <stop offset="1" stop-color="#132139"/>
+        </linearGradient>
+        <linearGradient id="hero-brass-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#e7b45e"/>
+          <stop offset="1" stop-color="#96682c"/>
+        </linearGradient>
+      </defs>
+      <rect width="600" height="760" fill="url(#hero-grad)"/>
+      <!-- faint grid -->
+      <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+        <path d="M0 160H600M0 320H600M0 480H600M0 640H600"/>
+        <path d="M120 0V760M240 0V760M360 0V760M480 0V760"/>
+      </g>
+      <!-- chart bars (pure SVG, no JS) — right-anchored stack -->
+      <g transform="translate(360,140)">
+        <text x="0" y="-6" fill="#e7b45e" font-family="ui-monospace,monospace" font-size="11" letter-spacing="2">OUTCOMES · LAST 4 QUARTERS</text>
+        ${[[0,110,180],[1,140,180],[2,165,180],[3,200,180]].map(([i,v,bh]) => `<rect x="${i*70+4}" y="${180-v}" width="36" height="${v}" rx="4" fill="url(#hero-brass-grad)" opacity="${0.7+i*0.08}"/>`).join('')}
+        <g fill="rgba(255,255,255,.55)" font-family="ui-monospace,monospace" font-size="10">
+          <text x="22" y="196">Q1</text>
+          <text x="92" y="196">Q2</text>
+          <text x="162" y="196">Q3</text>
+          <text x="232" y="196">Q4</text>
+        </g>
+      </g>
+      <!-- donut -->
+      <g transform="translate(460,330)">
+        <circle r="62" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
+        <circle r="62" fill="none" stroke="url(#hero-brass-grad)" stroke-width="14"
+          stroke-dasharray="297 393" stroke-dashoffset="0" stroke-linecap="round"
+          transform="rotate(-90)"/>
+        <text y="-2" fill="#fff" font-family="Fraunces,Georgia,serif" font-size="22" font-weight="700" text-anchor="middle">82%</text>
+        <text y="14" fill="rgba(255,255,255,.6)" font-family="ui-monospace,monospace" font-size="9" letter-spacing="1" text-anchor="middle">READY FOR AI SEARCH</text>
+      </g>
+      <!-- stat chips -->
+      <g transform="translate(48,470)">
+        <rect x="0" y="0" width="208" height="86" rx="12" fill="rgba(255,255,255,.08)" stroke="rgba(231,180,94,.25)" stroke-width="1"/>
+        <text x="16" y="22" fill="#e7b45e" font-family="ui-monospace,monospace" font-size="9" letter-spacing="2">TOOLS BUILT</text>
+        <text x="16" y="48" fill="#fff" font-family="Fraunces,Georgia,serif" font-size="28" font-weight="700">47</text>
+        <text x="16" y="66" fill="rgba(255,255,255,.55)" font-family="Inter,sans-serif" font-size="11">across 5 outcome areas</text>
+      </g>
+      <g transform="translate(278,470)">
+        <rect x="0" y="0" width="274" height="86" rx="12" fill="rgba(255,255,255,.08)" stroke="rgba(231,180,94,.25)" stroke-width="1"/>
+        <text x="16" y="22" fill="#e7b45e" font-family="ui-monospace,monospace" font-size="9" letter-spacing="2">NO SIGNUP · NO LIMITS</text>
+        <text x="16" y="48" fill="#fff" font-family="Inter,sans-serif" font-size="14" font-weight="500">Free, browser-based, privacy-first.</text>
+        <text x="16" y="66" fill="rgba(255,255,255,.55)" font-family="Inter,sans-serif" font-size="11">Text &amp; images never leave your device.</text>
+      </g>
+      <!-- brass accent line -->
+      <rect x="0" y="748" width="600" height="12" fill="url(#hero-brass-grad)" opacity=".85"/>
+    </svg>
     <aside class="pick-card" aria-label="Editor&#39;s pick of the week">
       <p class="pick-label">Editor&rsquo;s pick &middot; this week</p>
       <h2 class="pick-name"><a href="${rel(path, '/tools/' + PICK.slug + '/')}">${esc(PICK.name)}</a></h2>
@@ -499,10 +553,37 @@ function homeBody() {
       <a class="pick-cta" href="${rel(path, '/tools/' + PICK.slug + '/')}">Open the ${esc(PICK.name)} &rarr;</a>
     </aside>
   </div>
+
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Free marketing, SEO &amp; AI-search tools &mdash; no signup, no limits</p>
+      <h1>Find the right tool. Finish the job.</h1>
+      <p class="hero-sub">${TOOLS.length} browser-based utilities for SEO, AI-search visibility, content operations and everyday web work. Most tools run in your browser with no signup. Page checks query any public URL you give us.</p>
+      <div class="hero-search">
+        <input type="search" id="tool-search" placeholder="Search by task: ${SEARCH_EXAMPLES.join(', ')}&hellip;" aria-label="Search tools by task" aria-describedby="hero-hint">
+      </div>
+      <div class="search-examples" role="group" aria-label="Example searches">
+        <span class="sx-label">Try:</span>
+        ${SEARCH_EXAMPLES.map((q) => `<button type="button" class="sx-chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}
+      </div>
+      <p class="hero-hint" id="hero-hint">${TOOLS.length} tools &middot; 5 categories &middot; free forever</p>
+    </div>
+  </div>
 </section>
+
+<!-- ============ PROOF STRIP — trust signals ============ -->
+<div class="proof-strip">
+  <div class="container">
+    <p class="proof-strip-label">Why marketers keep this open</p>
+    ${PROOF.map((p) => `<span class="proof-chip"><span class="proof-dot" aria-hidden="true"></span>${esc(p.label)}<span style="color:var(--c-muted);font-weight:400"> ${esc(p.sub)}</span></span>`).join('')}
+    <span class="proof-chip offline"><span class="proof-dot" aria-hidden="true"></span>${TOOLS.length} tools &middot; free</span>
+  </div>
+</div>
+
 <div class="container">
   <p id="search-empty" class="search-empty" role="status" style="display:none">Nothing matches that search yet &mdash; try &ldquo;meta&rdquo;, &ldquo;robots&rdquo;, &ldquo;UTM&rdquo;, &ldquo;schema&rdquo; or &ldquo;audit&rdquo;, or browse all ${TOOLS.length} tools below.</p>
 
+  <!-- ============ START WITH YOUR JOB ============ -->
   <section class="cat-section jobs" id="start-with-your-job">
     <p class="section-eyebrow"><span class="sec-num">01</span> Start with your job</p>
     <h2 class="section-title">What are you trying to finish?</h2>
@@ -517,6 +598,7 @@ function homeBody() {
     </div>
   </section>
 
+  <!-- ============ FIVE OUTCOME CATEGORIES — visual cards ============ -->
   <section class="cat-section cat-outcomes" id="categories">
     <p class="section-eyebrow"><span class="sec-num">02</span> Five outcome categories</p>
     <h2 class="section-title">Everything grouped by the job it does</h2>
@@ -526,7 +608,7 @@ function homeBody() {
         return `<div class="outcome-card">
           <p class="outcome-num" aria-hidden="true">0${i + 1}</p>
           <h3><a href="${rel(path, '/' + c.slug + '/')}">${esc(c.name)}</a></h3>
-          <p class="outcome-desc">${c.homeDesc}</p>
+          <p class="outcome-desc">${esc(c.homeDesc)}</p>
           <p class="outcome-links">${list.slice(0, 3).map((t) => `<a href="${rel(path, '/tools/' + t.slug + '/')}">${esc(t.name)}</a>`).join('<span aria-hidden="true"> &middot; </span>')}</p>
           <span class="outcome-count">${list.length} tools</span>
           <a class="outcome-all" href="${rel(path, '/' + c.slug + '/')}">All ${list.length} tools &rarr;</a>
@@ -535,6 +617,7 @@ function homeBody() {
     </div>
   </section>
 
+  <!-- ============ GUIDES ============ -->
   <section class="cat-section" id="guides">
     <div class="cat-header">
       <h2><a href="${rel(path, '/blog/')}">Guides that show the work</a></h2>
@@ -556,6 +639,7 @@ function homeBody() {
     </div>
   </section>
 
+  <!-- ============ FULL TOOL DIRECTORY ============ -->
   <section class="home-section" id="tools">
     <p class="section-eyebrow"><span class="sec-num">03</span> Full tool directory</p>
     <h2 class="section-title">All ${TOOLS.length} tools</h2>
@@ -570,10 +654,12 @@ function homeBody() {
         <span class="cat-count">${list.length} tools</span>
         <a class="cat-view-all" href="${rel(path, '/' + c.slug + '/')}">View all &rarr;</a>
       </div>
-      <p class="cat-desc">${c.homeDesc}</p>
+      <p class="cat-desc">${esc(c.homeDesc)}</p>
       <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
     </section>`;
   }).join('')}
+
+  <!-- ============ CTA BAND ============ -->
   <section class="home-cta">
     <div class="cta-copy">
       <h2>Missing a tool? Found a bug?</h2>
@@ -584,6 +670,8 @@ function homeBody() {
       <a class="btn btn-secondary" href="${rel(path, '/contact/')}" data-cta="contact">Report a bug</a>
     </div>
   </section>
+
+  <!-- ============ FAQ + RECOGNITION ============ -->
   <section class="tool-content home-content">
     <h2>Free browser-based tools for marketing, SEO and AI search</h2>
     <p>Tools4Market brings ${TOOLS.length} focused utilities into one place: generate meta tags and Open Graph cards, preview your Google snippet, ship a <a href="${rel(path, '/tools/robots-txt-generator/')}">robots.txt</a> that covers every AI crawler, build UTM-tagged campaign links, analyse keyword density, create XML sitemaps, and run a full on-page audit of any URL. Each tool does one job properly — with presets, validation and copy-ready output — instead of burying it under ten ads and a signup wall.</p>
@@ -598,14 +686,49 @@ function homeBody() {
 </div>`;
 }
 
+const CAT_SCENES = {
+  seo: { title: '52 checks across 8 tools', sub: 'meta tags, OG, canonical, hreflang, schema, snapshots', bars: [[0,42],[1,48],[2,52],[3,46],[4,44]] },
+  ai: { title: '18+ AI crawlers covered', sub: 'GPTBot, ClaudeBot, PerplexityBot, Google-Extended & more', bars: [[0,14],[1,18],[2,16],[3,12]] },
+  content: { title: 'Publish-with-confidence utilities', sub: 'slugs, UTMs, keyword density, hashtags, reading time', bars: [[0,40],[1,55],[2,38],[3,28]] },
+  web: { title: 'Webmaster utility belt', sub: 'sitemaps, redirects, images, passwords, JSON & more', bars: [[0,30],[1,24],[2,18],[3,14],[4,10],[5,8]] },
+  marketing: { title: 'ROI · ROAS · CAC · CPC · CPM · CPA · CTR', sub: 'every marketing number, in one place, private and instant', bars: [[0,7],[1,6],[2,5],[3,4]] },
+};
+function categoryScene(cat) {
+  const sc = CAT_SCENES[cat.id];
+  if (!sc) return '';
+  const bars = sc.bars.map((b, i) => `<rect x="${i*60+6}" y="${140-b[1]}" width="40" height="${b[1]}" rx="4" fill="url(#cat-grad-${cat.id})" opacity="${0.65+i*0.08}"/>`).join('');
+  return `<div class="cat-scene" aria-hidden="true">
+    <svg viewBox="0 0 460 168" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cat-grad-${cat.id}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#243b63"/>
+          <stop offset="1" stop-color="#96682c"/>
+        </linearGradient>
+      </defs>
+      <rect width="460" height="168" rx="12" fill="#132139"/>
+      <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+        <path d="M0 40H460M0 80H460M0 120H460"/>
+      </g>
+      <text x="20" y="28" fill="#e7b45e" font-family="ui-monospace,monospace" font-size="10" letter-spacing="2">${esc(sc.title.split('·')[0].trim())}</text>
+      <text x="20" y="46" fill="rgba(255,255,255,.7)" font-family="Inter,sans-serif" font-size="10" max="420">${esc(sc.sub)}</text>
+      ${bars}
+      <g fill="rgba(255,255,255,.6)" font-family="ui-monospace,monospace" font-size="9">
+        ${sc.bars.map((b, i) => `<text x="${i*60+26}" y="${140-b[1]+16}">${b[1]}</text>`).join('')}
+      </g>
+    </svg>
+  </div>`;
+}
 function categoryBody(cat, list) {
   const path = '/' + cat.slug + '/';
   const others = Object.values(CATEGORIES).filter((c) => c.id !== cat.id);
   return `<div class="container">
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>${cat.name}</span></nav>
   <p class="cat-mark" aria-hidden="true">${cat.icon}</p>
-  <h1>${cat.name}</h1>
-  <p class="lead">${cat.pageDesc}</p>
+  <div class="cat-scene-wrap">
+    <h1>${cat.name}</h1>
+    <p class="lead">${cat.pageDesc}</p>
+    ${categoryScene(cat)}
+  </div>
   <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
   <section class="cat-more">
     <h2>Explore other categories</h2>

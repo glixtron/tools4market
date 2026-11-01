@@ -48,6 +48,7 @@ ${f.number('roic-rev', 'Revenue gained from the campaign', '', '0')}
 ${f.number('roic-inv', 'Total investment (media + creative + tools + labour)', '', '0')}
 ${outputBlock('roic-out', 'Result')}
 <p class="tool-note" id="roic-verdict"></p>
+<div id="roic-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 
@@ -84,6 +85,7 @@ ${f.number('roasc-rev', 'Revenue attributed to the ads', '', '0')}
 ${f.number('roasc-margin', 'Gross margin % (optional — enables break-even)', '', '0', '100')}
 ${outputBlock('roasc-out', 'Result')}
 <p class="tool-note" id="roasc-verdict"></p>
+<div id="roasc-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 
@@ -120,6 +122,7 @@ ${f.number('cacc-cust', 'New customers acquired in the period', '', '0')}
 ${f.number('cacc-ltv', 'Lifetime value per customer (optional — enables the ratio)', '', '0')}
 ${outputBlock('cacc-out', 'Result')}
 <p class="tool-note" id="cacc-verdict"></p>
+<div id="cacc-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 
@@ -157,6 +160,7 @@ ${f.number('amc-clicks', 'Clicks', '', '0')}
 ${f.number('amc-conv', 'Conversions (optional — enables CPA)', '', '0')}
 ${outputBlock('amc-out', 'Result')}
 <p class="tool-note" id="amc-verdict"></p>
+<div id="amc-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 
@@ -196,6 +200,7 @@ ${f.number('erc-rev', 'Revenue the campaign earned', '', '0')}
 ${f.number('erc-cost', 'Total campaign cost (platform + creative + offer)', '', '0')}
 ${outputBlock('erc-out', 'Result')}
 <p class="tool-note" id="erc-verdict"></p>
+<div id="erc-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 
@@ -234,6 +239,7 @@ ${f.number('mbc-cac', 'Blended customer acquisition cost (CAC)', '', '0')}
 ${f.number('mbc-arpu', 'Average revenue per customer per month (optional)', '', '0')}
 ${outputBlock('mbc-out', 'Result')}
 <p class="tool-note" id="mbc-verdict"></p>
+<div id="mbc-vis" class="kpi-strip"></div>
 ${note('Everything is calculated in your browser; nothing you type leaves this page.')}`,
   },
 ];

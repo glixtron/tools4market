@@ -114,9 +114,10 @@ ${outputBlock('ut-out', 'Tagged URL')}`,
 ${f.text('kd-query', 'Optional target phrase to check', '', 'Example: technical SEO audit')}
 ${f.textarea('kd-text', 'Paste text (analyzed locally)', 'Paste your article or draft here, or use Analyze my page above to fetch its main text…', 9)}
 ${f.check('kd-stop', 'Hide phrases that contain common stop words (phrase order is preserved)', true)}
-<div class="stat-line" id="kd-stats"></div>
+<div class="kpi-strip" id="kd-stats-tiles"></div>
 <div class="stat-line" id="kd-target-report"></div>
-${outputArea('kd-out', 'Frequency analysis')}`,
+${outputArea('kd-out', 'Frequency analysis')}
+<div id="kd-vis" class="kpi-strip"></div>`,
   },
 
   // ---------------------------------------------------------- 4

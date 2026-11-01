@@ -213,10 +213,12 @@
       out.textContent = '';
       var list = el('ul', 'inspect-signals');
       var fixesArr = [];
+      var results = [];
       var earned = 0, total = 0;
       checks.forEach(function (c) {
         var r = evalCheck(c, snap, ctx);
         var lvl = r.level;
+        results.push({ level: lvl, label: c.label, text: r.v || '' });
         var li = el('li', 'sig-' + lvl);
         li.appendChild(el('span', 'sig-dot', ''));
         var body = el('span', 'sig-body');
@@ -231,6 +233,7 @@
         }
       });
       out.appendChild(list);
+      auditBreakdown(root, results);
 
       // score ring (weighted crawl-health)
       var pct = total ? Math.round(earned / total * 100) : 0;
@@ -391,12 +394,14 @@
       var list = el('ul', 'inspect-signals');
       var earned = 0, total = 0;
       var fixesArr = [];
+      var results = [];
       factors.forEach(function (f) {
         var r = evalFactor(f, snap, query, ctx);
         if (r.level !== 'none') {
           total += f.weight;
           earned += r.level === 'pass' ? f.weight : r.level === 'warn' ? Math.round(f.weight * 0.5) : 0;
         }
+        results.push({ level: r.level, label: f.label, text: r.v || '' });
         var li = el('li', 'sig-' + r.level);
         li.appendChild(el('span', 'sig-dot', ''));
         var body = el('span', 'sig-body');
@@ -407,6 +412,7 @@
         if ((r.level === 'fail' || r.level === 'warn') && (f.weight || f.id === 'robots')) fixesArr.push({ w: f.weight, label: f.label, text: r.v, level: r.level });
       });
       out.appendChild(list);
+      auditBreakdown(root, results);
 
       var evidence = el('div', 'inspect-tip');
       evidence.appendChild(el('strong', null, 'Evidence from this page'));
@@ -475,4 +481,85 @@
     if (!b) return '';
     return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
   }
+
+  // ---- visual breakdown panel (stat tiles + bar chart by severity) ----
+  // Mirrors the chart helpers already in marketing.js; duplicated here so the
+  // two audit tools carry zero extra dependencies.
+  function kpiTileAudit(label, value, delta, deltaDir) {
+    var tile = document.createElement('div');
+    tile.className = 'stat-tile';
+    tile.innerHTML =
+      '<span class="stat-tile-label">' + label + '</span>' +
+      '<span class="stat-tile-value">' + value + '</span>' +
+      (delta != null
+        ? '<span class="stat-tile-delta ' + deltaDir + '">' +
+            (deltaDir === 'flat' ? '' : (deltaDir === 'up' ? '▲ ' : deltaDir === 'down' ? '▼ ' : '') + delta) + '</span>'
+        : '');
+    return tile;
+  }
+  function barChartAudit(title, sub, rows) {
+    var card = document.createElement('div');
+    card.className = 'chart-card';
+    var head = document.createElement('div');
+    head.innerHTML = '<p class="chart-title">' + title + '</p>' +
+      (sub ? '<p class="chart-sub">' + sub + '</p>' : '');
+    card.appendChild(head);
+    var chart = document.createElement('div');
+    chart.className = 'bar-chart';
+    var palette = ['var(--c-success)', 'var(--c-warn)', 'var(--c-danger)', 'var(--c-accent)', 'var(--c-muted)'];
+    rows.forEach(function (r, i) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var lbl = document.createElement('div');
+      lbl.className = 'bar-label';
+      lbl.textContent = r.label;
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = '0%';
+      fill.style.background = palette[i % palette.length];
+      track.appendChild(fill);
+      var val = document.createElement('div');
+      val.className = 'bar-val';
+      val.textContent = r.val;
+      row.appendChild(lbl); row.appendChild(track); row.appendChild(val);
+      chart.appendChild(row);
+      requestAnimationFrame(function () { fill.style.width = Math.max(2, Math.min(100, r.pct)) + '%'; });
+    });
+    card.appendChild(chart);
+    return card;
+  }
+  function auditBreakdown(root, results) {
+    // results: array of { level: 'pass'|'warn'|'fail'|'minor'|'info'|'none', label, text }
+    var counts = { pass: 0, warn: 0, fail: 0, minor: 0, info: 0, none: 0 };
+    var scored = 0;
+    results.forEach(function (r) {
+      if (counts[r.level] == null) counts[r.level] = 0;
+      counts[r.level]++;
+      if (r.level !== 'none') scored++;
+    });
+    var wrap = $(root, 'ca-vis') || $(root, 'sc2-vis');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    wrap.appendChild(kpiTileAudit('Scored checks', String(scored), scored === 0 ? 'No data' : '', scored === 0 ? 'flat' : counts.fail > 0 ? 'down' : counts.warn > 0 ? 'flat' : 'up'));
+    wrap.appendChild(kpiTileAudit('Passed', String(counts.pass), counts.pass === 0 ? '' : '', counts.pass > 0 ? 'up' : 'flat'));
+    if (counts.warn > 0) wrap.appendChild(kpiTileAudit('Warnings', String(counts.warn), counts.warn > 2 ? 'Review' : '', counts.warn > 2 ? 'down' : 'flat'));
+    if (counts.fail > 0) wrap.appendChild(kpiTileAudit('Failures', String(counts.fail), counts.fail > 0 ? 'Fix first' : '', 'down'));
+    if (counts.minor > 0) wrap.appendChild(kpiTileAudit('Minor', String(counts.minor), '', 'flat'));
+    if (counts.info > 0) wrap.appendChild(kpiTileAudit('Info', String(counts.info), '', 'flat'));
+    // bar chart: findings by severity (exclude 'none' and 'info' unless they're all we have)
+    var present = ['fail', 'warn', 'minor', 'pass', 'info'].filter(function (k) { return counts[k] > 0; });
+    if (present.length) {
+      var mx = Math.max.apply(null, present.map(function (k) { return counts[k]; })) || 1;
+      wrap.appendChild(barChartAudit('Findings by severity', 'Each bar = one scored check, coloured by outcome', present.map(function (k) {
+        return { label: k.charAt(0).toUpperCase() + k.slice(1) + ' (' + counts[k] + ')', val: String(counts[k]), pct: (counts[k] / mx) * 100 };
+      })));
+    } else {
+      wrap.appendChild(barChartAudit('No scored checks', 'Enter a URL and run the audit to see the breakdown', [
+        { label: 'Awaiting input', val: '', pct: 4 }
+      ]));
+    }
+  }
 })();
+
