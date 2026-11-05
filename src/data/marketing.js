@@ -64,8 +64,8 @@ ${note('Everything is calculated in your browser; nothing you type leaves this p
     keywords: 'roas calculator return on ad spend break even margin paid ads revenue',
     focus: 'roas calculator',
     h1: 'Free ROAS Calculator — Return on Ad Spend & Break-Even',
-    metaTitle: 'Free ROAS Calculator — Return on Ad Spend, Fast',
-    metaDesc: 'This free ROAS calculator turns ad spend and attributed revenue into return on ad spend, revenue per dollar and the break-even point your margin demands.',
+    metaTitle: 'ROAS Calculator: Free Return on Ad Spend Tool (2026)',
+    metaDesc: 'ROAS calculator: calculate Return on Ad Spend online for free. Enter ad spend and revenue, get ROAS ratio, revenue per dollar, and break-even point.',
     intro: 'Enter ad spend and the revenue your campaign attributed into this free ROAS calculator to read return on ad spend, revenue per dollar spent and the break-even ROAS your margin requires.',
     sections: [
       { h: 'What this ROAS calculator computes', p: ['Return on ad spend is deliberately simple: attributed revenue divided by what you spent on the ads, expressed as a multiple. Four times spend — written 4× — means every unit of currency bought back four in revenue. The calculator shows that ratio, the revenue-per-spend view of the same fact, and one number most ROAS tools skip: your break-even ROAS. Enter your gross margin percentage and the calculator works out the multiple at which the campaign exactly covers the cost of what it sold.', 'The break-even line is what turns a platform metric into a business decision. A 2× ROAS is a triumph for a business with 80% margins and a slow death for one at 20%, because cost of goods eats the revenue before it reaches profit. Same ads, same dashboard, opposite verdicts — the margin is the missing half of the sentence every ad account tells you. A 2× campaign on a 70%-margin product quietly beats a 3× campaign on a 25%-margin one; the multiple alone never settled this argument.'] },
@@ -216,8 +216,8 @@ ${note('Everything is calculated in your browser; nothing you type leaves this p
     keywords: 'marketing budget calculator growth projection customers cac payback plan',
     focus: 'marketing budget calculator',
     h1: 'Free Marketing Budget Calculator — Growth Plan in Minutes',
-    metaTitle: 'Free Marketing Budget Calculator — Plan Growth Spend',
-    metaDesc: 'Free marketing budget calculator — enter customers, growth rate and target to get the months, the budget and the payback. Private, no signup.',
+    metaTitle: 'Marketing Budget Calculator: Free Tool for 2026 Planning',
+    metaDesc: 'Marketing budget calculator: plan your spend online for free. Enter customers, growth rate, and target CAC to get budget, months to ROI, and payback period.',
     intro: 'Enter the customer base, the monthly growth rate and where you want to land, and this marketing budget calculator returns the months to target, the acquisition budget and the CAC payback — with honest guards on the assumptions.',
     sections: [
       { h: 'How this marketing budget calculator works', p: ['Growth targets fail quietly when the arithmetic behind them is hand-waved. This marketing budget calculator takes three inputs — your current customer base, the monthly growth rate you believe in, and the target — and returns the two numbers a plan is actually judged on: how many months the target is away, and what buying the gap outright would cost at your current acquisition cost. If you add average revenue per customer, it also shows the monthly revenue the target unlocks and how many months of that revenue pay back one CAC.', 'The months figure is computed on compounding growth — each month\u2019s customers join the base the next month\u2019s rate acts on — which is the model behind most growth decks and the one that flatters them most. The tool states it plainly so you can discount it honestly: a 8% monthly rate is not eight customers a hundred, it is a doubling roughly every nine months, and targets that assume the rate holds while the audience saturates will slip. Change any input and every line recomputes in this browser; nothing you type leaves the page.'] },

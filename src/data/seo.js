@@ -171,8 +171,8 @@ ${outputBlock('tw-out', 'Twitter Card tags')}`,
     keywords: 'canonical tag generator rel canonical duplicate content',
     focus: 'canonical tag generator',
     h1: 'Free Canonical Tag Generator — No Signup, No Limits',
-    metaTitle: 'Free Canonical Tag Generator — rel=canonical Online',
-    metaDesc: 'This canonical tag generator writes a correct rel=canonical link tag for any URL, so search engines know which version is the real page. Free, no signup.',
+    metaTitle: 'Canonical Tag Generator: Free rel=canonical Tag Maker (2026)',
+    metaDesc: 'Generate correct rel=canonical tags for any URL. Free canonical tag generator — paste your URL, get the tag. Prevents duplicate content. No signup or install.',
     intro: 'This canonical tag generator writes a correct rel=“canonical” link tag for any URL — the one line of HTML that tells search engines which version of a page is the real one.',
     sections: [
       { h: 'When you need a canonical tag', p: ['The same content is often reachable at several URLs: with and without a trailing slash, with query parameters, on HTTP and HTTPS, or across print/sort variants of a category page. Without a canonical, search engines may pick a different version than you want, splitting ranking signals across duplicates.', 'A canonical tag consolidates those signals onto the URL you choose. It is a hint, not a directive — but Google follows it in the vast majority of cases when the duplicates are genuinely equivalent.'] },
@@ -282,8 +282,8 @@ ${outputBlock('sc-out', 'JSON-LD')}`,
     keywords: 'serp preview tool google snippet title pixel width checker',
     focus: 'serp preview tool',
     h1: 'Free SERP Preview Tool — No Signup, No Limits',
-    metaTitle: 'Free SERP Preview Tool — Check Title & Description',
-    metaDesc: 'SERP preview tool for titles and descriptions, with browser-measured width estimates. Fetch a page to compare its title, H1 and target phrase. Free.',
+    metaTitle: 'SERP Preview Tool: Free Google Snippet Preview (2026)',
+    metaDesc: 'Preview how your title and meta description appear in Google. Free SERP preview tool — check length, pixel width and CTR before publishing.',
     intro: 'This serp preview tool shows your title and description, or fetches a public page to compare its live title, H1, description and visible topic. Width measurements are estimates; Google may rewrite or select different text for each query.',
     sections: [
       { h: 'What the preview can and cannot tell you', p: ['Search snippets vary with device, query and Google’s choice of title and page passage. This page renders your current title and description using browser font metrics so you can spot text that may be visually long; it does not reproduce a live Google result or guarantee where Google will cut or rewrite text.', 'Use the comparison to catch a title that differs from the visible heading or a description that misses the page topic. Keep the defining phrase and useful detail near the start, then read the whole line aloud. Clear, accurate wording matters more than hitting a fixed character target.'] },
@@ -324,8 +324,8 @@ ${outputArea('sp-out', 'Length check')}`,
     keywords: 'meta description checker length tester serp snippet',
     focus: 'meta description checker',
     h1: 'Free Meta Description Checker — No Signup, No Limits',
-    metaTitle: 'Free Meta Description Checker — Page-Fit Preview',
-    metaDesc: 'This meta description checker compares a draft with a fetched page title, H1 and target phrase, with character count and width estimate. Free, no signup.',
+    metaTitle: 'Meta Description Checker: Free Length & Preview Tool',
+    metaDesc: 'Meta description checker: check length and preview it in Google. Free tool — character count, pixel width, and snippet preview. Paste a URL or draft.',
     intro: 'This meta description checker takes a draft or fetches a public page to compare its description with its title, H1, opening text and optional target phrase. Character and pixel counts are editing estimates; Google chooses snippet text by query and device.',
     sections: [
       { h: 'What a useful description looks like', p: ['Google does not set a preferred description length. A useful description accurately summarizes this page, distinguishes it from nearby pages and gives a searcher a concrete reason to visit. Keep its main point early so it still reads well if a search result display shortens it.', 'Google may use the meta description when it is a good summary, or choose a passage from the page that better matches a query. You influence the candidate text, not the exact snippet users will see.'] },
@@ -516,8 +516,8 @@ ${note('The preview loads the image directly from its host — the same way soci
     keywords: 'hreflang checker validate language tags locale codes self reference multilingual',
     focus: 'hreflang checker',
     h1: 'Free Hreflang Checker — Validate Language Annotations',
-    metaTitle: 'Free Hreflang Checker — Validate hreflang Tags Fast',
-    metaDesc: 'Validate every hreflang tag with this free hreflang checker — code formats, duplicates, required self-reference and reciprocity reminders from the HTML.',
+    metaTitle: 'Hreflang Checker: Free hreflang Tag Validator Online',
+    metaDesc: 'Hreflang checker: validate hreflang tags free online. Check format, duplicates, self-reference, and reciprocity. Paste a URL or HTML — get errors and fixes.',
     intro: 'Paste a page’s HTML into this free hreflang checker to list every language annotation it declares, flag invalid codes and duplicates, and confirm the self-reference Google requires.',
     sections: [
       { h: 'What this hreflang checker validates', p: ['Hreflang is a reciprocity contract: each language version of a page declares every other version, including itself, and search engines swap the right URL into the right country’s results. The contract has three mechanical rules this checker verifies directly from the markup. Codes must be lowercase ISO 639 language with an optional UPPERCASE ISO 3166 region — en, fr-FR, zh-HK — plus x-default as the catch-all. Each hreflang value should be declared once; duplicates are discarded with only the last entry kept. And the page must reference itself, because a version that opts out of its own cluster tells crawlers it does not belong to it.', 'What one page cannot prove is the other half of the contract. Every alternate URL must return a working page, stay out of conflicts with canonical tags, and link back with the same complete set — a one-way annotation is ignored entirely. That verification means running this checker on each version and comparing the sets, which is exactly how the report above frames its output: definitive on what this page declares, explicit about what needs checking on the others.'] },
@@ -544,10 +544,10 @@ ${note('Codes, duplicates and self-reference are validated in your browser; reci
     name: 'Website Audit',
     cat: 'seo',
     icon: '🔍',
-    card: 'Crawl up to 100 pages and get every on-page, technical and link issue, with fixes.',
+    card: 'Crawl up to 100 pages with a live scan ledger and get every on-page, technical, visual and link issue, with fixes.',
     usedFor: 'for a full-site to-do list before a launch',
-    updated: '2026-10-29',
-    pickWhy: 'One run crawls up to 100 pages, checks 40+ rules on each and hands back a prioritized fix list — every finding carries a plain-language fix and the tool that does the job. Free, no signup, no limits.',
+    updated: '2026-10-31',
+    pickWhy: 'One run crawls up to 100 pages, checks 40+ rules on each and hands back a prioritized fix list — every finding carries a plain-language fix and the tool that does the job. Watch every crawler step live in the scan ledger. Free, no signup, no limits.',
     pickSample: `404  /contact-old/     Broken internal link — remove or redirect
 desc /pricing/         Meta description 210 chars — trim to 155
 dup  title × 3 pages   /blog/, /blog/page/2/ +1 — write unique titles
@@ -559,8 +559,8 @@ Score 74/100 · 100 pages · 12 fixes prioritized`,
     metaDesc: 'Free website audit: crawl up to 100 pages of any public site and get 40+ on-page, technical and link checks with a prioritized fix list. No signup.',
     intro: 'This website audit reads your sitemap, crawls up to 100 pages and checks each one with the same 40+ on-page, technical, content and link rules our own audits run. Every finding shows its evidence, a plain-language fix, and the tool that does the job.',
     sections: [
-      { h: 'What this website audit checks', p: ['The crawl covers five layers. Technical: HTTP status, redirect chains, canonical tags, robots directives, language declaration, viewport and content type. On-page: title and description lengths against the accepted ranges, heading order, H1 count. Structured data: whether JSON-LD parses and matches what the page visibly shows. Content and assets: word count, image alt text, intrinsic dimensions, HTML weight. And links: vague anchors, javascript: hrefs, internal-link density — plus site-wide cross-checks that need the whole crawl: duplicate titles, duplicate descriptions, duplicate H1s, orphan pages nothing links to, broken internal links and dead outbound links.', 'Every threshold is the same one our own site audits enforce — this tool runs the identical rule engine against your pages, not a simplified copy. Findings are ordered by severity: blockers are broken or unreachable things, majors are defects that cost you visibility, minors are hygiene, info is context.'] },
-      { h: 'How the crawl works', p: ['The audit starts at your robots.txt and sitemap.xml (a sitemap index is followed up to three files deep), keeps the page URLs on your own domain, and caps the crawl at 100 pages. Each page is fetched by our server in small batches — your browser never contacts your host directly — then parsed and run through the rule engine. After the pages, the crawl checks up to 100 of the link targets it found, so broken internal links and dead outbound links are detected by fetching the target, not by guessing.', 'Progress renders as it goes: findings appear batch by batch and the score updates live. You can stop at any point and resume from where you left off within the same browser session. Nothing about your site is stored after the run — the report lives in your browser until you close or re-run it.'] },
+      { h: 'What this website audit checks', p: ['The crawl covers six layers. Technical: HTTP status, redirect chains, canonical tags, robots directives, language declaration, viewport and content type. On-page: title and description lengths against the accepted ranges, heading order, H1 count. Structured data: whether JSON-LD parses and matches what the page visibly shows. Content and assets: word count, image alt text, intrinsic dimensions, HTML weight. Visual and layout: every image the page loads is fetched to catch dead files, soft-404 error pages served as images, payloads over the 300 KB budget and embeds that shift the layout when they load. And links: vague anchors, javascript: hrefs, internal-link density — plus site-wide cross-checks that need the whole crawl: duplicate titles, duplicate descriptions, duplicate H1s, orphan pages nothing links to, broken internal links and dead outbound links.', 'Every threshold is the same one our own site audits enforce — this tool runs the identical rule engine against your pages, not a simplified copy. Findings are ordered by severity: blockers are broken or unreachable things, majors are defects that cost you visibility, minors are hygiene, info is context.'] },
+      { h: 'How the crawl works', p: ['The audit starts at your robots.txt and sitemap.xml (a sitemap index is followed up to three files deep), keeps the page URLs on your own domain, and caps the crawl at 100 pages. Each page is fetched by our server in small batches — your browser never contacts your host directly — then parsed and run through the rule engine. After the pages, the crawl checks the images each page loads and up to 100 of the link targets it found, so broken internal links, dead outbound links and dead or oversized images are detected by fetching the target, not by guessing.', 'The scan ledger records every step as it happens — robots, sitemap, each crawl batch, each link and image check — with what was found and how long it took, so you can see the work instead of trusting a spinner. Alongside it, the filmstrip shows each page exactly as the crawler received it. You can stop at any point and resume from where you left off within the same browser session. Nothing about your site is stored after the run — the report lives in your browser until you close or re-run it.'] },
       { h: 'How to work through the results', p: ['Fix blockers first: a 404 inside your own site or a page that will not load wastes both visitor trust and crawl budget, and nothing else matters until it resolves. Then the majors — duplicate titles and descriptions mean two pages compete for one query and search engines pick the wrong one; thin pages rarely rank; missing alt text is the most common accessibility failure on the web. Minors are worth a pass once the majors are done.', 'Check whether a finding repeats across many pages before editing anything. A defect on one page is a page edit; the same defect on every page is a template edit, and fixing the template once clears the whole group. When a title or description finding fires, the report offers an AI draft built from that page’s actual content — review it before using it, and keep the part that names what the page really does.'] },
       { h: 'What this audit cannot see', p: ['This is a crawl of what your server returns, not a browser session: pages that render their content only through JavaScript will look thin here even when visitors see a full page — paste the rendered HTML into the SEO Score Checker for those. The audit has no access to Google Search Console, so it cannot report impressions, queries, index coverage or which canonical Google actually selected. It does not measure backlinks, page speed on real devices, or keyword demand.', 'Treat the score as a checklist summary that makes two runs comparable — this deploy removed six points, this fix added four back — not as a prediction of rankings. The value is in the finding list: each item names the page, shows the evidence it fetched, and says what to change.'] },
     ],
@@ -568,6 +568,7 @@ Score 74/100 · 100 pages · 12 fixes prioritized`,
       { q: 'How many pages does this website audit crawl?', a: 'Up to 100 pages, discovered from your sitemap.xml (a sitemap index is followed up to three files deep). The crawl cap keeps a single run fast and free; run it again after publishing to re-check.' },
       { q: 'Does the website audit use Google’s data?', a: 'No. It fetches your public pages and checks them against documented on-page, technical and link thresholds. It has no access to Search Console, so index status, impressions and queries are outside its view.' },
       { q: 'Is my site or the report stored anywhere?', a: 'No. Pages are fetched on demand for the run, and the report stays in your browser. Closing the tab or starting a new audit discards it.' },
+      { q: 'Does this audit test how my site looks?', a: 'It runs the visual checks that do not need a browser: every image the page loads is fetched to catch dead files, error pages served as images and oversized payloads, and embeds without reserved dimensions are flagged for layout shift. It does not render pixels, so colour contrast, spacing taste and font choices are outside its view — the filmstrip shows each page as the crawler received it, which is what search engines see.' },
       { q: 'Why does a page I can open fail the audit?', a: 'The audit reads the server’s HTML like a crawler does — no JavaScript rendering, no login, no region unblocking. A page that only renders through scripts will look thin here; use the SEO Score Checker with pasted rendered HTML for that case.' },
       { q: 'Can it audit a staging or private site?', a: 'Only pages publicly reachable from our server can be crawled. Private, password-protected or IP-restricted staging sites cannot be fetched; audit the production site or paste individual pages into the single-page tools.' },
     ],
@@ -580,6 +581,7 @@ ${f.url('wa-url', 'Website URL to audit', 'https://your-site.com')}
   <button type="button" class="btn btn-ghost" id="wa-copy-report" data-copy data-copy-text="">Copy report</button>
 </div>
 <div class="stat-line" id="wa-status" aria-live="polite"></div>
+<div class="wa-ledger" id="wa-ledger" hidden></div>
 <div class="score-wrap" id="wa-score" hidden>
   <div class="score-ring" id="wa-ring"><span id="wa-ring-num">0</span></div>
   <div class="score-meta">
@@ -589,6 +591,13 @@ ${f.url('wa-url', 'Website URL to audit', 'https://your-site.com')}
   </div>
 </div>
 ${outputArea('wa-pages', 'Pages audited')}
+<div class="wa-filmstrip" id="wa-filmstrip" hidden></div>
+<div class="wa-query" id="wa-query" hidden>
+  <label class="wa-query-label" for="wa-q">Ask this audit</label>
+  <input id="wa-q" type="search" autocomplete="off">
+  <div class="wa-chips" id="wa-chips"></div>
+  <p class="wa-query-count" id="wa-qcount" aria-live="polite"></p>
+</div>
 ${outputArea('wa-out', 'Findings and fixes')}
 ${note('Pages are fetched and checked by our server; your browser never contacts the audited site. The score summarizes the checks listed below — it is not a Google score or a ranking prediction.')}`,
   },

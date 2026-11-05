@@ -13,8 +13,8 @@ export const TOOLS_WEB = [
     keywords: 'htaccess redirect generator 301 force https www apache',
     focus: 'htaccess redirect generator',
     h1: 'Free .htaccess Redirect Generator — No Signup, No Limits',
-    metaTitle: 'Free .htaccess Redirect Generator — 301, HTTPS, WWW',
-    metaDesc: 'Create correct .htaccess rules with this htaccess redirect generator — 301/302 redirects, forced HTTPS and www canonicalisation for Apache. Free, no signup.',
+    metaTitle: '.htaccess Redirect Generator: Free 301 Redirect Maker (2026)',
+    metaDesc: 'Htaccess redirect generator: create .htaccess rules online for free. 301 redirects, HTTP→HTTPS, www→non-www, and domain moves. Copy-paste ready Apache rules.',
     intro: 'Use this htaccess redirect generator to write the rules your Apache site needs — 301 and 302 redirects, a forced HTTPS block and one canonical host.',
     sections: [
       { h: 'What this htaccess redirect generator produces', p: ['Three rule families: simple 301/302 redirects (old path → new URL), a force-HTTPS block that bounces all plain-HTTP traffic to the secure site, and www canonicalisation that picks either www or the bare domain as your one true host. Together they prevent the duplicate-URL problems that quietly split ranking signals. Generated as one block, they sit in the same file and can be enabled one family at a time, so you can fix protocol, host and individual paths in separate, testable steps.', 'A 301 tells browsers and search engines the move is permanent and passes most ranking signals; a 302 says temporary — use it for short-lived promos, and expect Google to keep the old URL indexed. When in doubt, use 301: an unnecessary permanent redirect is easy to undo later, while a 302 left in place for months quietly wastes the signals your old URL had earned. The status code is the one part of a redirect you cannot change afterwards without repeating the whole move.'] },
@@ -638,8 +638,8 @@ ${note('Patterns run locally with JavaScript\u2019s RegExp engine — nothing yo
     keywords: 'qr code generator create qr code png svg download url wifi free online',
     focus: 'qr code generator',
     h1: 'Free QR Code Generator — No Signup, No Limits',
-    metaTitle: 'Free QR Code Generator — PNG & SVG Download',
-    metaDesc: 'Create a QR code free with this QR code generator: enter a link or text, pick the size and error level, then download a PNG or SVG ready to print. No signup.',
+    metaTitle: 'QR Code Generator: Free PNG & SVG QR Maker (2026)',
+    metaDesc: 'QR code generator: create QR codes online for free. Enter text or URL, choose size and error correction, download PNG or SVG. No signup, no watermark.',
     intro: 'This QR code generator turns a link, message or WiFi detail into a scannable code you can preview instantly and download as PNG or SVG — generated in your browser with no signup.',
     sections: [
       { h: 'How this QR code generator works', p: [

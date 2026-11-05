@@ -7,8 +7,9 @@
 - **47 tools / 84 pages / 24 guides** — `regex-tester` and `qr-code-generator` added 31 Oct 2026
 - All 47 audit rules implemented and verified
 - All 47 tool pages smoke-tested (`npm test` → 47/47)
-- SEO audit **2672/0** · consent pass · worker-routing pass
-- All 43 audit-batch tests passing
+- SEO audit **2669/3** — the 3 are pre-existing `website-audit` content deviations (section 658 words vs 430–600, one FAQ answer outside 30–300 chars, card 114 vs 40–110), not caused by the Nov 5 metadata rewrite
+- Consent 30/30 · worker-routing 14/14 · audit rules 73/73
+- All 50 audit-batch tests passing
 - All 24 suggest API tests passing
 - VISITOR_FIX map added with 11 rule entries
 - Handoff map with 11 tool destinations configured
@@ -30,6 +31,8 @@ See [`docs/founder-actions.md`](founder-actions.md): AdSense review re-check 4 N
 4. Configured 11 site-specific tool destinations (meta-tag-generator, meta-description-checker, etc.)
 5. Updated SITE_AUDIT toolFor mapping
 6. Verified all tests pass (audit-batch, seo-audit, rules, routing, consent, suggest)
+7. Website Audit visual pass (5 Nov): iframe parsing + `iframe-undimensioned` rule, broken/oversized image and `og:image` checks, live scan ledger, crawler filmstrip, findings query filter, supporting styles; audit-batch suite grew 43 → 50
+8. CTR metadata rewrite (5 Nov): 15 GSC zero-click pages rewritten to match query phrasing, all within the 60/158 limits; see `docs/progress.md` for the table
 
 ## Next Steps
 

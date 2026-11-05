@@ -145,8 +145,8 @@ export const ARTICLES = [
     date: '2026-10-21',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'How to Block GPTBot — robots.txt Rules That Work',
-    metaDesc: 'How to block GPTBot with four lines of robots.txt, which OpenAI bots still get through, and what blocking does to your visibility in ChatGPT.',
+    metaTitle: 'GPTBot robots.txt: How to Block or Allow GPTBot (2026)',
+    metaDesc: 'Block GPTBot in robots.txt with 4 lines. Learn which OpenAI crawlers still get through, what blocking costs your ChatGPT visibility, and the 3-bot decision.',
     intro: 'Blocking GPTBot takes four lines in a robots.txt file. The decision around it takes a little longer, because OpenAI runs three crawlers and blocking the training one does not do what most people assume. Here is the exact block, the bots around it, and the honest trade-off.',
     sections: [
       {
@@ -599,8 +599,8 @@ export const ARTICLES = [
     date: '2026-10-21',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'Schema Markup for AI Search: What Actually Helps',
-    metaDesc: 'Schema markup for AI search: what structured data really does for AI Overviews and citations, and the types worth adding first.',
+    metaTitle: 'Schema Markup for AI Search: What Helps (and What Doesn\'t)',
+    metaDesc: 'Schema markup for AI search: does it help you appear in ChatGPT and Google AI Overviews? Which schema types matter, which don\'t, and how to validate.',
     intro: 'Every week someone sells "AI search schema" as a magic visibility switch. The truth: schema markup for AI search genuinely helps machines understand your pages, Google says AI features need no special markup, and a short honest list of schema types earns almost all the real value.',
     sections: [
       {
@@ -949,8 +949,8 @@ export const ARTICLES = [
     updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'Core Web Vitals in 2026: LCP, CLS and INP Explained',
-    metaDesc: 'Core Web Vitals are three field measurements, not a Lighthouse score. What LCP, CLS and INP each measure, the thresholds, and the fixes that move them.',
+    metaTitle: 'What is CLS in Core Web Vitals? LCP, CLS & INP (2026 Guide)',
+    metaDesc: 'CLS, LCP and INP explained: what each Core Web Vitals metric measures, the thresholds (LCP 2.5s, CLS 0.1, INP 200ms), and how to test and fix yours for free.',
     intro: 'Core Web Vitals are three numbers Google collects from real browsers. They are not the same as your Lighthouse score, and understanding that difference is most of the work.',
     sections: [
       {
@@ -1107,8 +1107,8 @@ export const ARTICLES = [
     updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: '.htaccess 301 Redirect: Patterns, Order and Testing',
-    metaDesc: '.htaccess 301 redirect rules are Apache-only, order-sensitive and easy to turn into a loop. Four patterns that cover most moves, and how to test one first.',
+    metaTitle: 'How to Write a 301 Redirect in .htaccess (4 Patterns)',
+    metaDesc: 'Write 301 redirects in .htaccess with 4 copy-paste patterns: single URL, domain move, www→non-www, and HTTP→HTTPS. How to test before deploying.',
     intro: 'An htaccess 301 redirect is the Apache way of telling browsers and crawlers that a URL has moved for good. The rules are short, the ordering is where people get hurt, and the file only works on Apache.',
     sections: [
       {
@@ -1215,8 +1215,8 @@ export const ARTICLES = [
     updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'Title Tag Length: Why 60 Characters Is Only a Guess',
-    metaDesc: 'Title tag length has no official limit: Google truncates the title link to fit the device. The practical range, why width decides, and when it gets rewritten.',
+    metaTitle: 'What is the Length of a Title Tag? Google\'s Limit (2026)',
+    metaDesc: 'Title tag length has no official limit — Google truncates by pixel width. The practical range (50-60 chars) and when Google rewrites your title.',
     intro: 'Title tag length is usually taught as a 60-character rule. Google publishes no such limit: it truncates the title link to fit the device, so the real constraint only shows up when you preview it.',
     sections: [
       {
@@ -1389,8 +1389,8 @@ export const ARTICLES = [
     updated: '2026-10-30',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'rel=canonical: The Tag, the Rules, and What Breaks It',
-    metaDesc: 'A canonical tag is a strong hint, not a command. Google can still pick another URL; here is where the tag goes, the rules it needs, and how to check who won.',
+    metaTitle: 'What is rel=canonical? Rules & Free Tag Generator (2026)',
+    metaDesc: 'rel=canonical tells Google which URL is the master version. Learn the 4 rules, what breaks it, and how to check which URL Google chose. Free generator.',
     intro: 'The canonical tag is the most misunderstood link element in SEO: a preference Google weighs rather than an instruction it obeys, and the ways it breaks are almost all silent.',
     sections: [
       {
@@ -1644,8 +1644,8 @@ export const ARTICLES = [
     updated: '2026-10-25',
     author: 'Tools4Market Editorial',
     reviewer: 'Tools4Market',
-    metaTitle: 'How to Test Structured Data: Rich Results vs Schema',
-    metaDesc: 'Two validators test structured data differently: Rich Results Test checks Google eligibility, Schema Markup Validator checks the markup. What neither can do.',
+    metaTitle: 'Test Structured Data: Rich Results Test & Schema Validator',
+    metaDesc: 'Test structured data with Google\'s Rich Results Test and Schema Markup Validator. What each checks, what neither catches, and when to validate. Free tools.',
     intro: 'Testing structured data is not one check. One validator asks whether Google can use the markup for a rich result; the other asks whether the markup is valid schema.org at all.',
     sections: [
       {

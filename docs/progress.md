@@ -1,3 +1,46 @@
+# CTR Metadata Rewrite — Nov 5, 2026
+
+**Agent:** Qoder · **Source:** `Tools4Market_CTR_Fix_Plan.md` (GSC, 19 Oct–3 Nov) · **Scope:** 15 zero-click pages
+
+## What changed
+
+Rewrote the meta title and description for every page the plan flagged: 2,055 impressions, ~1.07% site CTR, and zero clicks on all 15. Titles now lead with the query phrasing users actually type ("what is CLS…", "what is rel=canonical…", the exact tool name), and descriptions lead with a concrete answer plus a free/CTA signal.
+
+The plan's raw drafts exceeded the project limits, so every field was trimmed to the build's **60-character title / 158-character description** caps. The SEO audit's focus-phrase rule also required the exact tool phrase in each description; those were re-inserted without losing the rewrite.
+
+| Page | Impr. | New title |
+|---|---|---|
+| `/blog/core-web-vitals/` | 222 | What is CLS in Core Web Vitals? LCP, CLS & INP (2026 Guide) |
+| `/blog/rel-canonical-tag/` | 175 | What is rel=canonical? Rules & Free Tag Generator (2026) |
+| `/blog/title-tag-length-2026/` | 166 | What is the Length of a Title Tag? Google's Limit (2026) |
+| `/tools/serp-preview-tool/` | 136 | SERP Preview Tool: Free Google Snippet Preview (2026) |
+| `/blog/test-structured-data/` | 115 | Test Structured Data: Rich Results Test & Schema Validator |
+| `/tools/canonical-tag-generator/` | 109 | Canonical Tag Generator: Free rel=canonical Tag Maker (2026) |
+| `/tools/roas-calculator/` | 103 | ROAS Calculator: Free Return on Ad Spend Tool (2026) |
+| `/blog/htaccess-301-redirect/` | 87 | How to Write a 301 Redirect in .htaccess (4 Patterns) |
+| `/tools/marketing-budget-calculator/` | 83 | Marketing Budget Calculator: Free Tool for 2026 Planning |
+| `/tools/htaccess-redirect-generator/` | 54 | .htaccess Redirect Generator: Free 301 Redirect Maker (2026) |
+| `/blog/schema-markup-for-ai-search/` | 48 | Schema Markup for AI Search: What Helps (and What Doesn't) |
+| `/tools/hreflang-checker/` | 41 | Hreflang Checker: Free hreflang Tag Validator Online |
+| `/tools/qr-code-generator/` | 37 | QR Code Generator: Free PNG & SVG QR Maker (2026) |
+| `/tools/meta-description-checker/` | 34 | Meta Description Checker: Free Length & Preview Tool |
+| `/blog/how-to-block-gptbot/` | 33 | GPTBot robots.txt: How to Block or Allow GPTBot (2026) |
+
+Untouched, per the plan: homepage, tool-category pages, policy pages, and the pages already earning clicks.
+
+## Verification
+
+- **Build:** 84 pages, **zero** 60/158 length warnings
+- **SEO audit:** 2669 passed / 3 failed — all 3 are pre-existing `website-audit` content deviations (section 658 words vs 430–600, one FAQ answer outside 30–300 chars, card 114 vs 40–110), none on a page touched here
+- **Smoke:** 47/47 · **Audit rules:** 73/73 · **Audit batch:** 50/50 · **Worker:** 14/14 · **Consent:** 30/30
+- **Dist check:** all 15 built `<title>` values match the new copy
+
+## Also committed
+
+The prior session's uncommitted Website Audit upgrade was cross-verified and shipped with this change: iframe parsing and an `iframe-undimensioned` rule, a visual image pass (broken/oversized content and `og:image`), the live scan ledger, the "what the crawler saw" filmstrip, the findings query filter, and the supporting styles. Covered by audit-batch 50/50 (up from 43) and audit rules 73/73.
+
+---
+
 # Overnight Work — Oct 31, 2026
 
 **Agent:** Freebuff · **Starting commit:** `2f26926` · **Outcome:** 2 new tools shipped; 3 of the 6 listed tasks verified as already-done or no-ops rather than performed.
