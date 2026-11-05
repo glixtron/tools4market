@@ -1,3 +1,34 @@
+# Visual Redesign — Nov 6, 2026
+
+**Agent:** Qoder · **Source:** `Visual_Design_Audit_and_Upgrade_Plan.md` (reference only) · **Commit:** `4732ab9`
+
+## What changed
+
+Replaced decorative chrome with figures the build can prove, keeping the `docs/human-generated-human-readable.md` rules (no gradient text, no glassmorphism, no emoji product icons, no animated counters, no invented numbers).
+
+- **Hero** carries a real screenshot of the audit output (`src/assets/hero-audit.png`) instead of a mockup.
+- **Catalog band** gains a category bar chart and a browser/proxy/server split, both generated from the live tool counts in `src/visuals.mjs`. The caption now reads 19 in-browser / 27 URL / 1 server, matching the numbers band instead of contradicting it.
+- **Mobile charts**: under 720px the SVGs are hidden and HTML bar/split variants render, because 6px SVG labels were unreadable.
+- **Top-tool marketing**: editor's pick restored with its real sample output and a "Why this week" note; guide cards get one line icon each, plus authored diagrams with captions for status codes, structured data and canonical.
+- **Related tools**: the last 15 mappings curated, so calculators no longer link to each other arbitrarily.
+- **Honesty fix**: the category "scene" chart claimed 52 checks and 8 tools for a category holding 13; replaced by `cat-stats` computed from the real list.
+- **Navigation**: hamburger disclosure under 761px with `aria-expanded`, Escape-to-close and focus return; previously the nav wrapped onto two rows.
+- **Motion**: hero entrance, staggered card reveal, reading progress with a visible track, auto-highlighting article TOC.
+- **Layout**: empty ad slots collapse to zero height, removing a 133px dead gap above tool H1s.
+
+## Verification
+
+- SEO audit 2672/0 · smoke 47/47 · audit rules 73/47 · audit-batch 50 · worker routing 14 · consent 30
+- Build: 84 HTML pages, 47 tools, 5 categories
+- Browser-checked at 1440px and 390px on home, category, tool, guide, blog index and the mobile menu; search filter, TOC and progress bar probed live over CDP
+- Emoji audit of `dist`: only the four check marks inside the editor's-pick sample remain
+
+## Status
+
+Pushed to `origin/main` (`78a392d..4732ab9`). **Not deployed** — awaiting a separate deploy request.
+
+---
+
 # CTR Metadata Rewrite — Nov 5, 2026
 
 **Agent:** Qoder · **Source:** `Tools4Market_CTR_Fix_Plan.md` (GSC, 19 Oct–3 Nov) · **Scope:** 15 zero-click pages
