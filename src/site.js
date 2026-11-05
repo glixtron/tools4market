@@ -363,8 +363,77 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     };
   }
 
+  function initShellMotion() {
+    var header = document.querySelector('.site-header');
+    if (!header) return;
+    var onScroll = function () {
+      header.classList.toggle('is-scrolled', window.scrollY > 8);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    var toggle = document.getElementById('nav-toggle');
+    var nav = document.getElementById('site-nav');
+    if (!toggle || !nav) return;
+    var setNav = function (open) {
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      nav.classList.toggle('is-open', open);
+    };
+    toggle.addEventListener('click', function () {
+      setNav(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('is-open')) {
+        setNav(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (!nav.classList.contains('is-open')) return;
+      if (!nav.contains(e.target) && !toggle.contains(e.target)) setNav(false);
+    });
+  }
+
+  // Guide reading progress + contents highlighting. One rAF per scroll burst,
+  // no layout reads outside the frame, and nothing runs on pages without a bar.
+  function initReading() {
+    var bar = document.querySelector('.reading-progress i');
+    var article = document.querySelector('article.article');
+    if (!bar || !article) return;
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var heads = links.map(function (a) {
+      var id = a.getAttribute('href');
+      return id && id.charAt(0) === '#' ? document.querySelector(id) : null;
+    }).filter(Boolean);
+    var queued = false;
+    function update() {
+      queued = false;
+      var r = article.getBoundingClientRect();
+      var span = r.height - window.innerHeight;
+      var p = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 1;
+      bar.style.width = (p * 100).toFixed(2) + '%';
+      var current = -1;
+      for (var i = 0; i < heads.length; i++) {
+        if (heads[i].getBoundingClientRect().top < 120) current = i;
+      }
+      for (var j = 0; j < links.length; j++) {
+        links[j].classList.toggle('is-active', j === current);
+      }
+    }
+    function schedule() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    }
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+  }
+
   function boot() {
     initHeroAnim();
+    initShellMotion();
+    initReading();
     initCopy();
     initDownload();
     initSearch();

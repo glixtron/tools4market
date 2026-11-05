@@ -94,7 +94,7 @@ export const JOBS = [
   // Main tool: Full end-to-end website audit with AI-powered enhancement
   {
     title: 'Audit any live site with 40+ rules and AI fixes',
-    blurb: 'Comprehensive analysis with 40+ audit rules, visitor-friendly fixes, and AI-powered enhancement suggestions. Free, no signup, works on any page.',
+    blurb: 'One crawl covers titles, canonicals, schema, links, images and status codes, then hands back a ranked fix list. Free, no signup, works on any page.',
     path: '/tools/website-audit/',
     cta: 'Start Website Audit',
     icon: 'browser-check',
@@ -121,11 +121,11 @@ export const JOBS = [
     icon: 'link-tag',
   },
   {
-    title: 'Audit a live site before launch',
-    blurb: 'Fetch any URL and read its status, canonical, robots rules and discovery signals.',
+    title: 'Read one page before you trust it',
+    blurb: 'Fetch any URL and read its status, canonical, robots rules and discovery signals — no crawl needed.',
     path: '/tools/web-crawler-audit/',
     cta: 'Start with the Web Crawler Audit',
-    icon: 'browser-check',
+    icon: 'page-scan',
   },
   {
     title: 'Understand what a campaign really earned',
