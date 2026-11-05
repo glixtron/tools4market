@@ -25,7 +25,14 @@ Replaced decorative chrome with figures the build can prove, keeping the `docs/h
 
 ## Status
 
-Pushed to `origin/main` (`78a392d..4732ab9`). **Not deployed** — awaiting a separate deploy request.
+Pushed to `origin/main` (`78a392d..ec2b4a0`), then deployed to Cloudflare on 6 Nov 2026 — Version ID `ee96d73c-73f6-4c16-a813-e4f61a3cf91a`, worker startup 4 ms, `env.AI` + `env.ASSETS` bound, AdSense loader present in the deployed HTML.
+
+Live checks after deploy: `style.css?v=02bd7def`, `hero-visual` gone, `hero-shot` present, `/`, `/tools/website-audit/`, `/seo-tools/`, `/blog/`, `/blog/http-status-codes-seo/` and `/sitemap.xml` all 200.
+
+Two fixes landed after the redesign itself:
+
+- `61c2b7a` — proof strip no longer clips at 1080–1319px (the single-row rule now starts at 1320px).
+- `ec2b4a0` — `.hero-visual::after` painted over the old editor's-pick card, leaving dark text on a dark panel; the card now sits at `z-index: 2`. The new hero removes that component entirely.
 
 ---
 
