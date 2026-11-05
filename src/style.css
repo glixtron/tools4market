@@ -2315,8 +2315,12 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
   transition: border-color .15s, color .15s;
   white-space: nowrap;
 }
-@media (min-width: 1080px) {
+@media (min-width: 1320px) {
   .proof-strip .container { flex-wrap: nowrap; gap: 6px; }
+  .proof-strip-label { margin-right: 6px; letter-spacing: .08em; }
+}
+@media (min-width: 1080px) and (max-width: 1319.98px) {
+  .proof-strip .container { gap: 6px; }
   .proof-strip-label { margin-right: 6px; letter-spacing: .08em; }
 }
 .proof-chip:hover {
