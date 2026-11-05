@@ -188,11 +188,11 @@
         }
       }
 
+      var uniq = new Set(words);
       var statsTiles = $(root, 'kd-stats-tiles');
       if (statsTiles) {
         statsTiles.innerHTML = '';
         statsTiles.appendChild(kpiTile('Words', String(words.length), uniq.size > 0 ? 'tracked' : '', words.length > 0 ? 'up' : 'flat'));
-        var uniq = new Set(words);
         statsTiles.appendChild(kpiTile('Unique terms', String(uniq.size), uniq.size > 0 ? 'of ' + words.length : '', uniq.size > 0 ? 'up' : 'flat'));
         statsTiles.appendChild(kpiTile('Reading time', Math.max(1, Math.ceil(words.length / 200)) + ' min', words.length > 200 ? 'long form' : words.length > 0 ? 'short' : '', words.length > 200 ? 'flat' : (words.length > 0 ? 'flat' : 'flat')));
       }

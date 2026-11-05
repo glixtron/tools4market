@@ -22,7 +22,7 @@ class LocalLoader extends ResourceLoader {
     if (u.hostname !== 'localhost') return null;
     const p = decodeURIComponent(u.pathname);
     const file = path.join(DIST, p.endsWith('/') ? p + 'index.html' : p);
-    try { return readFileSync(file); } catch { return null; }
+    try { return Promise.resolve(readFileSync(file)); } catch { return null; }
   }
 }
 
