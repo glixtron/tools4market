@@ -7,7 +7,7 @@
 - **47 tools / 84 pages / 24 guides** — `regex-tester` and `qr-code-generator` added 31 Oct 2026
 - All 47 audit rules implemented and verified
 - All 47 tool pages smoke-tested (`npm test` → 47/47)
-- SEO audit **2669/3** — the 3 are pre-existing `website-audit` content deviations (section 658 words vs 430–600, one FAQ answer outside 30–300 chars, card 114 vs 40–110), not caused by the Nov 5 metadata rewrite
+- SEO audit **2672/0** — the 3 pre-existing `website-audit` content deviations (section length, FAQ answer, card length) were trimmed on 5 Nov
 - Consent 30/30 · worker-routing 14/14 · audit rules 73/73
 - All 50 audit-batch tests passing
 - All 24 suggest API tests passing

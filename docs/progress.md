@@ -31,9 +31,10 @@ Untouched, per the plan: homepage, tool-category pages, policy pages, and the pa
 ## Verification
 
 - **Build:** 84 pages, **zero** 60/158 length warnings
-- **SEO audit:** 2669 passed / 3 failed — all 3 are pre-existing `website-audit` content deviations (section 658 words vs 430–600, one FAQ answer outside 30–300 chars, card 114 vs 40–110), none on a page touched here
+- **SEO audit:** 2672 passed / 0 failed — the 3 pre-existing `website-audit` content deviations found during verification were trimmed in a follow-up commit (section 658 → 599 words, one FAQ answer 427 → 294 chars, card 114 → 109 chars)
 - **Smoke:** 47/47 · **Audit rules:** 73/73 · **Audit batch:** 50/50 · **Worker:** 14/14 · **Consent:** 30/30
 - **Dist check:** all 15 built `<title>` values match the new copy
+- **Deploy:** held at the owner's request — everything is committed and pushed for a single later deploy
 
 ## Also committed
 
