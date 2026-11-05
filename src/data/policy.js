@@ -32,7 +32,7 @@ export const POLICY = [
     metaDesc: 'Contact the Tools4Market team: tool suggestions, bug reports, feedback or business inquiries. We aim to reply within two business days.',
     html: `
 <h1>Contact</h1>
-<p>Everything reaches the same small inbox: <a href="mailto:support@tools4market.online"><strong><a href="mailto:support@tools4market.online">support@tools4market.online</a></strong></a>. We usually reply within two business days, and we answer complaints, privacy requests and takedown notices first.</p>
+<p>Everything reaches the same small inbox: <a href="mailto:support@tools4market.online"><strong>support@tools4market.online</strong></a>. We usually reply within two business days, and we answer complaints, privacy requests and takedown notices first.</p>
 <h2>Write to us</h2>
 <p>Use the form below — it opens your own email app with the message pre-filled, so nothing is stored on our servers and nothing is sent anywhere until you press send. You can also write directly, whichever is easier.</p>
 <form class="ct-form" action="mailto:support@tools4market.online" method="post" enctype="text/plain">

@@ -18,6 +18,12 @@
 ### Decisions waiting on the owner
 
 - [ ] **Ratify or reject the vendored QR encoder** (`src/vendor/qrcode.js`, MIT). The build still has zero npm dependencies, but rules.md §3 says "no npm dependencies" — the cleanest wording is "no npm *build* dependencies; third-party browser code must be vendored, licensed and loaded only on the page that needs it."
+- [ ] **H1 pattern** — `rules.md` §2 fixes every H1 as `Free {Tool} — No Signup, No Limits`; all 47 pages share the same opening. Proposal in `docs/human-generated-human-readable.md` §8: keep the phrase and `Free`, make the suffix optional on roughly 40% of pages.
+- [ ] **Eyebrow mandate** — `design.md` §9 requires an eyebrow plus rule on every homepage section, which the same doc flags as an AI tell. Proposal: keep it on one section, remove the numeric counters.
+
+### Human-generated pass (code, not yet started)
+
+Ranked in `docs/human-generated-human-readable.md` §7. The first four are: named author system with Person schema and author pages; custom SVG icon set replacing the 58 emoji; removal of word count, section counters and repeated eyebrows; per-tool tested/changed lines backed by a real changelog.
 
 ### Remaining (founder-side, not code)
 

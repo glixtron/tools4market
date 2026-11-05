@@ -56,7 +56,15 @@
 - Test in browser before declaring a tool done (browser-use skill).
 - `SITE.url` in build.mjs is now **`https://tools4market.online`** (domain purchased 20 Oct 2026) — the apex is the canonical host; `www` must 301 → apex (zone-level Cloudflare Redirect Rule). Override with the `SITE_URL` build env var if the host ever changes.
 
-## 7. Metrics we optimise (in priority order)
+## 7. Human-generated standard
+
+Binding for all copy, design and UI work: [`docs/human-generated-human-readable.md`](docs/human-generated-human-readable.md).
+
+That file lists the AI tells we never ship (gradient text, violet gradients, glassmorphism, emoji product icons, decorative numbering, eyebrow-plus-rule on every section, fake proof, anonymous bylines, banned vocabulary), the writing rules, the current site audit with file-level evidence, and the ranked fixes. Read it before writing or restyling any page. Rule IDs from it are valid review comments.
+
+Two of its proposals conflict with existing rules and need an owner decision before we apply them: the fixed H1 pattern in §2 of this file, and the mandatory eyebrow in `design.md` §9. Until that decision is recorded, the existing rules win.
+
+## 8. Metrics we optimise (in priority order)
 
 1. Core Web Vitals (LCP < 1.5s, CLS < 0.05, INP < 200ms)
 2. Search impressions growth (GSC, reviewed weekly)

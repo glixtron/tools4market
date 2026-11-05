@@ -42,6 +42,29 @@ The prior session's uncommitted Website Audit upgrade was cross-verified and shi
 
 ---
 
+# Human-Generated Standard — Nov 5, 2026
+
+Wrote [`docs/human-generated-human-readable.md`](human-generated-human-readable.md) and linked it from `rules.md` §7 as the binding standard for copy, design and UI.
+
+It covers: the sourced AI tells (design, type, copy, structure, motion, trust), hard rules with IDs (T/C/L/I/M/S/W series), the banned-vocabulary table, the em-dash budget, the named-author requirement, the current site audit with file:line evidence, ranked human signals to add, an enforcement checklist plus a proposed `check:human` script, and the sources.
+
+Audit result: 18 items checked. Failures are concentrated in the template layer, not the identity:
+
+- 58 emoji product/category icons (`build.mjs:397`, `build.mjs:726`)
+- 24/24 guides authored by "Tools4Market Editorial" with Organization schema (`src/data/blog.js:11`, `build.mjs:911`)
+- decorative `01`/`02`/`03` counters and an eyebrow on every homepage section (`build.mjs:588`–`652`)
+- word count printed in the byline (`build.mjs:875`)
+
+Passes: no violet gradients, real hero photograph, stated limitations with primary sources, RSS, real inbox, custom 404, restrained motion (2 keyframes), no fake testimonials or statistics.
+
+Also fixed a real defect found during the audit: the contact page nested an `<a>` inside an `<a>` (`src/data/policy.js:35`), which is invalid HTML. Now a single anchor with `<strong>`.
+
+Verification: build 84 pages / 47 tools, SEO audit 2672/0, smoke 47/47.
+
+Three decisions are recorded as owner calls, not applied: the fixed H1 pattern in `rules.md` §2, the mandatory eyebrow in `design.md` §9, and the vendored QR encoder wording.
+
+---
+
 # Overnight Work — Oct 31, 2026
 
 **Agent:** Freebuff · **Starting commit:** `2f26926` · **Outcome:** 2 new tools shipped; 3 of the 6 listed tasks verified as already-done or no-ops rather than performed.
