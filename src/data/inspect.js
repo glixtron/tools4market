@@ -590,6 +590,7 @@ export const SITE_AUDIT = {
   crawling: 'Audited {m} of {n} pages…',
   noPages: 'Your sitemap listed no page URLs, so there is nothing to crawl. Publish a sitemap and run the audit again.',
   links: 'Checking link targets ({m} of {n})…',
+  images: 'Checking images ({m} of {n})…',
   cross: 'Cross-checking pages for duplicates, orphans and broken links…',
   done: 'Audit complete: {n} page(s) checked, {f} finding(s).',
   stopped: 'Audit stopped at {m} of {n} pages. Press Resume to continue, or start over.',
@@ -609,7 +610,54 @@ export const SITE_AUDIT = {
   runningLabel: 'Audit running…',
   stopLabel: 'Stop',
   sev: { blocker: 'Blocker', major: 'Major', minor: 'Minor', info: 'Info' },
-  grp: { technical: 'Technical', onpage: 'On-page', schema: 'Structured data', content: 'Content', assets: 'Assets', links: 'Links', cross: 'Cross-page' },
+  grp: { technical: 'Technical', onpage: 'On-page', schema: 'Structured data', content: 'Content', assets: 'Assets', links: 'Links', cross: 'Cross-page', visual: 'Visual & layout' },
+  // Live scan ledger — every row is one thing the crawler actually did, with
+  // what it found and how long it took. Labels are keyed here, filled at run
+  // time (rules.md §3: no user-facing copy in the runtime).
+  ledger: {
+    title: 'Scan ledger',
+    note: 'Every step the crawler took, as it took it.',
+    robots: 'Reading robots.txt',
+    sitemap: 'Reading sitemap.xml',
+    discover: 'Reading robots.txt and sitemap.xml',
+    crawlBatch: 'Crawling pages {a}–{b} of {n}',
+    linksBatch: 'Checking link targets {a}–{b} of {n}',
+    imagesBatch: 'Checking images {a}–{b} of {n}',
+    cross: 'Cross-checking the crawl',
+    metaFindings: '{k} finding(s)',
+    metaUrls: '{k} URL(s)',
+    metaChecked: '{k} checked',
+    metaMs: '{ms} ms',
+    failed: 'failed',
+    httpStatus: 'HTTP {s}',
+    noSitemap: 'no sitemap',
+  },
+  // "What the crawler saw" — a per-page filmstrip card, built from the server's
+  // own view of each page. Deliberately labelled as the server's view, not a
+  // screenshot: this crawl reads HTML like a search engine, not a browser.
+  film: {
+    title: 'What the crawler saw',
+    note: 'Each card is one page as the server received it — status, title, heading and depth — recorded live during the crawl. This is a crawler’s view of your HTML, not a browser screenshot.',
+    words: '{w} words',
+    wordsLinks: '{w} words · {l} link(s)',
+  },
+  // Query the finished (or in-progress) report instead of scrolling it.
+  query: {
+    label: 'Ask this audit',
+    placeholder: 'Filter findings — e.g. “images”, “titles”, “broken links”',
+    chips: [
+      { k: 'blockers', l: 'Blockers' },
+      { k: 'titles', l: 'Titles' },
+      { k: 'descriptions', l: 'Descriptions' },
+      { k: 'links', l: 'Links' },
+      { k: 'images', l: 'Images' },
+      { k: 'schema', l: 'Schema' },
+      { k: 'mobile', l: 'Mobile' },
+      { k: 'visual', l: 'Visual' },
+    ],
+    count: 'Showing {a} of {b} findings',
+    none: 'No findings match that query. Clear it to see all {b} findings.',
+  },
   ai: {
     locked: 'AI drafting follows your cookie consent.',
     manage: 'Open consent settings',
@@ -657,6 +705,10 @@ export const SITE_AUDIT = {
     'robots-disallowed': { path: '/tools/robots-txt-tester/', label: 'Test this URL against robots.txt' },
     'og-complete': { path: '/tools/open-graph-generator/', label: 'Fix the social card' },
     'twitter-complete': { path: '/tools/twitter-card-generator/', label: 'Fix the social card' },
+    'og-image-broken': { path: '/tools/open-graph-generator/', label: 'Fix the social card' },
+    'img-broken': { path: '/blog/image-seo/', label: 'See the image fix checklist' },
+    'img-oversized': { path: '/tools/image-compressor/', label: 'Compress this image' },
+    'iframe-undimensioned': { path: '/blog/core-web-vitals/', label: 'See the layout-shift rules' },
     'og-image-dimensions': { path: '/blog/open-graph-image-size-2026/', label: 'See the social image size guide' },
     'canonical-present': { path: '/tools/canonical-tag-generator/', label: 'Fix the canonical tag' },
     'canonical-matches-sitemap-url': { path: '/tools/canonical-tag-generator/', label: 'Fix the canonical tag' },

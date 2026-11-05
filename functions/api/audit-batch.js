@@ -205,6 +205,20 @@ function robotsBlocked(rules, path) {
 // ---------------------------------------------------------------------------
 const visitorRules = [
   {
+    id: 'iframe-undimensioned',
+    group: 'visual',
+    severity: 'minor',
+    test(p) {
+      const missing = (p.iframes || []).filter((i) => !i.width || !i.height);
+      if (!missing.length) return null;
+      return {
+        message: `${missing.length} embedded frame(s) without width and height attributes`,
+        fix: 'Give every iframe or embed explicit width and height (or a fixed-ratio CSS wrapper). Without them the browser reserves no space and the content below jumps when the embed loads — a Cumulative Layout Shift penalty and a jarring read on mobile.',
+        evidence: { count: missing.length, srcs: missing.slice(0, 3).map((i) => str(i.src, 120)) },
+      };
+    },
+  },
+  {
     id: 'thin-content',
     group: 'content',
     severity: 'major',
@@ -266,6 +280,10 @@ function summarise(p) {
     description: p.description,
     h1: p.h1.map((h) => h.text).join(' | '),
     words: p.words.body,
+    // Visual pass: the page's images (deduped, capped) plus its social card
+    // image. The browser runs mode=images against these URLs after the crawl.
+    images: [...new Set(p.images.map((i) => i.absolute).filter(Boolean))].slice(0, 4),
+    ogImage: p.og && p.og.image ? p.og.image : null,
     internal: [...new Set(p.links.filter((l) => l.internal && l.absolute).map((l) => l.absolute))],
     // Outbound links are capped per page: the dead-external check only needs a
     // sample, and this field is posted BACK to mode=cross (payload budget).
@@ -379,7 +397,44 @@ async function modeLinks(urls) {
   return { ok: true, results };
 }
 
-function modeCross(summaries, linkResults) {
+// Visual pass: fetch image targets and report what they actually are.
+// A 200 with an HTML body is a soft-404 (a CDN error page served as an image),
+// so the content-type is checked, not just the status.
+const IMG_MAX = 8;               // per request — each is a full GET
+const IMG_BYTES_HEAVY = 300000;  // one image over ~300 KB on a page is a payload bug
+const IMG_TOTAL_HEAVY = 1500000; // cap for reading; above this, bytes are approximate
+
+async function fetchImageMeta(url) {
+  try {
+    const res = await fetch(url, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+      headers: { 'user-agent': UA, accept: 'image/*,*/*;q=0.8' },
+    });
+    const headers = {};
+    res.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
+    const type = (headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    const declared = Number(headers['content-length']);
+    let bytes = Number.isFinite(declared) && declared > 0 ? declared : 0;
+    if (!bytes) {
+      // No content-length: read up to the cap and measure what arrived.
+      const buf = await res.arrayBuffer().catch(() => null);
+      bytes = buf ? buf.byteLength : 0;
+    } else if (bytes > IMG_TOTAL_HEAVY) {
+      try { await res.body?.cancel(); } catch {}
+    }
+    return { url, status: res.status, type, bytes, approx: !Number.isFinite(declared) && bytes >= IMG_TOTAL_HEAVY };
+  } catch (e) {
+    return { url, status: 0, type: '', bytes: 0, error: String((e && e.message) || e) };
+  }
+}
+
+async function modeImages(urls) {
+  const results = await Promise.all(urls.slice(0, IMG_MAX).map(fetchImageMeta));
+  return { ok: true, results };
+}
+
+function modeCross(summaries, linkResults, imageResults) {
   const findings = [];
   const siteOrigin = summaries.length ? new URL(summaries[0].url).origin : null;
   // Every URL key goes through audit/cross.mjs normalise() — the SAME function
@@ -460,6 +515,36 @@ function modeCross(summaries, linkResults) {
       evidence: { target: r.url, status: r.status } });
   }
 
+  // Visual pass findings from the image fetches. `kind` attributes the URL:
+  // 'og' means the page's social-card image (a broken one silently kills every
+  // share of that page), 'content' means an <img> on the page itself.
+  let broken = 0, heavy = 0;
+  for (const r of imageResults || []) {
+    if (broken >= 12 && heavy >= 12) break;             // a wall of identical rows helps nobody
+    const page = r.page || '(site)';
+    const isOg = r.kind === 'og';
+    if (r.status === 0 || r.status >= 400 || (r.status === 200 && r.type && !/^image\//.test(r.type) && r.type !== 'application/octet-stream')) {
+      if (broken >= 12) continue;
+      broken++;
+      const what = isOg ? 'Social card (og:image)' : 'Image';
+      findings.push({ id: isOg ? 'og-image-broken' : 'img-broken', severity: isOg ? 'major' : 'major', group: 'visual', page,
+        message: `${what} returns ${r.status === 0 ? 'no response' : 'HTTP ' + r.status}${r.type ? ' as ' + r.type : ''}: ${str(r.url, 140)}`,
+        fix: isOg
+          ? 'The social card image is the first thing every share of this page shows — a dead URL renders as an empty preview on Facebook, LinkedIn and Slack. Point og:image at a live 1200×630 image on your own origin.'
+          : 'A broken image is a hole in the page for every visitor and a signal of neglect to search engines. Restore the file, fix the path, or remove the tag.',
+        evidence: { target: r.url, status: r.status, type: r.type || null } });
+      continue;
+    }
+    if (r.bytes > IMG_BYTES_HEAVY) {
+      if (heavy >= 12) continue;
+      heavy++;
+      findings.push({ id: 'img-oversized', severity: 'minor', group: 'visual', page,
+        message: `Image is ${(r.bytes / 1000).toFixed(0)} KB (budget ~300 KB): ${str(r.url, 140)}`,
+        fix: 'Every kilobyte of image sits on the critical path for the LCP element on a phone. Re-encode at WebP or AVIF, cap the display width, and ship a responsive srcset so phones never download the desktop file.',
+        evidence: { target: r.url, bytes: r.bytes, approx: !!r.approx } });
+    }
+  }
+
   return { ok: true, findings };
 }
 
@@ -520,14 +605,25 @@ export async function handleAuditBatch(request, env) {
       return json({ ...res, ms: Date.now() - started });
     }
 
-    if (mode === 'cross') {
-      const summaries = Array.isArray(body.summaries) ? body.summaries.slice(0, 120) : [];
-      if (!summaries.length) return json({ ok: false, error: 'No page summaries supplied.' }, 400);
-      const res = modeCross(summaries, Array.isArray(body.linkResults) ? body.linkResults : []);
+    if (mode === 'images') {
+      const urls = Array.isArray(body.urls) ? body.urls.slice(0, IMG_MAX) : [];
+      if (!urls.length) return json({ ok: false, error: 'No image URLs supplied.' }, 400);
+      for (const u of urls) {
+        let parsed; try { parsed = new URL(u); } catch { return json({ ok: false, error: 'Invalid URL in batch.' }, 400); }
+        if (!hostAllowed(parsed)) return json({ ok: false, error: 'That host is not allowed.' }, 403);
+      }
+      const res = await modeImages(urls);
       return json({ ...res, ms: Date.now() - started });
     }
 
-    return json({ ok: false, error: 'Unknown mode. Use discover, pages, links or cross.' }, 400);
+    if (mode === 'cross') {
+      const summaries = Array.isArray(body.summaries) ? body.summaries.slice(0, 120) : [];
+      if (!summaries.length) return json({ ok: false, error: 'No page summaries supplied.' }, 400);
+      const res = modeCross(summaries, Array.isArray(body.linkResults) ? body.linkResults : [], Array.isArray(body.imageResults) ? body.imageResults.slice(0, 120) : []);
+      return json({ ...res, ms: Date.now() - started });
+    }
+
+    return json({ ok: false, error: 'Unknown mode. Use discover, pages, links, images or cross.' }, 400);
   } catch (e) {
     return json({ ok: false, error: String((e && e.message) || e), ms: Date.now() - started }, 502);
   }

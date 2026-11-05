@@ -189,6 +189,14 @@ export function parsePage(input) {
     };
   });
 
+  // Embedded media. An iframe/embed without intrinsic dimensions shifts the
+  // layout when it loads — the classic CLS culprit the visual pass flags.
+  const iframes = [...body.matchAll(/<(?:iframe|embed)\b([^>]*)>/gi)].map((m) => ({
+    src: attr(m[1], 'src'),
+    width: attr(m[1], 'width'),
+    height: attr(m[1], 'height'),
+  }));
+
   const scriptTags = [...body.matchAll(/<script\b([^>]*)>/gi)].map((m) => ({
     src: attr(m[1], 'src'),
     async: /\basync\b/i.test(m[1]),
@@ -285,6 +293,7 @@ export function parsePage(input) {
     h1: headings.filter((h) => h.level === 1),
     links,
     images,
+    iframes,
     scripts,
     styles,
     preconnect,

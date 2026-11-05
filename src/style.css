@@ -2514,6 +2514,74 @@ body.hero-anim .pick-card { animation-delay: 90ms; }
 }
 .inspect-tip strong { color: var(--c-accent); }
 
+/* --- Website Audit: live scan ledger --------------------------------- */
+.wa-ledger { margin: 14px 0; border: 1px solid var(--c-border); border-radius: var(--radius-sm); overflow: hidden; }
+.wa-ledger .preview-label { margin: 0; padding: 9px 13px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); }
+.wa-steps { display: grid; }
+.wa-step {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 8px 13px; font-size: .84rem;
+  border-top: 1px solid var(--c-border);
+}
+.wa-step:first-child { border-top: 0; }
+.wa-step-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  align-self: center; background: var(--c-muted); opacity: .45;
+}
+.wa-step--run .wa-step-dot { background: var(--c-accent); opacity: 1; animation: wa-pulse 1.1s ease-in-out infinite; }
+.wa-step--done .wa-step-dot { background: var(--c-success); opacity: 1; }
+.wa-step--fail .wa-step-dot { background: var(--c-danger); opacity: 1; }
+.wa-step-label { flex: 1; font-family: var(--font-mono); font-size: .8rem; word-break: break-word; }
+.wa-step--done .wa-step-label { color: var(--c-text-2); }
+.wa-step--fail .wa-step-label { color: var(--c-danger); }
+.wa-step-meta { font-family: var(--font-mono); font-size: .74rem; color: var(--c-muted); text-align: right; flex: none; }
+@keyframes wa-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+@media (prefers-reduced-motion: reduce) { .wa-step--run .wa-step-dot { animation: none; } }
+
+/* --- Website Audit: "what the crawler saw" filmstrip ------------------ */
+.wa-filmstrip { margin: 12px 0 4px; }
+.wa-film-cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px; margin-top: 8px;
+}
+.wa-film-card {
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  padding: 9px 11px; background: var(--c-surface); min-width: 0;
+}
+.wa-film-status {
+  display: inline-block; font-family: var(--font-mono); font-size: .7rem;
+  padding: 1px 7px; border-radius: 999px; border: 1px solid var(--c-border); color: var(--c-muted);
+}
+.wa-film-status.is-ok { color: var(--c-success); border-color: var(--c-success); }
+.wa-film-status.is-bad { color: var(--c-danger); border-color: var(--c-danger); }
+.wa-film-path { margin: 6px 0 2px; font-family: var(--font-mono); font-size: .76rem; word-break: break-all; color: var(--c-text); }
+.wa-film-title {
+  margin: 0 0 4px; font-size: .78rem; color: var(--c-text-2); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.wa-film-meta { margin: 0; font-size: .72rem; color: var(--c-muted); }
+
+/* --- Website Audit: query the report ---------------------------------- */
+.wa-query { margin: 14px 0 10px; }
+.wa-query-label {
+  display: block; font-family: var(--font-head); font-size: .75rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--c-muted); margin-bottom: 6px;
+}
+.wa-query input {
+  width: 100%; padding: 9px 12px; font-size: .9rem;
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: var(--c-surface); color: var(--c-text);
+}
+.wa-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.wa-chip {
+  font-size: .76rem; padding: 4px 11px; border-radius: 999px;
+  border: 1px solid var(--c-border); background: var(--c-surface); color: var(--c-text-2); cursor: pointer;
+}
+.wa-chip:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.wa-chip[aria-pressed="true"] { background: var(--c-accent-soft); border-color: var(--c-accent); color: var(--c-accent); font-weight: 600; }
+.wa-query-count { margin: 8px 0 0; font-size: .8rem; color: var(--c-muted); }
+.wa-query-none { margin: 6px 0; font-size: .88rem; color: var(--c-text-2); }
+
 /* ---------- Input mode toggle (Analyze my page | Enter manually) ---------- */
 .inspect-modes {
   display: inline-flex; gap: 4px; padding: 3px; margin-bottom: 12px;
@@ -2786,3 +2854,224 @@ section.tool-content p a, .article p a, .policy p a, .cat-body p a {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* ================================================================
+   SIX LAYERS SECTION — CBO-style conversion rate optimization
+   ================================================================ */
+.six-layers {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  margin: 52px 0 26px;
+}
+.layer {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-xs);
+  position: relative;
+  overflow: hidden;
+}
+.layer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--chart-1), var(--chart-2));
+  border-radius: var(--radius) var(--radius) 0 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.layer:hover::before { opacity: 1; }
+.layer h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--c-text);
+}
+.layer p { color: var(--c-text-2); font-size: .93rem; line-height: 1.6; margin: 0 0 12px; }
+.layer .layer-stat {
+  font-family: var(--font-mono);
+  font-size: .88rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--c-muted);
+  display: block;
+  margin-bottom: 16px;
+}
+.layer .layer-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 0 14px;
+  background: linear-gradient(135deg, var(--chart-1), var(--chart-2));
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+@media (max-width: 720px) {
+  .six-layers { grid-template-columns: 1fr; }
+}
+
+/* ================================================================
+   CHARTS & GRAPHS — modern CBO data visualization
+   ================================================================ */
+.chart-wrapper {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-xs);
+  margin: 20px 0;
+}
+.chart-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.chart-legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 12px;
+  font-size: .82rem;
+  color: var(--c-text-2);
+  flex-wrap: wrap;
+}
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+}
+
+/* Bar chart base styles — each bar gets --bar-color from the series */
+.bar-chart {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+.bar {
+  position: absolute;
+  bottom: 0;
+  left: calc((100% / (N+1)) * var(--i));
+  width: calc(100% / (N+1)) - 12px;
+  background: var(--bar-color, var(--chart-1));
+  border-radius: 6px 6px 0 0;
+  transition: height .3s var(--ease);
+}
+
+/* Area chart — fill under the line */
+.area-chart {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  width: 100%;
+}
+.area-path {
+  fill: var(--chart-fill, var(--chart-1));
+  stroke: var(--chart-stroke, var(--chart-1));
+  stroke-width: 2px;
+}
+
+/* ================================================================
+   PHOTO GALLERY / CASE STUDY IMAGES
+   ================================================================ */
+.photo-gallery {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  margin: 24px 0;
+}
+.photo-item {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--c-bg);
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s var(--ease);
+}
+.photo-item:hover { transform: translateY(-4px); }
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .3s var(--ease);
+}
+.photo-item:hover img { transform: scale(1.05); }
+
+/* Case study card with chart inset */
+.case-study {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-xs);
+  margin: 20px 0;
+}
+.case-study h3 { margin: 0 0 12px; font-size: 1.15rem; }
+.case-study p { color: var(--c-text-2); font-size: .92rem; line-height: 1.6; margin: 0; }
+.case-study .chart-inset {
+  width: 100%;
+  height: 120px;
+  margin: 16px 0;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border-2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+}
+.case-study .chart-inset canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ================================================================
+   UPDATED BUTTONS WITH CHART ACCENTS
+   ================================================================ */
+.btn-chart {
+  background: var(--chart-3);
+  color: #fff;
+  border: 1.5px solid var(--chart-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .14s, transform .14s;
+}
+.btn-chart:hover { background: var(--chart-2); border-color: var(--chart-2); }
+
+/* ================================================================
+   UPDATED STATUS CHIPS WITH OKABE-ITO COLORS
+   ================================================================ */
+.chip.chart { background: var(--chart-3); color: #fff; }
+
+/* ================================================================
+   ENHANCED ACCESSIBILITY — contrast + link distinction (WCAG AA)
+   added after the Lighthouse audit flagged: eyebrow 4.47:1 (needs 4.5),
+   decorative counters 1.71:1, and prose links relying on color alone (1.05:1 vs body text).
+   ================================================================ */
+.section-eyebrow { color: #8c6025; }          /* 5.06:1 on paper at 11.5px */
+.section-eyebrow::before { background: #8c6025; }
+.sec-num { color: #766e5c; }                  /* 4.64:1 — small text */
+.outcome-num { color: #8b8271; }              /* 3.49:1 — 24px large text */
+.cat-num { color: #8c6025; }                  /* 5.06:1 — was 4.47 via --c-accent */
+.tool-proc { color: #66707c; opacity: 1; }    /* 5.03:1 on cards (4.62 on paper) */
+/* In-prose links: underline so they are distinguishable without relying on
+   color (cards, buttons and nav links keep their current treatment). */
+section.tool-content p a, .article p a, .policy p a, .cat-body p a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ================================================================ */
+/* End of Design System v2.2 "CBO Modern" */

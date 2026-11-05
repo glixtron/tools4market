@@ -27,6 +27,8 @@
   // cap is enforced by the server's discover response.
   var PAGE_BATCH = 4;
   var LINK_BATCH = 10;
+  var IMG_BATCH = 8;               // image fetches are full GETs of binary bodies
+  var MAX_IMAGES = 40;             // visual-pass image targets per crawl
   var MAX_LINKS = 100;             // link targets checked after the page crawl
   var STORE_KEY = 't4m_wa_v1';
   var SEV_ORDER = ['blocker', 'major', 'minor', 'info'];
@@ -66,6 +68,12 @@
     var noteEl = $(root, 'wa-note');
     var pagesOut = $(root, 'wa-pages');
     var out = $(root, 'wa-out');
+    var ledgerEl = $(root, 'wa-ledger');
+    var filmEl = $(root, 'wa-filmstrip');
+    var queryEl = $(root, 'wa-query');
+    var qIn = $(root, 'wa-q');
+    var chipsEl = $(root, 'wa-chips');
+    var qCount = $(root, 'wa-qcount');
     if (!runBtn || !out) return;
 
     out.textContent = S.idle || '';
@@ -91,6 +99,134 @@
     function clearStore() { try { window.sessionStorage.removeItem(STORE_KEY); } catch (e) {} }
 
     function setStatus(t) { if (status) status.textContent = t || ''; }
+
+    // ---- scan ledger: every step the crawler takes, as it takes it --------
+    // Rows live in st.ledger so a checkpointed crawl resumes with its history.
+    function renderLedger() {
+      if (!ledgerEl || !st || !st.ledger || !st.ledger.length) {
+        if (ledgerEl) { ledgerEl.hidden = true; ledgerEl.textContent = ''; }
+        return;
+      }
+      ledgerEl.hidden = false;
+      ledgerEl.textContent = '';
+      ledgerEl.appendChild(el('p', 'preview-label', (S.ledger && S.ledger.title) || 'Scan ledger'));
+      var list = el('div', 'wa-steps');
+      st.ledger.forEach(function (row) {
+        var step = el('div', 'wa-step wa-step--' + (row.state === 'run' ? 'run' : row.state === 'fail' ? 'fail' : 'done'));
+        step.appendChild(el('span', 'wa-step-dot', ''));
+        step.appendChild(el('span', 'wa-step-label', row.label));
+        var bits = [];
+        if (row.meta) bits.push(row.meta);
+        if (row.ms != null) bits.push(fill((S.ledger && S.ledger.metaMs) || '{ms} ms', { ms: row.ms }));
+        step.appendChild(el('span', 'wa-step-meta', bits.join(' · ')));
+        list.appendChild(step);
+      });
+      ledgerEl.appendChild(list);
+    }
+    function ledgerAdd(label) {
+      if (!st) return -1;
+      st.ledger = st.ledger || [];
+      st.ledger.push({ label: label, meta: '', ms: null, state: 'run' });
+      renderLedger();
+      return st.ledger.length - 1;
+    }
+    function ledgerFinish(i, meta, ms, failed) {
+      if (!st || !st.ledger || !st.ledger[i]) return;
+      st.ledger[i].state = failed ? 'fail' : 'done';
+      st.ledger[i].meta = meta || '';
+      st.ledger[i].ms = ms == null ? null : ms;
+      renderLedger();
+    }
+    // A stop (or failure) mid-request: the in-flight row can never complete.
+    function ledgerStopRunning() {
+      if (!st || !st.ledger) return;
+      var changed = false;
+      st.ledger.forEach(function (row) {
+        if (row.state === 'run') {
+          row.state = 'fail';
+          row.meta = (S.ledger && S.ledger.failed) || '';
+          changed = true;
+        }
+      });
+      if (changed) renderLedger();
+    }
+
+    // ---- filmstrip: each page as the crawler received it ------------------
+    function renderFilm() {
+      if (!filmEl || !st) return;
+      if (!st.summaries.length) { filmEl.hidden = true; filmEl.textContent = ''; return; }
+      filmEl.hidden = false;
+      filmEl.textContent = '';
+      filmEl.appendChild(el('p', 'preview-label', (S.film && S.film.title) || 'What the crawler saw'));
+      var strip = el('div', 'wa-film-cards');
+      st.summaries.forEach(function (s) {
+        var card = el('div', 'wa-film-card');
+        var badge = el('span', 'wa-film-status' + (s.status === 200 ? ' is-ok' : ' is-bad'),
+          fill((S.ledger && S.ledger.httpStatus) || 'HTTP {s}', { s: s.status != null ? s.status : '—' }));
+        card.appendChild(badge);
+        card.appendChild(el('p', 'wa-film-path', s.path));
+        card.appendChild(el('p', 'wa-film-title', s.title || ''));
+        card.appendChild(el('p', 'wa-film-meta', fill((S.film && S.film.wordsLinks) || '{w} words · {l} link(s)', {
+          w: s.words || 0, l: (s.internal || []).length,
+        })));
+        strip.appendChild(card);
+      });
+      filmEl.appendChild(strip);
+    }
+
+    // ---- query: filter the findings instead of scrolling them -------------
+    // Purely local — every chip and keystroke matches against fields the
+    // report already holds. No data leaves the browser.
+    var CHIP_KEYS = {
+      blockers: ['blocker'],
+      titles: ['title'],
+      descriptions: ['description', 'desc-'],
+      links: ['link', 'anchor', 'href', 'orphan', 'broken', 'dead'],
+      images: ['img', 'image', 'og:image'],
+      schema: ['schema', 'jsonld', 'json-ld', 'breadcrumb', 'faq'],
+      mobile: ['viewport', 'mobile', 'layout shift'],
+      visual: ['visual', 'img', 'iframe', 'embed', 'layout', 'shift', 'payload'],
+    };
+    var query = { text: '', chip: null };
+
+    function hay(f) {
+      return [f.id, f.group, f.page, f.message, f.fix].join(' ').toLowerCase();
+    }
+    function qMatch(f) {
+      var h = hay(f);
+      if (query.chip) {
+        var keys = CHIP_KEYS[query.chip] || [];
+        var hit = false;
+        for (var i = 0; i < keys.length; i++) if (h.indexOf(keys[i]) !== -1) { hit = true; break; }
+        if (!hit) return false;
+      }
+      var words = query.text.toLowerCase().split(/\s+/).filter(Boolean);
+      for (var j = 0; j < words.length; j++) if (h.indexOf(words[j]) === -1) return false;
+      return true;
+    }
+    function buildChips() {
+      if (!chipsEl || !S.query) return;
+      chipsEl.textContent = '';
+      (S.query.chips || []).forEach(function (c) {
+        var b = el('button', 'wa-chip', c.l);
+        b.type = 'button';
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', function () {
+          query.chip = query.chip === c.k ? null : c.k;
+          Array.prototype.forEach.call(chipsEl.children, function (x) {
+            x.setAttribute('aria-pressed', x === b && query.chip ? 'true' : 'false');
+          });
+          renderFindings();
+        });
+        chipsEl.appendChild(b);
+      });
+    }
+    function resetQuery() {
+      query = { text: '', chip: null };
+      if (qIn) qIn.value = '';
+      if (chipsEl) Array.prototype.forEach.call(chipsEl.children, function (x) { x.setAttribute('aria-pressed', 'false'); });
+      if (qCount) qCount.textContent = '';
+    }
     function resetControls() {
       running = false;
       runBtn.disabled = false;
@@ -255,9 +391,11 @@
     }
 
     function renderFindings() {
-      if (!out) return;
+      if (!out || !st) return;   // the query bar can fire before any audit runs
       out.textContent = '';
       if (!st.findings.length) {
+        if (queryEl) queryEl.hidden = true;
+        if (qCount) qCount.textContent = '';
         out.textContent = S.emptyReport || '';
         return;
       }
@@ -265,9 +403,18 @@
         var d = SEV_ORDER.indexOf(a.severity) - SEV_ORDER.indexOf(b.severity);
         return d || String(a.page).localeCompare(String(b.page));
       });
-      out.appendChild(el('p', 'preview-label', fill(S.findingsHeader || 'Findings ({n})', { n: sorted.length })));
+      var shown = sorted.filter(qMatch);
+      if (queryEl) queryEl.hidden = false;
+      if (qCount) qCount.textContent = fill((S.query && S.query.count) || 'Showing {a} of {b} findings', {
+        a: shown.length, b: sorted.length,
+      });
+      if (!shown.length) {
+        out.appendChild(el('p', 'wa-query-none', fill((S.query && S.query.none) || 'No findings match that query.', { b: sorted.length })));
+        return;
+      }
+      out.appendChild(el('p', 'preview-label', fill(S.findingsHeader || 'Findings ({n})', { n: shown.length })));
       var list = el('ul', 'inspect-signals');
-      sorted.forEach(function (f) { list.appendChild(findingRow(f)); });
+      shown.forEach(function (f) { list.appendChild(findingRow(f)); });
       out.appendChild(list);
     }
 
@@ -312,7 +459,9 @@
     }
 
     function renderAll() {
+      renderLedger();
       renderPages();
+      renderFilm();
       renderFindings();
       renderScore();
       buildReport();
@@ -359,6 +508,7 @@
 
     // ---- phases -----------------------------------------------------------
     function pause() {
+      ledgerStopRunning();
       save();
       var total = st.urls.length;
       var done = st.phase === 'pages' ? st.summaries.length : total;
@@ -371,8 +521,16 @@
       while (st.next < st.urls.length) {
         if (stopped) { pause(); return; }
         var batch = st.urls.slice(st.next, st.next + PAGE_BATCH);
+        var row = ledgerAdd(fill((S.ledger && S.ledger.crawlBatch) || 'Crawling pages {a}–{b} of {n}', {
+          a: st.next + 1, b: st.next + batch.length, n: st.urls.length,
+        }));
+        var before = st.findings.length;
+        var t0 = Date.now();
         var r = await post({ mode: 'pages', urls: batch, robotsRules: st.robotsRules });
-        if (!r.ok) throw new Error('pages batch failed');
+        if (!r.ok) {
+          ledgerFinish(row, '', r.data.ms != null ? r.data.ms : Date.now() - t0, true);
+          throw new Error('pages batch failed');
+        }
         r.data.pages.forEach(function (p) {
           var s = p.summary;
           if (s) {
@@ -382,8 +540,67 @@
           (p.findings || []).forEach(function (f) { st.findings.push(f); });
         });
         st.next += batch.length;
+        ledgerFinish(row,
+          fill((S.ledger && S.ledger.metaUrls) || '{k} URL(s)', { k: batch.length }) + ' · ' +
+          fill((S.ledger && S.ledger.metaFindings) || '{k} finding(s)', { k: st.findings.length - before }),
+          r.data.ms != null ? r.data.ms : Date.now() - t0, false);
         setStatus(fill(S.crawling || 'Audited {m} of {n} pages…', { m: st.next, n: st.urls.length }));
         renderAll();
+        save();
+      }
+      st.phase = 'images';
+      st.next = 0;
+      save();
+    }
+
+    // ---- visual pass: the images each page loads, fetched for real --------
+    function buildImageTargets() {
+      var seen = {};
+      var list = [];
+      function add(u, kind, page) {
+        if (!u || list.length >= MAX_IMAGES) return;
+        var k = norm(u);
+        if (!k || seen[k]) return;
+        seen[k] = true;
+        list.push({ url: u, kind: kind, page: page });
+      }
+      // Social-card images first: a dead og:image silently kills every share.
+      st.summaries.forEach(function (s) { add(s.ogImage, 'og', s.path); });
+      st.summaries.forEach(function (s) {
+        (s.images || []).slice(0, 3).forEach(function (u) { add(u, 'content', s.path); });
+      });
+      st.imageTargets = list;
+      st.imageResults = [];
+    }
+
+    async function runImages() {
+      if (!st.imageTargets) buildImageTargets();
+      while (st.next < st.imageTargets.length) {
+        if (stopped) { pause(); return; }
+        var batch = st.imageTargets.slice(st.next, st.next + IMG_BATCH);
+        var row = ledgerAdd(fill((S.ledger && S.ledger.imagesBatch) || 'Checking images {a}–{b} of {n}', {
+          a: st.next + 1, b: st.next + batch.length, n: st.imageTargets.length,
+        }));
+        var t0 = Date.now();
+        var r = await post({ mode: 'images', urls: batch.map(function (t) { return t.url; }) });
+        if (!r.ok) {
+          ledgerFinish(row, '', r.data.ms != null ? r.data.ms : Date.now() - t0, true);
+          throw new Error('images batch failed');
+        }
+        (r.data.results || []).forEach(function (res, i) {
+          st.imageResults.push({
+            url: res.url, status: res.status, type: res.type || '', bytes: res.bytes || 0,
+            approx: !!res.approx, kind: (batch[i] && batch[i].kind) || 'content',
+            page: (batch[i] && batch[i].page) || '',
+          });
+        });
+        st.next += batch.length;
+        ledgerFinish(row,
+          fill((S.ledger && S.ledger.metaChecked) || '{k} checked', { k: batch.length }),
+          r.data.ms != null ? r.data.ms : Date.now() - t0, false);
+        setStatus(fill(S.images || 'Checking images ({m} of {n})…', {
+          m: Math.min(st.next, st.imageTargets.length), n: st.imageTargets.length,
+        }));
         save();
       }
       st.phase = 'links';
@@ -396,10 +613,20 @@
       while (st.next < st.targets.length) {
         if (stopped) { pause(); return; }
         var batch = st.targets.slice(st.next, st.next + LINK_BATCH);
+        var row = ledgerAdd(fill((S.ledger && S.ledger.linksBatch) || 'Checking link targets {a}–{b} of {n}', {
+          a: st.next + 1, b: st.next + batch.length, n: st.targets.length,
+        }));
+        var t0 = Date.now();
         var r = await post({ mode: 'links', urls: batch });
-        if (!r.ok) throw new Error('links batch failed');
+        if (!r.ok) {
+          ledgerFinish(row, '', r.data.ms != null ? r.data.ms : Date.now() - t0, true);
+          throw new Error('links batch failed');
+        }
         st.linkResults = st.linkResults.concat(r.data.results || []);
         st.next += batch.length;
+        ledgerFinish(row,
+          fill((S.ledger && S.ledger.metaChecked) || '{k} checked', { k: batch.length }),
+          r.data.ms != null ? r.data.ms : Date.now() - t0, false);
         setStatus(fill(S.links || 'Checking link targets ({m} of {n})…', {
           m: Math.min(st.next, st.targets.length), n: st.targets.length,
         }));
@@ -412,9 +639,22 @@
 
     async function runCross() {
       setStatus(S.cross || 'Cross-checking pages…');
-      var r = await post({ mode: 'cross', summaries: st.summaries, linkResults: st.linkResults || [] });
-      if (!r.ok) throw new Error('cross failed');
+      var row = ledgerAdd((S.ledger && S.ledger.cross) || 'Cross-checking the crawl');
+      var t0 = Date.now();
+      var r = await post({
+        mode: 'cross',
+        summaries: st.summaries,
+        linkResults: st.linkResults || [],
+        imageResults: st.imageResults || [],
+      });
+      if (!r.ok) {
+        ledgerFinish(row, '', r.data.ms != null ? r.data.ms : Date.now() - t0, true);
+        throw new Error('cross failed');
+      }
       (r.data.findings || []).forEach(function (f) { st.findings.push(f); });
+      ledgerFinish(row,
+        fill((S.ledger && S.ledger.metaFindings) || '{k} finding(s)', { k: (r.data.findings || []).length }),
+        r.data.ms != null ? r.data.ms : Date.now() - t0, false);
       st.phase = 'done';
       st.next = 0;
       renderAll();
@@ -440,19 +680,38 @@
       try {
         if (!st) {
           setStatus(S.starting || 'Reading robots.txt and sitemap.xml…');
-          var d = await post({ mode: 'discover', origin: origin });
-          if (!d.ok) throw new Error('discover failed');
+          // The skeleton exists before the first request so the ledger row can
+          // be attached to it; fields are filled from the discover response.
           st = {
             origin: origin,
-            urls: d.data.urls || [],
-            robotsRules: (d.data.robots && d.data.robots.rules) || null,
+            urls: [],
+            robotsRules: null,
             phase: 'pages',
             next: 0,
             summaries: [],
-            findings: d.data.findings || [],
+            findings: [],
             targets: null,
             linkResults: [],
+            imageTargets: null,
+            imageResults: [],
+            ledger: [],
           };
+          var dRow = ledgerAdd((S.ledger && S.ledger.discover) || 'Reading robots.txt and sitemap.xml');
+          var t0 = Date.now();
+          var d = await post({ mode: 'discover', origin: origin });
+          if (!d.ok) {
+            ledgerFinish(dRow, '', d.data.ms != null ? d.data.ms : Date.now() - t0, true);
+            st = null;   // a run that discovered nothing is not worth resuming
+            throw new Error('discover failed');
+          }
+          st.urls = d.data.urls || [];
+          st.robotsRules = (d.data.robots && d.data.robots.rules) || null;
+          st.findings = d.data.findings || [];
+          ledgerFinish(dRow,
+            'robots.txt ' + fill((S.ledger && S.ledger.httpStatus) || 'HTTP {s}', { s: (d.data.robots && d.data.robots.status) != null ? d.data.robots.status : '—' }) +
+            ' · sitemap.xml ' + fill((S.ledger && S.ledger.httpStatus) || 'HTTP {s}', { s: (d.data.sitemap && d.data.sitemap.status) != null ? d.data.sitemap.status : '—' }) +
+            ' · ' + fill((S.ledger && S.ledger.metaUrls) || '{k} URL(s)', { k: st.urls.length }),
+            d.data.ms != null ? d.data.ms : Date.now() - t0, false);
           if (!st.urls.length) {
             renderAll();
             setStatus(S.noPages || 'No page URLs found in the sitemap.');
@@ -463,8 +722,10 @@
           setStatus(fill(S.discovered || 'Found {n} page(s) in the sitemap.', { n: st.urls.length }));
           save();
         }
-        // Resume dispatches from the checkpointed phase.
+        // Resume dispatches from the checkpointed phase. Older checkpoints
+        // (saved before the visual pass existed) resume straight from links.
         if (st.phase === 'pages') { await runPages(); if (stopped) return; }
+        if (st.phase === 'images') { await runImages(); if (stopped) return; }
         if (st.phase === 'links') { await runLinks(); if (stopped) return; }
         // cross is the final single request — its completion ends the run, so
         // a stop pressed during it still finishes (nothing left to skip).
@@ -473,6 +734,7 @@
       } catch (e) {
         var msg = S.failed || 'The audit request failed. Check the site is publicly reachable, then try again.';
         setStatus(msg);
+        ledgerStopRunning();
         // Keep the failure in the report area as well whenever nothing has been
         // rendered yet — status text alone reads as a silent tool.
         if (out && (!st || (!st.findings.length && !st.summaries.length))) out.textContent = msg;
@@ -498,6 +760,10 @@
       out.textContent = '';
       pagesOut.textContent = '';
       scoreWrap.hidden = true;
+      if (ledgerEl) { ledgerEl.hidden = true; ledgerEl.textContent = ''; }
+      if (filmEl) { filmEl.hidden = true; filmEl.textContent = ''; }
+      if (queryEl) queryEl.hidden = true;
+      resetQuery();
       run(origin);
     }
 
@@ -510,6 +776,13 @@
       stopped = true;
       stopBtn.disabled = true;   // takes effect at the next batch boundary
     });
+    if (qIn) qIn.addEventListener('input', function () {
+      query.text = qIn.value || '';
+      renderFindings();
+    });
+    buildChips();
+    if (qIn && S.query) qIn.placeholder = S.query.placeholder || '';
+
     if (resumeBtn) resumeBtn.addEventListener('click', function () {
       if (running) return;
       var saved = load();
@@ -526,6 +799,7 @@
     var pending = load();
     if (pending && pending.phase !== 'done') {
       st = pending;
+      st.ledger = st.ledger || [];
       showResume();
       renderAll();
     }
