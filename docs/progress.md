@@ -1,3 +1,57 @@
+# Human-Generated Pass — Nov 7, 2026
+
+**Agent:** Qoder · **Source:** `docs/ai-generated-tells.md` (rulebook) + `docs/human-generated-human-readable.md` (findings) · **Scope:** whole site, 85 pages
+
+## What changed
+
+The rulebook was written and bound into `rules.md`. Then every remaining tell it names was fixed on the site itself.
+
+### Identity and authorship
+
+- **`src/data/authors.js`** holds one honest author record. The build fails if a guide names an author who is not in it.
+- **`/authors/glixtron/`** — profile page with intro, three bio paragraphs, GitHub and email links, `ProfilePage` + `Person` JSON-LD, and the list of guides written.
+- Every guide byline is now `By Glixtron`, linked to that page, with `author: { @type: Person, sameAs }` in the `Article` schema. The previous "Tools4Market Editorial" / Organization pair was an anonymous byline pretending to be an editorial team.
+
+### Headlines and metadata
+
+- All 47 tool H1s were `Free {Tool} — No Signup, No Limits`. They now each say what the tool does (`Robots.txt Generator — rules for search engines and AI bots`, `Password Generator — strong passwords, made in this tab`), still carrying the target phrase and staying inside 20–75 characters.
+- The 5 category titles and the homepage title lost the same formula; category titles now carry their tool count.
+- Home title reads `Tools4Market — Free Marketing and SEO Tools`; description says 47 tools rather than 50+.
+
+### Structure and markup
+
+- Skip link on every page (`Skip to content`, visible on focus at 12px), `<main id="main">` landmark.
+- Footer: `h4` → `h2.footer-head`, cookie settings changed from an anchor styled as a button to a real `button`.
+- 404 page moved off inline styles to `.nf` classes; proof-strip chip, password output and preview labels de-inlined.
+- 46 dead CSS classes deleted (hero-visual, dashboard charts, case-study, photo-gallery, contact-form and similar leftovers): ~400 lines, ~3,060 remaining.
+- The `✦` badge above "Analyze your own page first" is gone — the sparkle is the clearest single AI visual signature on the site.
+- SVG figures in `src/visuals.mjs` had malformed `font-family=""Inter"` attributes from double-quoted constants; fixed.
+
+### Cards, counts and copy
+
+- A tool card's processing label ("Runs in your browser" / "Live page check available") now renders only when it differs from the rest of the grid, so a category of six calculators no longer repeats the same line six times.
+- The category stat strip renders only when the numbers differ; marketing had shown `6` and `6` side by side.
+- Hero search placeholder shortened to `Search 47 tools by task` — the old one was truncated at 390px and repeated the chips beneath it.
+- Repeated openers rewritten: `The first mistake is…` opened four "Common mistakes" sections; `updates as you type` appeared seven times. Technical repetitions (`title, H1, description and`, `to your domain root`) were left alone — they are the subject matter.
+- Clichéd guide titles rewritten (`…: a complete guide`, `The 2026 answer`, `everything to do before you publish`) and the GPTBot FAQ answer no longer says "not just training crawlers".
+
+### The hero screenshot now proves itself
+
+The capture showed `99.9/100` beside a Major finding. Site-level findings deducted nothing in `audit/score.mjs` or `src/runtime/site-audit.js`; a sitemap-less site also produced zero pages. Both were fixed (site findings cost their weight; the entered URL is audited when discovery finds no pages; the score is hidden when nothing was crawled), and the hero image is now a real run on example.com: **54/100, 15 findings, 1 page**, caption says the score is the checklist weighting, not a Google ranking.
+
+## Verification
+
+- SEO audit **2673/0** · smoke 47/47 · audit rules 73/47 · audit-batch 50 · worker routing 14 · consent 30
+- Build: **85 HTML pages** (47 tools, 5 categories, 5 policy, 24 guides, 1 author page, home/blog/404)
+- CDP sweep: 7 page types × 9 widths (320–1700) — no horizontal overflow; skip link is the first tab stop and renders on focus; mobile menu opens to `aria-expanded="true"`
+- Visually checked at 1440px: home, tool page, all category pages, guide, author page, 404; at 390px: home, menu, tool page
+
+## Status
+
+Committed and pushed. Not deployed — the production deploy waits for an explicit "deploy now".
+
+---
+
 # Visual Redesign — Nov 6, 2026
 
 **Agent:** Qoder · **Source:** `Visual_Design_Audit_and_Upgrade_Plan.md` (reference only) · **Commit:** `4732ab9`

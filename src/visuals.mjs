@@ -5,9 +5,9 @@
 
 import { toolIconBody } from './icons.mjs';
 
-const F = '"Fraunces", Georgia, serif';
+const F = "'Fraunces', Georgia, serif";
 const M = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-const S = '"Inter", system-ui, sans-serif';
+const S = "'Inter', system-ui, sans-serif";
 
 const INK = '#182338';
 const NAVY = '#243b63';

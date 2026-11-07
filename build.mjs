@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, SEARCH_EXAMPLES, weekIndex } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE, SITE_AUDIT } from './src/data/inspect.js';
 import { ARTICLES } from './src/data/blog.js';
+import { AUTHORS } from './src/data/authors.js';
 import { toolIcon, catIcon } from './src/icons.mjs';
 import { catalogChart, processingChart, guideFigure, guideThumb, toolPreview, GUIDE_FIGURE_SLUGS, PREVIEW_SLUGS } from './src/visuals.mjs';
 
@@ -346,6 +347,7 @@ ${ld.map(ldTag).join('\n')}
 </head>
 <body>
 ${gtmBody}
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="container header-inner">
     <a class="logo" href="${rel(path, '/')}"><img class="logo-mark" src="${av(path, '/assets/logo-mark.png')}" alt="" width="34" height="34" decoding="async"><span>Tools4Market</span></a>
@@ -361,7 +363,7 @@ ${gtmBody}
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 ${body}
 </main>
 <footer class="site-footer">
@@ -372,16 +374,16 @@ ${body}
       <p>Free browser-based tools for marketers, bloggers and webmakers. Most tools process input in your browser; page checks fetch the public URL through our first-party proxy. No signup, no limits.</p>
     </div>
     <div>
-      <h3>Categories</h3>
+      <h2 class="footer-head">Categories</h2>
       ${Object.values(CATEGORIES).map((c) => `<a href="${rel(path, '/' + c.slug + '/')}">${c.name}</a>`).join('')}
     </div>
     <div>
-      <h3>Company</h3>
+      <h2 class="footer-head">Company</h2>
       <a href="${rel(path, '/blog/')}">Guides</a>
       ${POLICY.map((p) => `<a href="${rel(path, '/' + p.slug + '/')}">${p.title}</a>`).join('')}
     </div>
     <div>
-      <h3>Popular tools</h3>
+      <h2 class="footer-head">Popular tools</h2>
       ${['robots-txt-generator', 'meta-tag-generator', 'open-graph-generator', 'keyword-density-checker', 'llms-txt-generator', 'utm-link-builder'].map((s) => {
         const t = TOOLS.find((x) => x.slug === s);
         return t ? `<a href="${rel(path, '/tools/' + s + '/')}">${t.name}</a>` : '';
@@ -389,7 +391,7 @@ ${body}
     </div>
   </div>
   <div class="container footer-bottom">
-    <p>&copy; ${YEAR} ${SITE.name} &middot; ${SITE.tagline} &middot; <a href="${rel(path, '/privacy-policy/')}">Privacy</a> &middot; <a href="${rel(path, '/terms/')}">Terms</a> &middot; <a href="${rel(path, '/disclaimer/')}">Disclaimer</a> &middot; <a href="#" data-ck-settings>Cookie settings</a></p>
+    <p>&copy; ${YEAR} ${SITE.name} &middot; ${SITE.tagline} &middot; <a href="${rel(path, '/privacy-policy/')}">Privacy</a> &middot; <a href="${rel(path, '/terms/')}">Terms</a> &middot; <a href="${rel(path, '/disclaimer/')}">Disclaimer</a> &middot; <button type="button" class="footer-ck" data-ck-settings>Cookie settings</button></p>
     <a class="launchstag-badge" href="https://launchstag.com" target="_blank" rel="noopener"><img src="https://launchstag.com/badge-dark.svg" alt="Featured on Launchstag" width="198" height="62" decoding="async" fetchpriority="low"></a>
   </div>
 </footer>
@@ -399,10 +401,19 @@ ${pageScripts(path, tool)}
 </html>`;
 }
 
-const toolCard = (t, path) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-slug="${esc(t.slug)}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords + ' ' + (t.usedFor || '')).toLowerCase())}">
+const toolCard = (t, path, showProc = true) => `<a class="tool-card" href="${rel(path, '/tools/' + t.slug + '/')}" data-slug="${esc(t.slug)}" data-search="${esc((t.name + ' ' + t.card + ' ' + t.keywords + ' ' + (t.usedFor || '')).toLowerCase())}">
   <span class="tool-icon" aria-hidden="true">${toolIcon(t.slug)}</span>
-  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span>${t.usedFor ? `<span class="tool-used">${esc(t.usedFor)}</span>` : ''}<span class="tool-proc">${procNote(t)}</span></span>
+  <span class="tool-card-body"><strong>${t.name}</strong><span>${t.card}</span>${t.usedFor ? `<span class="tool-used">${esc(t.usedFor)}</span>` : ''}${showProc ? `<span class="tool-proc">${procNote(t)}</span>` : ''}</span>
 </a>`;
+// A processing label earns its place only on the cards that differ from the
+// rest of the grid; repeating the same line on every card says nothing.
+const majorityProc = (list) => {
+  const count = new Map();
+  for (const t of list) count.set(procNote(t), (count.get(procNote(t)) || 0) + 1);
+  let top = null, n = 0;
+  for (const [k, v] of count) if (v > n) { top = k; n = v; }
+  return n > 1 ? top : null;
+};
 
 // Ad slot. Renders a real AdSense unit only when an ad-unit id is configured
 // (AD_SLOT_TOP / AD_SLOT_CONTENT / AD_SLOT_SIDEBAR); until then the slot keeps
@@ -535,7 +546,7 @@ function homeBody() {
       <h1>Find the right tool. Finish the job.</h1>
       <p class="hero-sub">${TOOLS.length} browser-based utilities for SEO, AI-search visibility, content operations and everyday web work. Most tools run in your browser with no signup. Page checks query any public URL you give us.</p>
       <div class="hero-search">
-        <input type="search" id="tool-search" placeholder="Search by task: ${SEARCH_EXAMPLES.join(', ')}&hellip;" aria-label="Search tools by task" aria-describedby="hero-hint">
+        <input type="search" id="tool-search" placeholder="Search ${TOOLS.length} tools by task" aria-label="Search tools by task" aria-describedby="hero-hint">
       </div>
       <div class="search-examples" role="group" aria-label="Example searches">
         <span class="sx-label">Try:</span>
@@ -548,8 +559,8 @@ function homeBody() {
         <span class="shot-dots"><i></i><i></i><i></i></span>
         <code>tools4market.online/tools/website-audit/</code>
       </div>
-      <img src="${av(path, '/assets/hero-audit.png')}" alt="A Tools4Market audit of example.com: the scan ledger, a score ring, and two findings each with a fix button" width="1000" height="1040" decoding="async" fetchpriority="high">
-      <figcaption>A real run on example.com, which has no sitemap. Two findings, each with the exact fix.</figcaption>
+      <img src="${av(path, '/assets/hero-audit.png')}" alt="A Tools4Market audit of example.com: the scan ledger, a 54/100 score, and the first blocker finding with its fix button" width="1000" height="1330" decoding="async" fetchpriority="high">
+      <figcaption>A real run on example.com, which has no sitemap. Fifteen findings, each with a fix; the score is this checklist's weighting, not a Google ranking.</figcaption>
     </figure>
   </div>
 </section>
@@ -558,7 +569,7 @@ function homeBody() {
 <div class="proof-strip">
   <div class="container">
     <p class="proof-strip-label">Why marketers keep this open</p>
-    ${PROOF.map((p) => `<span class="proof-chip"><span class="proof-dot" aria-hidden="true"></span>${esc(p.label)}<span style="color:var(--c-muted);font-weight:400"> ${esc(p.sub)}</span></span>`).join('')}
+    ${PROOF.map((p) => `<span class="proof-chip"><span class="proof-dot" aria-hidden="true"></span>${esc(p.label)}<span class="proof-sub"> ${esc(p.sub)}</span></span>`).join('')}
   </div>
 </div>
 
@@ -626,7 +637,6 @@ function homeBody() {
 
   <!-- ============ START WITH YOUR JOB ============ -->
   <section class="cat-section jobs" id="start-with-your-job">
-    <p class="section-eyebrow">Start with your job</p>
     <h2 class="section-title">What are you trying to finish?</h2>
     <div class="job-grid">
       ${JOBS.map((j) => `<a class="job-card" href="${rel(path, j.path)}">
@@ -640,7 +650,6 @@ function homeBody() {
 
   <!-- ============ FIVE OUTCOME CATEGORIES — visual cards ============ -->
   <section class="cat-section cat-outcomes" id="categories">
-    <p class="section-eyebrow">Five outcome categories</p>
     <h2 class="section-title">Everything grouped by the job it does</h2>
     <div class="outcome-grid">
       ${cats.map((c) => {
@@ -682,7 +691,6 @@ function homeBody() {
 
   <!-- ============ FULL TOOL DIRECTORY ============ -->
   <section class="home-section" id="tools">
-    <p class="section-eyebrow">Full tool directory</p>
     <h2 class="section-title">All ${TOOLS.length} tools</h2>
     <p class="section-sub">Filter with the search box at the top, or browse every category below.</p>
   </section>
@@ -696,7 +704,7 @@ function homeBody() {
         <a class="cat-view-all" href="${rel(path, '/' + c.slug + '/')}">View all &rarr;</a>
       </div>
       <p class="cat-desc">${esc(c.homeDesc)}</p>
-      <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
+      <div class="tool-grid">${list.map((t) => toolCard(t, path, procNote(t) !== majorityProc(list))).join('')}</div>
     </section>`;
   }).join('')}
 
@@ -729,16 +737,13 @@ function homeBody() {
 
 const catStats = (list) => {
   const local = list.filter((t) => LOCAL_TOOLS.has(t.slug)).length;
-  const rows = [
-    [list.length, list.length === 1 ? 'tool in this category' : 'tools in this category'],
-    [local, 'run in your browser'],
-    [list.length - local, 'read a URL you paste'],
-  ].filter(([n]) => n > 0);
-  return `<dl class="cat-stats">${rows.map(([n, l]) => `<div><dt>${n}</dt><dd>${l}</dd></div>`).join('')}</dl>`;
+  if (!local || local === list.length) return '';
+  return `<dl class="cat-stats"><div><dt>${list.length}</dt><dd>${list.length === 1 ? 'tool' : 'tools'}</dd></div><div><dt>${local}</dt><dd>${local === 1 ? 'runs' : 'run'} in your browser</dd></div></dl>`;
 };
 function categoryBody(cat, list) {
   const path = '/' + cat.slug + '/';
   const others = Object.values(CATEGORIES).filter((c) => c.id !== cat.id);
+  const maj = majorityProc(list);
   return `<div class="container">
   <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>${cat.name}</span></nav>
   <p class="cat-mark" aria-hidden="true">${catIcon(cat.id)}</p>
@@ -747,7 +752,7 @@ function categoryBody(cat, list) {
     <p class="lead">${cat.pageDesc}</p>
     ${catStats(list)}
   </div>
-  <div class="tool-grid">${list.map((t) => toolCard(t, path)).join('')}</div>
+  <div class="tool-grid">${list.map((t) => toolCard(t, path, procNote(t) !== maj)).join('')}</div>
   <section class="cat-more">
     <h2>Explore other categories</h2>
     <div class="tool-grid">${others.map((c) => `<a class="tool-card" href="${rel(path, '/' + c.slug + '/')}"><span class="tool-icon" aria-hidden="true">${catIcon(c.id)}</span><span class="tool-card-body"><strong>${c.name}</strong><span>${c.homeDesc}</span></span></a>`).join('')}</div>
@@ -885,8 +890,51 @@ function policyPage(p) {
 </div>`;
 }
 
+const authorOf = (a) => {
+  const by = AUTHORS.find((x) => x.name === a.author);
+  if (!by) throw new Error(`Unknown guide author "${a.author}" (${a.slug}); add them to src/data/authors.js`);
+  return by;
+};
+
+function authorPage(by) {
+  const path = '/authors/' + by.slug + '/';
+  const guides = ARTICLES.filter((a) => a.author === by.name).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const links = by.links.map((l) => `<li><a href="${esc(l.url)}"${l.url.startsWith('http') ? ' rel="me noopener" target="_blank"' : ''}>${esc(l.label)}</a></li>`).join('\n');
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/blog/')}">Guides</a> <span class="breadcrumb-sep">/</span> <span>${esc(by.name)}</span></nav>
+  <div class="article-layout article-layout--solo">
+  <article class="policy article author-page">
+    <h1>${esc(by.name)}</h1>
+    <p class="lead">${rich(by.intro)}</p>
+    ${by.bio.map((p) => `<p>${rich(p)}</p>`).join('\n')}
+    <h2>Where to find me</h2>
+    <ul class="article-tools">${links}</ul>
+    <h2>Guides I wrote</h2>
+    <ul class="article-tools">${guides.map((a) => `<li><a href="${rel(path, '/blog/' + a.slug + '/')}">${esc(a.title)}</a> &middot; <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time></li>`).join('\n')}</ul>
+  </article>
+  </div>
+</div>`;
+}
+
+function authorLd(by) {
+  const path = '/authors/' + by.slug + '/';
+  return [
+    {
+      '@context': 'https://schema.org', '@type': 'ProfilePage',
+      url: SITE.url + path,
+      mainEntity: {
+        '@type': 'Person', name: by.name, url: SITE.url + path,
+        description: by.intro,
+        sameAs: by.links.filter((l) => l.url.startsWith('http')).map((l) => l.url),
+      },
+    },
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }, { name: by.name, path }]),
+  ];
+}
+
 function articlePage(a) {
   const path = '/blog/' + a.slug + '/';
+  const by = authorOf(a);
   const related = (a.relatedTools || []).map((s) => TOOLS.find((t) => t.slug === s)).filter(Boolean);
   // Guide → guide links. `relatedTools` is tool-slugs-only by design, and inline
   // prose is escaped, so without this a guide has no way to point at another
@@ -900,7 +948,6 @@ function articlePage(a) {
   <aside class="toc" aria-label="Sections in this guide">
     <p class="toc-title">In this guide</p>
     <ol>${a.sections.map((s, i) => `<li><a href="#${hid(i)}">${esc(s.h)}</a></li>`).join('')}</ol>
-    <p class="toc-note">${a.sections.length} sections &middot; ${Math.max(3, Math.ceil(a.sections.reduce((n, s) => n + [...(s.p || []), ...(s.p2 || [])].join(' ').split(/\s+/).filter(Boolean).length, 0) / 200))} min read</p>
   </aside>` : '';
   // Guides carry a content unit after the second section, not a placeholder.
   // Tool pages can afford a permanent dashed box because the slot sits outside
@@ -914,7 +961,7 @@ function articlePage(a) {
   <div class="article-layout${hasToc ? '' : ' article-layout--solo'}">
   <article class="policy article">
     <h1>${esc(a.title)}</h1>
-    <p class="article-meta">Published <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.updated && a.updated !== a.date ? ` &middot; Updated <time datetime="${esc(a.updated)}">${fmtDate(a.updated)}</time>` : ''} &middot; By ${esc(a.author)}${a.reviewer ? ' &middot; Reviewed by ' + esc(a.reviewer) : ''}</p>
+    <p class="article-meta">Published <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.updated && a.updated !== a.date ? ` &middot; Updated <time datetime="${esc(a.updated)}">${fmtDate(a.updated)}</time>` : ''} &middot; By <a href="${rel(path, '/authors/' + by.slug + '/')}" rel="author">${esc(a.author)}</a></p>
     <p class="lead">${rich(a.intro)}</p>
     ${guideFigure(a.slug)}
     ${a.sections.map((s, i) => `<h2 id="${hid(i)}">${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}${i === 1 ? midAd : ''}`).join('\n')}
@@ -949,12 +996,17 @@ function blogIndexBody() {
 
 function articleLd(a) {
   const path = '/blog/' + a.slug + '/';
+  const by = authorOf(a);
   return [
     {
       '@context': 'https://schema.org', '@type': 'BlogPosting',
       headline: a.title, description: a.metaDesc, url: SITE.url + path,
       datePublished: a.date, dateModified: a.updated || a.date,
-      author: { '@type': 'Organization', name: a.author },
+      author: {
+        '@type': 'Person', name: by.name,
+        url: SITE.url + '/authors/' + by.slug + '/',
+        sameAs: by.links.filter((l) => l.url.startsWith('http')).map((l) => l.url),
+      },
       publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/icon-512.png', width: 512, height: 512 } },
       image: SITE.url + '/assets/og-image.png',
       inLanguage: 'en', mainEntityOfPage: { '@type': 'WebPage', '@id': SITE.url + path },
@@ -969,10 +1021,10 @@ function articleLd(a) {
 }
 
 function notFoundBody() {
-  return `<div class="container" style="text-align:center;padding:80px 0">
-  <div style="font-size:4rem;margin-bottom:16px">404</div>
+  return `<div class="container nf">
+  <p class="nf-code">404</p>
   <h1>Page not found</h1>
-  <p class="lead" style="margin:0 auto 28px">The page you are looking for does not exist (yet).</p>
+  <p class="lead">The page you are looking for does not exist (yet).</p>
   <p><a class="btn" href="/">Browse all free tools</a></p>
 </div>`;
 }
@@ -1042,18 +1094,19 @@ const run = async () => {
   await mkdir(R + 'dist/assets/runtime', { recursive: true });
 
   const pages = [
-    { path: '/', title: `${SITE.name} — Free Marketing & SEO Tools, No Signup`, desc: `${TOOLS.length}+ browser-based marketing, SEO, AI-search and web tools. Public-page checks fetch the entered URL through our proxy. No signup, no limits.`, body: homeBody(), ld: homeLd() },
+    { path: '/', title: `${SITE.name} — Free Marketing and SEO Tools`, desc: `${TOOLS.length} browser-based marketing, SEO, AI-search and web tools. Public-page checks fetch the entered URL through our proxy. No signup, no limits.`, body: homeBody(), ld: homeLd() },
     ...Object.values(CATEGORIES).map((c) => {
       const list = TOOLS.filter((t) => t.cat === c.id);
       const path = '/' + c.slug + '/';
       return {
-        path, title: `Free ${c.name} — No Signup, No Limits`, desc: c.metaDesc, body: categoryBody(c, list),
+        path, title: c.metaTitle, desc: c.metaDesc, body: categoryBody(c, list),
         ld: [breadcrumbLd([{ name: 'Home', path: '/' }, { name: c.name, path }])],
       };
     }),
     ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t), tool: t })),
     { path: '/blog/', title: 'Guides — Free SEO and Marketing How-Tos | ' + SITE.name, desc: 'Practical guides for the jobs these tools do: crawler rules, launch checklists, structured data, campaigns and technical SEO — tested, plain and free.', body: blogIndexBody(), ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Guides', url: SITE.url + '/blog/', description: 'How-to guides for marketers, bloggers and webmasters.' }, breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }])] },
     ...ARTICLES.map((a) => ({ path: '/blog/' + a.slug + '/', title: a.metaTitle, desc: a.metaDesc, body: articlePage(a), ld: articleLd(a) })),
+    ...AUTHORS.map((by) => ({ path: '/authors/' + by.slug + '/', title: by.metaTitle, desc: by.metaDesc, body: authorPage(by), ld: authorLd(by) })),
     ...POLICY.map((p) => {
       const path = '/' + p.slug + '/';
       return {
@@ -1080,7 +1133,7 @@ const run = async () => {
   // ---- sitemaps: a sitemap INDEX + two children (pages, tools) ---------
   // An index keeps room to grow (a blog/content sitemap later) and lets crawlers
   // fetch only the slice they need.
-  const pagePaths = ['/', '/blog/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
+  const pagePaths = ['/', '/blog/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...AUTHORS.map((by) => '/authors/' + by.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
   const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
   // Do not emit synthetic lastmod values: a build date is not the page's
   // significant content-modification date. Guides carry a real one (their

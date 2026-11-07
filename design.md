@@ -105,8 +105,9 @@ identity you could pick out of a screenshot:
 4. **Thin warm rules instead of shadows everywhere** — `#d8d1c4` hairlines,
    a `3px double` rule under the hero masthead, one `4px` brass edge on the
    feedback band. Depth (`--shadow-*`) is reserved for things that genuinely lift.
-5. **Editorial hierarchy** — every homepage section starts with a mono eyebrow +
-   rule, then a serif title. Numbers (`01`–`04`) order the categories and jobs.
+5. **Editorial hierarchy** — serif section titles on their own; a mono eyebrow +
+   rule is used at most once per page (today: the hero). No numbered markers
+   ordering sections or categories.
 6. **Proof beside the promise** — the hero's right column is the editor's pick:
    the tool, why it matters this week, and a real output preview. No empty
    atmospheric space.
@@ -332,7 +333,7 @@ Verify before shipping any design change:
 - [ ] Primary is deep blue `#243b63`, not Tailwind indigo `#4f46e5`
 - [ ] Headlines are Fraunces; UI labels are Outfit/Inter — no third sans
 - [ ] Brass appears only as accents (eyebrows, numerals, rules, one band edge)
-- [ ] Every homepage section opens with a mono eyebrow + rule
+- [ ] At most one mono eyebrow per page (currently the hero), never one per section
 - [ ] The hero's right column carries proof (editor's pick + output), not decoration
 - [ ] Tool cards keep the `::before` hover accent bar and their "used for" line
 - [ ] The cookie banner is slim and reserves page space while visible

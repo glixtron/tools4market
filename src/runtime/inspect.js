@@ -738,7 +738,6 @@
 
     // head
     var head = el('div', 'inspect-head');
-    head.appendChild(el('span', 'inspect-badge', '\u2726'));
     head.appendChild(el('strong', 'inspect-title', P.title || 'Analyze your own page first'));
     bodyWrap.appendChild(head);
     bodyWrap.appendChild(el('p', 'inspect-sub', P.subtitle || ''));

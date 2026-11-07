@@ -146,17 +146,6 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
     });
   }
 
-  // Hero entrance — a short fade-and-rise, once per session (a return visit in
-  // the same tab skips it). CSS guards on prefers-reduced-motion.
-  function initHeroAnim() {
-    try {
-      if (!window.sessionStorage.getItem('t4m_hero')) {
-        window.sessionStorage.setItem('t4m_hero', '1');
-        document.body.classList.add('hero-anim');
-      }
-    } catch (e) { /* private mode: no animation */ }
-  }
-
   // Deep-link handoff: another tool's report links here with ?url=&title=&desc=
   // (the audited page's snapshot), and the fields are filled on arrival so the
   // tool opens already loaded with that page. Phase 'tool' runs before the
@@ -431,7 +420,6 @@ window.T4M_TOOLS = window.T4M_TOOLS || {};
   }
 
   function boot() {
-    initHeroAnim();
     initShellMotion();
     initReading();
     initCopy();

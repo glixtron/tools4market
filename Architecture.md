@@ -1,6 +1,6 @@
 # Tools4Market — System Architecture
 
-*Version: 2.17 · 25 Oct 2026 · 45 tools, 82 generated HTML pages, 24 guides*
+*Version: 2.18 · 7 Nov 2026 · 47 tools, 85 generated HTML pages, 24 guides, 1 author page*
 
 ---
 
@@ -98,15 +98,18 @@ Tools4market/
 │       └── audit.js              ← web-crawler-audit and seo-score-checker
 │
 ├── dist/                        ← GENERATED OUTPUT (deploy this folder)
-│   ├── index.html               ← Homepage: hero + search + all 34 tool cards
-│   ├── seo-tools/index.html     ← Category hub pages (4 total)
+│   ├── index.html               ← Homepage: hero + search + all 47 tool cards
+│   ├── seo-tools/index.html     ← Category hub pages (5 total)
 │   ├── ai-search-tools/
 │   ├── content-social-tools/
 │   ├── web-utility-tools/
-│   ├── tools/                   ← Tool pages (30 total)
+│   ├── marketing-tools/
+│   ├── tools/                   ← Tool pages (47 total)
 │   │   ├── meta-tag-generator/index.html
 │   │   ├── open-graph-generator/index.html
-│   │   └── … (16 more)
+│   │   └── … (45 more)
+│   ├── blog/                    ← 24 guides + index
+│   ├── authors/glixtron/        ← Author page (data: src/data/authors.js)
 │   ├── about/  contact/  privacy-policy/  terms/  disclaimer/
 │   ├── assets/
 │   │   ├── style.css            ← Copied from src/style.css
@@ -469,3 +472,22 @@ related-tools sidebars and the pages sitemap.
   missing-input guidance) are honest by design: each states what the number
   does not cover and points at the neighbouring calculator for the missing
   half of the picture.
+
+## 16. Authorship and the human-generated rules (v2.18)
+
+Guides used to be attributed to "Tools4Market Editorial" with `Organization`
+markup. They now carry one named author from `src/data/authors.js`, which the
+build validates: an unknown name throws rather than shipping a dead byline.
+
+- `/authors/{slug}/` is a generated page (bio, links, `ProfilePage` +
+  `Person` JSON-LD with `sameAs`, list of guides). It is listed in
+  `sitemap-pages.xml` with the other top-level pages.
+- Guide pages render `By {name}` linked to that page, and `articleLd` sets
+  `author` to the `Person` with the same `sameAs` URLs — the schema and the
+  visible byline come from one record.
+- `docs/ai-generated-tells.md` is the rulebook this pass was written against;
+  `rules.md` binds the items that apply to code (`T7` for headline formulas).
+- Two rendering rules came out of it and are worth keeping: a tool card shows
+  its processing label only when it differs from the majority in the same
+  grid (`majorityProc()` in `build.mjs`), and the category stat strip only
+  renders when the numbers actually differ (`catStats()`).

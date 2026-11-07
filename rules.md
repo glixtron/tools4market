@@ -15,7 +15,7 @@
 ## 2. Definition of Done — every tool page must have
 
 - [ ] Working tool logic, tested in browser (correct output + edge cases: empty input, weird chars)
-- [ ] Unique H1 in pattern: `Free {Tool} — No Signup, No Limits`
+- [ ] Unique H1 containing the exact search phrase and the word `Free` where it is true. The H1 says what the tool does in its own words — no shared suffix, no opening repeated across pages (identical openings across 47 pages are themselves a generated signature; see the rulebook T7).
 - [ ] Meta title ≤60 chars, meta description ≤158 chars (checked by build)
 - [ ] ≥2 unique content sections (what it does / how to use / use cases)
 - [ ] 3–5 FAQs with FAQPage schema
@@ -26,7 +26,7 @@
 
 ## 3. Code rules
 
-- **No frameworks, no npm dependencies.** Vanilla JS + one CSS file. Build = plain Node (`node build.mjs`).
+- **No frameworks, no npm dependencies.** Vanilla JS + one CSS file. Build = plain Node (`node build.mjs`). Licensed third-party browser code must be vendored under `src/vendor/`, attributed, and loaded only on the page that needs it (the QR encoder is the one case).
 - Runtime JS: classic scripts, no modules (must work on `file://`). Shared registry: `window.T4M_TOOLS[slug] = (root) => {}`; lookup by `#tool-root[data-tool]`.
 - All dynamic DOM output via `textContent` / `createElement` — `innerHTML` only for build-time strings from our own data files.
 - Element IDs prefixed per tool (`mt-`, `og-`, `pw-`…) — pages are standalone but avoid collisions.
@@ -58,11 +58,11 @@
 
 ## 7. Human-generated standard
 
-Binding for all copy, design and UI work: [`docs/human-generated-human-readable.md`](docs/human-generated-human-readable.md).
+Binding for all copy, design and UI work: [`docs/human-generated-human-readable.md`](docs/human-generated-human-readable.md) (the rulebook and rule IDs) and [`docs/ai-generated-tells.md`](docs/ai-generated-tells.md) (the researched evidence base: code, spacing, layout, card and typography tells, detection commands, pre-ship checklist).
 
-That file lists the AI tells we never ship (gradient text, violet gradients, glassmorphism, emoji product icons, decorative numbering, eyebrow-plus-rule on every section, fake proof, anonymous bylines, banned vocabulary), the writing rules, the current site audit with file-level evidence, and the ranked fixes. Read it before writing or restyling any page. Rule IDs from it are valid review comments.
+The rulebook lists the AI tells we never ship (gradient text, violet gradients, glassmorphism, emoji product icons, decorative numbering, eyebrow-plus-rule on every section, fake proof, anonymous bylines, banned vocabulary), the writing rules, the current site audit with file-level evidence, and the ranked fixes. The evidence file records why each tell reads as machine-made, the values generated sites converge on, and how to detect them mechanically. Read both before writing or restyling any page. Rule IDs from the rulebook and section references from the evidence file are valid review comments.
 
-Two of its proposals conflict with existing rules and need an owner decision before we apply them: the fixed H1 pattern in §2 of this file, and the mandatory eyebrow in `design.md` §9. Until that decision is recorded, the existing rules win.
+Owner decisions recorded 7 Nov 2026: the H1 pattern in §2 of this file is amended (see §2), and the mandatory eyebrow in `design.md` §9 is replaced by the rulebook's L3 (at most one eyebrow per page). The vendored QR encoder remains committed source, not an npm dependency; the wording in §3 covers it.
 
 ## 8. Metrics we optimise (in priority order)
 

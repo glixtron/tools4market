@@ -14,6 +14,7 @@ export const CATEGORIES = {
     name: 'SEO & Meta Tools',
     icon: '🚀',
     homeDesc: 'Meta tags, Open Graph, canonical, hreflang, schema and snippet previews — the on-page essentials, generated correctly every time.',
+    metaTitle: 'SEO & Meta Tools — 13 free checkers and generators',
     pageDesc: 'Generate meta tags, Open Graph and Twitter cards, canonical and hreflang links, and JSON-LD schema. Compare title and description wording in an estimated preview; optional page checks fetch public URLs.',
     metaDesc: 'Free SEO tools for meta tags, Open Graph, canonical links, hreflang, JSON-LD schema and estimated snippet previews. No signup.',
     pageExtra: [
@@ -29,6 +30,7 @@ export const CATEGORIES = {
     name: 'AI Search & Crawler Tools',
     icon: '🤖',
     homeDesc: 'Robots.txt with AI-bot presets, one-click AI crawler blocking and llms.txt generation — get your site ready for the AI-search era.',
+    metaTitle: 'AI Search & Crawler Tools — robots.txt and llms.txt',
     pageDesc: 'The AI-search era toolkit: decide which AI crawlers may train on or answer from your content, generate llms.txt for answer engines, and ship a robots.txt that covers 18+ bots — including GPTBot, ClaudeBot and PerplexityBot.',
     metaDesc: 'Free AI search tools: robots.txt generator with AI crawler presets, one-click AI bot blocker (GPTBot, ClaudeBot, PerplexityBot) and llms.txt generator.',
     pageExtra: [
@@ -43,6 +45,7 @@ export const CATEGORIES = {
     name: 'Content & Social Tools',
     icon: '✍️',
     homeDesc: 'Slug generator, UTM builder, keyword density analyser and hashtag sets — the small utilities content teams use daily.',
+    metaTitle: 'Content & Social Tools — 8 free writing utilities',
     pageDesc: 'Daily-driver utilities for content and social teams: clean URL slugs, GA4-ready UTM links, phrase-frequency analysis and platform-tuned hashtag sets.',
     metaDesc: 'Free content tools: URL slug generator, UTM link builder, keyword density checker and hashtag generator for every platform. No signup.',
     pageExtra: [
@@ -58,6 +61,7 @@ export const CATEGORIES = {
     name: 'Web & Utility Tools',
     icon: '🛠️',
     homeDesc: 'Sitemaps, .htaccess redirects, image optimization and cryptographically random passwords — useful tools for web work.',
+    metaTitle: 'Web & Utility Tools — 16 free browser tools',
     pageDesc: 'Webmaster utilities for XML sitemaps, .htaccess redirects, image compression for faster pages, and secure passwords generated on your device.',
     metaDesc: 'Free browser-based web tools: optimize images for websites, generate XML sitemaps and .htaccess redirects, and create secure passwords.',
     pageExtra: [
@@ -74,6 +78,7 @@ export const CATEGORIES = {
     name: 'Marketing Calculators',
     icon: '📊',
     homeDesc: 'ROI, ROAS, CAC and ad-metric calculators — the numbers marketers and founders actually run, in your browser with no signup.',
+    metaTitle: 'Marketing Calculators — ROI, ROAS, CAC and ad costs',
     pageDesc: 'Free marketing calculators: ROI, ROAS, customer acquisition cost, CPC, CPM, CPA and CTR. Every calculation runs locally in your browser — nothing is uploaded.',
     metaDesc: 'Free marketing calculators for ROI, ROAS, CAC, CPC, CPM and CPA. Fast, private, no signup — every calculation runs in your browser.',
     pageExtra: [

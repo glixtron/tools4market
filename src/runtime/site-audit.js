@@ -244,16 +244,20 @@
       var byPath = {};
       st.summaries.forEach(function (s) { byPath[s.path] = 100; });
       var totals = { blocker: 0, major: 0, minor: 0, info: 0 };
+      var sitePenalty = 0;
       st.findings.forEach(function (f) {
         totals[f.severity] = (totals[f.severity] || 0) + 1;
-        // Site-level findings ('(site)', '/robots.txt') don't map to a page —
-        // same as score.mjs: they cap the score but deduct nothing per page.
+        // Site-level findings ('(site)', '/robots.txt') don't map to a page,
+        // but they still carry their weight: a major finding that deducted
+        // nothing showed up as 99.9/100 next to the note explaining the weights.
         if (byPath[f.page] != null) byPath[f.page] -= WEIGHTS[f.severity] || 0;
+        else sitePenalty += WEIGHTS[f.severity] || 0;
       });
       var paths = Object.keys(byPath);
       var penalty = 0;
       paths.forEach(function (p) { penalty += 100 - Math.max(0, byPath[p]); });
-      var raw = paths.length ? Math.max(0, 100 - penalty / paths.length) : 100;
+      var base = paths.length ? Math.max(0, 100 - penalty / paths.length) : 100;
+      var raw = Math.max(0, base - sitePenalty);
       var anyWeighted = st.findings.some(function (f) { return (WEIGHTS[f.severity] || 0) > 0; });
       var site = anyWeighted ? Math.min(99.9, Math.round(raw * 10) / 10) : 100;
       return { site: site, pages: paths.length, totals: totals };
@@ -262,6 +266,10 @@
     function renderScore() {
       if (!scoreWrap) return;
       var sc = computeScore();
+      // A site with no crawlable pages has no site score. Showing one derived
+      // only from site-level findings reads as a 95/100 next to a list of
+      // problems, which is exactly the kind of number this tool avoids.
+      if (!sc.pages) { scoreWrap.hidden = true; return; }
       scoreWrap.hidden = false;
       ringNum.textContent = sc.site;
       ring.style.setProperty('--p', sc.site);
@@ -705,6 +713,13 @@
             throw new Error('discover failed');
           }
           st.urls = d.data.urls || [];
+          // A site without a sitemap still has a page. Audit the URL the
+          // visitor entered instead of stopping at discovery with a score
+          // derived from site-level checks alone.
+          if (!st.urls.length) {
+            try { st.urls = [new URL(String((urlIn && urlIn.value) || origin).trim()).href.split('#')[0]]; }
+            catch (e) { st.urls = [origin + '/']; }
+          }
           st.robotsRules = (d.data.robots && d.data.robots.rules) || null;
           st.findings = d.data.findings || [];
           ledgerFinish(dRow,
@@ -712,13 +727,6 @@
             ' · sitemap.xml ' + fill((S.ledger && S.ledger.httpStatus) || 'HTTP {s}', { s: (d.data.sitemap && d.data.sitemap.status) != null ? d.data.sitemap.status : '—' }) +
             ' · ' + fill((S.ledger && S.ledger.metaUrls) || '{k} URL(s)', { k: st.urls.length }),
             d.data.ms != null ? d.data.ms : Date.now() - t0, false);
-          if (!st.urls.length) {
-            renderAll();
-            setStatus(S.noPages || 'No page URLs found in the sitemap.');
-            clearStore();
-            resetControls();
-            return;
-          }
           setStatus(fill(S.discovered || 'Found {n} page(s) in the sitemap.', { n: st.urls.length }));
           save();
         }

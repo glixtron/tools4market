@@ -1,6 +1,7 @@
 # Human-Generated Website Rules
 
-**Status:** binding from 5 Nov 2026, pending owner sign-off on §8 conflicts.
+**Status:** binding. Owner decisions on the §8 conflicts recorded 7 Nov 2026: the H1 suffix is now optional (rules.md §2 amended), the per-section eyebrow mandate is withdrawn in favour of L3, and the vendored QR encoder is committed source rather than a dependency.
+**Companion:** [`ai-generated-tells.md`](ai-generated-tells.md) records the researched evidence and the mechanical detection rules for every tell in §2.
 **Scope:** every page we ship: tool pages, guides, category pages, policy pages, emails.
 **Relationship to other docs:** `rules.md` governs what we build and how it is tested. `design.md` governs tokens and layout primitives. This file governs *how the result reads and feels*. Where the three disagree, `rules.md` wins until the conflict in §8 is resolved.
 
@@ -253,15 +254,11 @@ Ranked by signal strength per hour of work.
 
 ---
 
-## 8. Conflicts with existing binding docs
+## 8. Conflicts resolved (7 November 2026)
 
-These need an owner decision. Do not resolve them silently.
-
-1. **`rules.md:18` mandates H1 pattern `Free {Tool} — No Signup, No Limits`.** Applied to all 47 pages, the identical opening is itself a generated signature (T7). Proposal: amend to "H1 must contain the exact search phrase and the word `Free` where it is true; the `No Signup, No Limits` suffix is optional and should appear on no more than about 60% of pages." This does not change any page's target phrase.
-2. **`design.md` §9 requires an eyebrow plus rule on every homepage section.** That is L3 by construction. Proposal: keep the eyebrow on the first section only, or keep it but remove the numeric counters so it reads as a label rather than a template.
-3. **`rules.md:29` says no npm dependencies.** The vendored QR encoder (`src/vendor/qrcode.js`) is committed source, not an installed package, but the wording is ambiguous. Unrelated to this document; still needs ratification.
-
-Until decided, follow the existing docs. The conflicts are recorded here so the decision is deliberate.
+1. **`rules.md` §2 H1 pattern — resolved.** The H1 must contain the exact search phrase and `Free` where true, and must say what the tool does in its own words. The shared `No Signup, No Limits` suffix is gone from all 47 pages (7 Nov 2026); no page's target phrase changed.
+2. **`design.md` §9 eyebrow mandate — resolved.** The mandatory eyebrow plus rule on every homepage section is withdrawn. L3 applies: at most one eyebrow per page.
+3. **`rules.md` §3 "no npm dependencies" — resolved.** No installed packages and no framework. A licensed, vendored browser library loaded only on the page that needs it is permitted; `src/vendor/qrcode.js` stays.
 
 ---
 

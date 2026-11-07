@@ -28,8 +28,16 @@ export function score({ pages, findings, catalog }) {
   // One decimal, and 100 is reserved for a run with no findings at all. Rounding
   // 7 majors across 80 pages to "100/100" is the sort of number that makes an
   // audit untrustworthy: it reads as a clean bill of health next to a finding list.
+  // Findings that belong to no crawled page (a missing sitemap, a missing
+  // robots.txt) still carry a weight. Deducting nothing for them produced a
+  // 99.9 next to a "Major" finding, which contradicts the note that spells the
+  // weights out. They now cost what the checklist says they cost.
+  let sitePenalty = 0;
+  for (const f of findings) if (!byPage.has(f.page)) sitePenalty += weights[f.severity] || 0;
+
   const penalty = pageScores.reduce((sum, p) => sum + (100 - p.score), 0);
-  const raw = pages.length ? Math.max(0, 100 - penalty / pages.length) : 100;
+  const base = pages.length ? Math.max(0, 100 - penalty / pages.length) : 100;
+  const raw = Math.max(0, base - sitePenalty);
   const anyFinding = findings.some((f) => (weights[f.severity] || 0) > 0);
   const siteScore = anyFinding ? Math.min(99.9, Math.round(raw * 10) / 10) : 100;
 
