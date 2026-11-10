@@ -2,7 +2,9 @@
 
 *The owner-side work that blocks revenue and traffic. Everything in this file needs a browser session with an account I do not have: AdSense, Cloudflare dashboard, Launchstag, and the social/directory accounts. The site-side prerequisites are done.*
 
-*Last verified against production 26 Oct 2026 (Worker `60455cbb`, v2.17.1). Each item records what I could measure, what I could only read from vendor documentation, and what I could not verify at all — so nothing here reads more certain than it is.*
+*Last verified against production 10 Nov 2026 (Worker `bafeafcd`). Each item records what I could measure, what I could only read from vendor documentation, and what I could not verify at all — so nothing here reads more certain than it is.*
+
+*AdSense addendum, 10 Nov: the site-side configuration below is unchanged and still serving — 177 units across 75 pages, verified in the built HTML (`51 × 3` tool units + `24 × 1` guide units + 0 on the 14 pages with no slot). The owner reports the console now shows "Getting ready" and suspects payment details are the gate. That is a different state from the ad-unit configuration described below, and it is not something I can see: the units can be configured and serving while the account itself is not cleared for payment. Treat the account state as unknown until the owner reads it out of the console.*
 
 ---
 

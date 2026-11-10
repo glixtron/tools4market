@@ -2,6 +2,14 @@
 
 *Append-only. Newest entries at top.*
 
+### Deployment forensics and a shortener design note (10 Nov 2026)
+
+**Corrected a recorded claim.** The 28 Oct worklog said the three ad-less deploys looked like a Cloudflare Workers Build triggered by a push. The version history says otherwise: 120 versions retained, **118 `source: wrangler`, 2 `source: dash`** (20 Oct setup), **none from a build system**. The 28 Oct deploys are visible as versions 103 (15:08), 104 `af13998c` (15:09) and 106 `e03de6d2` (15:27), all local `wrangler deploy` runs from a checkout without `.env`. The guard now refuses an ad-less artefact, so the mechanism is closed either way. Production verified: `bafeafcd`, 177 ad units across 75 pages.
+
+**`docs/url-shortener-design.md`** — design note only. Splits the three wants inside "free URL shortener", measures what `/s/<code>` on a long domain actually buys (not brevity, only click counts), compares KV vs D1 for redirects vs counters, and enumerates the abuse controls required before launch. Recommendation: don't ship a public shortener; a 20–50 link owner-only redirect manager covers the real need.
+
+**Plan check:** the bot-table guide overlaps three existing guides and none of them has a table — the table is the missing artefact, not a new page.
+
 ### Four browser-local tools, and a behaviour test (10 Nov 2026)
 
 **Shipped:** `word-counter`, `character-counter`, `color-picker` and `css-minifier` — 51 tools, 89 pages. Each is pure client-side, in `LOCAL_TOOLS`, with 3 sections, 4 FAQs and the full schema stack. The homepage "Recently changed" list now links them at `/tools/…`, which also proves the previous pass's article/tool classification fix on the served page.

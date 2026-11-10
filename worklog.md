@@ -6,6 +6,27 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-11-10 (16th pass) — The Workers Build hypothesis was wrong, and a shortener design note
+
+**Agent:** Freebuff session
+**Trigger:** Owner asked whether the 28 Oct ad-less deploys came from a stale Desktop checkout; owner also asked for the URL shortener design note rather than code.
+
+**The recorded hypothesis was wrong, and the deployment metadata proves it.** The 28 Oct entry below says the three ad-less deploys "point at a build triggered by the repository rather than by a shell… the likely candidate is a Cloudflare Workers Build on `main`". I queried the version history directly (`/accounts/{acct}/workers/scripts/tools4market/versions`, 120 versions retained, paginated):
+
+- **118 versions are `source: wrangler`; 2 are `source: dash`** (versions 1–2, 20 Oct, during initial setup).
+- **Zero versions came from a build system.** Every deploy since 21 Oct was a local `wrangler deploy`.
+- The three 28 Oct deploys are real and visible: version 103 at 15:08:09, version 104 `af13998c` at 15:09:53, version 106 `e03de6d2` at 15:27:32 — all `wrangler`, all the same account, matching the worklog's own note that `af13998c` served the site without an ad loader.
+
+So they were not CI. They came from a checkout running `wrangler deploy` without a `.env` — the Desktop checkout before it had one, or the owner's own terminal. The mechanism is now closed regardless of who runs it: `scripts/check-deploy.mjs` inspects the built artefact and refuses to upload without an ad loader unless `ALLOW_ADS_OFF=1`, and `d01e61d` records ad intent in the repo so a build without `.env` cannot silently ship ad-free. Nothing on production was wrong at the time of checking: `bafeafcd` is live, 177 ad units across 75 pages (51 × 3 tool pages + 24 × 1 guides, 14 pages intentionally slotless), verified in `dist/`, not by arithmetic.
+
+**Design note, not code:** `docs/url-shortener-design.md`. It separates the three wants bundled in "free URL shortener" (a shorter URL, click counts, a ranking page), notes that `tools4market.online/s/aB3x9` is not short, compares KV against D1 for the redirect path and the click path, and lists the abuse controls that must exist before launch — reputation lookup, deny rules, rate limiting, expiry, deletion tokens, a named human for reports, and logging that does not retain raw IPs. Recommendation: **do not ship a public shortener**; an owner-only redirect manager serves the real need with none of the abuse surface. Five decisions are listed for the owner, and none of them is a build instruction.
+
+**Also checked, and it changes one plan item:** the "authoritative bot-table guide" overlaps three guides that already exist (`robots-txt-for-search-and-ai-crawlers`, `how-to-block-gptbot`, `check-ai-crawler-access` — the last already has a section called "Keep a per-bot decision table"), and none of the three actually contains a table. The table is the missing artefact, not a new page; it belongs inside an existing guide or as a distinct directory page that those three link to. Flagged rather than built.
+
+**Lesson:** a hypothesis written into the log becomes a fact for the next session unless someone re-checks it. The evidence was two API calls away for two weeks.
+
+---
+
 ## 2026-11-10 (15th pass) — Four browser-local tools, and a behaviour test that found a bug
 
 **Agent:** Freebuff session
