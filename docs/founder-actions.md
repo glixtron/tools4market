@@ -118,7 +118,7 @@ A build that prints `⚠ AdSense: N slot id(s) not numeric and ignored` means a 
 Copy `.env` into whichever checkout you deploy from, or deploy from the one that has it. Two guards now stand in the way, and they fail in opposite places:
 
 - **`ads.config.json`** (committed) records that this site runs ads. `build.mjs` refuses to build when it says `true` and the environment has no AdSense config — so a CI build, a fresh clone or a second machine fails at build time instead of publishing. Override with `ALLOW_ADS_OFF=1`.
-- **`scripts/check-deploy.mjs`** reads the built HTML before upload and refuses to publish a build with no loader, whatever the reason.
+- **`scripts/check-deploy.mjs`** reads the built HTML before upload and refuses to publish a build with no loader, whatever the reason. It also resolves every internal `href`/`src` in `dist/` to a file that exists, so a link to a page the build never generated fails before upload instead of surfacing in Search Console a week later.
 
 Intent has to live in git because `.env` cannot travel. On 28 Oct the site lost every placement three times in one day — twice from a shell without `.env` sourced, once from a checkout that had no `.env` at all — and every deploy log was green.
 
