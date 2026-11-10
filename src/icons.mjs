@@ -42,6 +42,7 @@ const P = {
   network: '<circle cx="12" cy="12" r="2.2"/><circle cx="5" cy="6" r="1.8"/><circle cx="19" cy="6" r="1.8"/><circle cx="5" cy="18" r="1.8"/><circle cx="19" cy="18" r="1.8"/><path d="m6.4 7.2 4 3.4M17.6 7.2l-4 3.4M6.4 16.8l4-3.4M17.6 16.8l-4-3.4"/>',
   regex: '<path d="M4 8h6M7 5v6M14 6.5l4 4M18 6.5l-4 4M12.4 15.4h6.4M16.6 13.6v2.4"/><circle cx="6.4" cy="17.4" r="1.2"/>',
   qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.6v2.6H14zM18 18h2v2h-2zM14 18h1M18 14h2"/>',
+  palette: '<path d="M12 3.5a8.5 8.5 0 1 0 0 17h1.3a1.9 1.9 0 0 0 0-3.8h-.9a1.7 1.7 0 0 1 0-3.4h3.3A4.3 4.3 0 0 0 20 9.6a7.6 7.6 0 0 0-8-6.1Z"/><circle cx="8.2" cy="9" r="1.1"/><circle cx="12" cy="7.2" r="1.1"/><circle cx="15.6" cy="9.4" r="1.1"/>',
   coins: '<ellipse cx="12" cy="6.4" rx="7" ry="2.8"/><path d="M5 6.4v4.4c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6.4"/><path d="M5 10.8v4.4c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-4.4"/>',
   target: '<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1"/>',
   userPlus: '<circle cx="10" cy="8" r="3.4"/><path d="M4 20c0-3.3 2.7-5.6 6-5.6 1.1 0 2.1.2 3 .7"/><path d="M17.6 14.4v5M15.1 16.9h5"/>',
@@ -69,6 +70,8 @@ const MAP = {
   'ics-calendar-generator': 'calendar', 'image-compressor': 'imageDown', 'json-validator': 'bracesCheck',
   'timestamp-converter': 'clock', 'ip-converter': 'network', 'regex-tester': 'regex',
   'qr-code-generator': 'qr',
+  'word-counter': 'type', 'character-counter': 'hash',
+  'color-picker': 'palette', 'css-minifier': 'code',
   'roi-calculator': 'coins', 'roas-calculator': 'target', 'cac-calculator': 'userPlus',
   'ad-metrics-calculator': 'sliders', 'email-roi-calculator': 'mail', 'marketing-budget-calculator': 'wallet',
 };

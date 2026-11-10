@@ -11,6 +11,7 @@
     "deploy": "node build.mjs && node scripts/check-deploy.mjs && npx wrangler deploy",
     "preview": "npx wrangler dev",
     "test": "node tests/smoke.mjs",
+    "test:tools": "node tests/tools-behaviour.mjs",
     "test:seo": "node tests/seo-audit.mjs",
     "test:consent": "node tests/consent-test.mjs",
     "test:worker": "node tests/worker-routing.mjs",

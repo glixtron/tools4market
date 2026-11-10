@@ -7,8 +7,8 @@ export const f = {
   text: (id, label, ph = '', val = '', type = 'text') =>
     `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" placeholder="${esc(ph)}"${val ? ` value="${esc(val)}"` : ''}></div>`,
   url: (id, label, ph = '', val = '') => f.text(id, label, ph, val, 'url'),
-  textarea: (id, label, ph = '', rows = 5) =>
-    `<div class="field"><label for="${id}">${label}</label><textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}"></textarea></div>`,
+  textarea: (id, label, ph = '', rows = 5, val = '') =>
+    `<div class="field"><label for="${id}">${label}</label><textarea id="${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(val)}</textarea></div>`,
   select: (id, label, opts, val = '') =>
     `<div class="field"><label for="${id}">${label}</label><select id="${id}">${opts.map((o) =>
       `<option value="${esc(o.v)}"${o.v === val ? ' selected' : ''}>${esc(o.l)}</option>`).join('')}</select></div>`,

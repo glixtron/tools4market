@@ -2,6 +2,14 @@
 
 *Append-only. Newest entries at top.*
 
+### Four browser-local tools, and a behaviour test (10 Nov 2026)
+
+**Shipped:** `word-counter`, `character-counter`, `color-picker` and `css-minifier` — 51 tools, 89 pages. Each is pure client-side, in `LOCAL_TOOLS`, with 3 sections, 4 FAQs and the full schema stack. The homepage "Recently changed" list now links them at `/tools/…`, which also proves the previous pass's article/tool classification fix on the served page.
+
+**New guard:** `tests/tools-behaviour.mjs` (30 assertions) checks the arithmetic rather than the rendering — word/unique/sentence counts, UTF-8 byte length for "café" (4 characters, 5 bytes), HEX→RGB/HSL, 21:1 and 1:1 contrast cases, and the minifier's refusals. It failed the colour picker first: the two contrast tiles were swapped (variables named after the background, not the text). Fixed. Smoke would have passed a tool that reported 0 for everything.
+
+**State:** `test:seo` 2837/0, smoke 51/51, tools 30/30, links 4,936/89 pages, worker 22/22, live 82/82, audit 0 blockers / 3 minors / 98 per 100. Deployed `bafeafcd`.
+
 ### 307 → 301 for trailing slashes, and an offline link guard (10 Nov 2026)
 
 **The redirect.** Every no-slash directory URL answered `307` — Cloudflare's documented `auto-trailing-slash` behaviour, in place since 21 Oct and therefore **not** the cause of the 8 Nov impression drop. Changed in `worker.js` (before the asset layer, which cannot emit 301 itself): GET/HEAD → 301, other methods → 308, file extensions and `/api/*` excluded. Deployed `4d60acd3`; live matrix verified; routing test 22/22.

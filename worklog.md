@@ -6,6 +6,29 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-11-10 (15th pass) — Four browser-local tools, and a behaviour test that found a bug
+
+**Agent:** Freebuff session
+**Trigger:** CEO plan authorised four browser-local tools after the 307→301 pass; URL shortener deferred to a design note.
+
+**Shipped:** `word-counter` (80K/mo), `character-counter` (60K/mo), `color-picker` (40K/mo) and `css-minifier` (25K/mo) — 51 tools now, 89 pages. Each has 3 sections (430–600 words), 4 FAQs, the WebApplication/FAQPage/BreadcrumbList stack, five related-tool links, and an honest "Runs in your browser" note. All four are in `LOCAL_TOOLS`, so they skip the inspect engine and never load it.
+
+**What each actually does, not just draws:**
+- **Word counter** — whitespace word count, unique-word ratio, sentences, paragraphs, reading time at 200 wpm, and a frequency list that drops forty common stopwords so the list shows topics rather than "the".
+- **Character counter** — characters with and without spaces, UTF-8 bytes, words and lines, then four limit bars (60 / 158 / 280 / 160) showing room left or distance over. "Café" is 4 characters and 5 bytes, and the test asserts both.
+- **Color picker** — HEX/RGB/HSL conversion, a nine-step tint-and-shade ramp, and WCAG contrast against black and white text with AA/AAA verdicts.
+- **CSS minifier** — comment and whitespace removal that keeps quoted strings and `url()` bodies intact, drops the final `;` before `}`, reports before/after bytes, and returns the input unchanged with a reason when braces do not balance or there is no rule.
+
+**A behaviour test caught what smoke cannot.** `tests/smoke.mjs` proves a page boots and produces output; it cannot tell 21:1 from 1:1. The new `tests/tools-behaviour.mjs` (30 assertions) renders each tool in jsdom and checks the arithmetic. It failed the colour picker on the first run: the two contrast tiles were swapped, so black text on black reported 21:1 and white text reported 1:1. The variables were named after the background rather than the text; renamed and fixed. It also caught two wrong assumptions in the test itself (HSL 218° vs an expected 214°, and a regex that matched every brace), which is the test doing its job before a user does.
+
+**Also:** `f.textarea` gained an optional initial value (the minifier ships with a stylesheet to work on), category meta titles now say 10 and 18 rather than 8 and 16, the homepage proof strip says 51, and the `palette` icon joins the line-icon family. The homepage "Recently changed" list now links the new tools at `/tools/…` — the classification fix from the previous pass, verified in the served page.
+
+**Verification:** build 89 pages / 51 tools; `test:seo` 2837/0; `npm test` 51/51; `test:tools` 30/30; `test:links` 4,936 links / 89 pages; `test:worker` 22/22; `test:audit` 73; `test:consent` 30; `test:audit-api` 50; `test:live` 82/82; audit 0 blockers / 3 minors / 98 per 100. Deployed `bafeafcd`; the four pages return 200 and the no-slash forms still 301.
+
+**Lesson:** the same shape as the last pass — a green suite proved the pages rendered, and only an assertion about the numbers proved the tools were right. A tool that renders "0 words" for every input passes smoke.
+
+---
+
 ## 2026-11-10 (14th pass) — 307 → 301, and two test bugs hiding a real 404
 
 **Agent:** Freebuff session

@@ -467,7 +467,8 @@ const LOCAL_TOOLS = new Set([
   'ics-calendar-generator', 'lorem-ipsum-generator', 'user-agent-parser', 'image-compressor',
   'json-validator', 'roi-calculator', 'roas-calculator', 'cac-calculator', 'ad-metrics-calculator',
   'timestamp-converter', 'ip-converter', 'email-roi-calculator', 'marketing-budget-calculator',
-  'regex-tester', 'qr-code-generator',
+  'regex-tester', 'qr-code-generator', 'word-counter', 'character-counter',
+  'color-picker', 'css-minifier',
 ]);
 // Honest card copy where the two stock notes don't fit: website-audit has no
 // single-page panel (it crawls), and local tools have no server round-trip.
@@ -522,7 +523,7 @@ function homeBody() {
   // Keep this list honest and current; each chip names a real property.
   const PROOF = [
     { label: 'No signup', sub: 'no account' },
-    { label: '47 tools', sub: 'one directory' },
+    { label: '51 tools', sub: 'one directory' },
     { label: 'In-browser', sub: 'files stay local' },
     { label: 'AI crawler presets', sub: '18 bots' },
     { label: 'Live page checks', sub: 'any public URL' },
@@ -819,6 +820,10 @@ function toolPage(t) {
     'ad-metrics-calculator': ['roas-calculator', 'cac-calculator', 'email-roi-calculator'],
     'email-roi-calculator': ['roi-calculator', 'cac-calculator', 'ad-metrics-calculator'],
     'marketing-budget-calculator': ['roas-calculator', 'roi-calculator', 'cac-calculator'],
+    'word-counter': ['character-counter', 'reading-time-calculator', 'case-converter', 'duplicate-line-remover', 'keyword-density-checker'],
+    'character-counter': ['word-counter', 'reading-time-calculator', 'meta-description-checker', 'meta-tag-generator', 'serp-preview-tool'],
+    'color-picker': ['open-graph-generator', 'twitter-card-generator', 'css-minifier', 'image-compressor', 'schema-markup-generator'],
+    'css-minifier': ['json-validator', 'color-picker', 'base64-encoder-decoder', 'url-encoder-decoder', 'regex-tester'],
   };
   const selected = (RELATED[t.slug] || []).map((slug) => TOOLS.find((x) => x.slug === slug)).filter(Boolean);
   const related = selected.length ? selected : [

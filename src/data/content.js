@@ -308,4 +308,66 @@ ${outputBlock('lo-out', 'Lorem Ipsum text')}`,
 ${f.textarea('rt-text', 'Paste your text (nothing is uploaded)', 'Paste an article, script or draft here to measure its length and timing…', 9)}
 ${outputBlock('rt-out', 'Text statistics')}`,
   },
+
+  // ---------------------------------------------------------- word counter
+  {
+    slug: 'word-counter',
+    name: 'Word Counter',
+    cat: 'content',
+    icon: '🔢',
+    card: 'Count words, unique words, characters, sentences and reading time as you type.',
+    usedFor: 'for article length and content briefs',
+    updated: '2026-11-10',
+    keywords: 'word counter word count character count reading time text statistics unique words',
+    focus: 'word counter',
+    h1: 'Word Counter — words, characters and reading time',
+    metaTitle: 'Free Word Counter — Words, Characters & Reading Time',
+    metaDesc: 'Free word counter counts words, unique words, characters, sentences and paragraphs as you type, with reading time and the terms you repeat most.',
+    intro: 'Paste any text into this word counter to see words, unique words, characters, sentences and paragraphs, plus reading time and the terms you repeat most often.',
+    sections: [
+      { h: 'What a word counter counts', p: ['A word counter is a measuring rule, and like any rule it only helps if you know where it starts. This one splits text on whitespace, as a word processor does: “state-of-the-art” is one word, a standalone number is one word, and a line of dashes is a word too. That is deliberate — it matches the count your editor, CMS and client will see, rather than inventing a stricter definition that leaves everyone comparing different numbers.', 'The unique count is different: it lowercases each token and discards punctuation, so “The” and “the” count once. The ratio between total and unique words is a rough read on repetition — a long piece with few unique words is circling a topic, while a short brief with many unique words is usually dense or jargon-heavy. Neither number is a verdict; they are the first two questions to ask before reading the draft.'] },
+      { h: 'How to use the word counter', p: ['Paste the text and the counts update with every keystroke. Nothing is uploaded: the counting runs in this browser tab, so drafts, client copy and unpublished briefs stay local. Clear the box to start again — there is no save, no account and no history to tidy up afterwards. If you are checking a page rather than a draft, paste only the body copy; navigation and footer links inflate every figure and make the reading time useless.', 'Read the strip in order. Words and characters answer the length question; sentences and paragraphs describe shape; reading time turns the count into a commitment. The frequency list is the part people skip and then need: it shows which terms the draft actually repeats, which is useful when a page is supposed to target one phrase and mentions three. Copy the numbers into a brief, or paste the text again after editing to see the difference.'] },
+      { h: 'Word count, reading time and SEO', p: ['There is no word count Google rewards. Pages rank because they answer a query better than the alternatives, and the length that takes varies with the query — a definition needs two hundred words, a migration checklist needs two thousand. What the word counter gives you is a comparison: what the pages already ranking spend, and what yours spends. If you are far below, you may be missing subtopics; if you are far above with no extra substance, you are probably padding.', 'Two mistakes recur. The first is counting markup, code samples or a navigation dump and mistaking it for prose. The second is treating reading time as a ranking factor rather than an editorial one: it tells you whether a page keeps the promise its title makes, which affects whether readers finish and share it, but it is not a signal you can optimise directly. Use the counts to edit, not to hit a number.'] },
+    ],
+    faqs: [
+      { q: 'How does this word counter split words?', a: 'It splits on whitespace, like a word processor: hyphenated words and standalone numbers each count once, and punctuation attached to a word does not create a second one.' },
+      { q: 'Does the word counter upload my text?', a: 'No. Counting runs in your browser and nothing is sent to a server, so drafts, client copy and unpublished content are safe to paste here.' },
+      { q: 'Why is the unique word count lower than the total?', a: 'The word counter lowercases each word and ignores punctuation, so repeats of the same term are counted once. The gap is a rough measure of repetition, not an error.' },
+      { q: 'Is there an ideal word count for SEO?', a: 'No. Length should follow the query: enough to answer it completely, not a target number. Compare with the pages already ranking, then add only what is missing.' },
+    ],
+    html: `
+${f.textarea('wc-text', 'Paste your text (nothing is uploaded)', 'Paste an article, draft or brief here to count its words…', 8)}
+${outputArea('wc-out', 'Text statistics')}`,
+  },
+
+  // ---------------------------------------------------------- character counter
+  {
+    slug: 'character-counter',
+    name: 'Character Counter',
+    cat: 'content',
+    icon: '🔡',
+    card: 'Count characters, spaces, bytes and lines — and see how much of a platform limit is left.',
+    usedFor: 'for titles, posts and message limits',
+    updated: '2026-11-10',
+    keywords: 'character counter character count byte counter twitter character limit meta description length',
+    focus: 'character counter',
+    h1: 'Character Counter — limits for titles, posts and messages',
+    metaTitle: 'Free Character Counter — Characters, Bytes & Limits',
+    metaDesc: 'Free character counter: characters with and without spaces, UTF-8 bytes, words and lines, and how much of a 60-character title or 280-character post is left.',
+    intro: 'This character counter measures characters with and without spaces, UTF-8 bytes, words and lines, and shows how much of a common limit is left before you publish.',
+    sections: [
+      { h: 'Characters, bytes and why the two differ', p: ['A character counter answers a simpler question than it looks. “Café” is four characters and five bytes in UTF-8; an emoji is one character in JavaScript’s count and four bytes on the wire. Databases, SMS gateways and APIs often charge by bytes, while editors, social platforms and meta tags count characters — so a string that fits one limit can fail another. The tool reports both, with spaces and without, because those are the two figures the limits actually use.', 'Lines and words are included for context rather than precision. A line count tells you whether a form field has wrapped in a way a backend will reject; a word count tells you whether a “short” post is really short. Neither replaces reading the text, but both catch the copy-paste accidents that make a field look fine and fail on submit. A paragraph pasted from a PDF also carries invisible characters, which the byte count exposes.'] },
+      { h: 'How to use the character counter', p: ['Paste the text and watch the figures move. The tiles report the raw counts; the bar chart underneath compares the same string against four limits people hit constantly: a sixty-character meta title, a hundred-and-fifty-eight-character description, a 280-character post and a 160-character SMS. Each bar says how much room is left, or how far over the line you are, so the answer is visible rather than calculated.', 'The counter is deliberately literal. It counts what is in the box, including line breaks and trailing spaces; trim the text first if you want the number a CMS will display. Nothing is uploaded, so a password, a client message or an unpublished title is safe to measure. When a limit depends on rendered length rather than raw characters — HTML entities, for instance — check the rendered page instead of trusting any counter.'] },
+      { h: 'The limits that actually matter', p: ['Google truncates titles and descriptions by pixel width, not character count, so sixty and a hundred and fifty-eight are working targets rather than rules; they keep most pages inside the snippet. Social platforms are stricter and more literal: a 280-character post is rejected over the line, and an SMS is split into segments at 160 characters for plain text, fewer when accents force a different encoding.', 'The practical use is comparison. Write three titles and measure each; the difference between fifty-two and sixty-four characters is usually one adjective you can lose. Do the same with a description, where the honest test is whether the first hundred and twenty characters carry the promise, because anything after that may never be shown. A character counter cannot write the line, but it stops the line being cut.'] },
+    ],
+    faqs: [
+      { q: 'What is the difference between characters and bytes?', a: 'Characters are what you see; bytes are how they are stored. In UTF-8 an accented letter takes two bytes and an emoji four, so byte limits are stricter than character limits.' },
+      { q: 'Does the character counter include spaces?', a: 'It reports both figures. Characters with spaces is the count most editors show; without spaces is the one some forms and databases enforce.' },
+      { q: 'Why do social platforms count characters differently?', a: 'Most count characters, some count bytes, and a few shorten every link to a fixed length. The character counter gives the raw figure; the platform applies its own rules on top.' },
+      { q: 'Is the counter accurate for emoji?', a: 'Yes for characters and bytes, with one caveat: some emoji are built from several code points, so a single visible glyph can count as more than one character in JavaScript.' },
+    ],
+    html: `
+${f.textarea('chc-text', 'Paste your text (nothing is uploaded)', 'Paste a title, post or message here…', 8)}
+${outputArea('chc-out', 'Character counts')}`,
+  },
 ];

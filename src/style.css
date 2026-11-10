@@ -1899,6 +1899,34 @@ img.logo-mark {
   margin: 18px 0;
 }
 
+/* Colour picker — the chosen colour, then a tint/shade ramp with its codes */
+.color-hero {
+  height: 96px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+  margin: 14px 0;
+}
+.swatch-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+.swatch {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--c-surface);
+}
+.swatch i { display: block; height: 42px; }
+.swatch code {
+  display: block;
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: var(--c-muted);
+}
+
 /* Visual comparison slider — two photos/renders stacked, draggable handle.
    The handle is positioned by JS; the CSS only governs appearance. */
 .compare {

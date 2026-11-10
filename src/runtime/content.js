@@ -459,4 +459,150 @@
     root.addEventListener('input', update);
     update();
   };
+
+  // ---------------------------------------------------------- word counter
+  T['word-counter'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).wordCount) || {};
+    var L = COPY.labels || {};
+    var input = $(root, 'wc-text');
+    var out = $(root, 'wc-out');
+    var STOP = ('a an and are as at be but by for from had has have he her his i if in into is it its ' +
+      'me my no not of on or our she so than that the their them then there these they this to ' +
+      'up us was we were what when which who will with you your').split(' ');
+
+    function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function tile(label, value) {
+      var t = el('div', 'stat-tile');
+      t.appendChild(el('span', 'stat-tile-label', label));
+      t.appendChild(el('span', 'stat-tile-value', value));
+      return t;
+    }
+
+    function update() {
+      var text = input.value;
+      if (!text.trim()) { out.textContent = COPY.empty || ''; return; }
+
+      var words = text.trim().split(/\s+/).filter(Boolean);
+      var tokens = text.toLowerCase().match(/[a-z0-9\u00c0-\u024f]+(?:['\u2019-][a-z0-9\u00c0-\u024f]+)*/g) || [];
+      var unique = new Set(tokens);
+      var sentences = (text.match(/[.!?]+(?=\s|$)/g) || []).length || 1;
+      var paragraphs = text.split(/\n\s*\n/).filter(function (b) { return b.trim(); }).length || 1;
+      var letters = tokens.reduce(function (n, w) { return n + w.length; }, 0);
+      var avgWord = tokens.length ? Math.round((letters / tokens.length) * 10) / 10 : 0;
+      var avgSent = Math.round((words.length / sentences) * 10) / 10;
+      var minutes = Math.max(1, Math.round(words.length / 200));
+
+      var freq = Object.create(null);
+      tokens.forEach(function (w) {
+        if (w.length < 2 || STOP.indexOf(w) !== -1) return;
+        freq[w] = (freq[w] || 0) + 1;
+      });
+      var top = Object.keys(freq).map(function (w) { return { word: w, n: freq[w] }; })
+        .filter(function (r) { return r.n > 1; })
+        .sort(function (a, b) { return b.n - a.n || (a.word < b.word ? -1 : 1); })
+        .slice(0, 6);
+
+      out.textContent = '';
+      var strip = el('div', 'kpi-strip');
+      strip.appendChild(tile(L.w || 'Words', fmt(words.length)));
+      strip.appendChild(tile(L.u || 'Unique', fmt(unique.size)));
+      strip.appendChild(tile(L.c || 'Characters', fmt(text.length)));
+      strip.appendChild(tile(L.s || 'Sentences', fmt(sentences)));
+      strip.appendChild(tile(L.p || 'Paragraphs', fmt(paragraphs)));
+      strip.appendChild(tile(L.m || 'Reading time', tpl(COPY.minUnit || '{n} min', { n: minutes })));
+      out.appendChild(strip);
+
+      var lines = el('p', 'tool-note');
+      lines.textContent = tpl(COPY.stats || '', {
+        w: fmt(words.length), u: fmt(unique.size), c: fmt(text.length),
+        s: fmt(sentences), p: fmt(paragraphs),
+      }) + ' ' + tpl(COPY.reading || '', { m: minutes }) + ' ' +
+        tpl(COPY.averages || '', { a: avgWord, b: avgSent });
+      out.appendChild(lines);
+
+      if (top.length) {
+        out.appendChild(barChart(COPY.topHead || 'Most frequent words', '', top.map(function (r) {
+          return { label: r.word, val: fmt(r.n), pct: (r.n / top[0].n) * 100 };
+        })));
+      } else {
+        var none = el('p', 'tool-note');
+        none.textContent = COPY.topNone || '';
+        out.appendChild(none);
+      }
+      var foot = el('p', 'tool-note');
+      foot.textContent = COPY.note || '';
+      out.appendChild(foot);
+    }
+    root.addEventListener('input', update);
+    update();
+  };
+
+  // ---------------------------------------------------------- character counter
+  T['character-counter'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).charCount) || {};
+    var input = $(root, 'chc-text');
+    var out = $(root, 'chc-out');
+
+    function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function bytesOf(s) {
+      if (window.TextEncoder) return new TextEncoder().encode(s).length;
+      return unescape(encodeURIComponent(s)).length;
+    }
+    function tile(label, value) {
+      var t = el('div', 'stat-tile');
+      t.appendChild(el('span', 'stat-tile-label', label));
+      t.appendChild(el('span', 'stat-tile-value', value));
+      return t;
+    }
+
+    function update() {
+      var text = input.value;
+      if (!text) { out.textContent = COPY.empty || ''; return; }
+      var chars = text.length;
+      var noSpaces = text.replace(/\s/g, '').length;
+      var bytes = bytesOf(text);
+      var words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+      var lines = text.split('\n').length;
+
+      out.textContent = '';
+      var strip = el('div', 'kpi-strip');
+      strip.appendChild(tile(COPY.charsLabel || 'Characters', fmt(chars)));
+      strip.appendChild(tile(COPY.noSpaceLabel || 'Without spaces', fmt(noSpaces)));
+      strip.appendChild(tile(COPY.bytesLabel || 'UTF-8 bytes', fmt(bytes)));
+      strip.appendChild(tile(COPY.wordsLabel || 'Words', fmt(words)));
+      strip.appendChild(tile(COPY.linesLabel || 'Lines', fmt(lines)));
+      out.appendChild(strip);
+
+      var limits = [
+        { label: COPY.limitTitle || 'Meta title · 60', limit: 60 },
+        { label: COPY.limitDesc || 'Meta description · 158', limit: 158 },
+        { label: COPY.limitTweet || 'X post · 280', limit: 280 },
+        { label: COPY.limitSms || 'SMS · 160', limit: 160 },
+      ];
+      var rows = limits.map(function (l) {
+        var over = chars > l.limit;
+        var value = over ? tpl(COPY.over || '{n} over', { n: fmt(chars - l.limit) })
+          : tpl(COPY.remaining || '{n} left', { n: fmt(l.limit - chars) });
+        return { label: l.label, val: value, pct: Math.min(100, (chars / l.limit) * 100), over: over };
+      });
+      out.appendChild(barChart(COPY.limitsHead || 'Common limits', '', rows, {
+        colors: rows.map(function (r) { return r.over ? 'var(--c-danger)' : 'var(--c-success)'; }),
+      }));
+      var foot = el('p', 'tool-note');
+      foot.textContent = COPY.note || '';
+      out.appendChild(foot);
+    }
+    root.addEventListener('input', update);
+    update();
+  };
 })();

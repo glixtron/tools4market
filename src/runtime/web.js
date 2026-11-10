@@ -1367,4 +1367,238 @@
     });
     generate();
   };
+
+  // ---------------------------------------------------------- colour picker
+  T['color-picker'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).colorPick) || {};
+    var pick = $(root, 'cp-pick');
+    var hexIn = $(root, 'cp-hex');
+    var out = $(root, 'cp-out');
+
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function parseHex(v) {
+      var s = String(v || '').trim().replace(/^#/, '');
+      if (/^[0-9a-f]{3}$/i.test(s)) s = s.replace(/(.)/g, '$1$1');
+      if (!/^[0-9a-f]{6}$/i.test(s)) return null;
+      return {
+        hex: '#' + s.toLowerCase(),
+        r: parseInt(s.slice(0, 2), 16),
+        g: parseInt(s.slice(2, 4), 16),
+        b: parseInt(s.slice(4, 6), 16),
+      };
+    }
+    function toHex(r, g, b) {
+      var h = function (n) { var x = Math.round(Math.max(0, Math.min(255, n))).toString(16); return x.length < 2 ? '0' + x : x; };
+      return '#' + h(r) + h(g) + h(b);
+    }
+    function mix(c, target, t) {
+      return {
+        r: c.r + (target.r - c.r) * t,
+        g: c.g + (target.g - c.g) * t,
+        b: c.b + (target.b - c.b) * t,
+      };
+    }
+    function toHsl(c) {
+      var r = c.r / 255, g = c.g / 255, b = c.b / 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h = 0, s = 0, l = (max + min) / 2;
+      var d = max - min;
+      if (d) {
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+        else if (max === g) h = ((b - r) / d + 2);
+        else h = ((r - g) / d + 4);
+        h *= 60;
+      }
+      return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+    function lum(c) {
+      var f = function (v) {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      };
+      return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+    }
+    function ratio(a, b) {
+      var hi = Math.max(a, b), lo = Math.min(a, b);
+      return (hi + 0.05) / (lo + 0.05);
+    }
+    function tile(label, value, sub, cls) {
+      var t = el('div', 'stat-tile');
+      t.appendChild(el('span', 'stat-tile-label', label));
+      t.appendChild(el('span', 'stat-tile-value', value));
+      if (sub) t.appendChild(el('span', 'stat-tile-delta ' + (cls || 'flat'), sub));
+      return t;
+    }
+    function swatchRow(c) {
+      var row = el('div', 'swatch-row');
+      var white = { r: 255, g: 255, b: 255 };
+      var black = { r: 0, g: 0, b: 0 };
+      var steps = [];
+      for (var i = 4; i >= 1; i--) steps.push({ c: mix(c, white, i * 0.16), label: null });
+      steps.push({ c: c, label: c.hex });
+      for (var j = 1; j <= 4; j++) steps.push({ c: mix(c, black, j * 0.16), label: null });
+      steps.forEach(function (s) {
+        var hex = toHex(s.c.r, s.c.g, s.c.b);
+        var box = el('div', 'swatch');
+        var bar = el('i');
+        bar.style.background = hex;
+        box.appendChild(bar);
+        box.appendChild(el('code', null, hex));
+        row.appendChild(box);
+      });
+      return row;
+    }
+    function verdict(r) {
+      if (r >= 7) return { txt: (COPY.pass || 'passes') + ' ' + (COPY.aa || 'AA') + ' · ' + (COPY.aaa || 'AAA'), cls: 'up' };
+      if (r >= 4.5) return { txt: (COPY.pass || 'passes') + ' ' + (COPY.aa || 'AA'), cls: 'up' };
+      return { txt: COPY.fail || 'fails', cls: 'down' };
+    }
+    function render(c) {
+      out.textContent = '';
+      var hero = el('div', 'color-hero');
+      hero.style.background = c.hex;
+      out.appendChild(hero);
+
+      var hsl = toHsl(c);
+      var strip = el('div', 'kpi-strip');
+      strip.appendChild(tile(COPY.hex || 'HEX', c.hex));
+      strip.appendChild(tile(COPY.rgb || 'RGB', 'rgb(' + c.r + ', ' + c.g + ', ' + c.b + ')'));
+      strip.appendChild(tile(COPY.hsl || 'HSL', 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)'));
+      out.appendChild(strip);
+
+      var rampHead = el('p', 'tool-note');
+      rampHead.textContent = COPY.rampHead || 'Tints and shades';
+      out.appendChild(rampHead);
+      out.appendChild(swatchRow(c));
+
+      var L = lum(c);
+      // Black text has luminance 0, white text has luminance 1. Naming the
+      // variables after the text colour (not the background) is the difference
+      // between a checker that is right and one whose two labels are swapped.
+      var blackText = ratio(L, 0);
+      var whiteText = ratio(L, 1);
+      var head = el('p', 'tool-note');
+      head.textContent = COPY.contrastHead || 'Contrast with text';
+      out.appendChild(head);
+      var cstrip = el('div', 'kpi-strip');
+      var vBlack = verdict(blackText);
+      var vWhite = verdict(whiteText);
+      cstrip.appendChild(tile(COPY.onLight || 'Black text on this colour', tpl(COPY.ratio || '{n}:1', { n: blackText.toFixed(2) }), vBlack.txt, vBlack.cls));
+      cstrip.appendChild(tile(COPY.onDark || 'White text on this colour', tpl(COPY.ratio || '{n}:1', { n: whiteText.toFixed(2) }), vWhite.txt, vWhite.cls));
+      out.appendChild(cstrip);
+
+      var foot = el('p', 'tool-note');
+      foot.textContent = COPY.note || '';
+      out.appendChild(foot);
+    }
+    function fromHexInput() {
+      var c = parseHex(hexIn.value);
+      if (!c) { out.textContent = COPY.invalid || ''; return; }
+      if (pick.value.toLowerCase() !== c.hex) pick.value = c.hex;
+      render(c);
+    }
+    function fromPick() {
+      var c = parseHex(pick.value);
+      if (!c) return;
+      hexIn.value = c.hex;
+      render(c);
+    }
+
+    pick.addEventListener('input', fromPick);
+    pick.addEventListener('change', fromPick);
+    hexIn.addEventListener('input', fromHexInput);
+    if (!parseHex(hexIn.value)) hexIn.value = '#243b63';
+    fromHexInput();
+  };
+
+  // ---------------------------------------------------------- CSS minifier
+  T['css-minifier'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).cssMin) || {};
+    var input = $(root, 'cm-in');
+    var out = $(root, 'cm-out');
+    var stats = $(root, 'cm-stats');
+
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function bytes(s) {
+      if (window.TextEncoder) return new TextEncoder().encode(s).length;
+      return unescape(encodeURIComponent(s)).length;
+    }
+    // Walk the source once, copying strings and url() bodies verbatim, dropping
+    // comments, and collapsing runs of whitespace to a single space only where
+    // two identifier characters would otherwise touch.
+    function sweep(src) {
+      var out = '', i = 0, n = src.length, quote = null, braces = 0;
+      while (i < n) {
+        var ch = src[i], next = src[i + 1];
+        if (quote) {
+          out += ch;
+          if (ch === '\\') { out += next || ''; i += 2; continue; }
+          if (ch === quote) quote = null;
+          i++; continue;
+        }
+        if (ch === '/' && next === '*') {
+          var end = src.indexOf('*/', i + 2);
+          i = end === -1 ? n : end + 2;
+          continue;
+        }
+        if (ch === '"' || ch === "'") { quote = ch; out += ch; i++; continue; }
+        if (ch === '{') braces++;
+        if (ch === '}') braces--;
+        if (/\s/.test(ch)) {
+          var j = i;
+          while (j < n && /\s/.test(src[j])) j++;
+          var prev = out.charAt(out.length - 1);
+          var after = src[j] || '';
+          if (prev && after && /[a-zA-Z0-9_%)\-]/.test(prev) && /[a-zA-Z0-9_(\-]/.test(after)) out += ' ';
+          i = j; continue;
+        }
+        out += ch; i++;
+      }
+      return { css: out, braces: braces, quote: quote };
+    }
+    function minify(src) {
+      var pass = sweep(src);
+      if (pass.quote) return { error: 'invalidBraces', open: 0, close: 0 };
+      if (!/\{/.test(src)) return { error: 'notCss' };
+      if (pass.braces !== 0) return { error: 'invalidBraces', open: Math.max(0, pass.braces), close: Math.max(0, -pass.braces) };
+      var css = pass.css
+        .replace(/\s*([{}:;,>+~])\s*/g, '$1')
+        .replace(/;}/g, '}')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return { css: css };
+    }
+    function update() {
+      var src = input.value;
+      if (!src.trim()) { out.textContent = ''; stats.textContent = COPY.empty || ''; return; }
+      var r = minify(src);
+      if (r.error) {
+        out.textContent = src;
+        stats.textContent = r.error === 'invalidBraces'
+          ? tpl(COPY.invalidBraces || '', { o: r.open, c: r.close })
+          : (COPY.notCss || '');
+        return;
+      }
+      out.textContent = r.css;
+      var before = bytes(src), after = bytes(r.css);
+      if (after >= before) {
+        stats.textContent = COPY.unchanged || '';
+      } else {
+        stats.textContent = tpl(COPY.stats || '', {
+          a: before, b: after, p: Math.round((1 - after / before) * 100),
+        });
+      }
+    }
+    root.addEventListener('input', update);
+    update();
+  };
 })();
