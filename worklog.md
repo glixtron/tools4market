@@ -6,6 +6,23 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-11-10 (14th pass) — 307 → 301, and two test bugs hiding a real 404
+
+**Agent:** Freebuff session
+**Trigger:** owner's GSC report (Nov 8 impression crash, 38 "Page with redirect") plus a request to change the trailing-slash redirect from 307 to 301.
+
+**307 → 301.** Verified the live behaviour first: every no-slash directory URL answered `307` with a `Location` to the slash form. Cloudflare's docs (last updated 23 Apr 2026) confirm that is the documented output of `html_handling: auto-trailing-slash` — there is no status-code option, and the config has been unchanged since 21 Oct 2026 (`015d110`). So the 307 **predates the Nov 8 crash by two and a half weeks and cannot explain it**; the 38 "Page with redirect" rows are Google noticing URLs it could already have found in October. The change is still right: 307 reads as temporary, Google keeps the no-slash URL canonical, and 301 consolidates. The fix lives in `worker.js`, before `env.ASSETS.fetch`, because the asset layer will never emit 301 itself: GET/HEAD → 301, other methods → 308 (a POST replayed as GET is a bug), files excluded by extension, `/api/*` returned earlier, `Cache-Control: public, max-age=86400`. Deployed `4d60acd3`. Live matrix: no-slash pages 301, slashed 200, `/assets/style.css` 200, `/sitemap.xml` 200, `/favicon.ico` 200, POST 308, `/nope-not-a-page` 301 → branded 404, `/` 200. `tests/worker-routing.mjs` 22/22; `tests/live-verify.mjs` gained four redirect assertions.
+
+**Two `test:live` failures after the deploy, neither a page bug.** (1) `/manifest.webmanifest` 301'd to `/manifest.webmanifest/`, because the file-exclusion regex capped extensions at 8 characters and `webmanifest` is 11 — a URL every browser asks for, turned into a 404 by our own rule. Widened to 12 and asserted. (2) Two blog posts failed the title/description length check while their canonical and status were fine: the test measured **raw HTML attributes**, so `&#39;` counted as five characters and both titles read as 62 instead of 58. Google counts rendered text. The test now decodes entities (numeric, named, hex) and names the failing sub-check instead of printing "status 200, canonical correct" and leaving the reader to guess. Re-measured all 84 URLs against the corrected rule: **0 over limit**.
+
+**A real blocker the audit found, one deploy late.** The live audit reported the homepage linking `/blog/website-audit/`, which 404s. The homepage's "Recently changed" list classifies entries with `isArticle: !!x.sections` — but tool pages have sections too, so the Website Audit **tool** was published under `/blog/` whenever its `updated` date was within 45 days. Classification is now explicit (tools vs articles by source list). Because the link was invisible until crawled, `tests/local-links.mjs` resolves every internal `href`/`src` in `dist/` against the files that exist, and `scripts/check-deploy.mjs` runs it before upload: 4,706 links across 85 pages, and verified to exit 1 with a deliberately broken link and 0 after restoring.
+
+**State:** build 85 pages / 47 tools; `test:live` **82/82**; audit **0 blockers, 0 majors, 3 minors, 98/100** (two of the three minors are the known missing `<lastmod>` on the pages/tools sitemaps, one is `og-image-tester` image dimensions). The 80 `skip-link` info findings are gone because the redesign added a skip link to every page — an open item closed without a task.
+
+**Lesson:** both `test:live` failures were the test lying, and the audit's blocker was the build lying. Neither would have been found by re-reading a green summary; both needed the served bytes measured against what the check claimed to measure.
+
+---
+
 ## 2026-10-31 (13th pass) — Two new tools, three brief claims disproved
 
 **Agent:** Freebuff session

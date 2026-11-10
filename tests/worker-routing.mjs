@@ -62,6 +62,38 @@ console.log('\n=== https: no redirect loops ===');
   ok('https non-root path is untouched', trailing.status === 200 && !trailing.location, 'status ' + trailing.status);
 }
 
+console.log('\n=== trailing slashes are permanent ===');
+{
+  // Was a 307: Cloudflare's asset layer answers that way for a no-slash
+  // directory URL, and nothing checked the status code. 307 reads as temporary,
+  // so Google kept the no-slash URL canonical. These assert the Worker's answer,
+  // before it is ever handed to a deploy.
+  const page = await route('https://tools4market.online/tools/robots-txt-generator');
+  ok('no-slash page → 301', page.status === 301, 'status ' + page.status);
+  ok('…to the slashed path', page.location === '/tools/robots-txt-generator/', page.location || '');
+
+  const q = await route('https://tools4market.online/blog/xml-sitemap-best-practices?utm_source=x');
+  ok('query string survives the redirect', q.location === '/blog/xml-sitemap-best-practices/?utm_source=x', q.location || '');
+
+  const file = await route('https://tools4market.online/assets/style.css');
+  ok('file URLs are never slash-normalised', file.status === 200, 'status ' + file.status);
+
+  // The extension cap was 8, so `.webmanifest` (11) read as a page path and the
+  // manifest 301'd to /manifest.webmanifest/ — a 404 at a URL every browser
+  // asks for.
+  const manifest = await route('https://tools4market.online/manifest.webmanifest');
+  ok('the 11-character .webmanifest is a file, not a page', manifest.status === 200, 'status ' + manifest.status);
+
+  const slash = await route('https://tools4market.online/tools/robots-txt-generator/');
+  ok('slashed URL is served, not redirected', slash.status === 200, 'status ' + slash.status);
+
+  const api = await route('https://tools4market.online/api/fetch?url=x');
+  ok('the API is not slash-normalised', api.status !== 301, 'status ' + api.status);
+
+  const post = await route('https://tools4market.online/tools/x', { method: 'POST' });
+  ok('a non-GET keeps its method (308, not 301)', post.status === 308, 'status ' + post.status);
+}
+
 console.log('\n=== local preview stays usable ===');
 {
   for (const host of ['localhost:8787', '127.0.0.1:8787']) {

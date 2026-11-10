@@ -14,9 +14,21 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkLocalLinks } from '../tests/local-links.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const INDEX = path.join(ROOT, 'dist', 'index.html');
+
+// A link to a page the build never generated is invisible until someone crawls
+// it. On 10 Nov the homepage advertised /blog/website-audit/ — the Website Audit
+// tool, misclassified as a guide — and the live audit found it a deploy later.
+const { broken, links } = checkLocalLinks();
+if (broken.length) {
+  console.error(`\n!! This build has ${broken.length} broken internal link(s) of ${links}:\n`);
+  for (const b of broken.slice(0, 15)) console.error('   ' + b);
+  console.error('\n   A link to a page that does not exist is worse than no link.\n');
+  process.exit(1);
+}
 
 if (/^(1|true|yes|on)$/i.test((process.env.ALLOW_ADS_OFF || '').trim())) {
   console.log('check-deploy: ALLOW_ADS_OFF=1 — publishing without ads on purpose.');

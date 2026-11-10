@@ -2,6 +2,16 @@
 
 *Append-only. Newest entries at top.*
 
+### 307 → 301 for trailing slashes, and an offline link guard (10 Nov 2026)
+
+**The redirect.** Every no-slash directory URL answered `307` — Cloudflare's documented `auto-trailing-slash` behaviour, in place since 21 Oct and therefore **not** the cause of the 8 Nov impression drop. Changed in `worker.js` (before the asset layer, which cannot emit 301 itself): GET/HEAD → 301, other methods → 308, file extensions and `/api/*` excluded. Deployed `4d60acd3`; live matrix verified; routing test 22/22.
+
+**Two failing live checks were measurement bugs.** `/manifest.webmanifest` (11-character extension) fell outside an 8-character file-exclusion regex and 301'd into a 404; widened and asserted. Two blog posts failed the title/description length check because the test measured raw HTML entities — `&#39;` as five characters — rather than rendered text; all 84 URLs re-measured correctly: 0 over limit.
+
+**One real broken link, found by the audit after deploy.** The homepage's "Recently changed" list used `!!x.sections` to decide article-vs-tool, and tool pages have sections, so the Website Audit tool was linked as `/blog/website-audit/` — a 404. Classification is now explicit, and a new `tests/local-links.mjs` resolves every internal link in `dist/` (4,706 across 85 pages) before upload, wired into `scripts/check-deploy.mjs`; verified failing on a broken link and passing after restore.
+
+**State:** 85 pages / 47 tools, `test:live` 82/82, audit 0 blockers / 3 minors / 98 per 100. The 80 `skip-link` info findings closed themselves — the redesign added a skip link to every page.
+
 ### A second ad-less deploy, from a checkout with no `.env` (28 Oct 2026)
 
 **15:08 and 15:09 UTC:** two deploys published the site with no AdSense loader and no units on 80 pages. The morning's guard could not catch it — it compares `.env` with the environment, and there was no `.env` in the checkout that deployed.

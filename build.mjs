@@ -531,11 +531,18 @@ function homeBody() {
   const localCount = TOOLS.filter((t) => LOCAL_TOOLS.has(t.slug)).length;
   const auditCount = TOOLS.filter((t) => t.slug === 'website-audit').length;
   const liveCount = TOOLS.length - localCount - auditCount;
-  const updatedThisMonth = [...TOOLS, ...ARTICLES]
-    .filter((x) => x.updated && (Date.now() - new Date(x.updated + 'T00:00:00Z').getTime()) < 45 * 864e5)
-    .sort((a, b) => (a.updated < b.updated ? 1 : -1))
+  // `isArticle` is decided by which list the entry came from. It used to be
+  // `!!x.sections`, on the assumption that only guides have sections — but tool
+  // pages do too, so the Website Audit tool was published on the homepage as
+  // /blog/website-audit/, a 404, whenever its `updated` date was inside 45 days.
+  const updatedThisMonth = [
+    ...TOOLS.map((x) => ({ x, isArticle: false })),
+    ...ARTICLES.map((x) => ({ x, isArticle: true })),
+  ]
+    .filter(({ x }) => x.updated && (Date.now() - new Date(x.updated + 'T00:00:00Z').getTime()) < 45 * 864e5)
+    .sort((a, b) => (a.x.updated < b.x.updated ? 1 : -1))
     .slice(0, 3)
-    .map((x) => ({ slug: x.slug, isArticle: !!x.sections, label: (x.name || x.title).split(/[:—]/)[0].trim() }));
+    .map(({ x, isArticle }) => ({ slug: x.slug, isArticle, label: (x.name || x.title).split(/[:—]/)[0].trim() }));
 
   return `
 <!-- ============ HERO — copy + task search on the left, editor's pick + proof on the right ============ -->

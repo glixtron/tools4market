@@ -19,7 +19,10 @@
     // Without this, Workers serves matching files straight from the asset
     // store and the Worker (and the redirect) never runs.
     "run_worker_first": true,
-    // /tools/slug/ → /tools/slug/index.html, and /tools/slug → 301 to the slash form
+    // /tools/slug/ → /tools/slug/index.html. A no-slash directory URL would get a
+    // 307 from this layer (Cloudflare's documented html_handling behaviour), so
+    // worker.js answers 301 before assets ever see it — see the trailing-slash
+    // block there. Keep this setting: it is what maps the slash form to index.html.
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }

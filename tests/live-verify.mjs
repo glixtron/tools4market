@@ -34,6 +34,17 @@ async function grab(url, opts = {}) {
 }
 const ct = (r) => (r.headers.get('content-type') || '').split(';')[0];
 
+// HTML entities are not characters. `What Doesn&#39;t` is 21 characters on the
+// page and 25 in the source, and Google counts the former. Measuring the raw
+// attribute inflated every title and description that contained an apostrophe
+// or an ampersand — two healthy pages failed the length check because of it.
+const decode = (s) => String(s)
+  .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
+  .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+  .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&');
+
 // Effective robots.txt rule for one bot, per RFC 9309 §2.2.1-2.2.2: groups that
 // name the bot are merged, the wildcard group applies only when no group names
 // it, the longest path wins, and an allow/disallow tie resolves to allow.
@@ -77,6 +88,24 @@ const www = await grab('https://www.' + HOST + '/', { redirect: 'manual' });
 ok('www redirects to the canonical host', www.status === 301 || www.status === 308, 'status ' + www.status + ' location ' + (www.headers.get('location') || www.error || ''));
 const apex = await grab(ORIGIN + '/', { redirect: 'manual' });
 ok('apex serves 200 without redirect', apex.status === 200, 'status ' + apex.status + ' ' + (apex.error || ''));
+
+// Trailing-slash normalisation. This was a 307 for as long as the site existed,
+// because Cloudflare's asset layer answers that way and nothing checked. A 307
+// is a temporary move: Google keeps the no-slash URL canonical. The canonical
+// form is the slashed one, so the status has to be permanent — asserted here so
+// it cannot drift back.
+{
+  const noSlash = await grab(ORIGIN + '/tools/robots-txt-generator', { redirect: 'manual' });
+  const loc = noSlash.headers ? (noSlash.headers.get('location') || '') : '';
+  ok('no-slash page URL redirects permanently', noSlash.status === 301, 'status ' + noSlash.status + ' location ' + loc);
+  ok('…to the slashed form', /\/tools\/robots-txt-generator\/$/.test(loc.replace(ORIGIN, '')), 'location ' + loc);
+
+  const slash = await grab(ORIGIN + '/tools/robots-txt-generator/', { redirect: 'manual' });
+  ok('slashed page URL serves 200', slash.status === 200, 'status ' + slash.status);
+
+  const asset = await grab(ORIGIN + '/assets/style.css', { redirect: 'manual' });
+  ok('file assets are not redirected', asset.status === 200, 'status ' + asset.status);
+}
 out.push('');
 
 // ---- HTTPS enforcement (owner request, 25 Oct 2026)
@@ -153,14 +182,20 @@ const badCrumbs = [];
 for (const u of all) {
   const r = await grab(u, { redirect: 'manual' });
   const canon = (r.body.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
-  const title = ((r.body.match(/<title>([^<]+)<\/title>/) || [])[1] || '').replace(/&amp;/g, '&');
-  const desc = ((r.body.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '').replace(/&amp;/g, '&');
+  const title = decode(((r.body.match(/<title>([^<]+)<\/title>/) || [])[1] || ''));
+  const desc = decode(((r.body.match(/<meta name="description" content="([^"]*)"/) || [])[1] || ''));
   const robots = (r.body.match(/<meta name="robots" content="([^"]+)"/) || [])[1] || '';
   const isHome = new URL(u).pathname === '/';
   if (!isHome && (!r.body.includes('class="breadcrumb"') || !r.body.includes('"@type":"BreadcrumbList"'))) badCrumbs.push(u.replace(ORIGIN, ''));
-  if (!(r.status === 200 && canon === u && title.length > 10 && title.length <= 60 && desc.length > 0 && desc.length <= 158 && !/noindex/i.test(robots))) {
-    bad.push(u.replace(ORIGIN, '') + ' [status ' + r.status + ', canonical ' + canon + ']');
-  }
+  // Name the failing part: "status 200, canonical correct" says nothing about
+  // why a page was rejected, and the next reader guesses wrong.
+  const why = [];
+  if (r.status !== 200) why.push('status ' + r.status);
+  if (canon !== u) why.push('canonical');
+  if (!(title.length > 10 && title.length <= 60)) why.push('title ' + title.length);
+  if (!(desc.length > 0 && desc.length <= 158)) why.push('desc ' + desc.length);
+  if (/noindex/i.test(robots)) why.push('noindex');
+  if (why.length) bad.push(u.replace(ORIGIN, '') + ' [' + why.join(', ') + ']');
 }
 ok(`all ${all.length} URLs: 200 + self-referencing canonical + indexable`, bad.length === 0, bad.length ? bad.slice(0, 4).join(' ;; ') : all.length + '/' + all.length);
 ok('all non-home sitemap pages have visible + JSON-LD breadcrumbs', badCrumbs.length === 0, badCrumbs.length ? badCrumbs.join(', ') : 'all breadcrumb trails present');

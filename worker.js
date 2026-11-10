@@ -109,6 +109,33 @@ export default {
       }
     }
 
+    // ---- permanent trailing-slash normalisation --------------------------
+    // Cloudflare's `auto-trailing-slash` asset handling answers a no-slash
+    // directory URL with a 307 — its documented behaviour, not a fault, but a
+    // 307 says "temporary": Google keeps the no-slash URL canonical and files it
+    // under "Page with redirect" instead of consolidating it. The canonical form
+    // here is the slashed one everywhere that matters (canonical tags, sitemaps,
+    // every internal link), so the move is permanent and should say so.
+    //
+    // Files are excluded: /assets/style.css?v=… and /404.html must not grow a
+    // slash. The extension class is deliberately wider than the obvious
+    // `.css`/`.html` — `/manifest.webmanifest` is a real file at the site root
+    // and an 8-character cap sent it to `/manifest.webmanifest/`, a 404. The
+    // /api/* routes returned above, so they never reach this.
+    const hasExtension = /\.[a-z0-9]{1,12}$/i.test(url.pathname);
+    if (!url.pathname.endsWith('/') && !hasExtension) {
+      return new Response(null, {
+        // 301 for the methods that mean "fetch this page"; 308 keeps the method
+        // for anything else, because a POST replayed as a GET is a bug.
+        status: request.method === 'GET' || request.method === 'HEAD' ? 301 : 308,
+        headers: {
+          Location: url.pathname + '/' + url.search,
+          // Safe to cache: the answer depends on the path alone.
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
+
     // ---- frontend: static assets ---------------------------------------
     const res = await env.ASSETS.fetch(request);
     if (res.status === 404) {

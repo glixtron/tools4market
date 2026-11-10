@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Tools4Market \u2014 free browser-based marketing, SEO & AI-search tools",
+  "description": "Tools4Market — free browser-based marketing, SEO & AI-search tools",
   "scripts": {
     "build": "node build.mjs",
     "postinstall": "node build.mjs || true",
@@ -14,6 +14,7 @@
     "test:seo": "node tests/seo-audit.mjs",
     "test:consent": "node tests/consent-test.mjs",
     "test:worker": "node tests/worker-routing.mjs",
+    "test:links": "node tests/local-links.mjs",
     "test:live": "node tests/live-verify.mjs",
     "test:audit": "node audit/tests/rules.test.mjs",
     "test:audit-api": "node tests/audit-batch-test.mjs",
