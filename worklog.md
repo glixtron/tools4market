@@ -6,6 +6,38 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-11-11 (18th pass) — A favicon set, a conservative SVG cleaner, a Markdown subset and an email format check
+
+**Agent:** Freebuff session
+**Trigger:** Owner picked the next four from the candidate list with the same parser-cost filter used for the JS minifier: favicon generator (Canvas, no parser), SVG optimizer (DOMParser-native), Markdown → HTML (hand-written subset), email validator. HTML minifier and HTML → Markdown were deferred **together** so one tokenizer can serve both next batch.
+
+**Shipped four tools, all browser-local** (`2cb2896`, fixes `bd910ab`, `d2eba46`, `9f98665`, deployed `8260efb8`): **59 tools / 97 pages / 24 guides**. Each has 3 sections, 4 FAQs, five related-tool links, the full schema stack and a note saying nothing is uploaded. Engines are exported (`T4M_FAVICON`, `T4M_SVG`, `T4M_MD`, `T4M_EMAIL`) so the tests assert bytes and strings rather than screenshots.
+
+- **Favicon generator** — monogram (one or two code points, sans/serif/mono) or image upload (PNG/JPG/GIF/WebP/SVG, 2 MB cap, letterbox or centre crop). Produces a multi-size `favicon.ico` with PNG payloads at 16/32/48, the PNG set, a 180 px Apple touch icon, 192/512 Android icons, `site.webmanifest` and a `<head>` snippet generated from the files actually present. ICO and ZIP are written by hand; the ZIP is store-only because the payload is a few KB and deflate would cost more code than it saves. `favicon.svg` is included only when an SVG was uploaded.
+- **SVG optimizer** — `DOMParser` + `XMLSerializer`, deletions only. Removes comments, editor namespaces/elements (Inkscape, sodipodi, Illustrator, Figma, Sketch), empty or editor-only `<metadata>`, unreferenced IDs, redundant defaults with an ancestor-override check, formatting whitespace and shortenable hex. An ID referenced by `url(#…)`, `href="#…"`, a marker/clip/mask/filter, a SMIL `begin="id.click"` **or a `<style>` block** is kept. Path data and transforms are never rewritten, and the page says so.
+- **Markdown → HTML** — line-based block pass plus one left-to-right inline scanner. Headings, paragraphs, bold/italic, inline code, links, images, fences with a language label, blockquotes, rules, hard breaks and two list levels; everything else is escaped text, which is why tables and raw HTML are absent rather than half-working. Input capped at 50,000 characters. Links may only use http/https/mailto/tel, and a refused protocol leaves a visible `[link blocked: …]` marker. Preview runs in a sandboxed iframe.
+- **Email validator** — ordered checks so the first failure names the rule (length limits, one @, local-part characters and dots, 64-character local cap, domain labels, TLD), Punycode conversion for non-ASCII domains, a 1,000-address batch with reasons in a table, and an optional `dns.google` MX lookup that runs only on a button press, single-address only. The copy separates format from deliverability in three places.
+
+**Three engine bugs and one page bug.**
+1. **Unclosed fences gained a blank line.** `'```\nx\n'` split into `['```','x','']`, so the trailing newline became a line of code. Fixed at the split: a final newline terminates the last line, it does not create another.
+2. **Strong inside emphasis mis-tokenised.** `*a **b** c*` closed the italic on the first star of `**b**` and produced `<em>a </em><em>b</em>* c*`. Replaced single-character `indexOf` scanning with delimiter-run awareness: emphasis opens and closes on a run of exactly one, strong on exactly two, `_` still respects intraword `snake_case`. Fixed in the engine, not by weakening the assertion.
+3. **Link destinations stopped at the first `)`.** Reading the blocked-link output showed a stray `)`, and the same bug would truncate `https://en.wikipedia.org/wiki/Foo_(bar)`. The scan now counts balanced parentheses, and a test pins the Wikipedia shape.
+4. **The smoke test caught a page-destroying markup bug the behaviour suite could not.** The SVG option label contained a raw `<title>`; inside a `<label>` that switches the HTML tokenizer into RCDATA, so the rest of the page was swallowed and the tool never registered. The Markdown checkbox had the same defect with `<article>`. Both are entity-escaped. The lesson is recorded: a label is markup context, not plain text.
+
+**Two controls did nothing, and the tests were green before anyone noticed.** The SVG “Remove comments” checkbox was bypassed — comments were stripped unconditionally — and “Remove the XML declaration” had nothing to remove, because `XMLSerializer` never emits a declaration. The email “Also look up MX records” checkbox gated nothing; the button next to it always performed the lookup. Fixed by wiring comments to the option, preserving processing instructions, deleting the dead SVG control, and replacing the MX checkbox with a labelled button. Runtime-generated copy (favicon file list, size labels, resolver errors) moved into `src/data/inspect.js`, where the rule says it belongs.
+
+**The favicon canvas probe had to be stronger than try/catch.** jsdom exposes `toBlob` but logs “not implemented”; it throws nothing. `canvasWorks()` now draws one pixel and reads it back, so a browser without a drawing surface gets the honest “cannot render the sizes here” message instead of a console error.
+
+**Deliberate deviations from the spec, all recorded:** the HTML-escape checkbox was dropped because escaping is a safety property, not an option; the SVG link is omitted unless an SVG is actually uploaded; the “no consecutive hyphens” rule applies only to non-`xn--` labels, because it would reject valid Punycode; the optimizer scans `<style>` text for IDs instead of accepting the spec's documented limitation; and the spec's “next-next batch” preview named Base64 and URL encoder/decoder, which already shipped — the owner has been told.
+
+**State:** `test:seo` 3165/0 · smoke 59/59 · tools **134/134** (was 67) · links 5,393/97 pages · worker 22/22 · audit rules 73 · consent 30 · audit-api 50 · live 82/82 · audit 0 blockers / 3 minors / 98 per 100. The three minors are the two known sitemap `<lastmod>` gaps and `og-image-tester` image dimensions; the new `h1 → h3` finding on the Markdown page was fixed in `bd910ab`. Ads measured in `dist/`: **201 units across 83 pages** (59 × 3 + 24 × 1), 14 pages intentionally slotless.
+
+**Unverified:** no desktop browser is connected, so canvas rendering, the download flows and the preview iframe were checked through jsdom and served HTML only. The MX lookup was not called in tests — asserting against a live resolver would make the suite depend on Google's uptime.
+
+**Lesson:** a control that does not change the output is worse than a missing control, because it tells the visitor their choice mattered. Two of this batch's defects were found by reading the produced string or comparing each control with the branch it claims to drive, not by a red assertion.
+
+---
+
 ## 2026-11-11 (17th pass) — Cron, JSON to CSV, text diff, hash — and a bot table that cannot drift
 
 **Agent:** Freebuff session

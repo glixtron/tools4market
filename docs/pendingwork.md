@@ -4,17 +4,17 @@
 
 Site-side code is current; the remaining work is a content roadmap (below) plus founder-side actions.
 
-- **55 tools / 93 pages / 24 guides** — `regex-tester` and `qr-code-generator` added 31 Oct; `word-counter`, `character-counter`, `color-picker`, `css-minifier` added 10 Nov; `cron-expression-generator`, `json-to-csv`, `text-diff`, `hash-generator` added 11 Nov
-- All 55 tool pages smoke-tested (`npm test` → 55/55)
-- Behaviour suite **67 assertions** (`npm run test:tools`) — arithmetic, conversions, diff scripts and hash vectors, not just rendering
-- SEO audit **3001/0**
-- Internal links **5,164 / 93 pages**, now including fragments (`/blog/slug/#anchor` must match an `id`)
+- **59 tools / 97 pages / 24 guides** — `regex-tester` and `qr-code-generator` added 31 Oct; `word-counter`, `character-counter`, `color-picker`, `css-minifier` added 10 Nov; `cron-expression-generator`, `json-to-csv`, `text-diff`, `hash-generator` added 11 Nov; `favicon-generator`, `svg-optimizer`, `markdown-to-html`, `email-validator` added 11 Nov
+- All 59 tool pages smoke-tested (`npm test` → 59/59)
+- Behaviour suite **134 assertions** (`npm run test:tools`) — ZIP CRCs, ICO bytes, SVG rules, exact Markdown strings, email rule codes, not just rendering
+- SEO audit **3165/0**
+- Internal links **5,393 / 97 pages**, now including fragments (`/blog/slug/#anchor` must match an `id`)
 - Consent 30/30 · worker-routing 22/22 · audit rules 73 · audit-batch 50 · live 82/82
 - Audit **0 blockers / 3 minors / 98 per 100**
 
 ### Content roadmap (owner-approved)
 
-- **12 tools left** from the 13-tool list, after this batch: HTML minifier, markdown → HTML, HTML → markdown, favicon generator, email validator, SVG optimizer, QR scanner, plus the individually-deferred JS minifier and others noted in `progress.md`. URL shortener was dropped from the roadmap on 11 Nov (`docs/url-shortener-design.md` explains why).
+- **Next pair:** HTML minifier + HTML → Markdown around **one shared HTML tokenizer**, so `<pre>`, `<textarea>`, `<script>`, `<style>`, conditional comments and inline SVG survive. Still pending: **QR scanner**, and the individually-deferred **JS minifier**. URL shortener was dropped from the roadmap on 11 Nov (`docs/url-shortener-design.md` explains why).
 - **12 guides** gap-checked against the 24 that exist.
 - **Bot decision table** — done 11 Nov, as a section inside `/blog/robots-txt-for-search-and-ai-crawlers/`, not a new page. Rendered from `src/data/bots.js`, the same array the robots.txt generator uses.
 - VISITOR_FIX map added with 11 rule entries

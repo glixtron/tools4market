@@ -2,6 +2,18 @@
 
 *Append-only. Newest entries at top.*
 
+### Four local tools: favicon set, SVG cleanup, Markdown subset, email format (11 Nov 2026)
+
+**Shipped:** `favicon-generator`, `svg-optimizer`, `markdown-to-html`, `email-validator` — **59 tools / 97 pages / 24 guides**, all in `LOCAL_TOOLS`, committed `2cb2896` with fixes `bd910ab`, `d2eba46` and `9f98665`, deployed `8260efb8`. Engines (`T4M_FAVICON`, `T4M_SVG`, `T4M_MD`, `T4M_EMAIL`) are exported so the suite checks real bytes: ZIP entry CRCs against `node:zlib`, ICO headers and offsets, SVG rule outcomes, exact Markdown strings and email rule codes.
+
+**Favicon generator** builds the whole set in one ZIP: PNG-in-ICO at 16/32/48, the PNG sizes, Apple 180, Android 192/512, a manifest and a head snippet derived from the files present. Monogram or upload, letterbox or centre crop, 2 MB cap. **SVG optimizer** deletes only: comments, editor namespaces and metadata, unreferenced IDs, redundant defaults (with an ancestor-override check), formatting whitespace and shortenable hex — while keeping IDs referenced from style text or SMIL. **Markdown → HTML** is a line-based block pass plus a single inline scanner: headings, lists to two levels, fences, quotes, rules, hard breaks, links and images, with every input character escaped and protocols limited to http/https/mailto/tel. **Email validator** runs ordered RFC 5322 format checks that name the failing rule, converts non-ASCII domains to Punycode, checks 1,000 addresses in a table, and offers an MX lookup only on a button press.
+
+**Defects found, in the order they surfaced:** an unclosed code fence gained a blank line from the trailing newline; `**` inside `*…*` mis-tokenised because the italic closed on the first star; link destinations stopped at the first `)`, which would truncate Wikipedia-style URLs (balanced-paren scan added). The smoke test then caught a page-killer: a raw `<title>` inside a `<label>` switched the HTML tokenizer into RCDATA and swallowed the SVG page; `<article>` did the same on the Markdown page. Both escaped.
+
+**Controls audit after the suite was green:** the SVG comments checkbox was bypassed, the XML-declaration checkbox had nothing to remove because `XMLSerializer` never emits one, and the email MX checkbox gated nothing. Comments now honour the option, processing instructions survive, the dead control was deleted and the MX checkbox became a button. Runtime-generated copy moved into `inspect.js`.
+
+**State:** `test:seo` 3165/0 · smoke 59/59 · tools 134/134 (was 67) · links 5,393/97 pages · worker 22/22 · audit rules 73 · consent 30 · audit-api 50 · live 82/82 · audit 0 blockers / 3 minors / 98 per 100. Ads in `dist/`: 201 units across 83 pages. Roadmap: HTML minifier + HTML → Markdown are the next pair, sharing one tokenizer; QR scanner and the deferred JS minifier remain.
+
 ### Four generator tools and a bot table that cannot drift (11 Nov 2026)
 
 **Shipped:** `cron-expression-generator`, `json-to-csv`, `text-diff`, `hash-generator` — **55 tools / 93 pages**, all in `LOCAL_TOOLS`, committed `6077ed2` and deployed `73fe6964`. Each has 3 sections, 4 FAQs, the full schema stack and five related-tool links. The batch was chosen because a wrong answer is detectable: a cron expression either fires when it claims, a CSV either round-trips, a diff either matches the text, a digest either matches the published vector.
