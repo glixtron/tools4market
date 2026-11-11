@@ -472,7 +472,8 @@ const LOCAL_TOOLS = new Set([
   'timestamp-converter', 'ip-converter', 'email-roi-calculator', 'marketing-budget-calculator',
   'regex-tester', 'qr-code-generator', 'word-counter', 'character-counter',
   'color-picker', 'css-minifier', 'cron-expression-generator', 'json-to-csv',
-  'text-diff', 'hash-generator',
+  'text-diff', 'hash-generator', 'favicon-generator', 'svg-optimizer',
+  'markdown-to-html', 'email-validator',
 ]);
 // Honest card copy where the two stock notes don't fit: website-audit has no
 // single-page panel (it crawls), and local tools have no server round-trip.
@@ -527,7 +528,7 @@ function homeBody() {
   // Keep this list honest and current; each chip names a real property.
   const PROOF = [
     { label: 'No signup', sub: 'no account' },
-    { label: '55 tools', sub: 'one directory' },
+    { label: '59 tools', sub: 'one directory' },
     { label: 'In-browser', sub: 'files stay local' },
     { label: 'AI crawler presets', sub: '18 bots' },
     { label: 'Live page checks', sub: 'any public URL' },
@@ -832,6 +833,10 @@ function toolPage(t) {
     'json-to-csv': ['json-validator', 'base64-encoder-decoder', 'url-encoder-decoder', 'cron-expression-generator', 'text-diff'],
     'text-diff': ['word-counter', 'duplicate-line-remover', 'case-converter', 'character-counter', 'json-to-csv'],
     'hash-generator': ['uuid-generator', 'password-generator', 'base64-encoder-decoder', 'jwt-decoder', 'json-validator'],
+    'favicon-generator': ['color-picker', 'image-compressor', 'open-graph-generator', 'svg-optimizer', 'css-minifier'],
+    'svg-optimizer': ['css-minifier', 'image-compressor', 'favicon-generator', 'color-picker', 'meta-tag-generator'],
+    'markdown-to-html': ['word-counter', 'character-counter', 'text-diff', 'case-converter', 'hash-generator'],
+    'email-validator': ['json-validator', 'text-diff', 'markdown-to-html', 'duplicate-line-remover', 'word-counter'],
   };
   const selected = (RELATED[t.slug] || []).map((slug) => TOOLS.find((x) => x.slug === slug)).filter(Boolean);
   const related = selected.length ? selected : [

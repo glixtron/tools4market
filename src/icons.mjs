@@ -74,6 +74,8 @@ const MAP = {
   'color-picker': 'palette', 'css-minifier': 'code',
   'cron-expression-generator': 'clock', 'json-to-csv': 'tree',
   'text-diff': 'copy', 'hash-generator': 'fingerprint',
+  'favicon-generator': 'imageCheck', 'svg-optimizer': 'imageDown',
+  'markdown-to-html': 'docText', 'email-validator': 'mail',
   'roi-calculator': 'coins', 'roas-calculator': 'target', 'cac-calculator': 'userPlus',
   'ad-metrics-calculator': 'sliders', 'email-roi-calculator': 'mail', 'marketing-budget-calculator': 'wallet',
 };

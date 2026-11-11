@@ -2098,4 +2098,698 @@
     render();
   };
 
+  // ---------------------------------------------------------- favicon generator
+  // The encoders are exported so the behaviour test can check real bytes in a
+  // real unzip, without needing a canvas. Rendering is the browser's job.
+  var FAV = window.T4M_FAVICON = (function () {
+    var CRC = null;
+    function crcTable() {
+      if (CRC) return CRC;
+      CRC = new Int32Array(256);
+      for (var n = 0; n < 256; n++) {
+        var c = n;
+        for (var k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        CRC[n] = c;
+      }
+      return CRC;
+    }
+    function crc32(bytes) {
+      var table = crcTable();
+      var c = 0xffffffff;
+      for (var i = 0; i < bytes.length; i++) c = table[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    }
+    function utf8(str) {
+      var s = String(str), out = [];
+      for (var i = 0; i < s.length; i++) {
+        var n = s.charCodeAt(i);
+        if (n < 0x80) out.push(n);
+        else if (n < 0x800) out.push(0xc0 | (n >> 6), 0x80 | (n & 63));
+        else if (n >= 0xd800 && n <= 0xdbff && i + 1 < s.length) {
+          var cp = 0x10000 + ((n - 0xd800) << 10) + (s.charCodeAt(i + 1) - 0xdc00);
+          out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 63), 0x80 | ((cp >> 6) & 63), 0x80 | (cp & 63));
+          i++;
+        } else out.push(0xe0 | (n >> 12), 0x80 | ((n >> 6) & 63), 0x80 | (n & 63));
+      }
+      return new Uint8Array(out);
+    }
+    function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+    function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+    function bytesOf(v) { return typeof v === 'string' ? utf8(v) : v; }
+
+    // Store-only ZIP (method 0). No compression: the payload is a handful of
+    // PNGs and a manifest, and a deflate implementation would cost more code
+    // than it saves bytes. Every structure here is from the PKZIP spec, and a
+    // real unzip reads it — which is exactly what the test does.
+    function buildZip(files) {
+      var DOSDATE = ((2026 - 1980) << 9) | (11 << 5) | 11;
+      var local = [], central = [], offset = 0;
+      files.forEach(function (f) {
+        var name = utf8(f.name);
+        var data = bytesOf(f.data);
+        var crc = crc32(data);
+        var head = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(DOSDATE),
+          u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
+        var rec = [].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(DOSDATE),
+          u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0),
+          u32(0), u32(offset));
+        local.push(new Uint8Array(head), name, data);
+        central.push(new Uint8Array(rec), name);
+        offset += head.length + name.length + data.length;
+      });
+      var centralSize = central.reduce(function (n, a) { return n + a.length; }, 0);
+      var eocd = new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+        u32(centralSize), u32(offset), u16(0)));
+      var total = offset + centralSize + eocd.length;
+      var out = new Uint8Array(total);
+      var at = 0;
+      local.concat(central).forEach(function (part) { out.set(part, at); at += part.length; });
+      out.set(eocd, at);
+      return out;
+    }
+
+    // PNG-in-ICO. Entry fields are from the ICONDIR/ICONDIRENTRY structures;
+    // 256 is encoded as 0, which is the one field you cannot read literally.
+    function buildIco(entries) {
+      var head = 6 + 16 * entries.length;
+      var total = head + entries.reduce(function (n, e) { return n + e.data.length; }, 0);
+      var out = new Uint8Array(total);
+      var view = new DataView(out.buffer);
+      view.setUint16(0, 0, true);
+      view.setUint16(2, 1, true);
+      view.setUint16(4, entries.length, true);
+      var offset = head;
+      entries.forEach(function (e, i) {
+        var p = 6 + i * 16;
+        out[p] = e.size >= 256 ? 0 : e.size;
+        out[p + 1] = e.size >= 256 ? 0 : e.size;
+        out[p + 2] = 0;
+        out[p + 3] = 0;
+        view.setUint16(p + 4, 1, true);
+        view.setUint16(p + 6, 32, true);
+        view.setUint32(p + 8, e.data.length, true);
+        view.setUint32(p + 12, offset, true);
+        out.set(e.data, offset);
+        offset += e.data.length;
+      });
+      return out;
+    }
+
+    function manifest(name, theme) {
+      return JSON.stringify({
+        name: name || 'Your site',
+        short_name: name || 'Site',
+        icons: [
+          { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+        ],
+        theme_color: theme || '#2563eb',
+        background_color: theme || '#2563eb',
+        display: 'standalone',
+      }, null, 2);
+    }
+
+    function headSnippet(hasSvg) {
+      var lines = ['<link rel="icon" href="/favicon.ico" sizes="48x48">'];
+      if (hasSvg) lines.push('<link rel="icon" type="image/svg+xml" href="/favicon.svg">');
+      lines.push(
+        '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">',
+        '<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">',
+        '<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">',
+        '<link rel="manifest" href="/site.webmanifest">'
+      );
+      return lines.join('\n');
+    }
+
+    // Code points, not UTF-16 units: an emoji is one character to a person and
+    // two to String.length, and a monogram should never be half a glyph.
+    function clampText(text) {
+      var chars = Array.from ? Array.from(String(text || '')) : String(text || '').split('');
+      return chars.slice(0, 2).join('');
+    }
+
+    function byteLength(str) { return utf8(str).length; }
+
+    return {
+      crc32: crc32, utf8: utf8, buildZip: buildZip, buildIco: buildIco,
+      manifest: manifest, headSnippet: headSnippet, clampText: clampText, byteLength: byteLength,
+    };
+  })();
+
+  T['favicon-generator'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).faviconGen) || {};
+    var modeText = $(root, 'fv-mode-text');
+    var modeImage = $(root, 'fv-mode-image');
+    var textPanel = $(root, 'fv-text-panel');
+    var imagePanel = $(root, 'fv-image-panel');
+    var textEl = $(root, 'fv-text');
+    var bgEl = $(root, 'fv-bg');
+    var fgEl = $(root, 'fv-fg');
+    var fontEl = $(root, 'fv-font');
+    var nameEl = $(root, 'fv-name');
+    var fitEl = $(root, 'fv-fit');
+    var fileEl = $(root, 'fv-file');
+    var goBtn = $(root, 'fv-go');
+    var statsEl = $(root, 'fv-stats');
+    var previewEl = $(root, 'fv-preview');
+    var filesEl = $(root, 'fv-files');
+    var snippetEl = $(root, 'fv-snippet');
+    var downloadBtn = $(root, 'fv-download');
+
+    var SIZES = [16, 32, 48, 180, 192, 512];
+    var NAMES = {
+      16: 'favicon-16x16.png', 32: 'favicon-32x32.png', 48: 'favicon-48x48.png',
+      180: 'apple-touch-icon.png', 192: 'android-chrome-192x192.png', 512: 'android-chrome-512x512.png',
+    };
+    var LIMIT = 2 * 1024 * 1024;
+    var state = { zip: null, file: null, image: null, svgText: null };
+
+    function setText(node, value) { if (node) node.textContent = value; }
+    function status(msg) { setText(statsEl, msg || ''); }
+
+    function listFiles(hasSvg) {
+      var lines = ['favicon.ico               16 + 32 + 48 px'];
+      SIZES.forEach(function (size) {
+        lines.push((NAMES[size] + '                    ').slice(0, 26) + size + '×' + size);
+      });
+      lines.push('site.webmanifest          icons, theme colour, display');
+      if (hasSvg) lines.push('favicon.svg               your uploaded vector, unchanged');
+      setText(filesEl, lines.join('\n'));
+    }
+
+    function syncPanels() {
+      var image = !!(modeImage && modeImage.checked);
+      if (textPanel) textPanel.hidden = image;
+      if (imagePanel) imagePanel.hidden = !image;
+    }
+
+    function colour(el, fallback) {
+      var v = el && el.value ? String(el.value) : '';
+      return /^#[0-9a-f]{6}$/i.test(v) ? v : fallback;
+    }
+
+    function fontStack(kind) {
+      if (kind === 'serif') return 'Georgia, "Times New Roman", serif';
+      if (kind === 'mono') return 'ui-monospace, SFMono-Regular, Menlo, monospace';
+      return 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    }
+
+    function drawMonogram(ctx, size, text, bg, fg, font) {
+      ctx.clearRect(0, 0, size, size);
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = fg;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var ratio = text.length > 1 ? 0.4 : 0.54;
+      ctx.font = '700 ' + Math.max(6, Math.round(size * ratio)) + 'px ' + fontStack(font);
+      ctx.fillText(text, size / 2, size / 2 + size * 0.02);
+    }
+
+    function drawFitted(ctx, img, size, fit) {
+      var iw = img.naturalWidth || img.width || size;
+      var ih = img.naturalHeight || img.height || size;
+      ctx.clearRect(0, 0, size, size);
+      if (fit === 'crop') {
+        var scale = Math.max(size / iw, size / ih);
+        var sw = size / scale, sh = size / scale;
+        ctx.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, size, size);
+      } else {
+        var f = Math.min(size / iw, size / ih);
+        var dw = iw * f, dh = ih * f;
+        ctx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+      }
+    }
+
+    function toPng(canvas) {
+      return new Promise(function (resolve, reject) {
+        if (typeof canvas.toBlob !== 'function') { reject(new Error('no-canvas')); return; }
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('no-canvas')); return; }
+          if (typeof blob.arrayBuffer === 'function') {
+            blob.arrayBuffer().then(function (buf) { resolve(new Uint8Array(buf)); }, reject);
+          } else if (window.FileReader) {
+            var fr = new FileReader();
+            fr.onload = function () { resolve(new Uint8Array(fr.result)); };
+            fr.onerror = reject;
+            fr.readAsArrayBuffer(blob);
+          } else reject(new Error('no-canvas'));
+        }, 'image/png');
+      });
+    }
+
+    function loadImage(file) {
+      return new Promise(function (resolve, reject) {
+        if (!window.URL || typeof URL.createObjectURL !== 'function' || typeof Image !== 'function') {
+          reject(new Error('no-canvas')); return;
+        }
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function () { resolve({ img: img, url: url }); };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('bad-image')); };
+        img.src = url;
+      });
+    }
+
+    function readText(file) {
+      return new Promise(function (resolve) {
+        if (!window.FileReader) { resolve(''); return; }
+        var fr = new FileReader();
+        fr.onload = function () { resolve(String(fr.result || '')); };
+        fr.onerror = function () { resolve(''); };
+        fr.readAsText(file);
+      });
+    }
+
+    function paintPreview(canvases) {
+      if (!previewEl) return;
+      previewEl.textContent = '';
+      [16, 32, 48, 180, 512].forEach(function (size) {
+        var tile = el('div', 'favicon-tile');
+        var c = canvases[size];
+        if (c) {
+          c.className = 'favicon-canvas';
+          tile.appendChild(c);
+        }
+        tile.appendChild(el('span', 'favicon-size', size + ' px'));
+        previewEl.appendChild(tile);
+      });
+    }
+
+    // A capability probe, not a try/catch around the first draw: jsdom (and a
+    // few embedded webviews) expose canvas methods that log "not implemented"
+    // instead of throwing, so the only reliable test is reading one pixel.
+    function canvasWorks() {
+      try {
+        var c = document.createElement('canvas');
+        c.width = 1;
+        c.height = 1;
+        var ctx = c.getContext && c.getContext('2d');
+        if (!ctx || typeof ctx.getImageData !== 'function') return false;
+        if (typeof c.toBlob !== 'function') return false;
+        ctx.getImageData(0, 0, 1, 1);
+        return true;
+      } catch (e) { return false; }
+    }
+
+    function generate() {
+      var isImage = !!(modeImage && modeImage.checked);
+      var hasSvg = !!(state.file && /svg/i.test(state.file.type || '') && state.svgText);
+      listFiles(hasSvg);
+      setText(snippetEl, FAV.headSnippet(hasSvg));
+
+      if (isImage && !state.file) { status(''); return; }
+      if (!isImage && !FAV.clampText(textEl && textEl.value)) {
+        status(COPY.noText || '');
+        return;
+      }
+      if (!canvasWorks()) { status(COPY.noCanvas || ''); return; }
+
+      status(COPY.generating || '');
+      var setup = isImage ? loadImage(state.file) : Promise.resolve(null);
+      setup.then(function (loaded) {
+        if (loaded) state.image = loaded.img;
+        var canvases = {};
+        var pngs = {};
+        return Promise.all(SIZES.map(function (size) {
+          var canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          var ctx = canvas.getContext && canvas.getContext('2d');
+          if (!ctx) throw new Error('no-canvas');
+          if (isImage) drawFitted(ctx, state.image, size, fitEl ? fitEl.value : 'letterbox');
+          else {
+            drawMonogram(ctx, size, FAV.clampText(textEl && textEl.value),
+              colour(bgEl, '#2563eb'), colour(fgEl, '#ffffff'), fontEl ? fontEl.value : 'sans');
+          }
+          canvases[size] = canvas;
+          return toPng(canvas).then(function (bytes) { pngs[size] = bytes; });
+        })).then(function () {
+          var ico = FAV.buildIco([16, 32, 48].map(function (s) { return { size: s, data: pngs[s] }; }));
+          var siteName = (nameEl && nameEl.value ? nameEl.value : '').trim();
+          var files = [
+            { name: 'favicon.ico', data: ico },
+            { name: 'favicon-16x16.png', data: pngs[16] },
+            { name: 'favicon-32x32.png', data: pngs[32] },
+            { name: 'favicon-48x48.png', data: pngs[48] },
+            { name: 'apple-touch-icon.png', data: pngs[180] },
+            { name: 'android-chrome-192x192.png', data: pngs[192] },
+            { name: 'android-chrome-512x512.png', data: pngs[512] },
+            { name: 'site.webmanifest', data: FAV.manifest(siteName, colour(bgEl, '#2563eb')) },
+          ];
+          if (hasSvg) files.push({ name: 'favicon.svg', data: state.svgText });
+          state.zip = FAV.buildZip(files);
+          paintPreview(canvases);
+          var kb = Math.round(state.zip.length / 1024);
+          status(String(COPY.ready || '').replace('{n}', files.length).replace('{size}', kb + ' KB'));
+          if (hasSvg && COPY.svgIncluded) {
+            status(statsEl.textContent + ' ' + COPY.svgIncluded);
+          }
+          if (downloadBtn) downloadBtn.textContent = COPY.download || 'Download favicons.zip';
+        });
+      }).catch(function (err) {
+        var code = err && err.message;
+        if (code === 'no-canvas') status(COPY.noCanvas || '');
+        else if (code === 'bad-image') status(COPY.badImage || '');
+        else status(COPY.badImage || '');
+      });
+    }
+
+    if (fileEl) {
+      fileEl.addEventListener('change', function () {
+        var file = fileEl.files && fileEl.files[0];
+        state.file = null;
+        state.svgText = null;
+        if (!file) { status(''); return; }
+        if (file.size > LIMIT) {
+          status(String(COPY.tooBig || '').replace('{mb}', (file.size / 1048576).toFixed(1)));
+          fileEl.value = '';
+          return;
+        }
+        if (!/^image\//.test(file.type || '')) { status(COPY.badType || ''); return; }
+        state.file = file;
+        if (/svg/i.test(file.type)) {
+          readText(file).then(function (text) {
+            state.svgText = text;
+            generate();
+          });
+          return;
+        }
+        generate();
+      });
+    }
+
+    [modeText, modeImage].forEach(function (r) {
+      if (r) r.addEventListener('change', function () { syncPanels(); generate(); });
+    });
+    [textEl, bgEl, fgEl, fontEl, nameEl].forEach(function (input) {
+      if (input) input.addEventListener('input', generate);
+      if (input) input.addEventListener('change', generate);
+    });
+    if (goBtn) goBtn.addEventListener('click', generate);
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        if (!state.zip) { status(COPY.downloadWait || ''); return; }
+        try {
+          if (!window.URL || typeof URL.createObjectURL !== 'function') return;
+          var blob = new Blob([state.zip], { type: 'application/zip' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'favicons.zip';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+        } catch (e) { status(COPY.badImage || ''); }
+      });
+    }
+
+    syncPanels();
+    listFiles(false);
+    setText(snippetEl, FAV.headSnippet(false));
+    status(COPY.note || '');
+  };
+
+  // ---------------------------------------------------------- SVG optimizer
+  // Exported so tests can assert what the DOM walk did to a known file rather
+  // than trusting a screenshot. Every rule here deletes; none rewrites geometry.
+  var SVGOPT = window.T4M_SVG = (function () {
+    var EDITOR_HOSTS = ['inkscape.org', 'sodipodi.sourceforge.net', 'ns.adobe.com', 'bohemiancoding.com', 'figma.com'];
+    var PRESERVE = {
+      text: 1, tspan: 1, textPath: 1, tref: 1, title: 1, desc: 1, style: 1, script: 1, foreignObject: 1,
+    };
+    var COLOUR_ATTRS = { fill: 1, stroke: 1, 'stop-color': 1, 'flood-color': 1, 'lighting-color': 1, color: 1 };
+
+    function isEditorNs(ns) {
+      if (!ns) return false;
+      for (var i = 0; i < EDITOR_HOSTS.length; i++) if (ns.indexOf(EDITOR_HOSTS[i]) !== -1) return true;
+      return false;
+    }
+    function isEditorPrefix(prefix) {
+      return /^(inkscape|sodipodi|sketch|illustrator|figma|serif)$/i.test(prefix || '');
+    }
+    function byteLength(str) {
+      if (window.TextEncoder) return new TextEncoder().encode(str).length;
+      return FAV.utf8(str).length;
+    }
+
+    function collectRefs(doc) {
+      var refs = {};
+      function note(value) {
+        var m;
+        var url = /url\(\s*['"]?#([^'")\s]+)/g;
+        while ((m = url.exec(value))) refs[m[1]] = true;
+        var hash = /#([A-Za-z_][\w:.-]*)/g;
+        while ((m = hash.exec(value))) refs[m[1]] = true;
+        var smil = /\b([A-Za-z_][\w-]*)\.(?:click|end|begin|repeat)\b/g;
+        while ((m = smil.exec(value))) refs[m[1]] = true;
+      }
+      var all = doc.getElementsByTagName('*');
+      for (var i = 0; i < all.length; i++) {
+        var attrs = all[i].attributes;
+        for (var j = 0; j < attrs.length; j++) note(attrs[j].value);
+      }
+      var styles = doc.getElementsByTagName('style');
+      for (var k = 0; k < styles.length; k++) {
+        var text = styles[k].textContent || '';
+        var m;
+        var id = /#([A-Za-z_][\w-]*)/g;
+        while ((m = id.exec(text))) refs[m[1]] = true;
+      }
+      return refs;
+    }
+
+    function hasInheritedOverride(node, prop) {
+      for (var p = node.parentNode; p && p.nodeType === 1; p = p.parentNode) {
+        if (p.hasAttribute && p.hasAttribute(prop)) return true;
+        var style = p.getAttribute && p.getAttribute('style');
+        if (style && style.indexOf(prop) !== -1) return true;
+      }
+      return false;
+    }
+
+    function optimize(source, opts) {
+      opts = opts || {};
+      var text = String(source == null ? '' : source);
+      var doc;
+      try {
+        doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+      } catch (e) {
+        return { error: 'parse', msg: (e && e.message) || '' };
+      }
+      var err = doc.getElementsByTagName('parsererror')[0] || doc.querySelector('parsererror');
+      if (err) {
+        var msg = String(err.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+        return { error: 'parse', msg: msg };
+      }
+      var root = doc.documentElement;
+      if (!root || root.localName !== 'svg') return { error: 'not-svg', name: root ? root.localName : '' };
+
+      var warnings = [];
+      var refs = collectRefs(doc);
+
+      // ---- nodes: comments, editor elements, editor metadata
+      var kill = [];
+      var walker = doc.createTreeWalker(root, 0xFFFFFFFF, null, false);
+      while (walker.nextNode()) {
+        var n = walker.currentNode;
+        if (n.nodeType === 8 || n.nodeType === 7) { kill.push(n); continue; }
+        if (n.nodeType !== 1) continue;
+        if (opts.meta && isEditorNs(n.namespaceURI)) { kill.push(n); continue; }
+        if (opts.meta && /^namedview$/i.test(n.localName) && isEditorNs(n.namespaceURI)) { kill.push(n); continue; }
+        if (opts.meta && n.localName === 'metadata') {
+          var kids = n.getElementsByTagName('*');
+          var editor = false;
+          for (var i = 0; i < kids.length; i++) if (isEditorNs(kids[i].namespaceURI)) editor = true;
+          if (editor || !kids.length) kill.push(n);
+        }
+      }
+      kill.forEach(function (node) { if (node.parentNode) node.parentNode.removeChild(node); });
+
+      // ---- attributes
+      var elements = root.getElementsByTagName('*');
+      var list = [root];
+      for (var e = 0; e < elements.length; e++) list.push(elements[e]);
+      list.forEach(function (node) {
+        var attrs = [];
+        for (var a = 0; a < node.attributes.length; a++) attrs.push(node.attributes[a]);
+        attrs.forEach(function (attr) {
+          var name = attr.localName || attr.name;
+          if (opts.meta && (isEditorNs(attr.namespaceURI) || isEditorPrefix(attr.prefix))) {
+            node.removeAttributeNode(attr);
+            return;
+          }
+          if (/^xmlns:/.test(attr.name) && isEditorPrefix(attr.name.split(':')[1])) {
+            node.removeAttribute(attr.name);
+            return;
+          }
+          var value = attr.value;
+          if (opts.hex && COLOUR_ATTRS[name] && /^#[0-9a-f]{6}$/i.test(value)) {
+            var hex = value.toLowerCase();
+            if (hex[1] === hex[2] && hex[3] === hex[4] && hex[5] === hex[6]) {
+              node.setAttribute(attr.name, '#' + hex[1] + hex[3] + hex[5]);
+              value = node.getAttribute(attr.name);
+            }
+          }
+          if (opts.rgb && COLOUR_ATTRS[name]) {
+            var m = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i.exec(value);
+            if (m) {
+              var parts = [m[1], m[2], m[3]].map(function (x) { return Math.min(255, parseInt(x, 10)); });
+              var toHex = parts.map(function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+              node.setAttribute(attr.name, '#' + toHex);
+            }
+          }
+          if (opts.ids && name === 'id' && !refs[value]) node.removeAttribute('id');
+        });
+        if (opts.defaults) {
+          var style = node.getAttribute('style') || '';
+          [['fill', 'black'], ['stroke', 'none'], ['stroke-width', '1']].forEach(function (pair) {
+            var prop = pair[0], def = pair[1];
+            if (node.getAttribute(prop) !== def) return;
+            if (style.indexOf(prop) !== -1) return;
+            if (hasInheritedOverride(node, prop)) return;
+            node.removeAttribute(prop);
+          });
+          if (node.localName === 'path' && node.getAttribute('d') === '') node.removeAttribute('d');
+        }
+      });
+
+      // ---- whitespace-only text nodes, except where the text is the content
+      if (opts.space) {
+        var texts = [];
+        var tw = doc.createTreeWalker(root, 4, null, false);
+        while (tw.nextNode()) {
+          var t = tw.currentNode;
+          if (/^\s+$/.test(t.nodeValue) && !PRESERVE[t.parentNode.localName]) texts.push(t);
+        }
+        texts.forEach(function (t) { if (t.parentNode) t.parentNode.removeChild(t); });
+      }
+
+      if (opts.title) {
+        var titled = [].slice.call(root.getElementsByTagName('title')).concat([].slice.call(root.getElementsByTagName('desc')));
+        titled.forEach(function (t) { if (t.parentNode) t.parentNode.removeChild(t); });
+      }
+      if (doc.getElementsByTagName('script').length) warnings.push('script');
+      if (doc.getElementsByTagName('style').length) warnings.push('style');
+
+      var out;
+      try { out = new XMLSerializer().serializeToString(doc); }
+      catch (e2) { return { error: 'serialize', msg: (e2 && e2.message) || '' }; }
+      return { svg: out, warnings: warnings, before: byteLength(text), after: byteLength(out) };
+    }
+
+    return { optimize: optimize, byteLength: byteLength };
+  })();
+
+  T['svg-optimizer'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).svgOpt) || {};
+    var input = $(root, 'sv-in');
+    var fileEl = $(root, 'sv-file');
+    var statsEl = $(root, 'sv-stats');
+    var warnEl = $(root, 'sv-warn');
+    var outEl = $(root, 'sv-out');
+    var downloadBtn = $(root, 'sv-download');
+    var OPTS = ['xml', 'comments', 'meta', 'ids', 'space', 'hex', 'defaults', 'rgb', 'title'];
+    var current = '';
+
+    function option(kind) {
+      var el = $(root, 'sv-' + kind);
+      return !!(el && el.checked);
+    }
+    function opts() {
+      var o = {};
+      OPTS.forEach(function (k) { o[k] = option(k); });
+      return o;
+    }
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+
+    function update() {
+      var src = input ? input.value : '';
+      current = '';
+      if (outEl) outEl.textContent = '';
+      if (warnEl) warnEl.textContent = '';
+      if (!src.trim()) { if (statsEl) statsEl.textContent = COPY.empty || ''; return; }
+      var result = SVGOPT.optimize(src, opts());
+      if (result.error) {
+        var msg = result.error === 'not-svg'
+          ? tpl(COPY.notSvg || '', { name: result.name || '' })
+          : (COPY.parseError ? tpl(COPY.parseError, { msg: result.msg || '' }) : (COPY.parseErrorPlain || ''));
+        if (statsEl) statsEl.textContent = msg;
+        return;
+      }
+      current = result.svg;
+      if (outEl) outEl.textContent = result.svg;
+      if (statsEl) {
+        var saved = result.before - result.after;
+        var pct = result.before ? Math.round((saved / result.before) * 100) : 0;
+        statsEl.textContent = saved > 0
+          ? tpl(COPY.stats || '', { before: result.before, after: result.after, pct: pct, bytes: saved })
+          : tpl(COPY.unchanged || '', { bytes: result.after });
+      }
+      if (warnEl) {
+        result.warnings.forEach(function (w) {
+          var p = el('p', 'tool-warn');
+          p.textContent = w === 'script' ? (COPY.scriptWarn || '') : (COPY.styleWarn || '');
+          warnEl.appendChild(p);
+        });
+      }
+    }
+
+    if (input) {
+      input.addEventListener('input', update);
+      input.addEventListener('change', update);
+    }
+    OPTS.forEach(function (k) {
+      var node = $(root, 'sv-' + k);
+      if (node) {
+        node.addEventListener('input', update);
+        node.addEventListener('change', update);
+      }
+    });
+    if (fileEl) {
+      fileEl.addEventListener('change', function () {
+        var file = fileEl.files && fileEl.files[0];
+        if (!file) return;
+        if (!/svg/i.test(file.type || '') && !/\.svg$/i.test(file.name || '')) {
+          if (statsEl) statsEl.textContent = COPY.tooBigType || '';
+          return;
+        }
+        if (file.size > 500 * 1024) {
+          if (statsEl) statsEl.textContent = tpl(COPY.tooBig || '', { kb: Math.round(file.size / 1024) });
+          return;
+        }
+        if (!window.FileReader) return;
+        var fr = new FileReader();
+        fr.onload = function () {
+          if (input) input.value = String(fr.result || '');
+          update();
+        };
+        fr.readAsText(file);
+      });
+    }
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        if (!current) return;
+        try {
+          if (!window.URL || typeof URL.createObjectURL !== 'function') return;
+          var blob = new Blob([current], { type: 'image/svg+xml' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'optimized.svg';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+        } catch (e) {}
+      });
+    }
+    update();
+  };
+
 })();

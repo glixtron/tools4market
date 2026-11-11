@@ -10,6 +10,7 @@
 // passes a smoke test and fails a reader.
 import { JSDOM, ResourceLoader } from 'jsdom';
 import { createHash, webcrypto } from 'node:crypto';
+import { crc32 as zlibCrc32 } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -275,6 +276,242 @@ async function boot(slug, setup) {
   ok('hash: four digests are shown', doc.querySelectorAll('#hg-out .hash-row').length === 4);
   type('hg-in', '');
   ok('hash: empty input invites text', /paste text/i.test(doc.getElementById('hg-out').textContent));
+  dom.window.close();
+}
+
+// ---- favicon generator (encoders only — rendering needs a real canvas)
+{
+  const { dom, doc, type } = await boot('favicon-generator');
+  const F = dom.window.T4M_FAVICON;
+
+  ok('favicon: CRC32 matches the published check value', F.crc32(F.utf8('123456789')) === 0xcbf43926,
+    F.crc32(F.utf8('123456789')).toString(16));
+
+  const zip = F.buildZip([
+    { name: 'a.txt', data: 'hello' },
+    { name: 'b.bin', data: new Uint8Array([0, 1, 255]) },
+  ]);
+  const dv = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+  const eocd = zip.length - 22;
+  ok('favicon: ZIP end record is a PKZIP end record', dv.getUint32(eocd, true) === 0x06054b50);
+  ok('favicon: ZIP reports two entries', dv.getUint16(eocd + 10, true) === 2);
+  let at = dv.getUint32(eocd + 16, true);
+  const entries = [];
+  for (let i = 0; i < 2; i++) {
+    const nameLen = dv.getUint16(at + 28, true);
+    const extra = dv.getUint16(at + 30, true);
+    const localOff = dv.getUint32(at + 42, true);
+    const crc = dv.getUint32(at + 16, true);
+    const size = dv.getUint32(at + 20, true);
+    const name = Buffer.from(zip.slice(at + 46, at + 46 + nameLen)).toString('utf8');
+    const lname = dv.getUint16(localOff + 26, true);
+    const lextra = dv.getUint16(localOff + 28, true);
+    const start = localOff + 30 + lname + lextra;
+    entries.push({ name, crc, size, data: zip.slice(start, start + size) });
+    at += 46 + nameLen + extra + dv.getUint16(at + 32, true);
+  }
+  ok('favicon: ZIP entry names survive the round trip',
+    entries.map((e) => e.name).join(',') === 'a.txt,b.bin', entries.map((e) => e.name).join(','));
+  ok('favicon: stored bytes come back unchanged',
+    Buffer.from(entries[0].data).toString('utf8') === 'hello' && entries[1].data[2] === 255);
+  ok('favicon: each entry CRC matches node:zlib',
+    entries.every((e) => e.crc === zlibCrc32(Buffer.from(e.data))));
+
+  const ico = F.buildIco([16, 32, 48].map((size) => ({ size, data: new Uint8Array([size]) })));
+  const iv = new DataView(ico.buffer, ico.byteOffset, ico.byteLength);
+  ok('favicon: ICO header says three images', iv.getUint16(2, true) === 1 && iv.getUint16(4, true) === 3);
+  ok('favicon: ICO entries carry the sizes and 32bpp',
+    ico[6] === 16 && ico[22] === 32 && ico[38] === 48 && iv.getUint16(6 + 6, true) === 32);
+  ok('favicon: ICO offsets point at the payloads',
+    ico[iv.getUint32(6 + 12, true)] === 16 && ico[iv.getUint32(22 + 12, true)] === 32);
+  const big = F.buildIco([{ size: 256, data: new Uint8Array([7]) }]);
+  ok('favicon: 256 is encoded as 0 in an ICO entry', big[6] === 0 && big[7] === 0);
+
+  const man = JSON.parse(F.manifest('Example', '#ff0000'));
+  ok('favicon: manifest is valid JSON with two icons',
+    man.icons.length === 2 && man.theme_color === '#ff0000' && man.name === 'Example');
+
+  ok('favicon: snippet omits the SVG link when there is no SVG',
+    !F.headSnippet(false).includes('favicon.svg') && F.headSnippet(true).includes('favicon.svg'));
+  ok('favicon: monogram clamps to two code points',
+    F.clampText('ABC') === 'AB' && F.clampText('🙂x') === '🙂x',
+    F.clampText('ABC') + '/' + F.clampText('🙂x'));
+  ok('favicon: UTF-8 byte length counts é as two', F.byteLength('é') === 2);
+
+  // In jsdom there is no drawing surface; the page must say so rather than throw.
+  type('fv-text', 'AB');
+  ok('favicon: without a canvas the page explains the limit', /drawing surface|cannot render/i.test(doc.getElementById('fv-stats').textContent),
+    doc.getElementById('fv-stats').textContent.slice(0, 60));
+  dom.window.close();
+}
+
+// ---- SVG optimizer
+{
+  const { dom, doc, type } = await boot('svg-optimizer');
+  const S = dom.window.T4M_SVG;
+  const base = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">';
+  const all = { xml: true, comments: true, meta: true, ids: true, space: true, hex: true, defaults: true, rgb: false, title: false };
+
+  let r = S.optimize(base + '<!-- note --><path d="M0 0h10v10z"/></svg>', all);
+  ok('svg: comments are removed', r.svg && !r.svg.includes('<!--'), r.svg);
+
+  r = S.optimize('<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"><sodipodi:namedview xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.0.dtd" pagecolor="red"/><g inkscape:label="Layer"><path d="M0 0"/></g></svg>', all);
+  ok('svg: editor elements and namespaces are removed',
+    !/namedview|inkscape|sodipodi|pagecolor/.test(r.svg), r.svg);
+
+  r = S.optimize(base + '<title>Logo</title><path d="M0 0"/></svg>', all);
+  ok('svg: title survives by default', r.svg.includes('<title>Logo</title>'));
+  r = S.optimize(base + '<title>Logo</title><path d="M0 0"/></svg>', Object.assign({}, all, { title: true }));
+  ok('svg: title is removed only when asked', !r.svg.includes('<title>'));
+
+  r = S.optimize(base + '<defs><path id="used" d="M0 0"/><path id="unused" d="M1 1"/></defs><use href="#used"/></svg>', all);
+  ok('svg: referenced IDs are kept and unused ones dropped',
+    r.svg.includes('id="used"') && !r.svg.includes('id="unused"'), r.svg);
+
+  r = S.optimize(base + '<style>path#styled{fill:red}</style><path id="styled" d="M0 0"/></svg>', all);
+  ok('svg: an ID named only inside a style block is kept', r.svg.includes('id="styled"'), r.svg);
+
+  r = S.optimize(base + '<rect id="box" width="4" height="4"/><animate begin="box.click" attributeName="opacity" dur="1s"/></svg>', all);
+  ok('svg: an ID used by a SMIL animation is kept', r.svg.includes('id="box"'));
+
+  r = S.optimize(base + '<path fill="#ffffff" stroke="#123456" d="M0 0"/></svg>', all);
+  ok('svg: six-digit hex colours are shortened', r.svg.includes('#fff') && r.svg.includes('#123456'), r.svg);
+
+  r = S.optimize(base + '<path fill="black" stroke-width="1" stroke="none" d="M0 0"/></svg>', all);
+  ok('svg: redundant default attributes are removed',
+    !r.svg.includes('stroke="none"') && !r.svg.includes('fill="black"'), r.svg);
+
+  r = S.optimize(base + '<g fill="red"><path fill="black" d="M0 0"/></g></svg>', all);
+  ok('svg: a default value that overrides an ancestor is kept', r.svg.includes('fill="black"'), r.svg);
+
+  r = S.optimize('<svg xmlns="http://www.w3.org/2000/svg">\n  <g>\n    <text> </text>\n  </g>\n</svg>', all);
+  ok('svg: whitespace between elements goes, text content stays',
+    !r.svg.includes('>\n') && r.svg.includes('<text> </text>'), JSON.stringify(r.svg));
+
+  r = S.optimize(base + '<path d="M10.5 20.25 L1 2 Z"/></svg>', all);
+  ok('svg: path data is never rewritten', r.svg.includes('d="M10.5 20.25 L1 2 Z"'));
+
+  r = S.optimize(base + '<script>alert(1)</script></svg>', all);
+  ok('svg: a script is preserved and flagged', r.svg.includes('<script>') && r.warnings.indexOf('script') !== -1);
+
+  ok('svg: malformed XML reports the parser error', S.optimize('<svg><g></svg>', all).error === 'parse');
+  ok('svg: a non-SVG root is refused', S.optimize('<html xmlns="http://www.w3.org/1999/xhtml"><body/></html>', all).error === 'not-svg');
+
+  const padded = '<svg xmlns="http://www.w3.org/2000/svg">\n\n  <!-- a -->\n  <path d="M0 0" fill="#ffffff"/>\n</svg>\n';
+  r = S.optimize(padded, all);
+  ok('svg: byte counts reflect the real output', r.after === S.byteLength(r.svg) && r.after < r.before,
+    r.before + ' -> ' + r.after);
+
+  type('sv-in', '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>');
+  ok('svg: the page renders the optimised markup', doc.getElementById('sv-out').textContent.includes('<svg'));
+  type('sv-in', '<svg><g></svg>');
+  ok('svg: the page names the parse failure', /Malformed SVG/.test(doc.getElementById('sv-stats').textContent));
+  dom.window.close();
+}
+
+// ---- markdown to HTML
+{
+  const { dom, doc, type } = await boot('markdown-to-html');
+  const M = dom.window.T4M_MD;
+  const out = (src, copy) => M.render(src, copy || {}).html;
+
+  ok('md: heading', out('# Hello') === '<h1>Hello</h1>', out('# Hello'));
+  ok('md: paragraph with bold and italic', out('**bold** and *italic*') === '<p><strong>bold</strong> and <em>italic</em></p>', out('**bold** and *italic*'));
+  ok('md: inline code', out('`code`') === '<p><code>code</code></p>');
+  ok('md: raw HTML is escaped, not rendered',
+    out('<script>alert(1)</script>') === '<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>', out('<script>alert(1)</script>'));
+  ok('md: a javascript URL is blocked visibly',
+    out('[click](javascript:alert(1))', { blocked: '[link blocked: {proto} URL]' }).includes('[link blocked: javascript URL]'),
+    out('[click](javascript:alert(1))', { blocked: '[link blocked: {proto} URL]' }));
+  ok('md: an https link is emitted',
+    out('[click](https://example.com)') === '<p><a href="https://example.com">click</a></p>', out('[click](https://example.com)'));
+  ok('md: a destination with balanced parentheses keeps the whole URL',
+    out('[x](https://en.wikipedia.org/wiki/Foo_(bar))') ===
+      '<p><a href="https://en.wikipedia.org/wiki/Foo_(bar)">x</a></p>',
+    out('[x](https://en.wikipedia.org/wiki/Foo_(bar))'));
+  ok('md: an image is emitted',
+    out('![alt](https://example.com/x.png)') === '<p><img src="https://example.com/x.png" alt="alt"></p>', out('![alt](https://example.com/x.png)'));
+  ok('md: fenced code is escaped inside a labelled block',
+    out('```js\nconst x = 1 < 2;\n```') === '<pre><code class="language-js">const x = 1 &lt; 2;</code></pre>', out('```js\nconst x = 1 < 2;\n```'));
+  ok('md: unordered list', out('- one\n- two\n- three') === '<ul><li>one</li><li>two</li><li>three</li></ul>', out('- one\n- two\n- three'));
+  ok('md: two-level nesting',
+    out('- outer\n  - inner') === '<ul><li>outer<ul><li>inner</li></ul></li></ul>', out('- outer\n  - inner'));
+  const deep = M.render('- a\n    - b\n        - c\n');
+  ok('md: deeper nesting is flattened and counted', deep.deep >= 1, 'deep=' + deep.deep);
+  ok('md: an unclosed fence is reported and swallowed as code',
+    M.render('```\nx\n').warnings.indexOf('unclosed') !== -1 && M.render('```\nx\n').html.includes('<pre><code>x</code></pre>'));
+  ok('md: empty input produces empty output', out('') === '');
+  ok('md: snake_case is not italics', !out('snake_case_name').includes('<em>'), out('snake_case_name'));
+  ok('md: strong inside emphasis',
+    out('*a **b** c*') === '<p><em>a <strong>b</strong> c</em></p>', out('*a **b** c*'));
+  ok('md: blockquote block', out('> hi') === '<blockquote>\n<p>hi</p>\n</blockquote>', out('> hi'));
+  ok('md: horizontal rule', out('---') === '<hr>');
+  ok('md: a hard break from two spaces', out('a  \nb').includes('<br>'));
+
+  const cap = M.render('a'.repeat(60000));
+  ok('md: input is capped at 50,000 characters', cap.truncated === true && cap.stats.chars === 50000, cap.stats.chars + '');
+
+  type('md-in', '# Title');
+  ok('md: the page wraps output in article by default',
+    /^<article>\n<h1>Title<\/h1>\n<\/article>/.test(doc.getElementById('md-out').textContent),
+    doc.getElementById('md-out').textContent.slice(0, 40));
+  ok('md: the preview frame gets the rendered HTML',
+    /<h1>Title<\/h1>/.test(doc.getElementById('md-preview').getAttribute('srcdoc') || ''));
+  dom.window.close();
+}
+
+// ---- email validator
+{
+  const { dom, doc, type } = await boot('email-validator');
+  const E = dom.window.T4M_EMAIL;
+  const cases = [
+    ['user@example.com', true, ''],
+    ['user@sub.example.com', true, ''],
+    ['user.name@example.com', true, ''],
+    ['user+tag@example.com', true, ''],
+    ['user@example', false, 'noDot'],
+    ['user.@example.com', false, 'localDot'],
+    ['.user@example.com', false, 'localDot'],
+    ['user..name@example.com', false, 'localDots'],
+    ['user@.com', false, 'domainDot'],
+    ['user@example..com', false, 'domainDots'],
+    ['user@example.com.', false, 'domainDot'],
+    ['user@-example.com', false, 'labelHyphen'],
+    ['user@example.c', false, 'tldShort'],
+    ['user@example.123', false, 'tldChars'],
+    ['"user"@example.com', false, 'quoted'],
+    ['javascript:alert(1)@example.com', false, 'localChars'],
+    ['user@example.com ', true, ''],
+    ['user@@example.com', false, 'multiAt'],
+    ['userexample.com', false, 'noAt'],
+    ['user@', false, 'noDomain'],
+  ];
+  let wrong = [];
+  cases.forEach(([addr, valid, code]) => {
+    const r = E.check(addr);
+    if (r.valid !== valid) wrong.push(addr + ' expected ' + (valid ? 'valid' : code) + ' got ' + (r.valid ? 'valid' : r.code));
+    else if (!valid && code && r.code !== code) wrong.push(addr + ' expected ' + code + ' got ' + r.code);
+  });
+  ok('email: all 20 format cases land on the right rule', wrong.length === 0, wrong.join(' | '));
+
+  const idn = E.check('user@münchen.de');
+  ok('email: an internationalized domain is converted, not rejected',
+    idn.valid && idn.domain === 'xn--mnchen-3ya.de' && idn.punycode === 'xn--mnchen-3ya.de', JSON.stringify(idn));
+
+  const long = E.check('a'.repeat(65) + '@example.com');
+  ok('email: a local part over 64 characters fails', long.code === 'localLong');
+
+  const batch = E.parseBatch('a@b.com\n\nc@d.com');
+  ok('email: batch parsing drops blank pieces', batch.entries.length === 2 && batch.entries[1] === 'c@d.com');
+  const big = E.parseBatch(Array.from({ length: 1002 }, (_, i) => 'u' + i + '@example.com').join('\n'));
+  ok('email: batch is capped at 1,000 with the overflow reported', big.entries.length === 1000 && big.over === 2);
+
+  type('em-in', 'ada@example.com');
+  ok('email: single mode shows a valid verdict', /Valid format/.test(doc.getElementById('em-out').textContent));
+  ok('email: single mode breaks out the parts', /example/.test(doc.getElementById('em-out').textContent) && /com/.test(doc.getElementById('em-out').textContent));
+  type('em-in', 'user..name@example.com');
+  ok('email: the failure reason is named on the page',
+    /two dots in a row/.test(doc.getElementById('em-out').textContent), doc.getElementById('em-out').textContent);
   dom.window.close();
 }
 

@@ -887,4 +887,112 @@ ${f.check('hg-upper', 'Uppercase hexadecimal', false)}
 ${outputArea('hg-out', 'Digests')}
 ${note('MD5 runs locally in this page; SHA digests use your browser’s WebCrypto. Nothing is uploaded, and nothing is stored after you close the tab.')}`,
   },
+  
+  // ---------------------------------------------------------- favicon generator
+  {
+    slug: 'favicon-generator',
+    name: 'Favicon Generator',
+    cat: 'web',
+    icon: '🏷️',
+    card: 'Turn an image or up to two letters into a full favicon set — ICO, PNG, Apple, Android and a manifest.',
+    usedFor: 'for site icons that look right everywhere',
+    updated: '2026-11-11',
+    keywords: 'favicon generator favicon ico generator apple touch icon pwa icons webmanifest multi size favicon',
+    focus: 'favicon generator',
+    h1: 'Favicon Generator — a complete icon set in one ZIP',
+    metaTitle: 'Free Favicon Generator — ICO, PNG and Apple Touch Icon',
+    metaDesc: 'Free favicon generator builds a complete icon set in one ZIP: a multi-size favicon.ico, PNG icons, an Apple touch icon, Android icons and a webmanifest.',
+    intro: 'Upload an image or type a monogram into this favicon generator to get a complete icon set — ICO, PNG, Apple touch, Android and a webmanifest — as one downloadable ZIP.',
+    sections: [
+      { h: 'What a complete favicon set contains', p: ['A favicon is not one file any more. The set that covers every place an icon appears is a small family: favicon.ico holding 16, 32 and 48 pixel images for legacy tabs and bookmark lists; separate 16 and 32 pixel PNGs for modern tabs; a 180 pixel Apple touch icon for the iOS home screen; 192 and 512 pixel icons for Android and a PWA manifest; and the manifest itself, which names those files and sets the theme colour.', 'The sizes are not decoration. A 16 pixel icon is drawn at 16 pixels with no room to adjust, while the same artwork at 512 is what an Android home screen and the install dialog show. A tool that exports a single 32 pixel PNG and calls it done leaves both of those with a blurry upscale. That is why the ZIP here contains eight files rather than one, and why the ICO carries three sizes instead of one.'] },
+      { h: 'How this favicon generator builds each file', p: ['The icons are drawn in a canvas at each target size, then encoded as PNG. The ICO embeds those same PNG images rather than an older bitmap format — every browser released since 2015 reads PNG-in-ICO, and it keeps transparency without a separate palette step. The ZIP is written by hand with stored (uncompressed) entries, because the payload is tiny and a deflate implementation would cost more than it saves.', 'Two input modes. Upload a PNG, JPG, GIF, WebP or SVG and the tool fits it: letterbox by default, so the whole image survives and the padding stays transparent, or crop from the centre when the subject already fills the frame. Or type one or two characters and pick a background and letter colour — a monogram, which is often the better favicon for a site without a logo mark.', 'The head snippet is generated from the file names actually in the ZIP. Upload an SVG and it is included unchanged as favicon.svg, with the matching link added to the snippet.'] },
+      { h: 'Favicon problems the generator cannot prevent', p: ['Browsers cache favicons harder than almost any other asset. A new icon can take days to appear, and the usual cause is the cache rather than the file. Hard-reload, open the site in a private window, or rename the file and update the link — renaming is the reliable fix for visitors who already hold the old icon.', 'Three variants are deliberately out of scope. Maskable icons for Android adaptive shapes need a safe zone the generator would have to guess at; monochrome Windows tiles need a separate silhouette; a vector favicon has to be drawn as vectors rather than upscaled. The manifest also ships with a placeholder name, which you must edit — a manifest that still says “Your site” is a defect of its own.', 'Keep the source image. A favicon gets regenerated more often than expected, after a rebrand or a colour change, and starting again from the 512 pixel export each time loses quality.'] },
+    ],
+    faqs: [
+      { q: 'What sizes should a favicon generator produce?', a: 'A multi-size favicon.ico (16, 32, 48), 16 and 32 pixel PNGs, a 180 pixel Apple touch icon, and 192 and 512 pixel icons for Android and PWAs — all produced here in one ZIP.' },
+      { q: 'Does this favicon generator keep transparency?', a: 'Yes. PNG-in-ICO preserves alpha, and the PNG sizes are exported with transparent padding unless you fill the canvas with a monogram background.' },
+      { q: 'Can I use an SVG favicon?', a: 'Modern browsers accept one, so an uploaded SVG is included unchanged as favicon.svg. The raster sizes are still generated, because older browsers ignore vector icons.' },
+      { q: 'Why has my new favicon not appeared?', a: 'Caching. Browsers keep favicons for a long time, so hard-reload, try a private window, or rename the file and update the link before assuming the export failed.' },
+    ],
+    html: `
+<div class="field field-check"><input type="radio" name="fv-mode" id="fv-mode-text" checked><label for="fv-mode-text">Monogram — type one or two characters</label></div>
+<div class="field field-check"><input type="radio" name="fv-mode" id="fv-mode-image"><label for="fv-mode-image">Upload an image</label></div>
+
+<div id="fv-text-panel">
+  <div class="field-row">
+    ${f.text('fv-text', 'Monogram (1–2 characters)', 'T', 'T')}
+    ${f.select('fv-font', 'Typeface', [{ v: 'sans', l: 'Sans' }, { v: 'serif', l: 'Serif' }, { v: 'mono', l: 'Mono' }], 'sans')}
+  </div>
+  <div class="field-row">
+    <div class="field"><label for="fv-bg">Background colour</label><input id="fv-bg" type="color" value="#2563eb"></div>
+    <div class="field"><label for="fv-fg">Letter colour</label><input id="fv-fg" type="color" value="#ffffff"></div>
+  </div>
+</div>
+
+<div id="fv-image-panel" hidden>
+  <div class="field"><label for="fv-file">Image file</label><input id="fv-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"></div>
+  <p class="field-hint">PNG, JPG, GIF, WebP or SVG — up to 2 MB</p>
+  ${f.select('fv-fit', 'If the image is not square', [{ v: 'letterbox', l: 'Letterbox — keep the whole image' }, { v: 'crop', l: 'Crop from the centre' }], 'letterbox')}
+</div>
+
+${f.text('fv-name', 'Site name for the manifest (optional)', 'Your site')}
+<button type="button" class="btn" id="fv-go">Generate favicon set</button>
+<p class="tool-note" id="fv-stats" aria-live="polite"></p>
+<div class="favicon-grid" id="fv-preview"></div>
+${outputBlock('fv-files', 'Files in favicons.zip')}
+${outputBlock('fv-snippet', 'Add to your <head>')}
+<button type="button" class="btn btn-ghost" id="fv-download">Download favicons.zip</button>
+${note('Rendered and zipped in your browser — the image never leaves the tab. The ICO embeds a PNG for each size, which every browser released since 2015 reads. Maskable Android icons, monochrome Windows tiles and a vector favicon are not produced here.')}`,
+  },
+
+  // ---------------------------------------------------------- SVG optimizer
+  {
+    slug: 'svg-optimizer',
+    name: 'SVG Optimizer',
+    cat: 'web',
+    icon: '🖼️',
+    card: 'Strip comments, editor metadata, unused IDs and default attributes from an SVG, with exact bytes saved.',
+    usedFor: 'for icons and illustrations before they ship',
+    updated: '2026-11-11',
+    keywords: 'svg optimizer svg minifier compress svg remove metadata inkscape svg clean up optimize svg online',
+    focus: 'svg optimizer',
+    h1: 'SVG Optimizer — conservative cleanup with exact byte counts',
+    metaTitle: 'Free SVG Optimizer — Strip Comments and Editor Metadata',
+    metaDesc: 'Free SVG optimizer strips comments, editor metadata, unused IDs and default attributes, reports the exact bytes saved, and leaves the artwork alone.',
+    intro: 'Paste an SVG into this optimizer to remove comments, editor metadata, unused IDs and default attributes, and see the exact bytes saved — all in your browser.',
+    sections: [
+      { h: 'What this SVG optimizer removes', p: ['Four kinds of weight live in a typical exported SVG. Comments carry design notes. Editor metadata arrives from Inkscape or Illustrator as extra namespaces, a namedview element and label attributes only that editor reads. Unused IDs are leftovers from deleted layers. Default attributes restate what the format already assumes, such as stroke="none" or stroke-width="1".', 'Each one is removed only when the tool can show it is not live. An ID is kept if any url(#…), href="#…", marker-, clip-path, mask or filter attribute points at it, if a SMIL animation names it, or if a <style> block mentions it — CSS can reference an ID that no attribute touches, so style text is scanned rather than ignored.', 'Whitespace between elements goes too. Whitespace inside <text>, <tspan>, <title>, <desc>, <style> and <script> stays, because there it is content rather than formatting.'] },
+      { h: 'Why the rules stay conservative', p: ['SVGO earns its large reductions by doing things a general tool should not do blind: merging paths, converting shapes, rounding coordinates, rewriting transforms. Each is fine on artwork you can inspect and wrong on artwork you cannot. A rounded coordinate can move a node, a merged path can change how a fill rule behaves, and a rewritten transform can collide with an animation.', 'This optimizer stops at deletions. It never rewrites geometry, never merges elements and never changes a path command, so the output is the same drawing with less noise around it. The visible consequence is that a hand-drawn illustration might come out 15 percent smaller instead of 60. The tool shows both byte counts, so the trade is visible rather than claimed.', 'Two toggles are off by default on purpose. Removing <title> and <desc> saves a few hundred bytes and deletes the accessible name of the graphic, which screen readers use. Converting rgb() to hex renders identically, but some pipelines match on the rgb form, so the default output is the one most pipelines already accept.'] },
+      { h: 'When to reach for SVGO instead', p: ['Run SVGO locally when the file has to be as small as possible and you can look at the result: icon sets, illustrations in a design system, anything rendered large enough that a stray node shows. Its plugins are individually documented, and the risk grows with how many of them you switch on.', 'Use this page for a quick, safe reduction with a byte count and nothing to install, or when the SVG came from someone else and you would rather not run a toolchain over it. Both answers are legitimate; they differ in how much you trust the file and how much you can check afterwards.', 'One limit is worth knowing before you start: base64 images embedded in <image> elements usually dominate the file size and cannot be improved by deleting attributes. Extract them and link externally, or accept that the number will barely move.'] },
+    ],
+    faqs: [
+      { q: 'Will this SVG optimizer break my artwork?', a: 'It only deletes what it can show is unused: comments, editor metadata, unreferenced IDs, redundant defaults and formatting whitespace. It never rewrites paths or transforms, so visible content is preserved.' },
+      { q: 'Does it support animated SVG?', a: 'Yes. <animate>, <animateTransform> and SMIL begin="id.click" references are recognised, so IDs an animation depends on are kept even when no attribute points at them.' },
+      { q: 'Why is my SVG still large after this SVG optimizer runs?', a: 'Usually a base64 image inside an <image> element, which this tool will not touch. Extract the bitmap and link it externally, or compress that image first.' },
+      { q: 'Does it remove the title and description?', a: 'Only if you tick that option. Both stay by default because <title> provides the accessible name of the graphic, and removing it is a real accessibility regression.' },
+    ],
+    html: `
+${f.textarea('sv-in', 'SVG source', 'Paste an SVG document…', 8)}
+<div class="field"><label for="sv-file">Or choose a .svg file</label><input id="sv-file" type="file" accept=".svg,image/svg+xml"></div>
+<div class="field-row">
+  <fieldset class="group-box"><legend>Structure</legend>
+    ${f.check('sv-xml', 'Remove the XML declaration', true)}
+    ${f.check('sv-comments', 'Remove comments', true)}
+    ${f.check('sv-meta', 'Remove editor metadata (Inkscape, Illustrator)', true)}
+    ${f.check('sv-space', 'Remove whitespace between elements', true)}
+  </fieldset>
+  <fieldset class="group-box"><legend>Attributes</legend>
+    ${f.check('sv-ids', 'Remove unused IDs', true)}
+    ${f.check('sv-hex', 'Shorten six-digit hex colours', true)}
+    ${f.check('sv-defaults', 'Remove default attributes', true)}
+    ${f.check('sv-rgb', 'Convert rgb() to hex (off by default)', false)}
+  </fieldset>
+</div>
+${f.check('sv-title', 'Remove &lt;title&gt; and &lt;desc&gt; — hurts accessibility, off by default', false)}
+<p class="tool-note" id="sv-stats" aria-live="polite"></p>
+<div id="sv-warn"></div>
+${outputBlock('sv-out', 'Optimized SVG')}
+<button type="button" class="btn btn-ghost" id="sv-download">Download .svg</button>
+${note('Conservative rules only, parsed with the browser’s built-in XML parser. No path merging, shape conversion or coordinate rounding — those can break artwork, and they are SVGO’s job. Nothing is uploaded.')}`,
+  },
   ];

@@ -409,4 +409,101 @@ ${outputArea('df-out', 'Differences')}
 ${outputBlock('df-unified', 'Unified diff')}
 ${note('Compared line by line in your browser — neither version is uploaded. Copy the unified diff straight into a review or a commit message.')}`,
   },
+  
+  // ---------------------------------------------------------- markdown to HTML
+  {
+    slug: 'markdown-to-html',
+    name: 'Markdown to HTML Converter',
+    cat: 'content',
+    icon: '📝',
+    card: 'Convert Markdown to escaped, XSS-safe HTML with a live preview.',
+    usedFor: 'for drafts that need to become markup',
+    updated: '2026-11-11',
+    keywords: 'markdown to html converter markdown converter md to html commonmark markdown preview',
+    focus: 'markdown to html',
+    h1: 'Markdown to HTML Converter — a safe CommonMark subset',
+    metaTitle: 'Free Markdown to HTML Converter — CommonMark Subset',
+    metaDesc: 'Free markdown to HTML converter turns headings, lists, code, links and images into clean HTML, with a live preview and every input character escaped.',
+    intro: 'Paste Markdown into this converter to get clean HTML, a live preview and a word count — every character you paste is escaped, so nothing in it can run.',
+    sections: [
+      { h: 'What the markdown to HTML converter supports', p: ['Headings from one to six hashes, paragraphs separated by blank lines, unordered and ordered lists to two levels, fenced code blocks with an optional language label, blockquotes, horizontal rules, and hard line breaks from two trailing spaces or a backslash. Inline it handles bold, italic, inline code, links and images.', 'The list is short and printed on the page, because a converter that silently mis-renders a table is worse than one that says it does not do tables. Anything outside that list — GFM tables, task lists, footnotes, definition lists, strikethrough, reference-style links, setext headings — comes out as plain text rather than as broken markup.', 'The block parser is line-based: each line is classified, consecutive lines group into a block, and fenced code is read raw until its closing fence. Inline formatting runs as a single left-to-right scan rather than a stack of regex replacements, which is the difference between bold inside italic working and the two corrupting each other.'] },
+      { h: 'Why the output is safe to paste anywhere', p: ['Markdown converters are an XSS delivery route whenever raw HTML passes through. This one never passes raw HTML: every character of your input is escaped before any tag is generated, so a script tag in a paragraph becomes visible text rather than an element. The only tags in the output are the ones the converter writes itself.', 'Links get a second check. A destination is parsed and must use http, https, mailto or tel; javascript:, data: and vbscript: are refused. A refused link leaves a visible marker in the output — “[link blocked: javascript URL]” — rather than vanishing, so you can see that something was rejected instead of wondering where it went.', 'The preview renders inside a sandboxed iframe with no script permission, so even a mistake in the escaping could not execute in the page you are reading. The generated HTML is placed in a text area, not injected into this page.'] },
+      { h: 'What it deliberately leaves out', p: ['Tables need column alignment, escaping inside cells and a decision about ragged rows. markdown-it and cmark-gfm already implement that, and a half-version here would produce tables that look right and break in a CMS. Footnotes and reference-style links need a second pass over the document, which a single-pass converter does not do, so both are omitted rather than approximated.', 'Raw HTML passthrough is the big omission, and it is intentional. If the output needs a div or a table, write HTML; this converter is for prose that should become predictable markup. That restriction is what makes the safety claim true rather than aspirational.', 'Two smaller limits are visible in the output rather than hidden: input is capped at 50,000 characters, and list nesting deeper than two levels is flattened with a count shown below the result, so you know what happened.'] },
+    ],
+    faqs: [
+      { q: 'Does this markdown to HTML converter support tables?', a: 'No. Tables are a GitHub extension rather than base CommonMark, and a partial implementation would break in a CMS. Use markdown-it locally if you need them.' },
+      { q: 'Is the converted HTML safe to embed?', a: 'Yes. Every input character is escaped and the converter writes all of the tags itself; there is no raw HTML passthrough, and link protocols are restricted.' },
+      { q: 'Why did one of my links come out as blocked?', a: 'Its protocol was not http, https, mailto or tel. javascript:, data: and vbscript: links are refused and replaced with a visible marker so the rejection is obvious.' },
+      { q: 'Can I paste HTML into the Markdown box?', a: 'You can, but it will appear as escaped text. Raw HTML is not passed through, because that is the main injection route in permissive Markdown parsers.' },
+    ],
+    html: `
+${f.textarea('md-in', 'Markdown', 'Paste Markdown here…', 10, '# Hello\n\nSome **bold** text and a [link](https://example.com).\n\n- one\n- two\n  - nested\n\n\`\`\`js\nconst x = 1 < 2 && 3 > 2;\n\`\`\`\n')}
+${f.check('md-wrap', 'Wrap the output in &lt;article&gt;', true)}
+<p class="tool-note" id="md-stats"></p>
+${outputBlock('md-out', 'HTML')}
+<p class="tool-note" id="md-preview-label">Preview</p>
+<iframe id="md-preview" class="md-preview-frame" sandbox="" title="Rendered preview of the converted Markdown"></iframe>
+<div class="md-subset">
+  <div>
+    <h3>Supported</h3>
+    <ul>
+      <li><code>#</code> to <code>######</code> headings</li>
+      <li>paragraphs, <strong>bold</strong>, <em>italic</em>, <code>inline code</code></li>
+      <li>ordered and unordered lists, two levels</li>
+      <li>fenced code blocks with a language label</li>
+      <li>blockquotes, horizontal rules, hard line breaks</li>
+      <li><code>[text](url)</code> links and <code>![alt](src)</code> images</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Not supported</h3>
+    <ul>
+      <li>tables, task lists, footnotes</li>
+      <li>definition lists and math blocks</li>
+      <li>raw HTML passthrough</li>
+      <li>reference-style links</li>
+      <li>setext headings and strikethrough</li>
+      <li>bare-URL autolinking</li>
+    </ul>
+  </div>
+</div>
+${note('All input text is HTML-escaped; the only tags in the output are the ones this converter generates. Links may only use http, https, mailto or tel — anything else is replaced with a visible blocked marker rather than dropped silently.')}`,
+  },
+
+  // ---------------------------------------------------------- email validator
+  {
+    slug: 'email-validator',
+    name: 'Email Validator',
+    cat: 'content',
+    icon: '📧',
+    card: 'Check email format step by step, with the exact reason an address fails.',
+    usedFor: 'for lists and signup forms before a send',
+    updated: '2026-11-11',
+    keywords: 'email validator email format checker validate email address rfc 5322 email list checker mx lookup',
+    focus: 'email validator',
+    h1: 'Email Validator — step-by-step format checks with reasons',
+    metaTitle: 'Free Email Validator — Format Check With Reasons',
+    metaDesc: 'Free email validator checks one address or a pasted list against RFC 5322 format rules, names the exact problem, and offers an optional MX lookup.',
+    intro: 'Check one address or a whole list in this email validator: it names the exact format rule that failed, shows the parts, and can look up a domain’s MX records.',
+    sections: [
+      { h: 'What an email validator can and cannot check', p: ['A format check answers one question: could this string be an address? It reads the local part, the domain and the TLD against the rules RFC 5322 describes in practice, then reports the first rule that fails. That is genuinely useful for catching typos before a send, and it is the whole of what can be verified without contacting a mail server.', 'It cannot tell you whether the mailbox exists, whether the domain accepts mail, or whether a person reads it. Those need an SMTP conversation or a delivery attempt. A disposable address passes every format rule, a typosquatted domain can have valid MX records, and an address can be shaped perfectly and belong to nobody.', 'The optional MX lookup closes one of those gaps. It asks a DNS resolver whether the domain publishes mail exchangers, which is a real signal that the domain is configured to receive mail. It is off by default because it is a network request, it is slow over a long list, and it still says nothing about the individual mailbox.'] },
+      { h: 'The checks, in the order they run', p: ['Order matters, because the first failure is the one reported. The address is trimmed; the total length is capped at 254 characters; there must be exactly one @; the local part is capped at 64 characters; it cannot start or end with a dot or contain two dots in a row; and every character must be legal in an unquoted address. Quoted local parts are refused outright rather than half-parsed.', 'The domain is checked separately: at most 253 characters, at least one dot, no leading or trailing dot, no empty label, every label 63 characters or fewer and made of letters, digits and internal hyphens, and a TLD of two or more letters. A non-ASCII domain is converted to Punycode, which is the form the DNS actually resolves, and the output shows that converted form.', 'Each failure names the rule, so a rejected address tells you what to fix instead of just turning red. That is the reason for a sequence of checks rather than one regular expression: a regex can reject an address, but it cannot say which rule it broke.'] },
+      { h: 'What a valid result does not mean', p: ['Valid means the format is sound. It does not mean deliverable, and treating it as a deliverability check is the most common way list hygiene goes wrong: a list of format-valid addresses can still be thirty percent dead. Bounce rates, spam traps and role accounts are invisible to any format checker.', 'If deliverability matters, the next step is SMTP verification, which opens a conversation with the receiving server and asks whether it would accept mail for that address without sending anything. That is a service rather than a page: it needs a sending reputation, rate limits and someone to answer when it goes wrong.', 'For a contact form the format check is still worth doing — it catches the typo that would otherwise bounce silently and lose a customer. Pair it with a confirmation email and the two halves fit together: a cheap rejection of the obviously wrong, and a real test of everything else.'] },
+    ],
+    faqs: [
+      { q: 'Why does my valid email show as invalid?', a: 'Usually an internationalized domain or a quoted local part. This validator converts non-ASCII domains to Punycode, so if it still fails, look for a dot at the edge of the local part.' },
+      { q: 'Does a valid result from this email validator mean the inbox exists?', a: 'No. The check verifies format, plus optional MX records. A format-valid address can bounce, be a typo or be disposable; only an SMTP probe or a real send confirms delivery.' },
+      { q: 'What does the MX lookup do?', a: 'It asks Google’s public resolver whether the domain publishes mail servers. No MX records means the domain cannot receive mail at that address. It is off by default and runs on single addresses only.' },
+      { q: 'Is my email list uploaded?', a: 'No. Checking happens in your browser. The optional MX lookup is the only network call, and it sends just the domain to dns.google — not the address and not the list.' },
+    ],
+    html: `
+<div class="field field-check"><input type="radio" name="em-mode" id="em-mode-single" checked><label for="em-mode-single">Single address</label></div>
+<div class="field field-check"><input type="radio" name="em-mode" id="em-mode-batch"><label for="em-mode-batch">Batch list</label></div>
+<div class="field"><label for="em-in">Email address</label><textarea id="em-in" rows="5" placeholder="user@example.com">ada@example.com</textarea></div>
+${f.check('em-mx', 'Also look up MX records (single mode, queries dns.google)', false)}
+<button type="button" class="btn btn-ghost" id="em-mx-go">Look up MX</button>
+<p class="tool-note" id="em-stats" aria-live="polite"></p>
+${outputArea('em-out', 'Result')}
+${note('Format checks only. A valid result means the address is shaped like an email address, not that a mailbox exists, accepts mail or belongs to anyone. Checking runs in your browser; the optional MX lookup is the only network call, and it goes to Google’s public resolver.')}`,
+  },
   ];
