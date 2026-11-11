@@ -2,6 +2,8 @@
 
 *Requested 10 Nov 2026 after the four browser-local tools shipped. This is a design note, not a build order: nothing here is implemented, and the recommendation at the end is that most of it should not be. Every cost figure is an order-of-magnitude estimate from Cloudflare's published pricing, not a quote.*
 
+**Status: dropped from the roadmap on 11 Nov 2026** after the owner read this note. It stays in the repository as the record of the decision, not as pending work. Reopening it means answering decisions 1–5 at the end, starting with the reputation-check key.
+
 ---
 
 ## The problem it is supposed to solve

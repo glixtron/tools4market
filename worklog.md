@@ -6,6 +6,36 @@ Running log of agent sessions: who did what, what was broken, how it was fixed, 
 
 ---
 
+## 2026-11-11 (17th pass) — Cron, JSON to CSV, text diff, hash — and a bot table that cannot drift
+
+**Agent:** Freebuff session
+**Trigger:** Owner authorised the next batch of four tools and asked for the bot decision table to be built rather than merely planned.
+
+**Shipped four tools, all browser-local** (`6077ed2`, deployed `73fe6964`): **55 tools / 93 pages**. Each has 3 sections, 4 FAQs, the full schema stack, five related-tool links, and an honest "nothing is sent to a server" note. The batch was chosen so a wrong answer is *detectable*: a cron expression either fires when it says or it does not, a CSV either round-trips or it does not, a diff either matches the text or it does not, and a digest either matches the published vector or it does not.
+
+- **Cron expression generator** — five editable fields and an expression box that stay in sync in both directions, six presets, a plain-English description, a per-field breakdown, and **the next five run times** as the real output (not a string that merely looks like cron). The engine is exported as `T4M_CRON` so tests drive it with a fixed clock instead of asserting whatever the wall clock says. It implements the Vixie rule that day-of-month and day-of-week are **OR-ed** when both are restricted — the single most common source of "it ran on a day I did not expect" — treats 7 as Sunday, and reports `0 0 31 2 *` as *never* after a five-year search instead of looping.
+- **JSON to CSV** — columns are the union of keys in first-seen order (a key that only appears in the tenth object still gets a header, and rows that lack it get an empty cell rather than a shifted row), nested objects flattened to dot notation, RFC 4180 quoting, comma/semicolon/tab, an Excel BOM option, and a formula guard that prefixes `= + @` and non-numeric hyphens with an apostrophe while leaving negative numbers alone.
+- **Text diff** — line-level LCS with common prefix/suffix trimming and a 1200-line cap (the table grows with the square of the input; 1200² × 4 bytes ≈ 5.7 MB is the actual reason for the number), two line-number columns, a change summary, and a copyable unified diff. Exported as `T4M_DIFF` so the edit script on a fixed pair of texts is an assertion, not a screenshot.
+- **Hash generator** — MD5 in the page because WebCrypto has no MD5, SHA-1/256/512 through `crypto.subtle`, UTF-8 encoding before hashing, uppercase toggle, per-digest copy. The page says plainly that MD5 and SHA-1 are broken for collision resistance and that none of them is a password hash.
+
+**The bot decision table is live, inside the guide that already owned the intent.** `src/data/bots.js` is now the single crawler list: the robots.txt generator renders its checkboxes from it and the robots guide renders an 18-row table (`User-agent | Owner | What it does | Starting point`) from the same array, so a bot in one is a bot in the other. It has a stable `#bot-decision-table` anchor, and `how-to-block-gptbot` and `check-ai-crawler-access` both link to it. Verified on the served page: 19 `<tr>`, 72 `<td>`.
+
+**Three things the tests found, and one they could not.**
+1. **Real bug:** `hash-generator` threw `ReferenceError: TextEncoder is not defined` under jsdom — an engine without `TextEncoder` got no digest at all. Replaced with a hand-written UTF-8 encoder, asserted against `Buffer` for `café🙂`.
+2. **Bad assertion, not bad code:** the cron field-sync test expected the expression to end with `30 * * * *` after editing the minute; the value is `30 9 * * *`, which is correct. Rewrote the assertion to compare the whole string — a test that "fails" on correct output teaches the next person to weaken it.
+3. **Copy gaps the SEO audit caught:** the cron intro did not contain its own target phrase and only one FAQ did. Fixed in the data file, not the audit.
+4. **Still unverified:** no desktop browser is connected to this session, so all four tools were checked through jsdom and served HTML. Layout, focus rings and the copy buttons are unverified by eye.
+
+**`tests/local-links.mjs` now validates fragments.** A link to `/blog/slug/#anchor` has to match an `id` on the destination page, not just resolve to a file. Proved by renaming the anchor in `dist/` and watching both cross-links fail with `(no such id)`, then restoring. This closes a class of breakage that a file-existence check cannot see and that only appears when a reader clicks.
+
+**State:** `test:seo` 3001/0 · smoke 55/55 · tools **67/67** (was 30) · links 5,164/93 pages · worker 22/22 · audit rules 73 · consent 30 · audit-api 50 · live 82/82 · audit 0 blockers / 3 minors / 98 per 100. Ad inventory measured in `dist/`: **189 units across 79 pages** (55 tool pages × 3 + 24 guides × 1), 13 pages intentionally slotless.
+
+**Also recorded, no code:** the URL shortener is **dropped from the roadmap** (`docs/url-shortener-design.md`, status line added) after the design note; and the 28 Oct "Workers Build" hypothesis is formally marked resolved in `suggest.md` with the version-history evidence.
+
+**Lesson:** the cheapest correctness test for a generator is not "does it render" but "does a known input produce the published output". All four tools were exported for exactly that reason, and the one real bug in the batch was invisible to the smoke test.
+
+---
+
 ## 2026-11-10 (16th pass) — The Workers Build hypothesis was wrong, and a shortener design note
 
 **Agent:** Freebuff session

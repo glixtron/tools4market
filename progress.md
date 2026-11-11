@@ -2,6 +2,20 @@
 
 *Append-only. Newest entries at top.*
 
+### Four generator tools and a bot table that cannot drift (11 Nov 2026)
+
+**Shipped:** `cron-expression-generator`, `json-to-csv`, `text-diff`, `hash-generator` — **55 tools / 93 pages**, all in `LOCAL_TOOLS`, committed `6077ed2` and deployed `73fe6964`. Each has 3 sections, 4 FAQs, the full schema stack and five related-tool links. The batch was chosen because a wrong answer is detectable: a cron expression either fires when it claims, a CSV either round-trips, a diff either matches the text, a digest either matches the published vector.
+
+**Each engine is exported so the behaviour test can assert correctness, not rendering.** `T4M_CRON` takes a fixed clock, so tests check OR semantics for day-of-month and day-of-week, 7-as-Sunday, and that `0 0 31 2 *` reports *never* after a five-year search. `T4M_DIFF` returns the edit script for a fixed pair of texts and enforces a 1200-line cap derived from the LCS table size. `T4M_HASH` is checked against `node:crypto` and the published MD5/SHA vectors. JSON→CSV is checked for union-of-keys headers, dot-notation flattening, RFC 4180 quoting, and the formula guard leaving negative numbers untouched.
+
+**Bot decision table is live** as a section inside `/blog/robots-txt-for-search-and-ai-crawlers/` (`#bot-decision-table`), not a fourth page on the same intent. `src/data/bots.js` is now the single crawler list: the generator's checkboxes and the guide's 18-row table are rendered from the same array — markup diffed as identical — so the two cannot drift. Both sibling guides link to the anchor. Articles gained table rendering in the HTML and in the full-text export.
+
+**Real bug the tests found:** `hash-generator` threw `TextEncoder is not defined` where the engine lacks it, producing no digest at all. Replaced with a hand-written UTF-8 encoder asserted against `Buffer`. Also fixed two cron copy gaps the SEO audit caught (intro and FAQ keyword coverage), and one bad assertion that failed on correct output.
+
+**New guard:** `tests/local-links.mjs` validates fragments, not just files — `/blog/slug/#anchor` must match an `id` on the destination page. Verified by renaming the anchor in `dist/` and watching both cross-links fail, then restoring.
+
+**State:** `test:seo` 3001/0 · smoke 55/55 · tools 67/67 (was 30) · links 5,164/93 pages · worker 22/22 · audit rules 73 · consent 30 · audit-api 50 · live 82/82 · audit 0 blockers / 3 minors / 98 per 100. Ads measured in `dist/`: 189 units across 79 pages. Roadmap: URL shortener dropped (decision record in `docs/url-shortener-design.md`); 12 tools remain from the 13-tool list.
+
 ### Deployment forensics and a shortener design note (10 Nov 2026)
 
 **Corrected a recorded claim.** The 28 Oct worklog said the three ad-less deploys looked like a Cloudflare Workers Build triggered by a push. The version history says otherwise: 120 versions retained, **118 `source: wrangler`, 2 `source: dash`** (20 Oct setup), **none from a build system**. The 28 Oct deploys are visible as versions 103 (15:08), 104 `af13998c` (15:09) and 106 `e03de6d2` (15:27), all local `wrangler deploy` runs from a checkout without `.env`. The guard now refuses an ad-less artefact, so the mechanism is closed either way. Production verified: `bafeafcd`, 177 ad units across 75 pages.

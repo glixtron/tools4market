@@ -4,7 +4,7 @@
 
 *Last verified against production 10 Nov 2026 (Worker `bafeafcd`). Each item records what I could measure, what I could only read from vendor documentation, and what I could not verify at all — so nothing here reads more certain than it is.*
 
-*AdSense addendum, 10 Nov: the site-side configuration below is unchanged and still serving — 177 units across 75 pages, verified in the built HTML (`51 × 3` tool units + `24 × 1` guide units + 0 on the 14 pages with no slot). The owner reports the console now shows "Getting ready" and suspects payment details are the gate. That is a different state from the ad-unit configuration described below, and it is not something I can see: the units can be configured and serving while the account itself is not cleared for payment. Treat the account state as unknown until the owner reads it out of the console.*
+*AdSense addendum, 11 Nov: the site-side configuration below is unchanged and still serving — 189 units across 79 pages, verified in the built HTML (`55 × 3` tool units + `24 × 1` guide units + 0 on the 13 pages with no slot). The owner reports the console now shows "Getting ready" and suspects payment details are the gate. That is a different state from the ad-unit configuration described below, and it is not something I can see: the units can be configured and serving while the account itself is not cleared for payment. Treat the account state as unknown until the owner reads it out of the console.*
 
 ---
 
