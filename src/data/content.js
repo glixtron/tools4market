@@ -445,7 +445,7 @@ ${outputBlock('md-out', 'HTML')}
 <iframe id="md-preview" class="md-preview-frame" sandbox="" title="Rendered preview of the converted Markdown"></iframe>
 <div class="md-subset">
   <div>
-    <h3>Supported</h3>
+    <h2>Supported</h2>
     <ul>
       <li><code>#</code> to <code>######</code> headings</li>
       <li>paragraphs, <strong>bold</strong>, <em>italic</em>, <code>inline code</code></li>
@@ -456,7 +456,7 @@ ${outputBlock('md-out', 'HTML')}
     </ul>
   </div>
   <div>
-    <h3>Not supported</h3>
+    <h2>Not supported</h2>
     <ul>
       <li>tables, task lists, footnotes</li>
       <li>definition lists and math blocks</li>

@@ -1983,7 +1983,7 @@ button.chip:focus-visible { outline: 2px solid var(--c-primary); outline-offset:
   gap: 18px 28px;
   margin: 18px 0 6px;
 }
-.md-subset h3 {
+.md-subset h2 {
   font-size: .74rem;
   text-transform: uppercase;
   letter-spacing: .06em;
