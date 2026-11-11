@@ -2508,7 +2508,7 @@
     syncPanels();
     listFiles(false);
     setText(snippetEl, FAV.headSnippet(false));
-    status(COPY.note || '');
+    status('');
   };
 
   // ---------------------------------------------------------- SVG optimizer

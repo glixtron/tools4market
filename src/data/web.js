@@ -942,7 +942,7 @@ ${f.text('fv-name', 'Site name for the manifest (optional)', 'Your site')}
 ${outputBlock('fv-files', 'Files in favicons.zip')}
 ${outputBlock('fv-snippet', 'Add to your <head>')}
 <button type="button" class="btn btn-ghost" id="fv-download">Download favicons.zip</button>
-${note('Rendered and zipped in your browser — the image never leaves the tab. The ICO embeds a PNG for each size, which every browser released since 2015 reads. Maskable Android icons, monochrome Windows tiles and a vector favicon are not produced here.')}`,
+${note('Rendered and zipped in your browser — the image never leaves the tab. The ICO embeds a PNG for each size, which every browser released since 2015 reads. Maskable Android icons, monochrome Windows tiles and a vector favicon are not produced here. The manifest ships with the placeholder name “Your site” — edit name and short_name in site.webmanifest before you publish.')}`,
   },
 
   // ---------------------------------------------------------- SVG optimizer
