@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-11-11T14:58:19.477Z",
+  "generatedAt": "2026-11-11T15:01:27.220Z",
   "target": "live",
   "pageCount": 96,
-  "elapsedMs": 2897,
+  "elapsedMs": 2172,
   "origin": "https://tools4market.online",
   "score": 98,
   "totals": {
     "blocker": 0,
     "major": 0,
-    "minor": 4,
+    "minor": 3,
     "info": 0
   },
   "byGroup": {
@@ -31,7 +31,7 @@
       "score": 100,
       "blocker": 0,
       "major": 0,
-      "minor": 2
+      "minor": 1
     },
     "blog": {
       "pages": 24,
@@ -56,15 +56,6 @@
           null
         ]
       }
-    },
-    {
-      "id": "heading-order",
-      "severity": "minor",
-      "group": "onpage",
-      "page": "/tools/markdown-to-html/",
-      "message": "Heading jumps h1 → h3 at \"Supported\"",
-      "fix": "Do not skip a level. An h3 directly under an h2 is fine; an h3 directly under an h1, or h4 under an h2, breaks outline parsing for screen readers and for passage extraction.",
-      "evidence": null
     },
     {
       "id": "sitemap-lastmod-missing",

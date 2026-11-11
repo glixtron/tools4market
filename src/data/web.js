@@ -976,7 +976,6 @@ ${f.textarea('sv-in', 'SVG source', 'Paste an SVG document…', 8)}
 <div class="field"><label for="sv-file">Or choose a .svg file</label><input id="sv-file" type="file" accept=".svg,image/svg+xml"></div>
 <div class="field-row">
   <fieldset class="group-box"><legend>Structure</legend>
-    ${f.check('sv-xml', 'Remove the XML declaration', true)}
     ${f.check('sv-comments', 'Remove comments', true)}
     ${f.check('sv-meta', 'Remove editor metadata (Inkscape, Illustrator)', true)}
     ${f.check('sv-space', 'Remove whitespace between elements', true)}

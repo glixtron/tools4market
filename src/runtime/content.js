@@ -1181,7 +1181,6 @@
     var single = $(root, 'em-mode-single');
     var batch = $(root, 'em-mode-batch');
     var input = $(root, 'em-in');
-    var mxEl = $(root, 'em-mx');
     var mxBtn = $(root, 'em-mx-go');
     var statsEl = $(root, 'em-stats');
     var outEl = $(root, 'em-out');
@@ -1195,8 +1194,8 @@
     function isBatch() { return !!(batch && batch.checked); }
 
     function verdictText(result) {
-      if (result.valid) return COPY.valid || 'Valid format';
-      return (COPY.invalid || 'Invalid') + ' — ' + reason(result.code) + '.';
+      if (result.valid) return COPY.valid || '';
+      return COPY.invalid + ' — ' + reason(result.code) + '.';
     }
 
     function partsGrid(result) {
@@ -1263,7 +1262,7 @@
         var row = el('tr');
         row.appendChild(el('td', 'email-address', address));
         var cell = el('td');
-        var chip = el('span', 'chip ' + (result.valid ? 'good' : 'bad'), result.valid ? (COPY.valid || 'Valid') : (COPY.invalid || 'Invalid'));
+        var chip = el('span', 'chip ' + (result.valid ? 'good' : 'bad'), result.valid ? COPY.valid : COPY.invalid);
         cell.appendChild(chip);
         row.appendChild(cell);
         row.appendChild(el('td', null, result.valid ? '' : reason(result.code)));
@@ -1281,7 +1280,6 @@
     function update() {
       if (isBatch()) renderBatch(); else renderSingle();
       if (mxBtn) mxBtn.hidden = isBatch();
-      if (mxEl) mxEl.disabled = isBatch();
     }
 
     function lookupMx() {
@@ -1291,7 +1289,7 @@
       line.textContent = tpl(COPY.mxPending || '', { domain: result.domain });
       outEl.appendChild(line);
       if (typeof fetch !== 'function') {
-        line.textContent = tpl(COPY.mxFail || '', { msg: 'fetch unavailable' });
+        line.textContent = tpl(COPY.mxFail || '', { msg: COPY.fetchUnavailable || '' });
         return;
       }
       fetch('https://dns.google/resolve?name=' + encodeURIComponent(result.domain) + '&type=MX')
@@ -1303,7 +1301,7 @@
             : tpl(COPY.mxNone || '', { domain: result.domain });
         })
         .catch(function (err) {
-          line.textContent = tpl(COPY.mxFail || '', { msg: (err && err.message) || 'network error' });
+          line.textContent = tpl(COPY.mxFail || '', { msg: (err && err.message) || COPY.networkError || '' });
         });
     }
 

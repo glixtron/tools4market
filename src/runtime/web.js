@@ -2268,12 +2268,12 @@
     function status(msg) { setText(statsEl, msg || ''); }
 
     function listFiles(hasSvg) {
-      var lines = ['favicon.ico               16 + 32 + 48 px'];
+      var lines = [COPY.listIco || ''];
       SIZES.forEach(function (size) {
-        lines.push((NAMES[size] + '                    ').slice(0, 26) + size + '×' + size);
+        lines.push((NAMES[size] + '                    ').slice(0, 26) + size + 'x' + size);
       });
-      lines.push('site.webmanifest          icons, theme colour, display');
-      if (hasSvg) lines.push('favicon.svg               your uploaded vector, unchanged');
+      lines.push(COPY.listManifest || '');
+      if (hasSvg) lines.push(COPY.listSvg || '');
       setText(filesEl, lines.join('\n'));
     }
 
@@ -2371,7 +2371,7 @@
           c.className = 'favicon-canvas';
           tile.appendChild(c);
         }
-        tile.appendChild(el('span', 'favicon-size', size + ' px'));
+        tile.appendChild(el('span', 'favicon-size', String(COPY.sizePx || '{n} px').replace('{n}', size)));
         previewEl.appendChild(tile);
       });
     }
@@ -2445,7 +2445,7 @@
           if (hasSvg && COPY.svgIncluded) {
             status(statsEl.textContent + ' ' + COPY.svgIncluded);
           }
-          if (downloadBtn) downloadBtn.textContent = COPY.download || 'Download favicons.zip';
+          if (downloadBtn && COPY.download) downloadBtn.textContent = COPY.download;
         });
       }).catch(function (err) {
         var code = err && err.message;
@@ -2594,7 +2594,10 @@
       var walker = doc.createTreeWalker(root, 0xFFFFFFFF, null, false);
       while (walker.nextNode()) {
         var n = walker.currentNode;
-        if (n.nodeType === 8 || n.nodeType === 7) { kill.push(n); continue; }
+        if (n.nodeType === 8 && opts.comments) { kill.push(n); continue; }
+        // Processing instructions are preserved: an xml-stylesheet one is
+        // functional, and this tool has no business deleting it.
+        if (n.nodeType === 7) continue;
         if (n.nodeType !== 1) continue;
         if (opts.meta && isEditorNs(n.namespaceURI)) { kill.push(n); continue; }
         if (opts.meta && /^namedview$/i.test(n.localName) && isEditorNs(n.namespaceURI)) { kill.push(n); continue; }
@@ -2690,7 +2693,7 @@
     var warnEl = $(root, 'sv-warn');
     var outEl = $(root, 'sv-out');
     var downloadBtn = $(root, 'sv-download');
-    var OPTS = ['xml', 'comments', 'meta', 'ids', 'space', 'hex', 'defaults', 'rgb', 'title'];
+    var OPTS = ['comments', 'meta', 'ids', 'space', 'hex', 'defaults', 'rgb', 'title'];
     var current = '';
 
     function option(kind) {

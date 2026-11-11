@@ -350,10 +350,15 @@ async function boot(slug, setup) {
   const { dom, doc, type } = await boot('svg-optimizer');
   const S = dom.window.T4M_SVG;
   const base = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">';
-  const all = { xml: true, comments: true, meta: true, ids: true, space: true, hex: true, defaults: true, rgb: false, title: false };
+  const all = { comments: true, meta: true, ids: true, space: true, hex: true, defaults: true, rgb: false, title: false };
 
   let r = S.optimize(base + '<!-- note --><path d="M0 0h10v10z"/></svg>', all);
-  ok('svg: comments are removed', r.svg && !r.svg.includes('<!--'), r.svg);
+  ok('svg: comments are removed when the option is on', r.svg && !r.svg.includes('<!--'), r.svg);
+  r = S.optimize(base + '<!-- note --><path d="M0 0h10v10z"/></svg>', Object.assign({}, all, { comments: false }));
+  ok('svg: unticking comments keeps them', r.svg.includes('<!-- note -->'), r.svg);
+
+  r = S.optimize('<svg xmlns="http://www.w3.org/2000/svg"><?xml-stylesheet href="a.css"?><path d="M0 0"/></svg>', all);
+  ok('svg: a processing instruction is preserved', r.svg.includes('<?xml-stylesheet'), r.svg);
 
   r = S.optimize('<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"><sodipodi:namedview xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.0.dtd" pagecolor="red"/><g inkscape:label="Layer"><path d="M0 0"/></g></svg>', all);
   ok('svg: editor elements and namespaces are removed',
@@ -402,6 +407,7 @@ async function boot(slug, setup) {
   ok('svg: byte counts reflect the real output', r.after === S.byteLength(r.svg) && r.after < r.before,
     r.before + ' -> ' + r.after);
 
+  ok('svg: the page no longer offers a control the engine ignores', doc.getElementById('sv-xml') === null);
   type('sv-in', '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>');
   ok('svg: the page renders the optimised markup', doc.getElementById('sv-out').textContent.includes('<svg'));
   type('sv-in', '<svg><g></svg>');
@@ -506,6 +512,8 @@ async function boot(slug, setup) {
   const big = E.parseBatch(Array.from({ length: 1002 }, (_, i) => 'u' + i + '@example.com').join('\n'));
   ok('email: batch is capped at 1,000 with the overflow reported', big.entries.length === 1000 && big.over === 2);
 
+  ok('email: the MX action is a button, not a checkbox that does nothing',
+    doc.getElementById('em-mx') === null && doc.getElementById('em-mx-go') !== null);
   type('em-in', 'ada@example.com');
   ok('email: single mode shows a valid verdict', /Valid format/.test(doc.getElementById('em-out').textContent));
   ok('email: single mode breaks out the parts', /example/.test(doc.getElementById('em-out').textContent) && /com/.test(doc.getElementById('em-out').textContent));
