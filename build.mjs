@@ -147,7 +147,10 @@ function rel(from, to) {
 // escape, then re-allow **bold** and `code` markers for our own content
 const rich = (s) => esc(s)
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-  .replace(/`([^`]+)`/g, '<code>$1</code>');
+  .replace(/`([^`]+)`/g, '<code>$1</code>')
+  // Internal links only: [label](/blog/slug/#anchor). Restricting the href to
+  // a relative path keeps this from becoming an injection point for prose.
+  .replace(/\[([^\]]+)\]\((\/[a-z0-9\/#_-]*)\)/gi, '<a href="$2">$1</a>');
 
 const ldTag = (obj) => '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, '\\u003c') + '</script>';
 
@@ -468,7 +471,8 @@ const LOCAL_TOOLS = new Set([
   'json-validator', 'roi-calculator', 'roas-calculator', 'cac-calculator', 'ad-metrics-calculator',
   'timestamp-converter', 'ip-converter', 'email-roi-calculator', 'marketing-budget-calculator',
   'regex-tester', 'qr-code-generator', 'word-counter', 'character-counter',
-  'color-picker', 'css-minifier',
+  'color-picker', 'css-minifier', 'cron-expression-generator', 'json-to-csv',
+  'text-diff', 'hash-generator',
 ]);
 // Honest card copy where the two stock notes don't fit: website-audit has no
 // single-page panel (it crawls), and local tools have no server round-trip.
@@ -523,7 +527,7 @@ function homeBody() {
   // Keep this list honest and current; each chip names a real property.
   const PROOF = [
     { label: 'No signup', sub: 'no account' },
-    { label: '51 tools', sub: 'one directory' },
+    { label: '55 tools', sub: 'one directory' },
     { label: 'In-browser', sub: 'files stay local' },
     { label: 'AI crawler presets', sub: '18 bots' },
     { label: 'Live page checks', sub: 'any public URL' },
@@ -824,6 +828,10 @@ function toolPage(t) {
     'character-counter': ['word-counter', 'reading-time-calculator', 'meta-description-checker', 'meta-tag-generator', 'serp-preview-tool'],
     'color-picker': ['open-graph-generator', 'twitter-card-generator', 'css-minifier', 'image-compressor', 'schema-markup-generator'],
     'css-minifier': ['json-validator', 'color-picker', 'base64-encoder-decoder', 'url-encoder-decoder', 'regex-tester'],
+    'cron-expression-generator': ['timestamp-converter', 'ics-calendar-generator', 'regex-tester', 'json-to-csv', 'uuid-generator'],
+    'json-to-csv': ['json-validator', 'base64-encoder-decoder', 'url-encoder-decoder', 'cron-expression-generator', 'text-diff'],
+    'text-diff': ['word-counter', 'duplicate-line-remover', 'case-converter', 'character-counter', 'json-to-csv'],
+    'hash-generator': ['uuid-generator', 'password-generator', 'base64-encoder-decoder', 'jwt-decoder', 'json-validator'],
   };
   const selected = (RELATED[t.slug] || []).map((slug) => TOOLS.find((x) => x.slug === slug)).filter(Boolean);
   const related = selected.length ? selected : [
@@ -954,6 +962,7 @@ function articlePage(a) {
   // audit asserts that every slug resolves.
   const next = (a.relatedGuides || []).map((s) => ARTICLES.find((x) => x.slug === s)).filter(Boolean);
   const paras = (list) => list.map((p) => `<p>${rich(p)}</p>`).join('\n');
+  const articleTable = (t) => `<div class="table-wrap"><table class="article-table"><thead><tr>${t.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${t.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   const hid = (i) => 's' + i;
   const hasToc = a.sections.length >= 4;
   const toc = hasToc ? `
@@ -976,7 +985,7 @@ function articlePage(a) {
     <p class="article-meta">Published <time datetime="${esc(a.date)}">${fmtDate(a.date)}</time>${a.updated && a.updated !== a.date ? ` &middot; Updated <time datetime="${esc(a.updated)}">${fmtDate(a.updated)}</time>` : ''} &middot; By <a href="${rel(path, '/authors/' + by.slug + '/')}" rel="author">${esc(a.author)}</a></p>
     <p class="lead">${rich(a.intro)}</p>
     ${guideFigure(a.slug)}
-    ${a.sections.map((s, i) => `<h2 id="${hid(i)}">${rich(s.h)}</h2>\n${paras(s.p || [])}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}${i === 1 ? midAd : ''}`).join('\n')}
+    ${a.sections.map((s, i) => `<h2 id="${s.anchor || hid(i)}">${rich(s.h)}</h2>\n${paras(s.p || [])}${s.table ? articleTable(s.table) : ''}${s.pre ? `<pre class="article-code">${esc(s.pre)}</pre>` : ''}${paras(s.p2 || [])}${i === 1 ? midAd : ''}`).join('\n')}
     ${a.links && a.links.length ? `<h2>Sources and further reading</h2>\n<ul>${a.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener nofollow" target="_blank">${esc(l.label)}</a></li>`).join('\n')}</ul>` : ''}
     <h2>Frequently asked questions</h2>
     ${a.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${rich(f.a)}</p></details>`).join('\n')}
@@ -1238,7 +1247,7 @@ const run = async () => {
       '',
       a.intro,
       '',
-      ...a.sections.flatMap((s2) => ['### ' + s2.h, '', ...(s2.p || []).map((x) => x.replace(/\*\*/g, '') + '\n'), ...(s2.pre ? ['```', s2.pre, '```', ''] : []), ...(s2.p2 || []).map((x) => x.replace(/\*\*/g, '') + '\n')]),
+      ...a.sections.flatMap((s2) => ['### ' + s2.h, '', ...(s2.p || []).map((x) => x.replace(/\*\*/g, '') + '\n'), ...(s2.pre ? ['```', s2.pre, '```', ''] : []), ...(s2.table ? ['| ' + s2.table.head.join(' | ') + ' |', '| ' + s2.table.head.map(() => '---').join(' | ') + ' |', ...s2.table.rows.map((r) => '| ' + r.join(' | ') + ' |'), ''] : []), ...(s2.p2 || []).map((x) => x.replace(/\*\*/g, '') + '\n')]),
       '### FAQ',
       '',
       ...a.faqs.flatMap((f) => ['**' + f.q + '**', '', f.a.replace(/\*\*/g, ''), '']),

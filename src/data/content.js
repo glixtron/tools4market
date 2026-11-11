@@ -370,4 +370,43 @@ ${outputArea('wc-out', 'Text statistics')}`,
 ${f.textarea('chc-text', 'Paste your text (nothing is uploaded)', 'Paste a title, post or message here…', 8)}
 ${outputArea('chc-out', 'Character counts')}`,
   },
-];
+
+  // ---------------------------------------------------------- text diff
+  {
+    slug: 'text-diff',
+    name: 'Text Diff Checker',
+    cat: 'content',
+    icon: '🔀',
+    card: 'Compare two texts line by line and see exactly what was added, removed or unchanged.',
+    usedFor: 'for drafts, contracts and config files',
+    updated: '2026-11-11',
+    keywords: 'text diff checker compare two texts difference finder diff tool line comparison',
+    focus: 'text diff',
+    h1: 'Text Diff Checker — compare two texts line by line',
+    metaTitle: 'Free Text Diff Checker — Compare Two Texts Line by Line',
+    metaDesc: 'Free text diff checker marks added and removed lines between two versions, with a copyable unified diff and a count of exactly what changed.',
+    intro: 'Paste two versions into this text diff checker to see added and removed lines side by side, with a unified diff you can copy into a review or a commit.',
+    sections: [
+      { h: 'What a line-level text diff can and cannot show', p: ['A text diff compares two versions line by line and marks each line as unchanged, removed or added. Line granularity is a deliberate limit: changing one word inside a paragraph marks the whole paragraph as removed and re-added, because the tool is not guessing at character-level intent. That is usually the right trade for prose and configuration files, where the line is the unit people actually edit.', 'The important honesty is about moves. If a paragraph is moved rather than edited, a line diff reports a removal at the old position and an addition at the new one, because order is part of the text. Only a tool that tracks blocks can say “moved”; this one cannot, so it does not claim to.', 'Whitespace is a real difference by default. Two files that differ only in indentation are different files, and a diff that hides that is lying to you. The ignore-whitespace option exists for the times indentation is noise, and it stays off until you ask for it.'] },
+      { h: 'How to read the diff output', p: ['Paste the original on the left and the changed version on the right. Removed lines carry a minus and a red tint, added lines a plus and a green tint, and unchanged lines a space. The two narrow columns are line numbers for each version, so a line that exists in only one shows a number on that side and a blank on the other. The summary counts the changes before you read a single line.', 'The unified diff underneath is the format review tools and patches expect: --- and +++ headers, an @@ hunk with the starting line and length, then the same lines prefixed with a space, minus or plus. Copy it into a commit message, a code review or a bug report and the other person can read the change without opening either file.', 'Everything runs in the tab. Contracts, unpublished drafts and client copy do not leave the browser, which is the reason to paste here rather than into a service that stores what it receives.'] },
+      { h: 'When a text diff is the wrong tool', p: ['A diff shows what changed, not whether the change was right. For a draft it is a proofreading aid — it surfaces a deleted clause that nobody meant to remove. For a config file it is a safety check before deploying. For a merge it is the wrong tool: two conflicting edits need a three-way merge, and a two-way comparison cannot tell which side to keep.', 'Very large texts are capped. Above twelve hundred changed lines on either side the comparison is refused with a message rather than frozen, because the table that makes the diff exact grows with the square of the input. Compare a chapter or a file at a time.', 'One more limit worth knowing: the diff ignores nothing you have not asked it to. Trailing spaces, Windows line endings and a stray tab all count as changes, and they are often exactly what you need to see before a file breaks a build. If the diff is noisier than the change, turn on the option that removes the noise — but do it knowingly.'] },
+    ],
+    faqs: [
+      { q: 'How does this text diff checker work?', a: 'It splits both texts into lines and computes the longest common subsequence, then marks the gaps as added or removed. The comparison happens in your browser and nothing is uploaded.' },
+      { q: 'Why does a moved paragraph show as a removal and an addition?', a: 'Because the diff compares positions line by line. A block that moves is, to a line-based algorithm, a deletion at the old place and an insertion at the new one.' },
+      { q: 'Can the text diff checker compare code or HTML?', a: 'Yes. Any plain text works, including code, HTML and configuration files. Very large changes are capped at twelve hundred lines per side to keep the page responsive.' },
+      { q: 'Does it ignore whitespace and case?', a: 'Only when you ask. Both options are off by default, because indentation and capitalisation are often the change you are looking for.' },
+    ],
+    html: `
+<div class="field-row">
+${f.textarea('df-a', 'Original', 'Paste the original text…', 10)}
+${f.textarea('df-b', 'Changed', 'Paste the changed text…', 10)}
+</div>
+${f.check('df-case', 'Ignore case', false)}
+${f.check('df-space', 'Ignore whitespace differences', false)}
+${f.check('df-blank', 'Ignore blank lines', false)}
+${outputArea('df-out', 'Differences')}
+${outputBlock('df-unified', 'Unified diff')}
+${note('Compared line by line in your browser — neither version is uploaded. Copy the unified diff straight into a review or a commit message.')}`,
+  },
+  ];

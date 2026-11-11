@@ -9,6 +9,7 @@
 // minifier's refusal to guess. A tool that renders "0 words" for every input
 // passes a smoke test and fails a reader.
 import { JSDOM, ResourceLoader } from 'jsdom';
+import { createHash, webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -30,13 +31,14 @@ const ok = (name, cond, detail = '') => {
   console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}${detail ? '  | ' + detail : ''}`);
 };
 
-async function boot(slug) {
+async function boot(slug, setup) {
   const rel = '/tools/' + slug + '/';
   const dom = new JSDOM(readFileSync(path.join(DIST, rel, 'index.html'), 'utf8'), {
     runScripts: 'dangerously', resources: new LocalLoader(), url: 'http://localhost:8090' + rel, pretendToBeVisual: true,
     beforeParse(w) {
       w.fetch = () => Promise.reject(new TypeError('offline'));
       w.HTMLElement.prototype.scrollIntoView = function () {};
+      if (setup) setup(w);
     },
   });
   await new Promise((r) => { dom.window.addEventListener('load', r); setTimeout(r, 1500); });
@@ -51,7 +53,13 @@ async function boot(slug) {
     t.querySelector('.stat-tile-label').textContent,
     t.querySelector('.stat-tile-value').textContent,
   ]);
-  return { dom, doc, type, tiles };
+  const set = (id, value) => {
+    const el = doc.getElementById(id);
+    el.value = value;
+    el.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    el.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+  };
+  return { dom, doc, type, set, tiles };
 }
 
 // ---- word counter
@@ -133,6 +141,140 @@ async function boot(slug) {
 
   type('cm-in', 'not css at all');
   ok('css minifier: non-CSS returned unchanged', doc.getElementById('cm-out').textContent === 'not css at all');
+  dom.window.close();
+}
+
+// ---- cron expression generator
+{
+  const { dom, doc, type, set } = await boot('cron-expression-generator');
+  const C = dom.window.T4M_CRON;
+  const at = (y, m, d, hh, mm) => new Date(y, m - 1, d, hh, mm);
+  const t = (d) => `${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+  let runs = C.nextRuns('*/15 * * * *', at(2026, 1, 5, 10, 7), 4).runs;
+  ok('cron: step minutes land on the quarter hours',
+    runs.map((d) => d.getMinutes()).join(',') === '15,30,45,0', runs.map(t).join(' | '));
+
+  runs = C.nextRuns('0 9 * * 1-5', at(2026, 1, 9, 18, 0), 1).runs;
+  ok('cron: weekdays skip the weekend', runs.length === 1 && runs[0].getDate() === 12 && runs[0].getDay() === 1, runs.map(t).join(''));
+
+  const never = C.nextRuns('0 0 31 2 *', at(2026, 1, 5, 0, 0), 3);
+  ok('cron: 31 February is reported as never', never.exhausted === true && never.runs.length === 0);
+
+  runs = C.nextRuns('0 9 1 * 1', at(2026, 1, 5, 10, 0), 1).runs;
+  ok('cron: day-of-month and day-of-week are OR-ed',
+    runs.length === 1 && runs[0].getDate() === 12, runs.map(t).join(''));
+
+  runs = C.nextRuns('0 0 * * 7', at(2026, 1, 5, 0, 0), 1).runs;
+  ok('cron: 7 means Sunday', runs.length === 1 && runs[0].getDay() === 0, runs.map(t).join(''));
+
+  ok('cron: out-of-range minute is an error', C.nextRuns('61 * * * *', at(2026, 1, 5, 0, 0), 1).error.field === 'minute');
+  ok('cron: four fields is an error', C.nextRuns('0 9 * *', at(2026, 1, 5, 0, 0), 1).error.n === 4);
+
+  type('cr-expr', '0 9 * * *');
+  ok('cron: description reads as English', /Every day at 09:00/.test(doc.getElementById('cr-report').textContent), doc.getElementById('cr-report').textContent.slice(0, 60));
+  ok('cron: expression echoed for copying', doc.getElementById('cr-out').textContent === '0 9 * * *');
+  type('cr-expr', '61 * * * *');
+  ok('cron: invalid expression is named', /does not parse/.test(doc.getElementById('cr-report').textContent));
+
+  set('cr-min', '30');
+  ok('cron: editing a field rewrites the expression', doc.getElementById('cr-out').textContent === '30 9 * * *', doc.getElementById('cr-out').textContent);
+  dom.window.close();
+}
+
+// ---- JSON to CSV
+{
+  const { dom, doc, type, set } = await boot('json-to-csv');
+  type('jc-in', '[{"a":1,"b":"x,y"}]');
+  ok('json-to-csv: header and quoted comma', doc.getElementById('jc-out').textContent === 'a,b\n1,"x,y"', JSON.stringify(doc.getElementById('jc-out').textContent));
+
+  type('jc-in', '[{"user":{"name":"Ada","city":"London"}}]');
+  ok('json-to-csv: nested keys flatten to dot notation', doc.getElementById('jc-out').textContent === 'user.name,user.city\nAda,London', JSON.stringify(doc.getElementById('jc-out').textContent));
+
+  type('jc-in', '[{"name":"Ada"},{"name":"Grace","role":"Admiral"}]');
+  ok('json-to-csv: columns are the union of keys, missing cells empty',
+    doc.getElementById('jc-out').textContent === 'name,role\nAda,\nGrace,Admiral', JSON.stringify(doc.getElementById('jc-out').textContent));
+
+  type('jc-in', '[{"v":"=1+1"},{"v":-5},{"v":"hi"}]');
+  const guarded = doc.getElementById('jc-out').textContent;
+  ok('json-to-csv: formula cells are guarded', guarded.includes("'=1+1"), guarded);
+  ok('json-to-csv: negative numbers are not guarded', guarded.includes('\n-5'), guarded);
+
+  type('jc-in', '[{"v":"say \\"hi\\""}]');
+  ok('json-to-csv: quotes are doubled', doc.getElementById('jc-out').textContent === 'v\n"say ""hi"""', JSON.stringify(doc.getElementById('jc-out').textContent));
+
+  type('jc-in', '[{"a":1,"b":2}]');
+  set('jc-delim', 'semicolon');
+  ok('json-to-csv: delimiter switch is honoured', doc.getElementById('jc-out').textContent === 'a;b\n1;2', JSON.stringify(doc.getElementById('jc-out').textContent));
+  set('jc-delim', 'comma');
+
+  type('jc-in', 'not json');
+  ok('json-to-csv: bad JSON is named, not guessed at', /not valid JSON/.test(doc.getElementById('jc-stats').textContent), doc.getElementById('jc-stats').textContent);
+
+  type('jc-in', '"a string"');
+  ok('json-to-csv: a scalar top level is refused', /array/.test(doc.getElementById('jc-stats').textContent), doc.getElementById('jc-stats').textContent);
+
+  type('jc-in', '[{"a":1}]');
+  ok('json-to-csv: stats report the shape', /1 rows × 1 columns/.test(doc.getElementById('jc-stats').textContent), doc.getElementById('jc-stats').textContent);
+  dom.window.close();
+}
+
+// ---- text diff
+{
+  const { dom, doc, type } = await boot('text-diff');
+  const D = dom.window.T4M_DIFF;
+
+  let script = D.diff('a\nb\nc', 'a\nx\nc').lines;
+  ok('text diff: marks removed and added lines',
+    script.map((l) => l.t).join(',') === 'same,del,add,same', script.map((l) => l.t).join(','));
+  ok('text diff: unchanged lines keep their text', script[0].s === 'a' && script[3].s === 'c');
+
+  ok('text diff: identical texts produce no edits', D.diff('a\nb', 'a\nb').lines.every((l) => l.t === 'same'));
+  ok('text diff: ignoreCase folds case', D.diff('Hello', 'hello', { ignoreCase: true }).lines.every((l) => l.t === 'same'));
+  ok('text diff: ignoring whitespace collapses runs', D.diff('a  b', 'a b', { ignoreSpace: true }).lines.every((l) => l.t === 'same'));
+  ok('text diff: cap is reported rather than frozen',
+    D.diff(Array.from({ length: 1300 }, (_, i) => 'x' + i).join('\n'), 'y').tooBig === true);
+
+  type('df-a', 'one\ntwo\nthree');
+  type('df-b', 'one\nTWO\nthree');
+  ok('text diff: UI renders one removal and one addition',
+    doc.querySelectorAll('#df-out .diff-row.del').length === 1 &&
+    doc.querySelectorAll('#df-out .diff-row.add').length === 1,
+    doc.querySelectorAll('#df-out .diff-row.del').length + '/' + doc.querySelectorAll('#df-out .diff-row.add').length);
+  ok('text diff: unified diff is copyable', /^--- original\n\+\+\+ changed\n@@/.test(doc.getElementById('df-unified').textContent), doc.getElementById('df-unified').textContent.slice(0, 40));
+
+  type('df-b', 'one\ntwo\nthree');
+  ok('text diff: equal texts say so', /No differences/.test(doc.getElementById('df-out').textContent));
+  dom.window.close();
+}
+
+// ---- hash generator
+{
+  const { dom, doc, type } = await boot('hash-generator', (w) => {
+    Object.defineProperty(w, 'crypto', { value: webcrypto, configurable: true });
+  });
+  const H = dom.window.T4M_HASH;
+  const hexOf = (fn, s) => fn(createHash(fn === 'md5' ? 'md5' : fn).update(Buffer.from(s, 'utf8')).digest('hex'));
+
+  ok('hash: MD5 of empty string is the RFC value', H.hex(H.md5(H.utf8(''))) === 'd41d8cd98f00b204e9800998ecf8427e');
+  ok('hash: MD5 of abc is the RFC value', H.hex(H.md5(H.utf8('abc'))) === '900150983cd24fb0d6963f7d28e17f72');
+  const long = 'a'.repeat(1000) + 'é🙂';
+  ok('hash: MD5 matches node for a long UTF-8 string',
+    H.hex(H.md5(H.utf8(long))) === createHash('md5').update(Buffer.from(long, 'utf8')).digest('hex'));
+  ok('hash: fallback UTF-8 encoder matches Buffer',
+    H.hex(H.utf8('café🙂')) === Buffer.from('café🙂', 'utf8').toString('hex'),
+    H.hex(H.utf8('café🙂')));
+
+  type('hg-in', 'abc');
+  await new Promise((r) => setTimeout(r, 40));
+  const text = doc.getElementById('hg-out').textContent;
+  ok('hash: SHA-1(SHA-256/SHA-512) of abc are the published values',
+    text.includes('a9993e364706816aba3e25717850c26c9cd0d89d') &&
+    text.includes('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad') &&
+    text.includes('ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f'));
+  ok('hash: four digests are shown', doc.querySelectorAll('#hg-out .hash-row').length === 4);
+  type('hg-in', '');
+  ok('hash: empty input invites text', /paste text/i.test(doc.getElementById('hg-out').textContent));
   dom.window.close();
 }
 

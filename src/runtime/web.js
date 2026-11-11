@@ -1601,4 +1601,501 @@
     root.addEventListener('input', update);
     update();
   };
+  // ---------------------------------------------------------- cron expression generator
+  // The engine is exported so tests can drive it with a fixed clock instead of
+  // asserting whatever the wall clock happens to say. Standard five-field cron:
+  // minute hour day-of-month month day-of-week. No seconds, no @reboot.
+  var CRON = window.T4M_CRON = (function () {
+    var MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+    var DAYS = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+    var FIELDS = [
+      { key: 'minute', min: 0, max: 59 },
+      { key: 'hour', min: 0, max: 23 },
+      { key: 'dom', min: 1, max: 31 },
+      { key: 'month', min: 1, max: 12, names: MONTHS },
+      { key: 'dow', min: 0, max: 7, names: DAYS },
+    ];
+
+    function substitute(text, names) {
+      if (!names) return text;
+      return String(text).replace(/[a-z]{3}/gi, function (m) {
+        var n = names[m.toLowerCase()];
+        return n == null ? m : String(n);
+      });
+    }
+
+    // One field → a boolean table over its legal range, or an error naming the
+    // field and the value that failed. Everything the parser accepts is also
+    // what the scheduler understands; there is no second, laxer code path.
+    function parseField(text, spec) {
+      var raw = String(text == null ? '' : text).trim();
+      if (!raw) return { error: { reason: 'empty', field: spec.key } };
+      raw = substitute(raw, spec.names);
+      var values = {};
+      var pieces = raw.split(',');
+      for (var p = 0; p < pieces.length; p++) {
+        var piece = pieces[p].trim();
+        if (!piece) return { error: { reason: 'field', field: spec.key, value: pieces[p] } };
+        var step = 1;
+        var slash = piece.split('/');
+        if (slash.length > 2) return { error: { reason: 'field', field: spec.key, value: piece } };
+        if (slash.length === 2) {
+          if (!/^\d+$/.test(slash[1])) return { error: { reason: 'field', field: spec.key, value: piece } };
+          step = parseInt(slash[1], 10);
+          if (step < 1) return { error: { reason: 'field', field: spec.key, value: piece } };
+        }
+        var base = slash[0];
+        var lo, hi;
+        if (base === '*') { lo = spec.min; hi = spec.max; }
+        else if (base.indexOf('-') > 0) {
+          var ab = base.split('-');
+          if (!/^\d+$/.test(ab[0]) || !/^\d+$/.test(ab[1])) return { error: { reason: 'field', field: spec.key, value: piece } };
+          lo = parseInt(ab[0], 10); hi = parseInt(ab[1], 10);
+        } else {
+          if (!/^\d+$/.test(base)) return { error: { reason: 'field', field: spec.key, value: piece } };
+          lo = parseInt(base, 10);
+          hi = slash.length === 2 ? spec.max : lo;
+        }
+        if (lo < spec.min || hi > spec.max || lo > hi) {
+          return { error: { reason: 'field', field: spec.key, value: piece } };
+        }
+        for (var v = lo; v <= hi; v += step) values[v] = true;
+      }
+      if (spec.key === 'dow' && values[7]) { values[0] = true; delete values[7]; }
+      return { values: values, spec: raw, restricted: raw !== '*' };
+    }
+
+    function parse(expr) {
+      var parts = String(expr || '').trim().split(/\s+/).filter(Boolean);
+      if (parts.length !== 5) return { error: { reason: 'fields', n: parts.length } };
+      var out = {};
+      for (var i = 0; i < 5; i++) {
+        var r = parseField(parts[i], FIELDS[i]);
+        if (r.error) return { error: r.error };
+        out[FIELDS[i].key] = r;
+      }
+      return { fields: out };
+    }
+
+    function dayMatches(f, d) {
+      if (!f.month.values[d.getMonth() + 1]) return false;
+      var domOk = !!f.dom.values[d.getDate()];
+      var dowOk = !!f.dow.values[d.getDay()];
+      // Vixie cron ORs the two day fields when both are restricted; when either
+      // is '*', the other one alone decides. Getting this backwards is the most
+      // common reason a job fires on a day the author did not expect.
+      if (f.dom.restricted && f.dow.restricted) return domOk || dowOk;
+      return domOk && dowOk;
+    }
+
+    function nextRuns(expr, from, count) {
+      var parsed = parse(expr);
+      if (parsed.error) return { error: parsed.error };
+      var f = parsed.fields;
+      var base = from ? new Date(from.getTime()) : new Date();
+      base.setSeconds(0, 0);
+      base.setMinutes(base.getMinutes() + 1);
+      var out = [];
+      var firstMinute = base.getHours() * 60 + base.getMinutes();
+      var DAYS_AHEAD = 1827; // five years, leap year included
+      for (var i = 0; i < DAYS_AHEAD && out.length < count; i++) {
+        var d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+        if (!dayMatches(f, d)) continue;
+        var fromMin = i === 0 ? firstMinute : 0;
+        for (var m = fromMin; m < 1440 && out.length < count; m++) {
+          var hh = Math.floor(m / 60), mm = m % 60;
+          if (f.hour.values[hh] && f.minute.values[mm]) {
+            out.push(new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm));
+          }
+        }
+      }
+      return { runs: out, exhausted: out.length < count };
+    }
+
+    return { parse: parse, nextRuns: nextRuns, parseField: parseField };
+  })();
+
+  T['cron-expression-generator'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).cronGen) || {};
+    var expr = $(root, 'cr-expr');
+    var fields = {
+      minute: $(root, 'cr-min'), hour: $(root, 'cr-hour'), dom: $(root, 'cr-dom'),
+      month: $(root, 'cr-month'), dow: $(root, 'cr-dow'),
+    };
+    var code = $(root, 'cr-out');
+    var report = $(root, 'cr-report');
+    var syncing = false;
+
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    function fieldWord(key) {
+      return { minute: COPY.labelMinute, hour: COPY.labelHour, dom: COPY.labelDom,
+        month: COPY.labelMonth, dow: COPY.labelDow }[key] || key;
+    }
+    function reason(err) {
+      if (!err) return '';
+      if (err.reason === 'fields') return tpl(COPY.reasonFields || '', { n: err.n });
+      if (err.reason === 'empty') return tpl(COPY.reasonEmpty || '', { field: String(fieldWord(err.field)).toLowerCase() });
+      var spec = { minute: [0, 59], hour: [0, 23], dom: [1, 31], month: [1, 12], dow: [0, 7] }[err.field] || [0, 59];
+      return tpl(COPY.reasonField || '', {
+        field: String(fieldWord(err.field)).toLowerCase(),
+        value: err.value, min: spec[0], max: spec[1],
+      });
+    }
+    function humanise(spec, key) {
+      var s = String(spec || '').trim();
+      if (s === '*') return COPY.any || '';
+      var slash = s.split('/');
+      var step = slash.length === 2 ? slash[1] : null;
+      var base = slash[0];
+      if (base === '*' && step) return tpl(COPY.step || '', { n: step });
+      if (base.indexOf('-') > 0) {
+        var ab = base.split('-');
+        return step ? tpl(COPY.stepRange || '', { n: step, a: ab[0], b: ab[1] })
+          : tpl(COPY.range || '', { a: ab[0], b: ab[1] });
+      }
+      if (s.indexOf(',') !== -1) return tpl(COPY.listVal || '', { n: s.split(',').length });
+      return s;
+    }
+    function describe(parsed) {
+      var f = parsed.fields;
+      var minSpec = f.minute.spec, hourSpec = f.hour.spec;
+      var mins = Object.keys(f.minute.values).map(Number).sort(function (a, b) { return a - b; });
+      var hours = Object.keys(f.hour.values).map(Number).sort(function (a, b) { return a - b; });
+      if (minSpec === '*' && hourSpec === '*') return COPY.everyMinute || '';
+      if (/^\*\/(\d+)$/.test(minSpec) && hourSpec === '*') {
+        return tpl(COPY.everyNMinutes || '', { n: minSpec.split('/')[1] });
+      }
+      if (hourSpec === '*' && mins.length === 1) return tpl(COPY.hourlyAt || '', { m: pad(mins[0]) });
+      if (hours.length === 1 && mins.length === 1) {
+        var t = pad(hours[0]) + ':' + pad(mins[0]);
+        var domStar = f.dom.spec === '*', dowStar = f.dow.spec === '*', monStar = f.month.spec === '*';
+        if (domStar && dowStar && monStar) return tpl(COPY.dailyAt || '', { t: t });
+        if (domStar && monStar && !dowStar) {
+          var names = (COPY.days || []);
+          var dows = Object.keys(f.dow.values).map(Number).sort(function (a, b) { return a - b; })
+            .map(function (d) { return names[d] || String(d); });
+          return tpl(COPY.weeklyAt || '', { t: t, days: dows.join(', ') });
+        }
+        if (dowStar && monStar && Object.keys(f.dom.values).length === 1) {
+          return tpl(COPY.monthlyAt || '', { t: t, d: Object.keys(f.dom.values)[0] });
+        }
+        if (dowStar && !monStar && Object.keys(f.dom.values).length === 1 && Object.keys(f.month.values).length === 1) {
+          var mo = Number(Object.keys(f.month.values)[0]);
+          return tpl(COPY.monthlyDate || '', { t: t, d: Object.keys(f.dom.values)[0], month: (COPY.months || [])[mo - 1] || mo });
+        }
+      }
+      return tpl(COPY.generic || '', {
+        m: minSpec, h: hourSpec, d: f.dom.spec, mo: f.month.spec, w: f.dow.spec,
+      });
+    }
+    function render() {
+      var text = expr.value.trim().replace(/\s+/g, ' ');
+      var parsed = CRON.parse(text);
+      code.textContent = text;
+      report.textContent = '';
+      if (parsed.error) {
+        report.textContent = tpl(COPY.invalid || '', { reason: reason(parsed.error) });
+        return;
+      }
+      var p = el('p', 'tool-note');
+      p.textContent = describe(parsed);
+      report.appendChild(p);
+
+      var next = CRON.nextRuns(text, new Date(), 5);
+      var head = el('p', 'tool-note');
+      head.textContent = COPY.nextHead || '';
+      report.appendChild(head);
+      if (!next.runs.length) {
+        var none = el('p', 'tool-note');
+        none.textContent = COPY.never || '';
+        report.appendChild(none);
+      } else {
+        var list = el('ul', 'run-list');
+        next.runs.forEach(function (d) {
+          var li = el('li');
+          li.textContent = d.toLocaleString(undefined, {
+            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+          });
+          list.appendChild(li);
+        });
+        report.appendChild(list);
+      }
+
+      var brk = el('p', 'tool-note');
+      brk.textContent = COPY.breakHead || '';
+      report.appendChild(brk);
+      var grid = el('div', 'kpi-strip');
+      ['minute', 'hour', 'dom', 'month', 'dow'].forEach(function (key) {
+        var tile = el('div', 'stat-tile');
+        tile.appendChild(el('span', 'stat-tile-label', fieldWord(key)));
+        tile.appendChild(el('span', 'stat-tile-value', humanise(parsed.fields[key].spec, key)));
+        grid.appendChild(tile);
+      });
+      report.appendChild(grid);
+
+      var foot = el('p', 'tool-note');
+      foot.textContent = COPY.note || '';
+      report.appendChild(foot);
+    }
+    function fromFields() {
+      if (syncing) return;
+      syncing = true;
+      expr.value = Object.keys(fields).map(function (k) { return fields[k].value.trim() || '*'; }).join(' ');
+      syncing = false;
+      render();
+    }
+    function fromExpr() {
+      if (syncing) return;
+      var parsed = CRON.parse(expr.value);
+      if (!parsed.error) {
+        syncing = true;
+        Object.keys(fields).forEach(function (k) { fields[k].value = parsed.fields[k].spec; });
+        syncing = false;
+      }
+      render();
+    }
+    Object.keys(fields).forEach(function (k) { fields[k].addEventListener('input', fromFields); });
+    expr.addEventListener('input', fromExpr);
+    Array.prototype.forEach.call(root.querySelectorAll('[data-cron]'), function (b) {
+      b.addEventListener('click', function () {
+        expr.value = b.getAttribute('data-cron');
+        fromExpr();
+      });
+    });
+    fromExpr();
+  };
+
+  // ---------------------------------------------------------- JSON to CSV
+  T['json-to-csv'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).jsonCsv) || {};
+    var input = $(root, 'jc-in');
+    var delim = $(root, 'jc-delim');
+    var flattenEl = $(root, 'jc-flatten');
+    var guardEl = $(root, 'jc-guard');
+    var bomEl = $(root, 'jc-bom');
+    var out = $(root, 'jc-out');
+    var stats = $(root, 'jc-stats');
+
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function bytes(s) {
+      if (window.TextEncoder) return new TextEncoder().encode(s).length;
+      return unescape(encodeURIComponent(s)).length;
+    }
+    function isPlain(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+
+    function flattenInto(row, prefix, outObj) {
+      Object.keys(row).forEach(function (k) {
+        var key = prefix ? prefix + '.' + k : k;
+        var v = row[k];
+        if (flattenEl.checked && isPlain(v)) flattenInto(v, key, outObj);
+        else outObj[key] = v;
+      });
+    }
+    function cellsOf(row) {
+      if (Array.isArray(row)) {
+        var o = {};
+        row.forEach(function (v, i) { o['column_' + (i + 1)] = v; });
+        return o;
+      }
+      if (isPlain(row)) {
+        var flat = {};
+        flattenInto(row, '', flat);
+        return flat;
+      }
+      return { value: row };
+    }
+    function toText(v) {
+      if (v === null || v === undefined) return '';
+      if (typeof v === 'string') return v;
+      if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+      return JSON.stringify(v);
+    }
+    function quoteCell(text, sep) {
+      var s = String(text);
+      if (guardEl.checked) {
+        // Only values a spreadsheet would execute, never plain negative numbers.
+        var looksNumeric = /^-?\d+(\.\d+)?$/.test(s);
+        if (/^[=+@]/.test(s) || (s.charAt(0) === '-' && !looksNumeric) || /^[\t\r]/.test(s)) s = "'" + s;
+      }
+      if (s.indexOf(sep) !== -1 || /["\n\r]/.test(s)) return '"' + s.split('"').join('""') + '"';
+      return s;
+    }
+    function update() {
+      var src = input.value.trim();
+      if (!src) { out.textContent = ''; stats.textContent = COPY.empty || ''; return; }
+      var data;
+      try { data = JSON.parse(src); }
+      catch (e) {
+        out.textContent = '';
+        stats.textContent = tpl(COPY.invalid || '', { msg: (e && e.message) || '' });
+        return;
+      }
+      if (!Array.isArray(data) && !isPlain(data)) {
+        out.textContent = '';
+        stats.textContent = tpl(COPY.notRows || '', { kind: Array.isArray(data) ? 'array' : typeof data });
+        return;
+      }
+      var rows = Array.isArray(data) ? data : [data];
+      var sep = delim.value === 'semicolon' ? ';' : delim.value === 'tab' ? '\t' : ',';
+      var records = rows.map(cellsOf);
+      var cols = [];
+      records.forEach(function (r) {
+        Object.keys(r).forEach(function (k) { if (cols.indexOf(k) === -1) cols.push(k); });
+      });
+      if (!rows.length) { out.textContent = ''; stats.textContent = COPY.noRows || ''; return; }
+      var lines = [cols.map(function (c) { return quoteCell(c, sep); }).join(sep)];
+      records.forEach(function (r) {
+        lines.push(cols.map(function (c) { return quoteCell(toText(r[c]), sep); }).join(sep));
+      });
+      var csv = lines.join('\n');
+      out.textContent = csv;
+      stats.textContent = tpl(COPY.stats || '', {
+        r: records.length, c: cols.length, b: bytes(csv) + (bomEl.checked ? 3 : 0),
+      });
+    }
+    [input, delim, flattenEl, guardEl, bomEl].forEach(function (node) {
+      node.addEventListener('input', update);
+      node.addEventListener('change', update);
+    });
+    update();
+  };
+
+  // ---------------------------------------------------------- hash generator
+  T['hash-generator'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).hashGen) || {};
+    var input = $(root, 'hg-in');
+    var upper = $(root, 'hg-upper');
+    var out = $(root, 'hg-out');
+    var ALGOS = [
+      { key: 'md5', label: 'MD5', bits: 128 },
+      { key: 'sha1', label: 'SHA-1', bits: 160 },
+      { key: 'sha256', label: 'SHA-256', bits: 256 },
+      { key: 'sha512', label: 'SHA-512', bits: 512 },
+    ];
+
+    function hex(bytes, up) {
+      var s = '';
+      for (var i = 0; i < bytes.length; i++) {
+        var h = bytes[i].toString(16);
+        if (h.length < 2) h = '0' + h;
+        s += h;
+      }
+      return up ? s.toUpperCase() : s;
+    }
+    function utf8(text) {
+      if (window.TextEncoder) return new TextEncoder().encode(text);
+      // Older engines (and some test harnesses) have no TextEncoder. Encode
+      // UTF-8 by hand rather than throwing before the digest can be computed.
+      var out = [];
+      for (var i = 0; i < text.length; i++) {
+        var c = text.charCodeAt(i);
+        if (c < 0x80) out.push(c);
+        else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+        else if (c >= 0xd800 && c <= 0xdbff && i + 1 < text.length) {
+          var cp = 0x10000 + ((c - 0xd800) << 10) + (text.charCodeAt(i + 1) - 0xdc00);
+          out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 63), 0x80 | ((cp >> 6) & 63), 0x80 | (cp & 63));
+          i++;
+        } else out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+      }
+      return new Uint8Array(out);
+    }
+    // MD5 is not in WebCrypto (it is broken by design), so it ships here as a
+    // small implementation. Same padding and length rules as RFC 1321.
+    function md5(bytes) {
+      var shift = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+        5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+        4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+        6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21];
+      var K = new Int32Array(64);
+      for (var k = 0; k < 64; k++) K[k] = Math.floor(Math.abs(Math.sin(k + 1)) * 4294967296) | 0;
+      var len = bytes.length;
+      var padded = new Uint8Array((((len + 8) >> 6) + 1) << 6);
+      padded.set(bytes);
+      padded[len] = 0x80;
+      var view = new DataView(padded.buffer);
+      view.setUint32(padded.length - 8, (len << 3) >>> 0, true);
+      view.setUint32(padded.length - 4, Math.floor(len / 536870912), true);
+      var a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+      for (var off = 0; off < padded.length; off += 64) {
+        var M = new Int32Array(16);
+        for (var j = 0; j < 16; j++) M[j] = view.getInt32(off + j * 4, true);
+        var A = a0, B = b0, C = c0, D = d0;
+        for (var i = 0; i < 64; i++) {
+          var F, g;
+          if (i < 16) { F = (B & C) | (~B & D); g = i; }
+          else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+          else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+          else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+          F = (F + A + K[i] + M[g]) | 0;
+          A = D; D = C; C = B;
+          B = (B + ((F << shift[i]) | (F >>> (32 - shift[i])))) | 0;
+        }
+        a0 = (a0 + A) | 0; b0 = (b0 + B) | 0; c0 = (c0 + C) | 0; d0 = (d0 + D) | 0;
+      }
+      var digest = new Uint8Array(16);
+      [a0, b0, c0, d0].forEach(function (word, idx) {
+        digest[idx * 4] = word & 0xff;
+        digest[idx * 4 + 1] = (word >>> 8) & 0xff;
+        digest[idx * 4 + 2] = (word >>> 16) & 0xff;
+        digest[idx * 4 + 3] = (word >>> 24) & 0xff;
+      });
+      return digest;
+    }
+
+    window.T4M_HASH = { md5: md5, hex: hex, utf8: utf8 };
+
+    function render() {
+      var text = input.value;
+      var up = upper.checked;
+      out.textContent = '';
+      if (!text) { out.textContent = COPY.empty || ''; return; }
+      var bytes = utf8(text);
+      var rows = [];
+      rows.push({ label: 'MD5', value: hex(md5(bytes), up) });
+      var subtle = window.crypto && window.crypto.subtle;
+      if (!subtle) {
+        out.textContent = COPY.unsupported || '';
+        return;
+      }
+      var pending = ALGOS.slice(1).map(function (a) {
+        return subtle.digest(a.key === 'sha1' ? 'SHA-1' : a.key === 'sha256' ? 'SHA-256' : 'SHA-512', bytes)
+          .then(function (buf) { return { label: a.label, value: hex(new Uint8Array(buf), up) }; });
+      });
+      Promise.all(pending).then(function (rest) {
+        var all = rows.concat(rest);
+        out.textContent = '';
+        var grid = el('div', 'hash-grid');
+        all.forEach(function (r) {
+          var box = el('div', 'hash-row');
+          box.appendChild(el('span', 'hash-label', r.label));
+          var codeEl = el('code', 'hash-value', r.value);
+          codeEl.id = 'hg-' + r.label.toLowerCase().replace(/[^a-z0-9]/g, '');
+          box.appendChild(codeEl);
+          var btn = el('button', 'btn-copy', 'Copy');
+          btn.type = 'button';
+          btn.setAttribute('data-copy', '#' + codeEl.id);
+          box.appendChild(btn);
+          grid.appendChild(box);
+        });
+        out.appendChild(grid);
+        var foot = el('p', 'tool-note');
+        foot.textContent = COPY.note || '';
+        out.appendChild(foot);
+      });
+    }
+    input.addEventListener('input', render);
+    upper.addEventListener('change', render);
+    render();
+  };
+
 })();

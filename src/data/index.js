@@ -45,7 +45,7 @@ export const CATEGORIES = {
     name: 'Content & Social Tools',
     icon: '✍️',
     homeDesc: 'Slug generator, UTM builder, keyword density analyser and hashtag sets — the small utilities content teams use daily.',
-    metaTitle: 'Content & Social Tools — 10 free writing utilities',
+    metaTitle: 'Content & Social Tools — 11 free writing utilities',
     pageDesc: 'Daily-driver utilities for content and social teams: clean URL slugs, GA4-ready UTM links, phrase-frequency analysis and platform-tuned hashtag sets.',
     metaDesc: 'Free content tools: URL slug generator, UTM link builder, keyword density checker and hashtag generator for every platform. No signup.',
     pageExtra: [
@@ -61,7 +61,7 @@ export const CATEGORIES = {
     name: 'Web & Utility Tools',
     icon: '🛠️',
     homeDesc: 'Sitemaps, .htaccess redirects, image optimization and cryptographically random passwords — useful tools for web work.',
-    metaTitle: 'Web & Utility Tools — 18 free browser tools',
+    metaTitle: 'Web & Utility Tools — 21 free browser tools',
     pageDesc: 'Webmaster utilities for XML sitemaps, .htaccess redirects, image compression for faster pages, and secure passwords generated on your device.',
     metaDesc: 'Free browser-based web tools: optimize images for websites, generate XML sitemaps and .htaccess redirects, and create secure passwords.',
     pageExtra: [

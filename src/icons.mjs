@@ -72,6 +72,8 @@ const MAP = {
   'qr-code-generator': 'qr',
   'word-counter': 'type', 'character-counter': 'hash',
   'color-picker': 'palette', 'css-minifier': 'code',
+  'cron-expression-generator': 'clock', 'json-to-csv': 'tree',
+  'text-diff': 'copy', 'hash-generator': 'fingerprint',
   'roi-calculator': 'coins', 'roas-calculator': 'target', 'cac-calculator': 'userPlus',
   'ad-metrics-calculator': 'sliders', 'email-roi-calculator': 'mail', 'marketing-budget-calculator': 'wallet',
 };

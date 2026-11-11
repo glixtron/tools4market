@@ -764,4 +764,127 @@ ${f.textarea('cm-in', 'CSS to minify', 'Paste a stylesheet or a fragment…', 9,
 ${outputBlock('cm-out', 'Minified CSS')}
 ${note('Minified in your browser — paste confidential stylesheets without uploading them.')}`,
   },
+  
+  // ---------------------------------------------------------- cron expression generator
+  {
+    slug: 'cron-expression-generator',
+    name: 'Cron Expression Generator',
+    cat: 'web',
+    icon: '⏰',
+    card: 'Build a five-field cron expression and see the next five times it will run.',
+    usedFor: 'for scheduled jobs, backups and deploys',
+    updated: '2026-11-11',
+    keywords: 'cron expression generator crontab schedule next run cron job syntax five fields',
+    focus: 'cron expression generator',
+    h1: 'Cron Expression Generator — expression and next run times',
+    metaTitle: 'Free Cron Expression Generator — Next Run Times',
+    metaDesc: 'Free cron expression generator: build a five-field crontab line, read it in plain English and see the next five run times in your own timezone.',
+    intro: 'Use this cron expression generator to build a five-field expression from presets or by typing each field, then read it in plain English and see the next five run times.',
+    sections: [
+      { h: 'What the five cron fields control', p: ['A cron expression is five fields separated by spaces, read left to right as minute, hour, day of month, month and day of week. Minute runs from 0 to 59, hour from 0 to 23, day of month from 1 to 31, month from 1 to 12, and day of week from 0 to 7 where both 0 and 7 mean Sunday. An asterisk means every legal value rather than zero, which is the first thing people misread.', 'Each field accepts a single number, a range such as 9-17, a step such as */15, or a comma-separated list such as 1,3,5. Steps can be combined with ranges: 0-30/10 means every ten minutes inside the first half hour. Month and weekday names are accepted too, so jan and mon work wherever numbers do. This cron expression generator normalises names to numbers, which is why the breakdown below always shows the numeric form.'] },
+      { h: 'How this cron expression generator works', p: ['Start from a preset if one fits — every fifteen minutes, hourly, a daily nine o’clock, weekdays at nine, Monday midnight, or the first of the month — then adjust a field. The five boxes and the expression box stay in sync: typing in either place updates the other, and the next-run list recalculates on every keystroke.', 'The next five runs are the real output. They are computed in this browser’s timezone from the current minute, so an expression that looks plausible but never fires — 0 0 31 2 *, say — shows up immediately as an empty list rather than being discovered at three in the morning by a missing backup. Nothing is sent to a server.', 'Copy the expression into a crontab, or paste it into any scheduler that takes standard five-field syntax. Seconds and the @reboot shorthand are deliberately out of scope: they are extensions, and a generator that silently accepts them teaches syntax that fails elsewhere.'] },
+      { h: 'Cron mistakes the next-run list exposes', p: ['The day-of-month and day-of-week fields combine with OR when both are restricted, not AND. 0 9 1 * 1 runs on the first of the month and on every Monday — a rule that surprises almost everyone the first time. With one of the two left as an asterisk the other alone decides, which is the behaviour most people expect. The next-run list makes the difference visible before it reaches production.', 'Two more traps: */15 starts at zero, so it fires at :00, :15, :30 and :45 rather than fifteen minutes after whenever you wrote it; and February has no thirty-first, so a monthly job pinned to 31 skips the short months entirely. Keep the server’s timezone in mind as well — a job set for 02:00 runs at 02:00 where the server is, which may not be where you are.', 'Cron has no syntax for the last day of the month and no jitter for avoiding a thundering herd. Both need a wrapper script or a scheduler with a richer format. If the expression needs a comment to be understood, that comment belongs next to it in the crontab.'] },
+    ],
+    faqs: [
+      { q: 'What do the five fields in a cron expression mean?', a: 'In order: minute (0-59), hour (0-23), day of month (1-31), month (1-12) and day of week (0-7, where 0 and 7 are Sunday). An asterisk means every value.' },
+      { q: 'Does this cron expression generator use my timezone?', a: 'Yes. The next-run list is calculated in your browser’s local timezone from the current minute, so it shows when the job fires on your machine, not on the server.' },
+      { q: 'Why does my cron job run on a different day than expected?', a: 'Because day-of-month and day-of-week are OR-ed when both are set. 0 9 1 * 1 runs on the first of the month and every Monday; leave one field as * to make the other decide.' },
+      { q: 'Can a cron expression generator handle the last day of the month?', a: 'Not in standard five-field cron. There is no L modifier, so a job pinned to 31 skips shorter months; the usual workaround is a wrapper script that checks the date.' },
+    ],
+    html: `
+<p class="tool-note" id="cr-presets-label">Start from a preset, or type the fields yourself</p>
+<div class="chip-row" role="group" aria-labelledby="cr-presets-label">
+  <button type="button" class="chip" data-cron="*/15 * * * *">Every 15 min</button>
+  <button type="button" class="chip" data-cron="0 * * * *">Hourly</button>
+  <button type="button" class="chip" data-cron="0 9 * * *">Daily 09:00</button>
+  <button type="button" class="chip" data-cron="0 9 * * 1-5">Weekdays 09:00</button>
+  <button type="button" class="chip" data-cron="0 0 * * 1">Mondays 00:00</button>
+  <button type="button" class="chip" data-cron="0 2 1 * *">1st of the month</button>
+</div>
+<div class="field-row">
+${f.text('cr-min', 'Minute (0-59)', '*')}
+${f.text('cr-hour', 'Hour (0-23)', '*')}
+</div>
+<div class="field-row">
+${f.text('cr-dom', 'Day of month (1-31)', '*')}
+${f.text('cr-month', 'Month (1-12 or JAN-DEC)', '*')}
+</div>
+${f.text('cr-dow', 'Day of week (0-7, 0 and 7 are Sunday)', '*')}
+${f.text('cr-expr', 'Expression', '', '*/15 9-17 * * 1-5')}
+${outputBlock('cr-out', 'Expression')}
+${outputArea('cr-report', 'When it runs')}
+${note('Standard five-field cron, evaluated in your browser. Nothing is sent to a server, and the expression is yours to copy into a crontab.')}`,
+  },
+
+  // ---------------------------------------------------------- JSON to CSV
+  {
+    slug: 'json-to-csv',
+    name: 'JSON to CSV Converter',
+    cat: 'web',
+    icon: '📊',
+    card: 'Convert an array of JSON objects to CSV, with nested keys flattened and quoted properly.',
+    usedFor: 'for spreadsheets, exports and data handoffs',
+    updated: '2026-11-11',
+    keywords: 'json to csv converter json csv export flatten nested json array to csv spreadsheet',
+    focus: 'json to csv',
+    h1: 'JSON to CSV Converter — flatten and export cleanly',
+    metaTitle: 'Free JSON to CSV Converter — Nested Keys Flattened',
+    metaDesc: 'Free JSON to CSV converter: turn an array of objects into a spreadsheet-ready file, flatten nested keys to dot notation, and quote every field that needs it.',
+    intro: 'Paste JSON into this converter to get CSV with a header row, nested objects flattened to dot notation, and every comma, quote and newline escaped correctly.',
+    sections: [
+      { h: 'How the JSON to CSV converter maps structure to rows', p: ['The converter reads a JSON array and writes one CSV row per element. Object keys become the header row, in the order they first appear across the whole array, so a key that only exists in the tenth object still gets a column. Rows that lack that key are written as empty cells rather than shifted left — misaligned columns are the most common way a CSV export silently corrupts data.', 'Nested objects are flattened to dot notation when the option is on: address.city and address.postcode become their own columns instead of being crammed into one JSON blob. Arrays and mixed values are serialised as JSON text inside a single cell, because a cell can only hold one value. A top-level array of arrays is accepted too and becomes column_1, column_2, and so on.', 'A single top-level object is treated as one row. An array of plain strings or numbers becomes a single value column, which is rarely what you want but is better than refusing the input. If the top level is null or a scalar, the tool says so instead of inventing a table.'] },
+      { h: 'Delimiters, quoting and the formula guard', p: ['Delimiter matters more than it looks. A comma is the default and the safe choice for a standards-compliant parser; a semicolon is what several European Excel locales expect; a tab produces TSV, which stays robust when the data is full of commas. Every field containing the delimiter, a quote or a newline is quoted, and inner quotes are doubled — the rule both RFC 4180 and every spreadsheet implements.', 'The formula guard exists because a CSV is executable. A cell beginning with =, +, @, or a hyphen followed by something that is not a number, is prefixed with an apostrophe so a spreadsheet treats it as text rather than a formula. Negative numbers are left alone deliberately. The BOM option prepends the three bytes Excel needs to read UTF-8 without mangling accents.', 'The stats line reports rows, columns and output size, which is the quickest check that flattening produced the shape you expected. A file reporting one column for forty objects usually means the input was an array of arrays rather than an array of objects.'] },
+      { h: 'Where JSON to CSV conversions go wrong', p: ['Uneven objects are the usual source of empty cells: if only some records carry a phone field, the column exists and most rows are blank. That is correct, not a bug — but it is a reminder that JSON’s flexibility disappears the moment data becomes a rectangle. Decide which keys are required before exporting, not after someone opens the file.', 'Numbers arrive as text once they are in CSV, and long identifiers lose precision in Excel above fifteen significant digits. Dates stay exactly as the JSON wrote them; the converter does not guess a format, because guessing turns 03/04 into a different day in a different locale. Large inputs are fine, but the browser holds the whole string, so a hundred-megabyte export belongs in a script rather than a tab.', 'Check the first three lines before sending the file anywhere. A wrong delimiter and a missing header look identical in a preview and completely different to the person importing it.'] },
+    ],
+    faqs: [
+      { q: 'How do I convert nested JSON to CSV?', a: 'Leave the flatten option on. The JSON to CSV converter walks nested objects and writes their keys as dot notation, so address.city becomes a column instead of one cell of raw JSON.' },
+      { q: 'Why does my CSV open with the wrong encoding in Excel?', a: 'Excel does not assume UTF-8 by default. Turn on the BOM option, which adds the three bytes Excel needs to read accents and non-Latin characters correctly.' },
+      { q: 'What happens to arrays inside the JSON?', a: 'An array inside a record is written as JSON text in a single cell, because a CSV cell can only hold one value. Split it into columns only if every record has the same length.' },
+      { q: 'Does the converter protect against CSV injection?', a: 'Yes, by default. Cells starting with =, +, @ or a non-numeric hyphen are prefixed with an apostrophe so spreadsheets treat them as text rather than formulas.' },
+    ],
+    html: `
+${f.textarea('jc-in', 'JSON to convert', 'Paste an array of objects…', 9, '[{"name":"Ada","role":"Engineer","address":{"city":"London","postcode":"N1"},"tags":["math","logic"]},{"name":"Grace","role":"Admiral","address":{"city":"New York","postcode":"10001"},"tags":["navy"]}]')}
+<div class="field-row">
+${f.select('jc-delim', 'Delimiter', [{ v: 'comma', l: 'Comma ( , )' }, { v: 'semicolon', l: 'Semicolon ( ; )' }, { v: 'tab', l: 'Tab' }], 'comma')}
+${f.check('jc-flatten', 'Flatten nested objects to dot notation', true)}
+</div>
+${f.check('jc-guard', 'Guard formula cells (prefix = + - @ with an apostrophe)', true)}
+${f.check('jc-bom', 'Add a UTF-8 BOM for Excel', false)}
+<p class="tool-note" id="jc-stats"></p>
+${outputBlock('jc-out', 'CSV')}
+${note('Converted in your browser — the JSON you paste is never uploaded. Quoting follows RFC 4180, so the output opens in Excel, Sheets and any parser without a repair step.')}`,
+  },
+
+  // ---------------------------------------------------------- hash generator
+  {
+    slug: 'hash-generator',
+    name: 'Hash Generator',
+    cat: 'web',
+    icon: '🔐',
+    card: 'Generate MD5, SHA-1, SHA-256 and SHA-512 hashes from text, entirely in your browser.',
+    usedFor: 'for checksums, integrity checks and debugging',
+    updated: '2026-11-11',
+    keywords: 'hash generator md5 sha1 sha256 sha512 checksum hash text online hex digest',
+    focus: 'hash generator',
+    h1: 'Hash Generator — MD5, SHA-1, SHA-256 and SHA-512',
+    metaTitle: 'Free Hash Generator — MD5, SHA-1, SHA-256, SHA-512',
+    metaDesc: 'Free hash generator produces MD5, SHA-1, SHA-256 and SHA-512 digests from text in your browser, with a clear note on which algorithms are safe to use.',
+    intro: 'Paste text into this hash generator to get MD5, SHA-1, SHA-256 and SHA-512 digests, computed locally, plus a plain warning about which of them are broken.',
+    sections: [
+      { h: 'What a hash generator produces', p: ['A hash function turns any input into a fixed-length string. MD5 produces 128 bits, written as 32 hexadecimal characters; SHA-1 produces 160 bits (40 characters); SHA-256 produces 256 bits (64 characters); SHA-512 produces 512 bits (128 characters). The length belongs to the algorithm, not the input, which is why a three-word password and a two-gigabyte file share a digest size.', 'A good hash is one-way and sensitive: changing a single character changes roughly half the output bits, so two near-identical inputs produce completely different digests. That property makes a hash useful for comparing files without moving them, and makes it useless for storing anything you need to read back.', 'Identical input always produces the identical digest. That determinism is the whole point: two people can hash the same download on different machines and compare the strings to know the file arrived intact.'] },
+      { h: 'How to use this hash generator', p: ['Type or paste text and the four digests appear as you type. The input is encoded as UTF-8 before hashing, so an accented letter or an emoji contributes the same bytes a server would see — a detail that matters when a checksum computed here has to match one computed elsewhere. Uppercase output is available for systems that expect it; the value is the same either way.', 'Nothing is uploaded. MD5 runs in this page; SHA-1, SHA-256 and SHA-512 use the browser’s WebCrypto implementation, which is only available over https. If the page is opened from a local file or an insecure origin the SHA digests are unavailable, and the tool says so instead of returning something wrong. Each digest has its own copy button.', 'Hashing text is not the same as hashing a file. A text editor may normalise line endings or add a trailing newline, and either change produces a digest different from the one a publisher computed. For downloads, hash the bytes rather than a copy pasted into a box.'] },
+      { h: 'Which hash to use, and which not to', p: ['MD5 and SHA-1 are broken for collision resistance: practical collisions exist, so an attacker can produce two different inputs with the same digest. They remain fine for accidental-corruption checks, where nobody is choosing both files, and they are still requested by legacy systems. They are not fine for signatures, certificates or anything where an adversary benefits from a match.', 'SHA-256 and SHA-512 have no known practical collisions and are the safe defaults for file integrity and content addressing. SHA-512 is not automatically more secure in a way that matters here; both are far beyond brute force for password-length input, and the choice is usually dictated by what the other system accepts.', 'None of these are password hashes. A general-purpose digest is fast by design, which is exactly what a password store must not be; passwords need a deliberately slow algorithm with a salt, such as bcrypt, scrypt or Argon2. Using SHA-256 on a password is barely better than storing it in plain text once a database is stolen.'] },
+    ],
+    faqs: [
+      { q: 'Is MD5 still safe to use?', a: 'No for signatures or anything an attacker can influence — collisions are practical. It is still acceptable for accidental-corruption checks and for legacy systems that demand it.' },
+      { q: 'Does this hash generator upload my text?', a: 'No. MD5 runs in the page and the SHA digests use your browser’s own WebCrypto implementation, so nothing you paste leaves the tab.' },
+      { q: 'Can I use this hash generator for passwords?', a: 'Not for storage. General-purpose hashes are fast by design; passwords need a slow, salted algorithm such as bcrypt, scrypt or Argon2, and a server-side secret.' },
+      { q: 'Why do I get a different hash than another tool?', a: 'Usually an encoding or line-ending difference. This tool hashes the UTF-8 bytes exactly as typed, including trailing newlines; a file hash covers different bytes.' },
+    ],
+    html: `
+${f.textarea('hg-in', 'Text to hash', 'Type or paste the text you want to hash…', 6)}
+${f.check('hg-upper', 'Uppercase hexadecimal', false)}
+${outputArea('hg-out', 'Digests')}
+${note('MD5 runs locally in this page; SHA digests use your browser’s WebCrypto. Nothing is uploaded, and nothing is stored after you close the tab.')}`,
+  },
   ];

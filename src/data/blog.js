@@ -2,6 +2,8 @@
 // Each article targets one phrase (focus), links into the matching tool, and carries
 // FAQPage + Article/BlogPosting + BreadcrumbList structured data (added in build.mjs).
 
+import { botTable } from './bots.js';
+
 export const ARTICLES = [
   {
     slug: 'robots-txt-for-search-and-ai-crawlers',
@@ -25,6 +27,18 @@ export const ARTICLES = [
         p: [
           'The crawler list grew a category in 2024. Alongside Googlebot and Bingbot there are training crawlers (GPTBot, ClaudeBot, Bytespider, Amazonbot, CCBot, MistralAI-Training), AI search indexers and user-triggered fetchers (OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User, Claude-SearchBot, Claude-User), and AI agents (Applebot-Extended, meta-externalagent, cohere-ai, Diffbot). They are not interchangeable: one may be used to train a model, another to index pages for an assistant, and a third to fetch a page live when a user asks about it. `Google-Extended` belongs in none of those lists, because it is not a crawler at all — it is a control token that Google\'s own crawls consult to decide whether content may be used for Gemini training and for Gemini grounding.',
           'That distinction decides your policy. Many publishers now want training crawlers blocked while allowing the answer-engine fetchers that send real readers to the site, because those fetchers are the traffic. Our **AI Crawler Blocker** tool generates a robots.txt with per-bot presets for exactly this split — block training, allow search and answer engines — and our **robots.txt generator** covers the classic search-bot side.',
+        ],
+      },
+      {
+        anchor: 'bot-decision-table',
+        h: 'The bot decision table',
+        p: [
+          'Every crawler below is listed because the robots.txt generator emits a block for it, and the table is built from that same array — so the guide and the tool cannot drift apart. The last column is a starting point, not a rule: **Your call** means the choice changes nothing about ranking, it only decides whether that company may use your content, while **Allow** means blocking costs you a place in that engine’s answers.',
+          'The split that matters is training versus answering. A training crawler takes content away and returns nothing measurable; an answer-engine fetcher brings a reader who asked a question. Most publishers land on blocking the first group and allowing the second, but the decision is editorial and licensing, not technical — write it down next to the file so the next person keeps it.',
+        ],
+        table: botTable(),
+        p2: [
+          'Three things the table cannot tell you. First, robots.txt is voluntary: the crawlers here honour it, and scrapers that do not are a CDN or WAF problem, not a file problem. Second, `Google-Extended` is a control token rather than a crawler — blocking it switches Gemini training and Gemini grounding off together, while Googlebot and Search are untouched. Third, blocking an assistant bot removes you from that engine’s answers, which is lost referral traffic rather than a ranking penalty.',
         ],
       },
       {
@@ -179,6 +193,7 @@ export const ARTICLES = [
         p: [
           'If your goal is "no training, keep the readers", block GPTBot and explicitly allow the two search-side bots. If your goal is total invisibility to OpenAI, block all three — knowing that this also removes you from ChatGPT search and its citations.',
           'Our **AI Crawler Blocker** generates exactly this split: per-bot presets that block training crawlers while leaving search and answer-engine bots allowed, plus the matching allow rules so nothing is blocked by accident.',
+          'The full list — every crawler the generator knows, its owner, what it does and a starting point for each — is in the [bot decision table](/blog/robots-txt-for-search-and-ai-crawlers/#bot-decision-table) inside our robots.txt guide. It is generated from the same list the generator uses, so a bot that appears in one appears in the other.',
         ],
       },
       {
@@ -378,6 +393,7 @@ export const ARTICLES = [
         p: [
           'Write your policy down as five columns — bot, owner, purpose, allowed?, where enforced (robots.txt / CDN / both). New AI crawlers ship every quarter; when one appears, you decide once, in the table, instead of guessing in a panic on a Friday.',
           'Our **AI Crawler Blocker** maintains this matrix for the crawlers that matter and generates the matching robots.txt from your choices, so the file and the policy can never drift apart.',
+          'The table itself does not need to be built by hand: the [bot decision table](/blog/robots-txt-for-search-and-ai-crawlers/#bot-decision-table) lists the crawlers our generator emits, with the owner, the purpose and a starting decision for each. Copy it, change what you disagree with, and keep your version next to the robots.txt file.',
         ],
       },
     ],

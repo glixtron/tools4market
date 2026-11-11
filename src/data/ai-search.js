@@ -1,29 +1,8 @@
 // Tools4Market — AI Search & Crawler tool definitions (build-time data)
-import { f, outputBlock, outputArea, note, groupBox } from './helpers.js';
+import { f, outputBlock, outputArea, note } from './helpers.js';
+import { botCheckboxes } from './bots.js';
 
-const AI_GROUPS = (prefix) => `
-${groupBox('AI training crawlers', `
-<div class="field-check"><input type="checkbox" id="${prefix}-gptbot" data-bot="GPTBot"><label for="${prefix}-gptbot">GPTBot <span class="field-hint">(OpenAI — model training)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-claudebot" data-bot="ClaudeBot"><label for="${prefix}-claudebot">ClaudeBot <span class="field-hint">(Anthropic — model training)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-anthropic" data-bot="anthropic-ai"><label for="${prefix}-anthropic">anthropic-ai <span class="field-hint">(Anthropic — legacy agent)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-googleext" data-bot="Google-Extended"><label for="${prefix}-googleext">Google-Extended <span class="field-hint">(Gemini training; not Search)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-ccbot" data-bot="CCBot"><label for="${prefix}-ccbot">CCBot <span class="field-hint">(Common Crawl — feeds many models)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-bytespider" data-bot="Bytespider"><label for="${prefix}-bytespider">Bytespider <span class="field-hint">(ByteDance / TikTok)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-applebot" data-bot="Applebot-Extended"><label for="${prefix}-applebot">Applebot-Extended <span class="field-hint">(Apple Intelligence training)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-meta" data-bot="Meta-ExternalAgent"><label for="${prefix}-meta">Meta-ExternalAgent <span class="field-hint">(Meta AI training)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-imagesift" data-bot="ImagesiftBot"><label for="${prefix}-imagesift">ImagesiftBot <span class="field-hint">(Hive — image datasets)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-diffbot" data-bot="Diffbot"><label for="${prefix}-diffbot">Diffbot <span class="field-hint">(knowledge-graph scraping)</span></label></div>
-`)}
-${groupBox('AI search assistants', `
-<div class="field-check"><input type="checkbox" id="${prefix}-oaisearch" data-bot="OAI-SearchBot"><label for="${prefix}-oaisearch">OAI-SearchBot <span class="field-hint">(ChatGPT search listings)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-chatgptuser" data-bot="ChatGPT-User"><label for="${prefix}-chatgptuser">ChatGPT-User <span class="field-hint">(live user browsing)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-perplexity" data-bot="PerplexityBot"><label for="${prefix}-perplexity">PerplexityBot <span class="field-hint">(Perplexity answer engine)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-perplexityuser" data-bot="Perplexity-User"><label for="${prefix}-perplexityuser">Perplexity-User <span class="field-hint">(user-initiated fetches)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-claudeuser" data-bot="Claude-User"><label for="${prefix}-claudeuser">Claude-User <span class="field-hint">(user-initiated fetches)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-claudesearch" data-bot="Claude-SearchBot"><label for="${prefix}-claudesearch">Claude-SearchBot <span class="field-hint">(Claude search listings)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-youbot" data-bot="YouBot"><label for="${prefix}-youbot">YouBot <span class="field-hint">(You.com)</span></label></div>
-<div class="field-check"><input type="checkbox" id="${prefix}-applebot-search" data-bot="Applebot"><label for="${prefix}-applebot-search">Applebot <span class="field-hint">(Siri / Spotlight, not training)</span></label></div>
-`)}`;
+const AI_GROUPS = (prefix) => botCheckboxes(prefix);
 
 export const TOOLS_AI = [
   // ---------------------------------------------------------- 1

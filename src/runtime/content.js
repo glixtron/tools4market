@@ -605,4 +605,138 @@
     root.addEventListener('input', update);
     update();
   };
+  // ---------------------------------------------------------- text diff
+  // Line-level diff exported for the behaviour test: a fixed pair of texts must
+  // produce a fixed edit script, which is the only way to assert "correct"
+  // rather than "rendered something".
+  var DIFF = window.T4M_DIFF = (function () {
+    var CAP = 1200;
+
+    function diff(aText, bText, opts) {
+      opts = opts || {};
+      var a = String(aText == null ? '' : aText).split('\n');
+      var b = String(bText == null ? '' : bText).split('\n');
+      function norm(s) {
+        var t = s;
+        if (opts.ignoreCase) t = t.toLowerCase();
+        if (opts.ignoreSpace) t = t.replace(/\s+/g, ' ').trim();
+        return t;
+      }
+      if (opts.ignoreBlank) {
+        a = a.filter(function (s) { return s.trim() !== ''; });
+        b = b.filter(function (s) { return s.trim() !== ''; });
+      }
+      var start = 0;
+      while (start < a.length && start < b.length && norm(a[start]) === norm(b[start])) start++;
+      var endA = a.length - 1, endB = b.length - 1;
+      while (endA >= start && endB >= start && norm(a[endA]) === norm(b[endB])) { endA--; endB--; }
+      var midA = a.slice(start, endA + 1);
+      var midB = b.slice(start, endB + 1);
+      if (midA.length > CAP || midB.length > CAP) return { tooBig: true, cap: CAP };
+
+      var n = midA.length, m = midB.length;
+      // LCS table on normalised lines. Typed array: 1200² × 4 bytes ≈ 5.7 MB,
+      // which is the reason for the cap rather than an arbitrary number.
+      var w = m + 1;
+      var dp = new Uint32Array((n + 1) * w);
+      for (var i = n - 1; i >= 0; i--) {
+        for (var j = m - 1; j >= 0; j--) {
+          dp[i * w + j] = norm(midA[i]) === norm(midB[j])
+            ? dp[(i + 1) * w + j + 1] + 1
+            : Math.max(dp[(i + 1) * w + j], dp[i * w + j + 1]);
+        }
+      }
+      var out = [];
+      for (var p = 0; p < start; p++) out.push({ t: 'same', s: a[p] });
+      var x = 0, y = 0;
+      while (x < n && y < m) {
+        if (norm(midA[x]) === norm(midB[y])) { out.push({ t: 'same', s: midA[x] }); x++; y++; }
+        else if (dp[(x + 1) * w + y] >= dp[x * w + y + 1]) { out.push({ t: 'del', s: midA[x] }); x++; }
+        else { out.push({ t: 'add', s: midB[y] }); y++; }
+      }
+      while (x < n) { out.push({ t: 'del', s: midA[x] }); x++; }
+      while (y < m) { out.push({ t: 'add', s: midB[y] }); y++; }
+      for (var q = endA + 1; q < a.length; q++) out.push({ t: 'same', s: a[q] });
+      return { lines: out, prefix: start };
+    }
+
+    function unified(script, aTotal, bTotal) {
+      var head = '--- original\n+++ changed\n';
+      if (!script.length) return head;
+      var del = 0, add = 0;
+      script.forEach(function (l) { if (l.t === 'del') del++; if (l.t === 'add') add++; });
+      var body = script.map(function (l) {
+        return (l.t === 'add' ? '+' : l.t === 'del' ? '-' : ' ') + l.s;
+      }).join('\n');
+      return head + '@@ -1,' + aTotal + ' +1,' + bTotal + ' @@\n' + body + '\n';
+    }
+
+    return { diff: diff, unified: unified };
+  })();
+
+  T['text-diff'] = function (root) {
+    var COPY = (((window.T4M_ISTR || {}).tools || {}).textDiff) || {};
+    var aEl = $(root, 'df-a');
+    var bEl = $(root, 'df-b');
+    var caseEl = $(root, 'df-case');
+    var spaceEl = $(root, 'df-space');
+    var blankEl = $(root, 'df-blank');
+    var out = $(root, 'df-out');
+    var codeOut = $(root, 'df-unified');
+
+    function tpl(s, vars) {
+      return String(s || '').replace(/\{(\w+)\}/g, function (m, k) {
+        return vars[k] != null ? vars[k] : m;
+      });
+    }
+    function update() {
+      var aText = aEl.value, bText = bEl.value;
+      out.textContent = '';
+      codeOut.textContent = '';
+      if (!aText && !bText) { out.textContent = COPY.empty || ''; return; }
+      var script = DIFF.diff(aText, bText, {
+        ignoreCase: caseEl.checked, ignoreSpace: spaceEl.checked, ignoreBlank: blankEl.checked,
+      });
+      if (script.tooBig) {
+        out.textContent = tpl(COPY.tooBig || '', { n: script.cap });
+        return;
+      }
+      var added = 0, removed = 0, same = 0;
+      script.lines.forEach(function (l) {
+        if (l.t === 'add') added++;
+        else if (l.t === 'del') removed++;
+        else same++;
+      });
+      if (!added && !removed) { out.textContent = COPY.identical || ''; return; }
+
+      var summary = el('p', 'tool-note');
+      summary.textContent = tpl(COPY.summary || '', { a: added, d: removed, s: same });
+      out.appendChild(summary);
+
+      var aLine = 0, bLine = 0;
+      var block = el('div', 'diff-block');
+      script.lines.forEach(function (l) {
+        var row = el('div', 'diff-row ' + l.t);
+        if (l.t === 'same') { aLine++; bLine++; }
+        else if (l.t === 'del') { aLine++; }
+        else { bLine++; }
+        row.appendChild(el('span', 'diff-n', l.t === 'add' ? '' : String(aLine)));
+        row.appendChild(el('span', 'diff-n', l.t === 'del' ? '' : String(bLine)));
+        row.appendChild(el('span', 'diff-mark', l.t === 'add' ? '+' : l.t === 'del' ? '−' : ' '));
+        row.appendChild(el('span', 'diff-line', l.s === '' ? ' ' : l.s));
+        block.appendChild(row);
+      });
+      out.appendChild(block);
+
+      codeOut.textContent = DIFF.unified(script.lines, aText.split('\n').length, bText.split('\n').length);
+      var unifiedHead = root.querySelector('#df-unified-head');
+      if (unifiedHead) unifiedHead.textContent = COPY.unifiedHead || '';
+    }
+    [aEl, bEl, caseEl, spaceEl, blankEl].forEach(function (node) {
+      node.addEventListener('input', update);
+      node.addEventListener('change', update);
+    });
+    update();
+  };
+
 })();

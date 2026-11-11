@@ -52,8 +52,19 @@ export function checkLocalLinks() {
         path.join(DIST, rel, 'index.html'),
         path.join(DIST, rel.replace(/\/$/, '') + '.html'),
       ];
-      if (!candidates.some((c) => existsSync(c) && statSync(c).isFile())) {
+      const target = candidates.find((c) => existsSync(c) && statSync(c).isFile());
+      if (!target) {
         broken.push(`${path.relative(DIST, file)} → ${rel}`);
+        continue;
+      }
+      // A fragment is a promise about the destination page. Checking only the
+      // file would let /blog/slug/#renamed-heading pass while landing the
+      // reader at the top of the page with no explanation.
+      if (u.hash && target.endsWith('.html')) {
+        const id = decodeURIComponent(u.hash.slice(1));
+        if (id && !new RegExp(`(?:id|name)="${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`).test(readFileSync(target, 'utf8'))) {
+          broken.push(`${path.relative(DIST, file)} → ${rel}#${id} (no such id)`);
+        }
       }
     }
   }

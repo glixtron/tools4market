@@ -1927,6 +1927,105 @@ img.logo-mark {
   color: var(--c-muted);
 }
 
+/* Preset buttons — cron generator, and any other field-filling shortcut */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 18px;
+}
+button.chip {
+  cursor: pointer;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  padding: 6px 12px;
+  transition: border-color .14s, background .14s;
+}
+button.chip:hover { border-color: var(--c-primary); background: var(--c-surface-2); }
+button.chip:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+
+/* Article tables — the bot decision table and anything else that needs one */
+.table-wrap { overflow-x: auto; margin: 18px 0 6px; }
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+  min-width: 560px;
+}
+.article-table th,
+.article-table td {
+  border-bottom: 1px solid var(--c-border);
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.article-table th {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--c-muted);
+  white-space: nowrap;
+}
+.article-table td:first-child { font-family: var(--font-mono); font-size: .8rem; }
+.article-table tbody tr:hover td { background: var(--c-surface-2); }
+
+/* Cron next-run list */
+.run-list { margin: 6px 0 18px; padding-left: 20px; }
+.run-list li {
+  font-family: var(--font-mono);
+  font-size: .85rem;
+  padding: 2px 0;
+}
+
+/* Text diff — two line-number columns, a marker, then the line */
+.diff-block {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: auto;
+  max-height: 460px;
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  margin-top: 12px;
+  background: var(--c-surface);
+}
+.diff-row {
+  display: grid;
+  grid-template-columns: 44px 44px 20px 1fr;
+  align-items: start;
+  padding: 1px 0;
+}
+.diff-row.add { background: var(--c-success-soft); }
+.diff-row.del { background: var(--c-danger-soft); }
+.diff-n { color: var(--c-muted); text-align: right; padding: 0 8px; user-select: none; }
+.diff-mark { text-align: center; color: var(--c-muted); }
+.diff-row.add .diff-mark { color: var(--c-success); }
+.diff-row.del .diff-mark { color: var(--c-danger); }
+.diff-line { white-space: pre-wrap; word-break: break-word; padding-right: 10px; }
+
+/* Hash digests — label, value, copy */
+.hash-grid { display: grid; gap: 10px; margin: 4px 0 14px; }
+.hash-row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+}
+.hash-label {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--c-muted);
+}
+.hash-value { font-family: var(--font-mono); font-size: .78rem; word-break: break-all; }
+
 /* Visual comparison slider — two photos/renders stacked, draggable handle.
    The handle is positioned by JS; the CSS only governs appearance. */
 .compare {
