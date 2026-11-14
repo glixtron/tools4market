@@ -42,6 +42,10 @@ Full table in the diagnosis, §7. 33 redirects + 25 canonical duplicates need no
 canonicals are live and Google drains them as it recrawls. `?ref=` URLs are deliberately **not** disallowed,
 because a blocked URL cannot be crawled and therefore cannot relay its canonical.
 
+**Deployed 14 Nov** (commit `9de1574`, Worker `3a37790a`). Verified on production: the 301, the four
+noindex pages, the `/feed.xml` header, the `/tow0/` disallow, and 82/82 live assertions.
+Sitemap index: <https://tools4market.online/sitemap.xml> — 99 URLs (12 pages + 60 tools + 27 guides).
+
 - **1 real 404 fixed** — `/blog/website-audit/` → `/tools/website-audit/`, a 301 map in `worker.js`
   (before trailing-slash normalisation, query preserved, one hop without the slash). Four routing assertions.
 - **4 legal pages noindexed** — `/privacy-policy/`, `/terms/`, `/disclaimer/`, `/contact/` were four of the

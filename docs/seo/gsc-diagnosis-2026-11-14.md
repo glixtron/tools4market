@@ -195,11 +195,14 @@ beats one at 80; a phrase that names a tool we already have beats a new page.
 
 ### Code, this week (one deploy)
 
-7. Deploy the pending batch: the research release (`/research/`, `/research/ai-crawlers-2026/`,
-   `/ai-crawlers/`, three seasonal guides) plus this batch (rich results tester, CWV table, synonyms,
-   budget chart fix). Live is still 59 tools / 13 pages / 24 blog; the build is 60 / 16 / 27.
-8. After deploy, verify the seven new URLs return 200, appear in the sitemap, and carry self-referencing
-   canonicals — the same check used before (`tests/live-verify.mjs`).
+7. ~~Deploy the pending batch~~ — **done 14 Nov** (commit `9de1574`, Worker version
+   `3a37790a`). Live now matches the build: 60 tools, 27 guides, and a 99-URL sitemap index.
+   The research release (`/research/`, `/research/ai-crawlers-2026/`, `/ai-crawlers/`, three seasonal
+   guides) and this batch (rich results tester, CWV table, synonyms, budget chart fix, drilldown fixes)
+   shipped together.
+8. ~~After deploy, verify the seven new URLs~~ — **done**: all seven return 200, the 301 from
+   `/blog/website-audit/` is live, `/terms/` carries `noindex`, `/feed.xml` carries
+   `X-Robots-Tag: noindex`, and `tests/live-verify.mjs` passes 82/82 against production.
 
 ### Code, days 7–14
 
