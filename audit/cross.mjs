@@ -65,6 +65,9 @@ export function runCross({ pages, site, catalog }) {
       if (ASSET_RE.test(path)) continue;
       if (/^\/(api|sitemap|robots|feed|llms)/.test(path)) continue;
       if (sitemapSet.has(abs) || byUrl.has(abs)) continue;
+      // A dist audit can answer from the filesystem: noindexed legal pages and
+      // copied static files are real targets even though no sitemap lists them.
+      if (site.distPaths && site.distPaths.has(path)) continue;
       if (!broken.has(abs)) broken.set(abs, new Map());
       const sources = broken.get(abs);
       if (!sources.has(p.url)) sources.set(p.url, l.text || '(no text)');

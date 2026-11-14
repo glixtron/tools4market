@@ -14,7 +14,7 @@ export const CATEGORIES = {
     name: 'SEO & Meta Tools',
     icon: '🚀',
     homeDesc: 'Meta tags, Open Graph, canonical, hreflang, schema and snippet previews — the on-page essentials, generated correctly every time.',
-    metaTitle: 'SEO & Meta Tools — 13 free checkers and generators',
+    metaTitle: 'SEO & Meta Tools — 14 free checkers and generators',
     pageDesc: 'Generate meta tags, Open Graph and Twitter cards, canonical and hreflang links, and JSON-LD schema. Compare title and description wording in an estimated preview; optional page checks fetch public URLs.',
     metaDesc: 'Free SEO tools for meta tags, Open Graph, canonical links, hreflang, JSON-LD schema and estimated snippet previews. No signup.',
     pageExtra: [

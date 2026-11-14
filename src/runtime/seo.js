@@ -633,4 +633,221 @@
     root.addEventListener('change', update);
     update();
   };
+
+  // ---------------------------------------------------------- rich results tester
+  T['rich-results-tester'] = function (root) {
+    // Required/recommended properties per type, from Google's structured-data
+    // documentation. `any` means at least one of the listed properties must be
+    // present (Product needs offers, review or aggregateRating).
+    var RULES = {
+      Article: { req: ['headline', 'image', 'datePublished', 'author'], rec: ['dateModified', 'publisher', 'mainEntityOfPage'] },
+      NewsArticle: { req: ['headline', 'image', 'datePublished', 'author'], rec: ['dateModified', 'publisher', 'mainEntityOfPage'] },
+      BlogPosting: { req: ['headline', 'image', 'datePublished', 'author'], rec: ['dateModified', 'publisher', 'mainEntityOfPage'] },
+      FAQPage: { req: ['mainEntity'], rec: [] },
+      BreadcrumbList: { req: ['itemListElement'], rec: [] },
+      Product: { req: ['name', 'image'], any: [['offers', 'review', 'aggregateRating']], rec: ['description', 'brand', 'sku'] },
+      Offer: { req: ['price', 'priceCurrency'], rec: ['availability', 'url'] },
+      Recipe: { req: ['name', 'image', 'recipeIngredient', 'recipeInstructions'], rec: ['author', 'datePublished'] },
+      Organization: { req: ['name', 'url'], rec: ['logo', 'sameAs'] },
+      WebSite: { req: ['name', 'url'], rec: ['potentialAction'] },
+      Event: { req: ['name', 'startDate', 'location'], rec: ['endDate', 'image', 'offers'] },
+      VideoObject: { req: ['name', 'description', 'thumbnailUrl', 'uploadDate'], rec: ['contentUrl', 'duration'] },
+      HowTo: { req: ['name', 'step'], rec: ['image', 'totalTime'] },
+      LocalBusiness: { req: ['name', 'address'], rec: ['telephone', 'openingHours', 'priceRange'] },
+    };
+    var DATES = { datePublished: 1, dateModified: 1, uploadDate: 1, startDate: 1, endDate: 1 };
+    var URLS = { image: 1, url: 1, thumbnailUrl: 1, item: 1, logo: 1, contentUrl: 1, mainEntityOfPage: 1 };
+
+    var input = $(root, 'rr-in');
+    var out = $(root, 'rr-out');
+    var statsEl = $(root, 'rr-stats');
+    var sumEl = $(root, 'rr-summary');
+
+    function present(node, key) {
+      var v = node[key];
+      if (v === undefined || v === null || v === '') return false;
+      if (Array.isArray(v) && !v.length) return false;
+      return true;
+    }
+    function nodeType(v) {
+      if (Array.isArray(v)) return v.filter(function (t) { return typeof t === 'string'; });
+      return typeof v === 'string' ? [v] : [];
+    }
+    function flatten(v, outList) {
+      if (Array.isArray(v)) { v.forEach(function (x) { flatten(x, outList); }); return; }
+      if (!v || typeof v !== 'object') return;
+      if (Array.isArray(v['@graph'])) {
+        outList.push({ node: v, graph: true });
+        v['@graph'].forEach(function (x) { flatten(x, outList); });
+        return;
+      }
+      outList.push({ node: v, graph: false });
+    }
+
+    function checkNode(node) {
+      var errors = [], warnings = [];
+      var types = nodeType(node['@type']);
+      if (!types.length) { errors.push('Missing @type: Google cannot tell which result the block describes.'); return { types: ['(no type)'], errors: errors, warnings: warnings }; }
+      var ctx = node['@context'];
+      if (!ctx) warnings.push('Missing @context — add "https://schema.org" to the outer object.');
+      else if (typeof ctx === 'string' && !/schema\.org/i.test(ctx)) warnings.push('@context is not schema.org.');
+
+      types.forEach(function (type) {
+        var rule = RULES[type];
+        if (!rule) { warnings.push('@type ' + type + ' is recognised but this checker has no property rules for it — check Google’s documentation for required fields.'); return; }
+        rule.req.forEach(function (key) {
+          if (!present(node, key)) errors.push('Missing required property "' + key + '" for ' + type + '.');
+        });
+        (rule.any || []).forEach(function (group) {
+          if (!group.some(function (k) { return present(node, k); })) errors.push(type + ' needs at least one of: ' + group.join(', ') + '.');
+        });
+        (rule.rec || []).forEach(function (key) {
+          if (!present(node, key)) warnings.push('Recommended property "' + key + '" is absent for ' + type + '.');
+        });
+      });
+
+      Object.keys(node).forEach(function (key) {
+        var v = node[key];
+        if (DATES[key] && typeof v === 'string' && !/^\d{4}-\d{2}-\d{2}/.test(v)) {
+          warnings.push('"' + key + '" should be an ISO 8601 date (YYYY-MM-DD); found "' + v + '".');
+        }
+        if (URLS[key] && typeof v === 'string' && v && !/^(https?:)?\/\//.test(v)) {
+          warnings.push('"' + key + '" should be an absolute URL; found "' + v + '".');
+        }
+      });
+
+      if (types.indexOf('FAQPage') !== -1 && present(node, 'mainEntity')) {
+        var qs = Array.isArray(node.mainEntity) ? node.mainEntity : [node.mainEntity];
+        qs.forEach(function (q, i) {
+          if (!q || typeof q !== 'object') { errors.push('FAQPage mainEntity item ' + (i + 1) + ' is not an object.'); return; }
+          if (!present(q, 'name')) errors.push('Question ' + (i + 1) + ' is missing "name".');
+          if (!q.acceptedAnswer || !present(q.acceptedAnswer, 'text')) errors.push('Question ' + (i + 1) + ' is missing acceptedAnswer.text.');
+        });
+      }
+      if (types.indexOf('BreadcrumbList') !== -1 && present(node, 'itemListElement')) {
+        var items = Array.isArray(node.itemListElement) ? node.itemListElement : [node.itemListElement];
+        items.forEach(function (it, i) {
+          if (!it || typeof it !== 'object') { errors.push('Breadcrumb item ' + (i + 1) + ' is not an object.'); return; }
+          ['position', 'name'].forEach(function (k) { if (!present(it, k)) errors.push('Breadcrumb item ' + (i + 1) + ' is missing "' + k + '".'); });
+          if (!present(it, 'item')) warnings.push('Breadcrumb item ' + (i + 1) + ' has no "item" URL.');
+        });
+      }
+      if (types.indexOf('Product') !== -1 && present(node, 'offers')) {
+        var offers = Array.isArray(node.offers) ? node.offers : [node.offers];
+        offers.forEach(function (o, i) {
+          if (!o || typeof o !== 'object') return;
+          if (!present(o, 'price') && !present(o, 'priceSpecification')) errors.push('Offer ' + (i + 1) + ' needs "price" or "priceSpecification".');
+          if (!present(o, 'priceCurrency')) errors.push('Offer ' + (i + 1) + ' needs "priceCurrency".');
+        });
+      }
+      if (types.indexOf('Recipe') !== -1 && present(node, 'recipeIngredient') && !Array.isArray(node.recipeIngredient)) {
+        warnings.push('"recipeIngredient" reads best as an array of strings.');
+      }
+      if (types.indexOf('HowTo') !== -1 && present(node, 'step')) {
+        var steps = Array.isArray(node.step) ? node.step : [node.step];
+        steps.forEach(function (s, i) {
+          if (typeof s === 'string') return;
+          if (!s || typeof s !== 'object' || !(present(s, 'text') || present(s, 'name'))) errors.push('HowTo step ' + (i + 1) + ' needs "text".');
+        });
+      }
+      return { types: types, errors: errors, warnings: warnings };
+    }
+
+    function parseError(text, err) {
+      var m = /position\s+(\d+)/i.exec(String((err && err.message) || err));
+      var msg = String((err && err.message) || err);
+      if (!m) return msg;
+      var pos = Math.min(parseInt(m[1], 10), text.length);
+      var up = text.slice(0, pos);
+      return 'line ' + up.split('\n').length + ', column ' + (pos - up.lastIndexOf('\n')) + ' — ' + msg;
+    }
+
+    function update() {
+      var text = input.value.trim();
+      out.textContent = '';
+      statsEl.textContent = '';
+      sumEl.textContent = '';
+      if (!text) { sumEl.textContent = 'Paste JSON-LD (or full page HTML) to check it.'; return; }
+
+      var blocks = [];
+      var re = /<script[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+      var m;
+      while ((m = re.exec(text))) blocks.push(m[1]);
+      if (!blocks.length) {
+        if (/<script/i.test(text) && /<html|<body|<head/i.test(text)) {
+          sumEl.textContent = 'No application/ld+json block found in that HTML — the page has no JSON-LD, or it is injected by JavaScript.';
+          return;
+        }
+        blocks.push(text);
+      }
+
+      var nodes = [], errors = 0, warnings = 0;
+      blocks.forEach(function (raw, bi) {
+        var parsed;
+        try { parsed = JSON.parse(raw); } catch (e) {
+          var p = document.createElement('p');
+          p.className = 'rr-error';
+          p.textContent = 'Block ' + (bi + 1) + ' does not parse as JSON: ' + parseError(raw, e);
+          out.appendChild(p);
+          errors++;
+          return;
+        }
+        var list = [];
+        flatten(parsed, list);
+        list.forEach(function (item) {
+          if (item.graph && !item.node['@type'] && !Object.keys(item.node).some(function (k) { return k !== '@context' && k !== '@graph'; })) return;
+          var res = checkNode(item.node);
+          nodes.push(res);
+          errors += res.errors.length;
+          warnings += res.warnings.length;
+        });
+      });
+
+      statsEl.textContent = '';
+      statsEl.appendChild(el('span', null, nodes.length + ' schema node' + (nodes.length === 1 ? '' : 's') + ' · '));
+      statsEl.appendChild(el('strong', null, errors + ' error' + (errors === 1 ? '' : 's')));
+      statsEl.appendChild(el('span', null, ' · '));
+      statsEl.appendChild(el('strong', null, warnings + ' warning' + (warnings === 1 ? '' : 's')));
+      statsEl.appendChild(chip(errors ? 'warn' : 'good', errors ? 'Fix the errors before shipping' : 'Required properties present'));
+
+      sumEl.textContent = nodes.length
+        ? 'Checked against Google’s documented properties. This validates the markup, not whether Google will show a rich result.'
+        : 'No schema nodes found.';
+
+      nodes.forEach(function (res, i) {
+        var h = document.createElement('h3');
+        h.textContent = (i + 1) + '. ' + res.types.join(', ');
+        out.appendChild(h);
+        var ul = document.createElement('ul');
+        if (!res.errors.length && !res.warnings.length) {
+          var okLi = document.createElement('li');
+          okLi.className = 'rr-ok';
+          okLi.textContent = 'All required and recommended properties present.';
+          ul.appendChild(okLi);
+        }
+        res.errors.forEach(function (msg) {
+          var li = document.createElement('li');
+          li.className = 'rr-error';
+          li.textContent = msg;
+          ul.appendChild(li);
+        });
+        res.warnings.forEach(function (msg) {
+          var li = document.createElement('li');
+          li.className = 'rr-warn';
+          li.textContent = msg;
+          ul.appendChild(li);
+        });
+        out.appendChild(ul);
+      });
+    }
+
+    var timer = null;
+    root.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(update, 250);
+    });
+    var runBtn = $(root, 'rr-run');
+    if (runBtn) runBtn.addEventListener('click', update);
+    update();
+  };
 })();

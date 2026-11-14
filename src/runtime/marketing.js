@@ -374,7 +374,7 @@
         vis.innerHTML = '';
         var gap = t - b;
         var gapPct = t > b ? Math.min(100, (gap / t) * 100) : 6;
-        vis.appendChild(kpiTile('Target gap', fmt(gap) + ' customers', g > 0 ? fmt(Math.log(t / b) / Math.log(1 + g)) + ' months' : '—', g > 0 && months_calc() <= 12 ? 'up' : 'flat', gapPct));
+        vis.appendChild(kpiTile('Target gap', fmt(gap) + ' customers', g > 0 ? fmt(Math.log(t / b) / Math.log(1 + g)) + ' months' : '—', g > 0 && monthsToTarget(b, t, g) <= 12 ? 'up' : 'flat', gapPct));
         if (cc > 0) {
           vis.appendChild(kpiTile('Acquisition budget', money(gap * cc, c), cc + ' CAC', 'flat', 70));
         }
@@ -384,7 +384,7 @@
         ]));
       }
     }
-    function months_calc() {
+    function monthsToTarget(b, t, g) {
       return g > 0 ? Math.ceil(Math.log(t / b) / Math.log(1 + g)) : (t - b);
     }
     on(root, update);

@@ -30,6 +30,11 @@ export const POLICY = [
   {
     slug: 'contact',
     title: 'Contact',
+    // Kept out of search results: it is linked from the footer of every page and
+    // answers one question, but Search listed it as "crawled — not indexed" on
+    // 14 Nov. noindex states that intent instead of leaving a thin page in the
+    // quality signal.
+    noindex: true,
     metaTitle: 'Contact Tools4Market — Get in Touch',
     metaDesc: 'Contact the Tools4Market team: tool suggestions, bug reports, feedback or business inquiries. We aim to reply within two business days.',
     html: `
@@ -69,6 +74,7 @@ export const POLICY = [
   {
     slug: 'privacy-policy',
     title: 'Privacy Policy',
+    noindex: true,
     metaTitle: 'Privacy Policy — Tools4Market',
     metaDesc: 'How Tools4Market handles data: tools run locally in your browser, cookie consent for analytics and advertising, and your rights.',
     html: `
@@ -104,6 +110,7 @@ export const POLICY = [
   {
     slug: 'terms',
     title: 'Terms of Service',
+    noindex: true,
     metaTitle: 'Terms of Service — Tools4Market',
     metaDesc: 'The terms governing use of Tools4Market: free license, acceptable use, disclaimers of warranty and limitation of liability.',
     html: `
@@ -128,6 +135,7 @@ export const POLICY = [
   {
     slug: 'disclaimer',
     title: 'Disclaimer',
+    noindex: true,
     metaTitle: 'Disclaimer — Tools4Market',
     metaDesc: 'Disclaimer for Tools4Market: information accuracy, generated code, professional advice, affiliate and advertising disclosure.',
     html: `

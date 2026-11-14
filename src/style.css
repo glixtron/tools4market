@@ -904,6 +904,60 @@ img.logo-mark {
 .home-cta p { margin: 0; color: var(--c-muted); font-size: .92rem; max-width: 62ch; }
 .cta-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* email capture — home and guides index, only when an account is configured */
+.signup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: 24px 36px;
+  align-items: center;
+  margin: 56px 0 0;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-left: 4px solid var(--c-primary);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  box-shadow: var(--shadow-xs);
+}
+.signup-copy h2 { margin: 0 0 6px; font-size: 1.3rem; }
+.signup-copy p { margin: 0; color: var(--c-muted); font-size: .92rem; max-width: 56ch; }
+.signup-form { display: flex; flex-wrap: wrap; gap: 8px; }
+.signup-form input[type="email"] {
+  flex: 1 1 190px;
+  min-width: 0;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: .92rem;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm, 8px);
+}
+.signup-form input[type="email"]:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 1px;
+}
+.signup-note {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: .76rem;
+  color: var(--c-muted);
+}
+.signup-note a { color: inherit; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 880px) {
+  .signup { grid-template-columns: 1fr; padding: 22px 20px; }
+}
+
 .search-empty {
   text-align: center;
   color: var(--c-muted);
@@ -1390,6 +1444,10 @@ img.logo-mark {
 .output .output-area li.hlc-issue {
   color: var(--c-danger);
 }
+.output .output-area li.rr-error { color: var(--c-danger); }
+.output .output-area li.rr-warn { color: var(--c-warn); }
+.output .output-area li.rr-ok { color: var(--c-success); }
+.output .output-area p.rr-error { color: var(--c-danger); margin: 0; }
 .ogit-preview {
   display: block;
   max-width: 100%;
@@ -2397,13 +2455,13 @@ button.chip:focus-visible { outline: 2px solid var(--c-primary); outline-offset:
   .tool-shell { padding: 18px 16px; }
   .inspect-row { flex-direction: column; }
   .inspect-run, .inspect-row .btn { width: 100%; }
-  .bar-row { grid-template-columns: 100px 1fr 52px; }
 
   .stat-tile { padding: 14px 16px; }
   .stat-tile-value { font-size: 1.35rem; }
   .kpi-strip { grid-template-columns: 1fr 1fr; }
-  .bar-row { grid-template-columns: 90px 1fr 46px; }
-  .bar-label { font-size: .72rem; }
+  .bar-row { grid-template-columns: 96px 1fr 46px; }
+  /* The longest token is "Google-Extended": wrap it rather than clip it. */
+  .bar-label { font-size: .7rem; white-space: normal; line-height: 1.25; }
 }
 
 /* ---------- Inspect panel ("analyze your own page first") ---------- */
@@ -2797,21 +2855,7 @@ section.tool-content p a, .article p a, .policy p a, .cat-body p a {
 }
 
 
-/* Bar chart base styles — each bar gets --bar-color from the series */
-.bar-chart {
-  position: relative;
-  height: 200px;
-  width: 100%;
-}
-.bar {
-  position: absolute;
-  bottom: 0;
-  left: calc((100% / (N+1)) * var(--i));
-  width: calc(100% / (N+1)) - 12px;
-  background: var(--bar-color, var(--chart-1));
-  border-radius: 6px 6px 0 0;
-  transition: height .3s var(--ease);
-}
+/* Bar chart base styles — rows are laid out by .bar-chart (see Charts above) */
 
 /* ================================================================
    UPDATED STATUS CHIPS WITH OKABE-ITO COLORS

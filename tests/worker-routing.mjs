@@ -94,6 +94,23 @@ console.log('\n=== trailing slashes are permanent ===');
   ok('a non-GET keeps its method (308, not 301)', post.status === 308, 'status ' + post.status);
 }
 
+console.log('\n=== legacy URLs move permanently (not 404) ===');
+{
+  // Search reported /blog/website-audit/ as the site's only real 404 on 14 Nov.
+  // The guide was folded into the tool page, so the old URL owes a 301 — and one
+  // hop even when the slash is missing, because the report lists the slashed form.
+  const r = await route('https://tools4market.online/blog/website-audit/');
+  ok('/blog/website-audit/ → 301', r.status === 301, 'status ' + r.status);
+  ok('…to the Website Audit tool', r.location === CANON + '/tools/website-audit/', r.location || '');
+  ok('…cacheable as a permanent move', (r.headers.get('cache-control') || '').includes('max-age=86400'));
+
+  const bare = await route('https://tools4market.online/blog/website-audit?utm_source=gsc');
+  ok('no-slash legacy URL redirects in one hop with its query', bare.status === 301 && bare.location === CANON + '/tools/website-audit/?utm_source=gsc', bare.status + ' ' + (bare.location || ''));
+
+  const live = await route('https://tools4market.online/tools/website-audit/');
+  ok('the tool itself still serves 200', live.status === 200, 'status ' + live.status);
+}
+
 console.log('\n=== local preview stays usable ===');
 {
   for (const host of ['localhost:8787', '127.0.0.1:8787']) {
@@ -109,6 +126,11 @@ console.log('\n=== HSTS on the static asset layer ===');
   ok('dist/_headers: /* block carries HSTS', /Strict-Transport-Security:\s*max-age=\d{7,}/.test(headers));
   ok('dist/_headers: no includeSubDomains before subdomains are known', !/includeSubDomains/i.test(headers));
   ok('dist/_headers: security headers still on /*', block && /X-Content-Type-Options/.test(block) && /X-Frame-Options/.test(block));
+
+  // Search crawls /feed.xml as if it were a page (it is in the 14 Nov crawl set).
+  // An RSS document is a feed, not a result, so the header says so.
+  const feedBlock = headers.split(/\n(?=\/)/).find((b) => b.startsWith('/feed.xml\n'));
+  ok('dist/_headers: /feed.xml carries X-Robots-Tag: noindex', !!feedBlock && /X-Robots-Tag:\s*noindex/.test(feedBlock));
 }
 
 console.log(`\nWORKER ROUTING: ${pass} passed, ${fail} failed.`);

@@ -6,6 +6,8 @@ import { createHash } from 'node:crypto';
 import { TOOLS, CATEGORIES, POLICY, HOME_FAQS, JOBS, EDITOR_PICKS, SEARCH_EXAMPLES, weekIndex } from './src/data/index.js';
 import { INSPECT_TEXT, AUDIT, SCORE, SITE_AUDIT } from './src/data/inspect.js';
 import { ARTICLES } from './src/data/blog.js';
+import { RESEARCH } from './src/data/research.js';
+import { AI_BOTS } from './src/data/bots.js';
 import { AUTHORS } from './src/data/authors.js';
 import { toolIcon, catIcon } from './src/icons.mjs';
 import { catalogChart, processingChart, guideFigure, guideThumb, toolPreview, GUIDE_FIGURE_SLUGS, PREVIEW_SLUGS } from './src/visuals.mjs';
@@ -27,7 +29,7 @@ const ASSET_V = await (async () => {
   for (const d of dirs) {
     try {
       for (const f of (await readdir(R + d)).sort()) {
-        if (/\.(js|css|png|svg|woff2)$/.test(f)) files.push(d + '/' + f);
+        if (/\.(js|css|png|svg|woff2|webp|avif)$/.test(f)) files.push(d + '/' + f);
       }
     } catch { /* directory not present */ }
   }
@@ -80,6 +82,12 @@ const INDEXNOW_KEY = (process.env.INDEXNOW_KEY || '').trim();
 if (INDEXNOW_KEY && !/^[a-zA-Z0-9-]{8,128}$/.test(INDEXNOW_KEY)) {
   throw new Error('INDEXNOW_KEY must be 8–128 letters/digits/dashes (got: ' + INDEXNOW_KEY + ')');
 }
+// Buttondown username for the email list. Empty → no form is rendered anywhere,
+// so a checkout without the variable cannot publish a dead subscribe button.
+const BUTTONDOWN_USERNAME = (process.env.BUTTONDOWN_USERNAME || '').trim();
+if (BUTTONDOWN_USERNAME && !/^[a-z0-9][a-z0-9-]{1,60}$/i.test(BUTTONDOWN_USERNAME)) {
+  throw new Error('BUTTONDOWN_USERNAME must be a Buttondown username (got: ' + BUTTONDOWN_USERNAME + ')');
+}
 // ---- AdSense ------------------------------------------------------------
 // `data-ad-slot` must be the NUMERIC unit id from AdSense → Ads → By ad unit.
 // A value like `ca-pub-123:0/0` is not a slot id: the tag renders, the request
@@ -115,6 +123,9 @@ const AD_SLOTS_ON = ADSENSE_ENABLED || Object.values(AD_SLOTS).some(Boolean);
 // the repo: ads.config.json says what this site is, `.env` says how to reach it.
 // ALLOW_ADS_OFF=1 is the explicit override for a deliberately ad-free build.
 const ADS_INTENT = await readFile(R + 'ads.config.json', 'utf8').then(JSON.parse).catch(() => ({}));
+// The AI-crawler study is a committed snapshot, not a live query: `npm run study`
+// writes src/data/ai-crawler-study.json and the build only renders it.
+const STUDY = JSON.parse(await readFile(R + 'src/data/ai-crawler-study.json', 'utf8'));
 if (ADS_INTENT.adsEnabled && !ADSENSE_ENABLED && !process.env.ALLOW_ADS_OFF) {
   console.error(
     '\n!! ads.config.json says this site runs ads, but this build has no AdSense environment.\n' +
@@ -383,6 +394,8 @@ ${body}
     <div>
       <h2 class="footer-head">Company</h2>
       <a href="${rel(path, '/blog/')}">Guides</a>
+      <a href="${rel(path, '/research/')}">Research</a>
+      <a href="${rel(path, '/ai-crawlers/')}">AI crawlers</a>
       ${POLICY.map((p) => `<a href="${rel(path, '/' + p.slug + '/')}">${p.title}</a>`).join('')}
     </div>
     <div>
@@ -473,7 +486,7 @@ const LOCAL_TOOLS = new Set([
   'regex-tester', 'qr-code-generator', 'word-counter', 'character-counter',
   'color-picker', 'css-minifier', 'cron-expression-generator', 'json-to-csv',
   'text-diff', 'hash-generator', 'favicon-generator', 'svg-optimizer',
-  'markdown-to-html', 'email-validator',
+  'markdown-to-html', 'email-validator', 'rich-results-tester',
 ]);
 // Honest card copy where the two stock notes don't fit: website-audit has no
 // single-page panel (it crawls), and local tools have no server round-trip.
@@ -528,7 +541,7 @@ function homeBody() {
   // Keep this list honest and current; each chip names a real property.
   const PROOF = [
     { label: 'No signup', sub: 'no account' },
-    { label: '59 tools', sub: 'one directory' },
+    { label: `${TOOLS.length} tools`, sub: 'one directory' },
     { label: 'In-browser', sub: 'files stay local' },
     { label: 'AI crawler presets', sub: '18 bots' },
     { label: 'Live page checks', sub: 'any public URL' },
@@ -572,7 +585,11 @@ function homeBody() {
         <span class="shot-dots"><i></i><i></i><i></i></span>
         <code>tools4market.online/tools/website-audit/</code>
       </div>
-      <img src="${av(path, '/assets/hero-audit.png')}" alt="A Tools4Market audit of example.com: the scan ledger, a 54/100 score, and the first blocker finding with its fix button" width="1000" height="1330" decoding="async" fetchpriority="high">
+      <picture>
+        <source type="image/avif" srcset="${av(path, '/assets/hero-audit.avif')}">
+        <source type="image/webp" srcset="${av(path, '/assets/hero-audit.webp')}">
+        <img src="${av(path, '/assets/hero-audit.png')}" alt="A Tools4Market audit of example.com: the scan ledger, a 54/100 score, and the first blocker finding with its fix button" width="1000" height="1330" decoding="async" fetchpriority="high">
+      </picture>
       <figcaption>A real run on example.com, which has no sitemap. Fifteen findings, each with a fix; the score is this checklist's weighting, not a Google ranking.</figcaption>
     </figure>
   </div>
@@ -721,6 +738,29 @@ function homeBody() {
     </section>`;
   }).join('')}
 
+  <!-- ============ RESEARCH BAND ============ -->
+  <section class="home-section" id="research">
+    <h2 class="section-title">Measured, not asserted</h2>
+    <p class="section-sub">We fetch and count the parts of the web other people describe. Each study ships its method and its raw dataset.</p>
+    <div class="blog-list">
+      <a class="blog-card" href="${rel(path, '/research/ai-crawlers-2026/')}">
+        <span class="blog-meta"><span class="blog-topic">Research</span></span>
+        <strong>Which top websites block AI crawlers?</strong>
+        <span class="blog-dek">20.9% of the 1,000 highest-ranked sites disallow GPTBot at the root — and only 8.7% block training while keeping the answer engines. 18 crawlers, full CSV.</span>
+        <span class="blog-tool">Read the study &rarr;</span>
+      </a>
+      <a class="blog-card" href="${rel(path, '/ai-crawlers/')}">
+        <span class="blog-meta"><span class="blog-topic">Reference</span></span>
+        <strong>Every AI crawler, in one list</strong>
+        <span class="blog-dek">What each token does, who runs it, and the exact robots.txt line that allows or blocks it — GPTBot, ClaudeBot, PerplexityBot and the rest.</span>
+        <span class="blog-tool">Browse the crawler list &rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ EMAIL CAPTURE ============ -->
+  ${emailCapture(path)}
+
   <!-- ============ CTA BAND ============ -->
   <section class="home-cta">
     <div class="cta-copy">
@@ -783,7 +823,8 @@ function toolPage(t) {
     'twitter-card-generator': ['open-graph-generator', 'meta-tag-generator'],
     'canonical-tag-generator': ['hreflang-tag-generator', 'web-crawler-audit', 'sitemap-generator'],
     'hreflang-tag-generator': ['canonical-tag-generator', 'schema-markup-generator'],
-    'schema-markup-generator': ['web-crawler-audit', 'seo-score-checker', 'meta-tag-generator'],
+    'schema-markup-generator': ['rich-results-tester', 'web-crawler-audit', 'seo-score-checker'],
+    'rich-results-tester': ['schema-markup-generator', 'seo-score-checker', 'web-crawler-audit', 'meta-tag-generator'],
     'serp-preview-tool': ['meta-description-checker', 'meta-tag-generator', 'seo-score-checker'],
     'meta-description-checker': ['serp-preview-tool', 'meta-tag-generator'],
     'web-crawler-audit': ['seo-score-checker', 'sitemap-generator', 'robots-txt-generator'],
@@ -1017,6 +1058,7 @@ function blogIndexBody() {
       <span>${esc(a.intro.slice(0, 180))}…</span>
     </a>`).join('\n    ')}
   </div>
+  ${emailCapture(path)}
 </div>`;
 }
 
@@ -1046,8 +1088,282 @@ function articleLd(a) {
   ];
 }
 
-function notFoundBody() {
-  return `<div class="container nf">
+// ---- research: AI crawler study + directory ------------------------------
+const pct1 = (n) => (Math.round(n * 10) / 10).toFixed(1) + '%';
+const verdictLabel = (v) => ({ allowed: 'Allowed', blocked: 'Blocked', nofile: 'No file', unknown: 'Unreadable' }[v] || v);
+
+const statTile = (label, value, note) => `<div class="stat-tile"><span class="stat-tile-label">${esc(label)}</span><span class="stat-tile-value">${esc(value)}</span>${note ? `<span class="stat-tile-delta flat">${esc(note)}</span>` : ''}</div>`;
+
+// Bars are drawn to the percentage itself, not scaled to the largest value:
+// the track is the whole sample, so a 20.9% bar is exactly a fifth of it and
+// the chart needs no caveat about its axis.
+function botBar(b) {
+  const w = Math.max(1, Math.round(b.pct * 10) / 10);
+  return `<div class="bar-row"><div class="bar-label">${esc(b.ua)}</div><div class="bar-track"><div class="bar-fill" style="width:${w}%"></div></div><div class="bar-val">${pct1(b.pct)}</div></div>`;
+}
+
+// ---- email list ---------------------------------------------------------
+// Rendered only when BUTTONDOWN_USERNAME is set. Buttondown hosts the list and
+// the confirmation step; this is their documented embed form, pointed at a
+// username rather than an API key, so no secret ever enters the build.
+function emailCapture(path) {
+  if (!BUTTONDOWN_USERNAME) return '';
+  const action = 'https://buttondown.email/api/emails/embed-subscribe/' + encodeURIComponent(BUTTONDOWN_USERNAME);
+  return `<section class="signup" aria-labelledby="signup-title">
+    <div class="signup-copy">
+      <h2 id="signup-title">One email when there is something to measure</h2>
+      <p>New studies like the crawler one above, plus the guides that explain them. No drip sequence, no relaunch news, no more than one email a week.</p>
+    </div>
+    <form class="signup-form" action="${action}" method="post" target="_blank">
+      <input type="hidden" name="embed" value="1">
+      <label class="visually-hidden" for="signup-email">Email address</label>
+      <input type="email" id="signup-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+      <button class="btn" type="submit">Subscribe</button>
+      <p class="signup-note">Double opt-in. The address is stored by Buttondown, not by this site — see the <a href="${rel(path, '/privacy-policy/')}">privacy policy</a>.</p>
+    </form>
+  </section>`;
+}
+
+function researchIndexBody() {
+  const path = '/research/';
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>Research</span></nav>
+  <h1>Research</h1>
+  <p class="lead">Measured snapshots of things we can fetch and count. Each study ships its method and its raw dataset, so the numbers can be checked rather than repeated.</p>
+  <div class="blog-list">
+    ${RESEARCH.map((r) => `<a class="blog-card" href="${rel(path, '/research/' + r.slug + '/')}">
+      <span class="blog-date"><time datetime="${esc(r.date)}">${fmtDate(r.date)}</time></span>
+      <strong>${esc(r.title)}</strong>
+      <span>${esc(r.summary)}</span>
+    </a>`).join('\n    ')}
+    <a class="blog-card" href="${rel(path, '/ai-crawlers/')}">
+      <span class="blog-date">Reference</span>
+      <strong>AI crawlers: the full list</strong>
+      <span>Every token in the study, what it does, who runs it, and the robots.txt line that allows or blocks it.</span>
+    </a>
+  </div>
+</div>`;
+}
+
+function studyBody(entry) {
+  const s = STUDY;
+  const path = '/research/' + entry.slug + '/';
+  const bot = Object.fromEntries(s.perBot.map((b) => [b.id, b]));
+  const iso = s.generatedAt.slice(0, 10);
+  const chartBots = ['gptbot', 'claudebot', 'ccbot', 'bytespider', 'googleext', 'perplexity', 'oaisearch', 'applebot-search']
+    .map((id) => bot[id]).filter(Boolean);
+  const tableRows = s.perBot.map((b) => `<tr><td><code>${esc(b.ua)}</code></td><td>${esc(b.owner)}</td><td>${b.group === 'training' ? 'Training' : 'Search &amp; answers'}</td><td>${b.blocked}</td><td>${pct1(b.pct)}</td></tr>`).join('');
+  const notables = (s.notable || []).map((r) => `<tr><td>${esc(r.domain)}</td><td>${esc(verdictLabel(r.gptbot))}</td><td>${esc(verdictLabel(r.claudebot))}</td><td>${esc(verdictLabel(r.perplexity))}</td></tr>`).join('');
+  const trainingCount = s.perBot.filter((b) => b.group === 'training').length;
+
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <a href="${rel(path, '/research/')}">Research</a> <span class="breadcrumb-sep">/</span> <span>${esc(entry.short)}</span></nav>
+  <div class="article-layout article-layout--solo">
+  <article class="policy article">
+    <h1>${esc(entry.title)}</h1>
+    <p class="article-meta">Published <time datetime="${iso}">${fmtDate(iso)}</time> &middot; By <a href="${rel(path, '/authors/glixtron/')}" rel="author">Glixtron</a> &middot; Snapshot, not a live feed</p>
+    <p class="lead">Every <em>should I block the AI crawlers</em> decision starts with the same file, and almost nobody publishes what sites actually put in it. We fetched <code>robots.txt</code> from the ${s.sampleRequested.toLocaleString('en-GB')} highest-ranked domains that serve a website, parsed each file for the ${s.perBot.length} AI crawlers we track, and recorded whether that crawler may fetch the site root.</p>
+
+    <div class="kpi-strip">
+      ${statTile('Sites analysed', s.sampleRequested.toLocaleString('en-GB'), `${s.sampleReadable} with a readable robots.txt`)}
+      ${statTile('Block GPTBot', pct1(bot.gptbot.pct), `${bot.gptbot.blocked} sites disallow /`)}
+      ${statTile('Block a training crawler', pct1(s.summary.anyTrainingBlockedPct), `${s.summary.anyTrainingBlocked} sites`)}
+      ${statTile('Block training, keep answers', pct1(s.summary.blockTrainingAllowSearchPct), `${s.summary.blockTrainingAllowSearch} sites`)}
+    </div>
+
+    <h2>One in five blocks GPTBot at the root</h2>
+    <p>Of the ${s.sampleReadable} sites that served a readable file, ${bot.gptbot.blocked} (${pct1(bot.gptbot.pct)}) disallow GPTBot from the whole site. ClaudeBot sits at ${pct1(bot.claudebot.pct)} and CCBot — the Common Crawl crawler that feeds many models indirectly — at ${pct1(bot.ccbot.pct)}. The order is the interesting part: the open dataset is blocked slightly more often than the crawlers owned by model vendors.</p>
+    <p>Blocking is still the minority position. <strong>${pct1(s.summary.openToAllPct)}</strong> of the sample disallows none of the ${trainingCount} training crawlers we checked at the root. The headline for anyone deciding today is not that the web has closed, but that a large, visible minority has closed one door while leaving the others open.</p>
+
+    <div class="chart-card">
+      <p class="chart-title">Root disallowed, by crawler</p>
+      <p class="chart-sub">Share of the ${s.sampleReadable} sites with a readable robots.txt whose rules block <code>/</code> for that user-agent. Each bar is the share itself; the track is the full sample.</p>
+      <div class="bar-chart">${chartBots.map((b) => botBar(b)).join('\n        ')}</div>
+    </div>
+
+    <h2>The numbers by crawler</h2>
+    <p>Each row is one user-agent token exactly as it appears in robots.txt. A site counts as blocking when the longest matching rule for the root path is a <code>Disallow</code>.</p>
+    <div class="table-wrap"><table class="article-table">
+      <thead><tr><th scope="col">Crawler</th><th scope="col">Run by</th><th scope="col">Purpose</th><th scope="col">Sites blocking</th><th scope="col">Share</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div>
+
+    <h2>Blocking is all-or-nothing</h2>
+    <p>${s.summary.anyTrainingBlocked} sites block at least one training crawler, but the distribution is not gradual: ${s.summary.allTrainingBlocked} of them block all ${trainingCount} at once — more than a quarter of the blockers reject the whole category. Once a publisher decides the content is not for training, the decision tends to cover every vendor rather than one.</p>
+
+    <h2>Most blocking also hits the answer engines</h2>
+    <p>The advice that circulates in 2026 — block training, keep the crawlers that send readers — describes only ${s.summary.blockTrainingAllowSearch} sites (${pct1(s.summary.blockTrainingAllowSearchPct)}). In practice ${bot.oaisearch.blocked} sites block OAI-SearchBot and ${bot.perplexity.blocked} block PerplexityBot, so a substantial share of the sample is invisible to at least one AI answer engine by choice. The token names invite it: <code>PerplexityBot</code> reads like a training crawler, and blocking the company often happens in one line.</p>
+
+    <h2>What eight well-known sites published</h2>
+    <div class="table-wrap"><table class="article-table">
+      <thead><tr><th scope="col">Site</th><th scope="col">GPTBot</th><th scope="col">ClaudeBot</th><th scope="col">PerplexityBot</th></tr></thead>
+      <tbody>${notables}</tbody>
+    </table></div>
+    <p class="chart-sub">As measured on ${fmtDate(iso)}. "Allowed" means no rule matched the site root for that token; it says nothing about what the crawler actually fetched, or about paths below the root.</p>
+
+    <h2>What to do with this</h2>
+    <p>There are three defensible positions, and the data shows all three in use. <strong>Allow everything</strong> keeps every answer engine able to cite you; ${pct1(s.summary.openToAllPct)} of the sample is here. <strong>Block training, keep the readers</strong> is the trade ${pct1(s.summary.blockTrainingAllowSearchPct)} of the sample makes — the <a href="${rel(path, '/tools/ai-crawler-blocker/')}">AI Crawler Blocker</a> writes that file for you. <strong>Block everything</strong> protects content from all machine reading, and costs you the citations; the <a href="${rel(path, '/tools/robots-txt-generator/')}">robots.txt generator</a> covers the classic bots too.</p>
+    <p>Whichever you choose, test the file rather than trusting the template. The <a href="${rel(path, '/tools/robots-txt-tester/')}">robots.txt tester</a> shows which rule wins for a given path and bot, and the <a href="${rel(path, '/tools/web-crawler-audit/')}">crawler audit</a> reads a live site's response, robots rules and canonical signals together.</p>
+
+    <h2>Limits of this study</h2>
+    <ul>
+      <li><strong>One day.</strong> ${fmtDate(iso)} is the day the files were fetched. Publishers edit robots.txt constantly, so recheck before quoting a single site.</li>
+      <li><strong>Root only.</strong> A site can allow <code>/</code> and disallow <code>/news/</code>. This measures the site-wide decision, not every path.</li>
+      <li><strong>${s.sampleNoFile + s.sampleError} sites were left out.</strong> ${s.sampleNoFile} published no file; ${s.sampleError} answered with an error (403, 418, 429 or a timeout). Those are disproportionately hostile to automated requests, so the real blocking rate is more likely understated than overstated.</li>
+      <li><strong>Apex host only.</strong> <code>m.</code> and AMP subdomains can publish different rules.</li>
+      <li><strong>robots.txt is advisory.</strong> Cloudflare bot rules, licence deals and server-side blocking are invisible in the file and often do more.</li>
+      <li><strong>Not a random sample.</strong> Tranco ranks popularity, not site type; a top-1,000 list over-represents platforms and publishers.</li>
+    </ul>
+
+    <h2>Method</h2>
+    <ol>
+      <li><strong>Sample.</strong> The Tranco top-1m list, read in rank order on ${fmtDate(iso)}. A domain was included when its homepage served HTML or its robots.txt was readable — the second condition keeps publishers that answer 403 to unfamiliar clients. The first ${s.sampleRequested.toLocaleString('en-GB')} qualifying domains were analysed.</li>
+      <li><strong>Fetch.</strong> One <code>GET https://&lt;domain&gt;/robots.txt</code> per domain, following redirects, with an identifying user agent that names this site.</li>
+      <li><strong>Parse.</strong> An RFC 9309 subset: groups merged per user-agent, case-insensitive tokens, longest matching path wins, <code>Allow</code> wins ties, <code>*</code> and <code>$</code> wildcards supported. A site blocks a crawler when the root path resolves to a <code>Disallow</code>.</li>
+      <li><strong>Exclude.</strong> ${s.sampleNoFile} sites without a file and ${s.sampleError} unreadable ones are reported separately and left out of the percentages, which use the ${s.sampleReadable} readable files as the denominator.</li>
+    </ol>
+
+    <div class="chart-card">
+      <p class="chart-title">Cite this study</p>
+      <p>Tools4Market (${fmtDate(iso)}). <em>${esc(entry.title)}</em>. https://tools4market.online/research/${entry.slug}/</p>
+      <p><a class="btn btn-secondary" href="${rel(path, path + 'dataset.csv')}" download>Download the dataset (CSV, ${s.sampleRequested.toLocaleString('en-GB')} rows)</a></p>
+    </div>
+
+    <h2>Frequently asked questions</h2>
+    <details><summary>How many top websites block GPTBot?</summary><p>${bot.gptbot.blocked} of the ${s.sampleReadable} sites with a readable robots.txt (${pct1(bot.gptbot.pct)}) disallowed it from the site root on ${fmtDate(iso)}. Counting the ${s.sampleNoFile} sites with no file as non-blocking, it is ${pct1((bot.gptbot.blocked / s.sampleRequested) * 100)} of all ${s.sampleRequested.toLocaleString('en-GB')} domains.</p></details>
+    <details><summary>Does blocking AI crawlers hurt Google rankings?</summary><p>Not directly. <code>GPTBot</code>, <code>ClaudeBot</code> and <code>CCBot</code> are not Googlebot, so blocking them leaves Search crawling and ranking untouched. What changes is whether your pages can appear in those assistants' answers — that is lost referral traffic, not a ranking penalty. <code>Google-Extended</code> is the one token that touches Google's own AI use, and it does not affect Search.</p></details>
+    <details><summary>Does robots.txt stop AI scrapers?</summary><p>It stops the crawlers that choose to honour it, which includes the major vendors. It cannot stop a scraper that ignores the file or a browser-like fetch. For those, rate limiting and a WAF are the controls that work — robots.txt is a policy statement, not enforcement.</p></details>
+    <details><summary>Why do some sites block PerplexityBot but allow OAI-SearchBot?</summary><p>Because the tokens are read by name. <code>PerplexityBot</code> looks like a training crawler and gets filtered with the training group; <code>OAI-SearchBot</code> is explicitly a search-listing bot. In this sample ${bot.perplexity.blocked} sites block PerplexityBot and ${bot.oaisearch.blocked} block OAI-SearchBot.</p></details>
+    <details><summary>How was the sample chosen?</summary><p>By rank, from the Tranco top-1m list, keeping only domains that served an HTML homepage or a readable robots.txt, until ${s.sampleRequested.toLocaleString('en-GB')} were collected. It is a popularity ranking, not a random sample of the web.</p></details>
+  </article>
+  </div>
+</div>`;
+}
+
+function studyLd(entry) {
+  const s = STUDY;
+  const path = '/research/' + entry.slug + '/';
+  const iso = s.generatedAt.slice(0, 10);
+  return [
+    {
+      '@context': 'https://schema.org', '@type': 'Article',
+      headline: entry.title, description: entry.summary, url: SITE.url + path,
+      datePublished: iso, dateModified: iso,
+      author: { '@type': 'Person', name: 'Glixtron', url: SITE.url + '/authors/glixtron/' },
+      publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/icon-512.png', width: 512, height: 512 } },
+      image: SITE.url + '/assets/og-image.png',
+      inLanguage: 'en', mainEntityOfPage: { '@type': 'WebPage', '@id': SITE.url + path },
+    },
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Research', path: '/research/' }, { name: entry.short, path }]),
+    {
+      '@context': 'https://schema.org', '@type': 'Dataset',
+      name: 'AI crawler robots.txt policy of the top 1,000 websites',
+      description: `Robots.txt verdicts for ${s.perBot.length} AI crawlers across the ${s.sampleRequested} highest-ranked domains that serve a website, fetched ${iso}.`,
+      url: SITE.url + path, datePublished: iso, temporalCoverage: iso,
+      creator: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+      license: 'https://creativecommons.org/licenses/by/4.0/',
+      distribution: { '@type': 'DataDownload', contentUrl: SITE.url + path + 'dataset.csv', encodingFormat: 'text/csv' },
+    },
+    {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: [
+        { '@type': 'Question', name: 'How many top websites block GPTBot?', acceptedAnswer: { '@type': 'Answer', text: `${s.perBot.find((b) => b.id === 'gptbot').blocked} of ${s.sampleReadable} sites with a readable robots.txt blocked GPTBot at the root on ${iso}.` } },
+        { '@type': 'Question', name: 'Does blocking AI crawlers hurt Google rankings?', acceptedAnswer: { '@type': 'Answer', text: 'Not directly. GPTBot, ClaudeBot and CCBot are not Googlebot, so blocking them leaves Search crawling and ranking untouched. The cost is not appearing in those assistants answers.' } },
+        { '@type': 'Question', name: 'How was the sample chosen?', acceptedAnswer: { '@type': 'Answer', text: 'By rank from the Tranco top-1m list, keeping domains that served an HTML homepage or a readable robots.txt.' } },
+      ],
+    },
+  ];
+}
+
+function crawlerDirectoryBody() {
+  const path = '/ai-crawlers/';
+  const rows = AI_BOTS.map((b) => `<tr><td><code>${esc(b.ua)}</code></td><td>${esc(b.owner)}</td><td>${esc(b.purpose)}</td><td>${esc(b.advice)}</td></tr>`).join('');
+  return `<div class="container">
+  <nav class="breadcrumb"><a href="${rel(path, '/')}">Home</a> <span class="breadcrumb-sep">/</span> <span>AI crawlers</span></nav>
+  <div class="article-layout article-layout--solo">
+  <article class="policy article">
+    <h1>AI crawlers: the full list, and how to allow or block each one</h1>
+    <p class="article-meta">Updated <time datetime="2026-11-14">14 November 2026</time> &middot; By <a href="${rel(path, '/authors/glixtron/')}" rel="author">Glixtron</a></p>
+    <p class="lead">There are now two kinds of crawler on your site: the ones that index pages for search, and the ones that read them for a model. They share a file, they do not share a purpose, and the tokens are easy to confuse. This page lists every AI crawler we model, what it is for, and the robots.txt decision it needs.</p>
+
+    <div class="table-wrap"><table class="article-table">
+      <thead><tr><th scope="col">User-agent</th><th scope="col">Run by</th><th scope="col">What it does</th><th scope="col">Starting point</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+
+    <h2>Training crawlers and answer engines are not the same decision</h2>
+    <p>A <strong>training crawler</strong> takes content away: the page becomes training data, and nothing measurable comes back. An <strong>answer engine</strong> fetches a page to answer a question, which is how your site gets cited and clicked. Both live in robots.txt, and blocking one is not a statement about the other.</p>
+    <p>The split most publishers land on is to block the first group and allow the second — but our <a href="${rel(path, '/research/ai-crawlers-2026/')}">study of 1,000 top websites</a> found only 8.7% actually do that cleanly. In practice most blocking is blanket, and it takes the answer engines with it.</p>
+
+    <h2>The three files people need</h2>
+    <p><strong>Allow everything.</strong> The default, and the right choice if you want citations and have nothing to licence.</p>
+    <pre class="article-code">User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml</pre>
+    <p><strong>Block training, keep the readers.</strong> List the training tokens, then allow the rest. Remember that <code>Google-Extended</code> is a control token, not a crawler: blocking it switches Gemini training and grounding off together, while Googlebot and Search are untouched.</p>
+    <pre class="article-code">User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: *
+Allow: /</pre>
+    <p><strong>Block everything.</strong> For staging sites and anything behind a paywall. It stops the crawlers that obey it, and it also stops search engines seeing a <code>noindex</code> tag, so use it deliberately.</p>
+    <pre class="article-code">User-agent: *
+Disallow: /</pre>
+
+    <h2>What robots.txt cannot do</h2>
+    <p>It is a request, not a wall. Crawlers from the major vendors honour it; scrapers that ignore it, or fetch with a browser identity, are unaffected. It also does not remove indexed pages, does not de-rank anything, and does not stop a company that already has your content under a licence. For those cases the controls that work sit at the edge — rate limiting, a WAF rule, or a signed agreement.</p>
+
+    <h2>Check what a site actually publishes</h2>
+    <p>Reading a file and predicting its effect are different jobs. The <a href="${rel(path, '/tools/robots-txt-tester/')}">robots.txt tester</a> resolves a path against the rules and shows which line wins for a given bot; the <a href="${rel(path, '/tools/ai-crawler-blocker/')}">AI crawler blocker</a> writes the training-block file above with your domain filled in; the <a href="${rel(path, '/tools/robots-txt-generator/')}">robots.txt generator</a> covers the classic bots and the sitemap line.</p>
+    <p>For the wider question — whether anyone is actually blocking you — the <a href="${rel(path, '/tools/web-crawler-audit/')}">crawler audit</a> reads a live page's response headers, robots rules and canonical signals in one pass.</p>
+
+    <h2>Frequently asked questions</h2>
+    <details><summary>Which AI crawlers should I block?</summary><p>If you do not want your content used for model training, block the training group: GPTBot, ClaudeBot, CCBot, Bytespider, Google-Extended, Applebot-Extended, meta-externalagent and the rest of the table above. Keep the answer engines if you want citations. The choice is editorial and licensing, not a ranking mechanism.</p></details>
+    <details><summary>Is Google-Extended a crawler?</summary><p>No. It is a control token that Google's crawlers consult. Blocking it turns off Gemini training and Gemini grounding together; it does not block Googlebot, Search indexing or rankings.</p></details>
+    <details><summary>Does blocking GPTBot remove my pages from ChatGPT?</summary><p>It prevents OpenAI's training and search crawlers from reading new pages. Pages already in an index or a model are not removed by the file, and anything fetched by a user-controlled browser is outside robots.txt entirely.</p></details>
+    <details><summary>What is the difference between PerplexityBot and Perplexity-User?</summary><p><code>PerplexityBot</code> builds the answer index; <code>Perplexity-User</code> fetches a page live when someone asks about it. Blocking the first removes you from the index; blocking the second stops live fetches, which is where some of the referral traffic comes from.</p></details>
+    <details><summary>Do AI crawlers respect robots.txt?</summary><p>The major vendors' crawlers do, and each publishes its token. That is exactly why the token names matter: a rule that names the wrong token protects nothing. Scrapers without a published policy are a different problem, handled at the edge rather than in the file.</p></details>
+
+    <h2>Related</h2>
+    <ul class="article-tools">
+      <li><a href="${rel(path, '/research/ai-crawlers-2026/')}">Study: which top sites block AI crawlers</a> — 1,000 sites, 18 crawlers, measured.</li>
+      <li><a href="${rel(path, '/blog/robots-txt-for-search-and-ai-crawlers/')}">robots.txt for search engines and AI crawlers</a> — what the file controls.</li>
+      <li><a href="${rel(path, '/blog/how-to-block-gptbot/')}">How to block GPTBot (and what it costs you)</a></li>
+      <li><a href="${rel(path, '/blog/check-ai-crawler-access/')}">Check whether AI crawlers can read your site</a></li>
+    </ul>
+  </article>
+  </div>
+</div>`;
+}
+
+function crawlerDirectoryLd() {
+  const path = '/ai-crawlers/';
+  return [
+    {
+      '@context': 'https://schema.org', '@type': 'Article',
+      headline: 'AI crawlers: the full list, and how to allow or block each one',
+      description: 'Every major AI crawler in 2026, what it does, who runs it, and the robots.txt line that allows or blocks it.',
+      url: SITE.url + path, datePublished: '2026-11-14', dateModified: '2026-11-14',
+      author: { '@type': 'Person', name: 'Glixtron', url: SITE.url + '/authors/glixtron/' },
+      publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: SITE.url + '/assets/icon-512.png', width: 512, height: 512 } },
+      image: SITE.url + '/assets/og-image.png', inLanguage: 'en',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': SITE.url + path },
+    },
+    breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'AI crawlers', path }]),
+    {
+      '@context': 'https://schema.org', '@type': 'ItemList',
+      name: 'AI crawlers tracked by Tools4Market',
+      itemListElement: AI_BOTS.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.ua, description: `${b.owner}: ${b.purpose}` })),
+    },
+  ];
+}
+
+function notFoundBody() {  return `<div class="container nf">
   <p class="nf-code">404</p>
   <h1>Page not found</h1>
   <p class="lead">The page you are looking for does not exist (yet).</p>
@@ -1132,11 +1448,14 @@ const run = async () => {
     ...TOOLS.map((t) => ({ path: '/tools/' + t.slug + '/', title: t.metaTitle, desc: t.metaDesc, body: toolPage(t), ld: toolLd(t), tool: t })),
     { path: '/blog/', title: 'Guides — Free SEO and Marketing How-Tos | ' + SITE.name, desc: 'Practical guides for the jobs these tools do: crawler rules, launch checklists, structured data, campaigns and technical SEO — tested, plain and free.', body: blogIndexBody(), ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Guides', url: SITE.url + '/blog/', description: 'How-to guides for marketers, bloggers and webmasters.' }, breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/blog/' }])] },
     ...ARTICLES.map((a) => ({ path: '/blog/' + a.slug + '/', title: a.metaTitle, desc: a.metaDesc, body: articlePage(a), ld: articleLd(a) })),
+    { path: '/research/', title: 'Research — measured studies | ' + SITE.name, desc: 'Measured snapshots of things we can fetch and count, each with its method and raw dataset: AI crawler policy, robots.txt rules and more.', body: researchIndexBody(), ld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Research', url: SITE.url + '/research/', description: 'Measured studies with published datasets.' }, breadcrumbLd([{ name: 'Home', path: '/' }, { name: 'Research', path: '/research/' }])] },
+    ...RESEARCH.map((r) => ({ path: '/research/' + r.slug + '/', title: r.metaTitle, desc: r.metaDesc, body: studyBody(r), ld: studyLd(r) })),
+    { path: '/ai-crawlers/', title: 'AI Crawlers List (2026): GPTBot, ClaudeBot, PerplexityBot', desc: 'Every major AI crawler in 2026: what it does, who runs it, and the robots.txt line that allows or blocks it. GPTBot, ClaudeBot, PerplexityBot and more.', body: crawlerDirectoryBody(), ld: crawlerDirectoryLd() },
     ...AUTHORS.map((by) => ({ path: '/authors/' + by.slug + '/', title: by.metaTitle, desc: by.metaDesc, body: authorPage(by), ld: authorLd(by) })),
     ...POLICY.map((p) => {
       const path = '/' + p.slug + '/';
       return {
-        path, title: p.metaTitle, desc: p.metaDesc, body: policyPage(p),
+        path, title: p.metaTitle, desc: p.metaDesc, body: policyPage(p), noindex: !!p.noindex,
         ld: [breadcrumbLd([{ name: 'Home', path: '/' }, { name: p.title, path }])],
       };
     }),
@@ -1156,11 +1475,23 @@ const run = async () => {
     }
   }
 
+  // Research datasets ship beside the study that cites them, so the
+  // "download the raw data" link resolves to a real file on the published site
+  // (the Dataset schema's contentUrl points at the same URL).
+  for (const r of RESEARCH) {
+    if (!r.dataset) continue;
+    await copyFile(R + 'src/data/' + r.dataset, R + 'dist/research/' + r.slug + '/dataset.csv');
+  }
+
   // ---- sitemaps: a sitemap INDEX + two children (pages, tools) ---------
   // An index keeps room to grow (a blog/content sitemap later) and lets crawlers
   // fetch only the slice they need.
-  const pagePaths = ['/', '/blog/', ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...AUTHORS.map((by) => '/authors/' + by.slug + '/'), ...POLICY.map((p) => '/' + p.slug + '/')];
+  const pagePaths = ['/', '/blog/', '/research/', '/ai-crawlers/', ...RESEARCH.map((r) => '/research/' + r.slug + '/'), ...Object.values(CATEGORIES).map((c) => '/' + c.slug + '/'), ...AUTHORS.map((by) => '/authors/' + by.slug + '/'), ...POLICY.filter((p) => !p.noindex).map((p) => '/' + p.slug + '/')];
   const toolPaths = TOOLS.map((t) => '/tools/' + t.slug + '/');
+  // Only pages that belong in search results are listed. Legal and contact pages
+  // carry noindex (AdSense-required furniture, not landing pages), and Search had
+  // all four in "crawled — currently not indexed" on 14 Nov: a page cannot be
+  // both noindex and worth a sitemap slot.
   // Do not emit synthetic lastmod values: a build date is not the page's
   // significant content-modification date. Guides carry a real one (their
   // publish/update date from src/data/blog.js); tool and page URLs have no
@@ -1197,6 +1528,10 @@ const run = async () => {
     'User-agent: *',
     'Content-Signal: search=yes,ai-train=no,use=reference',
     'Allow: /',
+    '# Not a page: the Google Tag Gateway path (served by Cloudflare, not this',
+    '# repo). Search crawled /tow0/ on 14 Nov — there is nothing there to index and',
+    '# the 593 KB script behind it spends crawl budget.',
+    'Disallow: /tow0/',
     '',
     '# AI training crawlers',
     ...TRAINING_BOTS.map((b) => `User-agent: ${b}`),
@@ -1231,6 +1566,10 @@ const run = async () => {
     '',
     '## Guides',
     ...ARTICLES.map((a) => `- [${a.title}](${SITE.url}/blog/${a.slug}/): ${a.intro.split('.')[0]}.`),
+    '',
+    '## Research',
+    ...RESEARCH.map((r) => `- [${r.title}](${SITE.url}/research/${r.slug}/): ${r.summary}`),
+    `- [AI crawlers: the full list](${SITE.url}/ai-crawlers/): every AI crawler token, what it does and how to allow or block it in robots.txt.`,
     '',
     '## Policies',
     ...POLICY.map((p) => `- [${p.title}](${SITE.url}/${p.slug}/)`),
@@ -1343,7 +1682,7 @@ ${feedItems}
   }
   // social share image (og:image / twitter:image) — pre-rendered, brand palette
   await copyFile(R + 'src/assets/og-image.png', R + 'dist/assets/og-image.png');
-  for (const ic of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo-mark.png', 'hero_scene.jpg', 'hero-audit.png']) {
+  for (const ic of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'logo-mark.png', 'hero_scene.jpg', 'hero-audit.png', 'hero-audit.webp', 'hero-audit.avif']) {
     const src = R + 'src/assets/' + ic;
     try { await copyFile(src, R + 'dist/assets/' + ic); }
     catch { /* missing source asset — keep build working */ }
@@ -1380,6 +1719,11 @@ ${feedItems}
 
 /*.html
   Cache-Control: public, max-age=300, must-revalidate
+
+# An RSS document is a feed, not a result. Search had /feed.xml in its 14 Nov
+# crawl set and it can never rank, so the header ends that conversation.
+/feed.xml
+  X-Robots-Tag: noindex
 
 /*
   X-Content-Type-Options: nosniff

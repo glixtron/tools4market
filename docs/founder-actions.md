@@ -16,8 +16,20 @@
 | 2 | Cloudflare managed robots.txt | Owner decision + toggle | 3 min | Cleaner policy file; **costs edge enforcement** |
 | 3 | Launchstag Verify | Owner, in the listing dashboard | 2 min | Listing + dofollow badge link |
 | 4 | Distribution | Owner accounts | 1–3 h, spread out | Referral traffic + backlinks |
+| 5 | Email list (Buttondown) | Owner creates the account, then sets `BUTTONDOWN_USERNAME` in `.env` | 5 min | A repeat-visit channel the site does not have yet |
 
 ---
+
+## 0. Email list — one variable to turn it on
+
+The home page and `/blog/` carry a subscribe band **only when `BUTTONDOWN_USERNAME` is set**; without it the build renders no form, so a checkout without the variable cannot publish a dead button.
+
+1. Create the list at buttondown.email (free tier is enough to start).
+2. Copy the username from the dashboard URL — `buttondown.email/<username>`.
+3. Add `BUTTONDOWN_USERNAME=<username>` to `.env` and redeploy. The build rejects anything that is not a plausible username.
+4. Confirm the form posts to `https://buttondown.email/api/emails/embed-subscribe/<username>` and that the confirmation email arrives.
+
+No API key is used or needed: the embed form subscribes by username, and the address is stored by Buttondown, not by this site.
 
 ## 1. AdSense — the revenue blocker
 

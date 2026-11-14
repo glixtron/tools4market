@@ -7,7 +7,7 @@
 // Prints a per-defect report; exits non-zero if anything fails.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { TOOLS, CATEGORIES, JOBS, SEARCH_EXAMPLES, EDITOR_PICKS } from '../src/data/index.js';
+import { TOOLS, CATEGORIES, JOBS, SEARCH_EXAMPLES, EDITOR_PICKS, POLICY } from '../src/data/index.js';
 import { ARTICLES } from '../src/data/blog.js';
 
 const ROOT = path.resolve(new URL('..', import.meta.url).pathname);
@@ -351,6 +351,17 @@ for (const t of TOOLS) {
   ok('sitemap-blog.xml: every guide entry carries its real date', ARTICLES.every((a) => blogMap2.includes(`<loc>https://tools4market.online/blog/${a.slug}/</loc><lastmod>${a.updated || a.date}</lastmod>`)));
   ok('sitemap-tools.xml: no synthetic lastmod on tool URLs', !read('sitemap-tools.xml').includes('<lastmod>'));
   ok('sitemap-pages.xml: no synthetic lastmod on page URLs', !read('sitemap-pages.xml').includes('<lastmod>'));
+
+  // --- noindex is a promise the sitemap has to keep. Legal and contact pages
+  //     are deliberately out of search (14 Nov coverage report listed all four as
+  //     crawled-but-not-indexed); a noindex URL in a sitemap is a mixed signal.
+  const noindexPages = POLICY.filter((p) => p.noindex).map((p) => '/' + p.slug + '/');
+  const pagesMap = read('sitemap-pages.xml');
+  ok('sitemap-pages.xml: noindex pages are not listed', noindexPages.every((p) => !pagesMap.includes(`<loc>https://tools4market.online${p}</loc>`)), noindexPages.filter((p) => pagesMap.includes(`<loc>https://tools4market.online${p}</loc>`)).join(','));
+  const badNoindex = noindexPages.filter((p) => !/content="noindex"/i.test(read(p.slice(1) + 'index.html')));
+  ok('legal pages: every noindex page renders the robots meta', badNoindex.length === 0, badNoindex.join(','));
+  ok('legal pages: footer still links them (noindex is not unlinked)', ['/privacy-policy/', '/terms/', '/disclaimer/', '/contact/'].every((p) => read('index.html').includes(`href="${p.slice(1)}"`) || read('index.html').includes(`href="${p}"`)));
+  ok('robots.txt: tag-gateway path is disallowed', /^Disallow: \/tow0\/$/m.test(read('robots.txt')));
 
   // --- crawler policy: search + AI answer engines allowed, AI training blocked.
   //     This is the same split the AI Crawler Blocker generates and the AI-crawler

@@ -1,0 +1,303 @@
+{
+  "generatedAt": "2026-11-14T15:42:21.754Z",
+  "source": "Tranco top-1m list (the list snapshot fetched on the run date)",
+  "sourceUrl": "https://tranco-list.eu/",
+  "sampleRequested": 1000,
+  "sampleReadable": 895,
+  "sampleNoFile": 45,
+  "sampleError": 60,
+  "perBot": [
+    {
+      "id": "ccbot",
+      "ua": "CCBot",
+      "owner": "Common Crawl",
+      "purpose": "Open dataset used by many models",
+      "group": "training",
+      "blocked": 203,
+      "pct": 22.7
+    },
+    {
+      "id": "bytespider",
+      "ua": "Bytespider",
+      "owner": "ByteDance",
+      "purpose": "Model training (TikTok)",
+      "group": "training",
+      "blocked": 198,
+      "pct": 22.1
+    },
+    {
+      "id": "claudebot",
+      "ua": "ClaudeBot",
+      "owner": "Anthropic",
+      "purpose": "Model training",
+      "group": "training",
+      "blocked": 191,
+      "pct": 21.3
+    },
+    {
+      "id": "gptbot",
+      "ua": "GPTBot",
+      "owner": "OpenAI",
+      "purpose": "Model training",
+      "group": "training",
+      "blocked": 187,
+      "pct": 20.9
+    },
+    {
+      "id": "meta",
+      "ua": "Meta-ExternalAgent",
+      "owner": "Meta",
+      "purpose": "Meta AI training",
+      "group": "training",
+      "blocked": 170,
+      "pct": 19
+    },
+    {
+      "id": "diffbot",
+      "ua": "Diffbot",
+      "owner": "Diffbot",
+      "purpose": "Knowledge-graph scraping",
+      "group": "training",
+      "blocked": 167,
+      "pct": 18.7
+    },
+    {
+      "id": "googleext",
+      "ua": "Google-Extended",
+      "owner": "Google",
+      "purpose": "Gemini training (not Search)",
+      "group": "training",
+      "blocked": 162,
+      "pct": 18.1
+    },
+    {
+      "id": "anthropic",
+      "ua": "anthropic-ai",
+      "owner": "Anthropic",
+      "purpose": "Legacy agent",
+      "group": "training",
+      "blocked": 150,
+      "pct": 16.8
+    },
+    {
+      "id": "applebot",
+      "ua": "Applebot-Extended",
+      "owner": "Apple",
+      "purpose": "Apple Intelligence training",
+      "group": "training",
+      "blocked": 147,
+      "pct": 16.4
+    },
+    {
+      "id": "perplexity",
+      "ua": "PerplexityBot",
+      "owner": "Perplexity",
+      "purpose": "Answer-engine index",
+      "group": "assistant",
+      "blocked": 147,
+      "pct": 16.4
+    },
+    {
+      "id": "imagesift",
+      "ua": "ImagesiftBot",
+      "owner": "Hive",
+      "purpose": "Image datasets",
+      "group": "training",
+      "blocked": 134,
+      "pct": 15
+    },
+    {
+      "id": "youbot",
+      "ua": "YouBot",
+      "owner": "You.com",
+      "purpose": "Answer-engine index",
+      "group": "assistant",
+      "blocked": 124,
+      "pct": 13.9
+    },
+    {
+      "id": "perplexityuser",
+      "ua": "Perplexity-User",
+      "owner": "Perplexity",
+      "purpose": "User-initiated fetches",
+      "group": "assistant",
+      "blocked": 123,
+      "pct": 13.7
+    },
+    {
+      "id": "chatgptuser",
+      "ua": "ChatGPT-User",
+      "owner": "OpenAI",
+      "purpose": "Live user browsing",
+      "group": "assistant",
+      "blocked": 118,
+      "pct": 13.2
+    },
+    {
+      "id": "claudesearch",
+      "ua": "Claude-SearchBot",
+      "owner": "Anthropic",
+      "purpose": "Claude search listings",
+      "group": "assistant",
+      "blocked": 117,
+      "pct": 13.1
+    },
+    {
+      "id": "claudeuser",
+      "ua": "Claude-User",
+      "owner": "Anthropic",
+      "purpose": "User-initiated fetches",
+      "group": "assistant",
+      "blocked": 115,
+      "pct": 12.8
+    },
+    {
+      "id": "oaisearch",
+      "ua": "OAI-SearchBot",
+      "owner": "OpenAI",
+      "purpose": "ChatGPT search listings",
+      "group": "assistant",
+      "blocked": 101,
+      "pct": 11.3
+    },
+    {
+      "id": "applebot-search",
+      "ua": "Applebot",
+      "owner": "Apple",
+      "purpose": "Siri and Spotlight, not training",
+      "group": "assistant",
+      "blocked": 53,
+      "pct": 5.9
+    }
+  ],
+  "summary": {
+    "anyTrainingBlocked": 247,
+    "anyTrainingBlockedPct": 27.6,
+    "allTrainingBlocked": 65,
+    "allTrainingBlockedPct": 7.3,
+    "blockTrainingAllowSearch": 78,
+    "blockTrainingAllowSearchPct": 8.7,
+    "openToAll": 648,
+    "openToAllPct": 72.4
+  },
+  "examples": [
+    {
+      "ua": "CCBot",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    },
+    {
+      "ua": "Bytespider",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    },
+    {
+      "ua": "ClaudeBot",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    },
+    {
+      "ua": "GPTBot",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    },
+    {
+      "ua": "Meta-ExternalAgent",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    },
+    {
+      "ua": "Diffbot",
+      "domains": [
+        "facebook.com",
+        "fbcdn.net",
+        "gstatic.com",
+        "instagram.com",
+        "twitter.com"
+      ]
+    }
+  ],
+  "notable": [
+    {
+      "domain": "google.com",
+      "status": 200,
+      "gptbot": "allowed",
+      "claudebot": "allowed",
+      "perplexity": "allowed"
+    },
+    {
+      "domain": "wikipedia.org",
+      "status": 200,
+      "gptbot": "allowed",
+      "claudebot": "allowed",
+      "perplexity": "allowed"
+    },
+    {
+      "domain": "nytimes.com",
+      "status": 200,
+      "gptbot": "blocked",
+      "claudebot": "blocked",
+      "perplexity": "blocked"
+    },
+    {
+      "domain": "bbc.com",
+      "status": 200,
+      "gptbot": "blocked",
+      "claudebot": "blocked",
+      "perplexity": "blocked"
+    },
+    {
+      "domain": "amazon.com",
+      "status": 200,
+      "gptbot": "blocked",
+      "claudebot": "blocked",
+      "perplexity": "blocked"
+    },
+    {
+      "domain": "reddit.com",
+      "status": 200,
+      "gptbot": "blocked",
+      "claudebot": "blocked",
+      "perplexity": "blocked"
+    },
+    {
+      "domain": "medium.com",
+      "status": 200,
+      "gptbot": "blocked",
+      "claudebot": "blocked",
+      "perplexity": "allowed"
+    },
+    {
+      "domain": "github.com",
+      "status": 200,
+      "gptbot": "allowed",
+      "claudebot": "allowed",
+      "perplexity": "allowed"
+    }
+  ]
+}

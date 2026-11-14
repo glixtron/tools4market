@@ -523,5 +523,28 @@ async function boot(slug, setup) {
   dom.window.close();
 }
 
+// ---------- rich results tester
+async function testRichResults() {
+  const { dom, doc, type } = await boot('rich-results-tester');
+  const out = () => doc.getElementById('rr-out').textContent;
+  const run = () => doc.getElementById('rr-run').click();
+  ok('rich results: sample Article passes required props with one recommendation',
+    /Article/.test(out()) && /Recommended property "dateModified"/.test(out()), out().slice(0, 120));
+  type('rr-in', '<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Q"}]}</script>');
+  run();
+  ok('rich results: an FAQ question without an answer is an error', /acceptedAnswer/.test(out()));
+  type('rr-in', '{"@context":"https://schema.org","@type":"Product","name":"Kettle"}');
+  run();
+  ok('rich results: Product without offers, review or rating is an error', /needs at least one of/.test(out()));
+  type('rr-in', '{"@type":"Article","datePublished":"14 November 2026"}');
+  run();
+  ok('rich results: a non-ISO date is flagged', /ISO 8601 date/.test(out()));
+  type('rr-in', 'not json');
+  run();
+  ok('rich results: broken JSON is named, not rendered', /does not parse as JSON/.test(out()));
+  dom.window.close();
+}
+await testRichResults();
+
 console.log(`\nTOOL BEHAVIOUR: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

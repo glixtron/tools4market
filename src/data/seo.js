@@ -600,4 +600,76 @@ ${outputArea('wa-pages', 'Pages audited')}
 ${outputArea('wa-out', 'Findings and fixes')}
 ${note('Pages are fetched and checked by our server; your browser never contacts the audited site. The score summarizes the checks listed below — it is not a Google score or a ranking prediction.')}`,
   },
+  // ---------------------------------------------------------- 14
+  {
+    slug: 'rich-results-tester',
+    name: 'Rich Results Tester',
+    cat: 'seo',
+    icon: '🧾',
+    card: 'Paste JSON-LD and see which schema properties are missing before Google ignores the markup.',
+    usedFor: 'for checking structured data before it ships',
+    updated: '2026-11-14',
+    keywords: 'rich results test rich snippet checker structured data validator schema markup google',
+    focus: 'rich results test',
+    h1: 'Rich Results Test — check structured data before Google does',
+    metaTitle: 'Rich Results Test: Free Structured Data Checker',
+    metaDesc: 'Run a rich results test on pasted JSON-LD: check every schema type for required and recommended properties, see what is missing, and copy the fixes.',
+    intro: 'This rich results test reads the JSON-LD you paste, finds every schema node, and checks the properties Google expects for each supported type — so you fix the markup before Google rejects it.',
+    sections: [
+      {
+        h: 'What this rich results test checks',
+        p: [
+          'This rich results test reads the JSON-LD you paste, extracts every schema node — including nodes nested inside an @graph — and checks each one against the properties Google documents for its type. It reports three verdicts: missing required properties, which usually mean no rich result; missing recommended properties, which limit how rich the result can be; and values that parse but break a documented rule, such as a date that is not ISO 8601 or an image URL that is not absolute.',
+          'The check covers the types that actually produce enhanced results in Google Search: Article, NewsArticle, BlogPosting, FAQPage, BreadcrumbList, Product, Offer, Recipe, Organization, WebSite, Event, VideoObject, HowTo and LocalBusiness. A type outside that list is reported as recognised but unchecked, rather than silently passed as valid.',
+        ],
+      },
+      {
+        h: 'How to run the rich results test on a page',
+        p: [
+          'Open the page in a browser, view its source, and copy every application/ld+json script block into the field — or paste the whole HTML and the tool pulls the blocks out for you. Press Check structured data. Nothing leaves your browser: the markup is parsed locally, so staging pages and client drafts are fine to test.',
+          'Read errors first. A missing required property means the markup cannot produce the result you expect, no matter how good the rest of the page looks. Warnings are the difference between a plain result and a rich one. Fix the source template rather than the rendered page, then re-check the same snippet so you know the fix took.',
+        ],
+      },
+      {
+        h: 'Rich results test, syntax validator, and Google’s own tool',
+        p: [
+          'Three checks answer three different questions. A JSON syntax check asks whether the text parses at all. A schema validator asks whether the vocabulary is used correctly. This rich results test asks whether the node carries what Google needs for the result type, and it runs entirely in the browser.',
+          'Google’s own Rich Results Test renders the live page and reports which enhanced results Google can detect — the final word on eligibility, but slower and dependent on what is deployed. Use this tool while writing the markup, then confirm on the live URL before you rely on the result appearing.',
+        ],
+      },
+      {
+        h: 'Structured data mistakes that block rich results',
+        p: [
+          'The same failures account for most rejected markup: FAQPage without mainEntity, Product without offers, review or aggregateRating, dates written as “14 November 2026”, image values that are relative paths, and an @type written as an array where Google expects a string. Copying a snippet from a tutorial without replacing its example domain causes the last problem more often than any syntax error.',
+          'If the type is correct and Google still shows no rich result, the page is the limit: product and review markup need visible content that matches the data, and some features are restricted by site type. Structured data never overrides what the page itself shows.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is a rich results test?', a: 'A check of structured data against the properties Google requires for an enhanced search result. This one runs on pasted JSON-LD and lists missing required and recommended fields for every node it finds.' },
+      { q: 'Does passing this test guarantee rich results?', a: 'No. It validates structure, not eligibility. Google decides whether a page qualifies from visible content, supported types and site-level rules, and its own Rich Results Test remains the final check.' },
+      { q: 'Which schema types does this rich results test cover?', a: 'Article, NewsArticle, BlogPosting, FAQPage, BreadcrumbList, Product, Offer, Recipe, Organization, WebSite, Event, VideoObject, HowTo and LocalBusiness. Other types are listed but not property-checked.' },
+      { q: 'Why does Google’s Rich Results Test show no results for valid markup?', a: 'Usually the type is not one Google enhances, or the visible content does not match the markup. Google’s tool reports supported features only, so a valid Organization block can still produce no result.' },
+      { q: 'Should I use JSON-LD or microdata?', a: 'JSON-LD. Google documents it as the recommended format, it sits in one script block instead of being scattered through the markup, and it is the format this tester reads.' },
+      { q: 'Is a rich results test the same as a rich snippet test?', a: 'In practice, yes. People say rich snippet for the enhanced result and rich results test for the check; both mean validating JSON-LD against the required and recommended properties Google documents.' },
+    ],
+    html: `
+${f.textarea('rr-in', 'JSON-LD or page HTML', '', 10, `<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How long should a title tag be?",
+  "image": "https://example.com/title-tag-length.png",
+  "datePublished": "2026-11-14",
+  "author": { "@type": "Person", "name": "Alex Morgan" }
+}
+</script>`)}
+<div class="btn-row">
+  <button type="button" class="btn" id="rr-run">Check structured data</button>
+</div>
+<div class="stat-line" id="rr-stats" aria-live="polite"></div>
+<div class="stat-line" id="rr-summary" aria-live="polite"></div>
+${outputArea('rr-out', 'Findings and fixes')}
+${note('The check runs in your browser: the markup is never sent to our server. The sample above is a valid Article with one recommendation — replace it with your own block.')}`,
+  },
 ];

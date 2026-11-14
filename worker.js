@@ -55,6 +55,29 @@ export default {
       });
     }
 
+    // ---- permanent moves for URLs still in search's crawl set ------------
+    // /blog/website-audit/ was the only real 404 in the 14 Nov coverage report:
+    // the guide it named was folded into the tool page, and Search had already
+    // crawled it. A map here rather than a _redirects file because Workers
+    // Static Assets rejects host-level rules, and because a 301 wants an
+    // assertion in tests/worker-routing.mjs before it ships. The lookup ignores
+    // a trailing slash so /blog/website-audit redirects in one hop too.
+    const LEGACY_REDIRECTS = new Map([
+      ['/blog/website-audit', '/tools/website-audit/'],
+    ]);
+    const barePath = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
+    const moved = LEGACY_REDIRECTS.get(barePath);
+    if (moved) {
+      return new Response(null, {
+        status: 301,
+        headers: {
+          'Location': CANONICAL_ORIGIN + moved + url.search,
+          // A permanent move is cacheable; the answer depends on the path alone.
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
+
     // ---- backend: the live-URL proxy ------------------------------------
     if (url.pathname === '/api/fetch' || url.pathname === '/api/fetch/') {
       if (request.method === 'OPTIONS') {

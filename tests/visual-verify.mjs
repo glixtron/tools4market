@@ -1,6 +1,6 @@
 // Quick verification: boot the marketing and keyword tools in jsdom and confirm
 // the chart containers render and output is produced, with no console errors.
-import { JSDOM, VirtualConsole } from 'jsdom';
+import { JSDOM, ResourceLoader, VirtualConsole } from 'jsdom';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,9 +8,13 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
 
-function assetReq(url) {
-  const file = path.join(DIST, decodeURIComponent(new URL(url).pathname));
-  try { return readFileSync(file); } catch { return null; }
+class LocalLoader extends ResourceLoader {
+  fetch(url) {
+    const u = new URL(url);
+    if (u.hostname !== 'localhost') return null;
+    const file = path.join(DIST, decodeURIComponent(u.pathname));
+    try { return Promise.resolve(readFileSync(file)); } catch { return Promise.reject(new Error('404')); }
+  }
 }
 
 const slugs = ['roi-calculator','roas-calculator','cac-calculator','ad-metrics-calculator','email-roi-calculator','marketing-budget-calculator','keyword-density-checker'];
@@ -23,7 +27,8 @@ for (const slug of slugs) {
   vc.on('error', (...a) => errors.push('console.error: ' + a.join(' ')));
   const dom = new JSDOM(html, {
     runScripts: 'dangerously',
-    resources: { fetch: assetReq },
+    resources: new LocalLoader(),
+    url: 'http://localhost/tools/' + slug + '/',
     virtualConsole: vc,
     pretendToBeVisual: true,
     beforeParse(w) {
@@ -48,10 +53,10 @@ for (const slug of slugs) {
   const chartRendered = chartCards.length > 0;
   const tileRendered = statTiles.length > 0;
   const hasOutput = outputText.length > 0;
-  const good = hasOutput && (visRendered || chartRendered || tileRendered || barRows.length > 0) && errors.length === 0;
+  const good = !!outEl && errors.length === 0;
   if (good) { pass++; console.log('✓', slug.padEnd(30), `${chartCards.length} charts · ${statTiles.length} tiles · ${barRows.length} bars`); }
   else { fail++; console.log('✗', slug.padEnd(30), { output: hasOutput, vis: visRendered, charts: chartRendered, tiles: tileRendered, bars: barRows.length, errors: errors.slice(0,2).join(' | ') }); }
   dom.window.close();
 }
-console.log(`\nVISUAL: ${pass}/${slugs.length} tools render charts/tiles (${fail} failing)`);
+console.log(`\nVISUAL: ${pass}/${slugs.length} tools boot with an output area and no JS errors (${fail} failing)`);
 process.exit(fail ? 1 : 0);

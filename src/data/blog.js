@@ -960,6 +960,14 @@ export const ARTICLES = [
           'Largest Contentful Paint times how long the largest element in the viewport takes to render: good under 2.5 seconds, poor past 4.0. Cumulative Layout Shift scores unexpected movement: good under 0.1, poor past 0.25. Interaction to Next Paint times the delay between a tap and the next frame that shows a response: good under 200 milliseconds, poor past 500.',
           'Google evaluates the 75th percentile of real users over a 28-day window, per page group. That detail matters. A fast desktop visit does not cancel out a slow phone, and one good day does not clear a bad month.',
         ],
+        table: {
+          head: ['Metric', 'What it measures', 'Good', 'Needs work', 'Poor'],
+          rows: [
+            ['LCP', 'Time until the largest visible element renders', '2.5 s or less', '2.5–4.0 s', 'Over 4.0 s'],
+            ['CLS', 'Unexpected layout movement, unitless', '0.1 or less', '0.1–0.25', 'Over 0.25'],
+            ['INP', 'Delay from interaction to the next painted frame', '200 ms or less', '200–500 ms', 'Over 500 ms'],
+          ],
+        },
       },
       {
         h: 'What is LCP in Core Web Vitals?',
@@ -1682,7 +1690,7 @@ export const ARTICLES = [
         h: 'A ten-minute structured data validation pass',
         p: [
           'Pick one URL per template — home, article, product, FAQ — and run both validators. Fix errors, read warnings, and confirm every claim in the markup is visible on the page. Then inspect the same URL in Search Console to see what Google actually parsed.',
-          'The Schema Markup Generator builds the block, the Web Crawler Audit confirms the deployed page returns 200 with that block in place, and the SEO Score Checker covers the surrounding metadata. The pass is short because the point is template coverage, not every URL.',
+          'The Schema Markup Generator builds the block, the Rich Results Tester checks the pasted JSON-LD against the required and recommended properties before you hand it to Google, the Web Crawler Audit confirms the deployed page returns 200 with that block in place, and the SEO Score Checker covers the surrounding metadata. The pass is short because the point is template coverage, not every URL.',
         ],
       },
     ],
@@ -1694,7 +1702,7 @@ export const ARTICLES = [
       { q: 'Can I test structured data by pasting JSON-LD?', a: 'Yes, both tools accept a code snippet. Use the snippet for syntax checks and the URL test for the final check, because the URL test renders the page and sees markup that only exists after JavaScript runs.' },
       { q: 'Do I need to validate every page?', a: 'No. Validate one URL per template and any page with unusual markup. Templates repeat, so a fix at the template level covers thousands of URLs; page-by-page validation spends time on the same code.' },
     ],
-    relatedTools: ['schema-markup-generator', 'web-crawler-audit', 'seo-score-checker', 'serp-preview-tool'],
+    relatedTools: ['schema-markup-generator', 'rich-results-tester', 'web-crawler-audit', 'seo-score-checker', 'serp-preview-tool'],
     relatedGuides: ['schema-markup-for-ai-search', 'website-launch-seo-checklist', 'screaming-frog-alternative'],
     links: [
       { label: 'Google: Rich Results Test', url: 'https://search.google.com/test/rich-results' },
@@ -1770,6 +1778,232 @@ export const ARTICLES = [
       { label: 'Google: how HTTP status codes affect crawling', url: 'https://developers.google.com/crawling/docs/troubleshooting/http-status-codes' },
       { label: 'RFC 9110: HTTP semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110.html' },
       { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
+    ],
+  },
+  {
+    slug: 'seo-checklist-2027',
+    title: 'The SEO checklist for 2027: what to fix before the year turns',
+    focus: 'seo checklist 2027',
+    date: '2026-11-14',
+    updated: '2026-11-14',
+    author: 'Glixtron',
+    metaTitle: 'SEO Checklist 2027: 12 Checks Before the Year Turns',
+    metaDesc: 'A 12-point SEO checklist for 2027: crawler access, titles, canonicals, schema, speed and the baseline to compare in March. Each check names the tool.',
+    intro: 'December is the last cheap month to fix a site: traffic is high, campaigns pause, and anything shipped now has time to be crawled before January. This is the SEO checklist for 2027 we run, in the order that finds the expensive problems first.',
+    sections: [
+      {
+        h: 'New year, same three questions',
+        p: [
+          'Search changed shape in 2026, but the underlying questions did not. Can a crawler reach the page? Does the page answer the query it was written for? Can a person or an assistant quote it without guessing? Everything on this list serves one of those three.',
+          'What did change is who reads the page. Answer engines fetch and cite; training crawlers take text and return nothing measurable. That makes crawler policy a marketing decision rather than a robots.txt chore — and it is why the first checks below are about access, not keywords.',
+          'The order matters. A title rewrite on a page that returns a 403 to crawlers is invisible work. Fix access, then metadata, then structure, then measurement.',
+        ],
+      },
+      {
+        h: 'Access first: can the crawler get in?',
+        p: [
+          'Start at the root. `robots.txt` should return 200 as plain text, name the search engines you want, and make a deliberate statement about AI crawlers rather than inheriting one from a template. Check the sitemap line points at a file that exists, and that the sitemap contains only URLs that answer 200.',
+          'Then test the decision rather than trusting the file. The [robots.txt tester](/tools/robots-txt-tester/) resolves a path against the rules and shows which line wins for a named bot; the [AI crawler blocker](/tools/ai-crawler-blocker/) writes the training-block group with your domain already filled in. For a single page that should not appear in results, confirm it is crawlable enough to serve its `noindex` — a blocked page cannot communicate that.',
+          'Finally, check the response itself. A page behind a login, a JavaScript shell that renders nothing, or a soft 404 all look like indexable URLs in a sitemap and behave like dead ends. The [website audit](/tools/website-audit/) runs the public-URL checks in one pass; the [crawler audit](/tools/web-crawler-audit/) shows the status, headers and canonical signals for one URL.',
+        ],
+      },
+      {
+        h: 'Titles and descriptions: rewrite the pages that already rank',
+        p: [
+          'Most sites do not need more pages in January; they need the pages they have to earn the click. Pull the queries where you rank in positions 5–15 with a click-through rate below the position average, and rewrite those titles first. The page is already eligible — the snippet is what is losing.',
+          'Preview before you ship. Titles truncate by pixel width, not character count, and a rewritten title that cuts mid-phrase is worse than the generic one it replaced. The [SERP preview](/tools/serp-preview-tool/) shows the cut, and the [meta description checker](/tools/meta-description-checker/) flags duplicates and lengths across a batch.',
+        ],
+      },
+      {
+        h: 'Template debt: canonicals, hreflang and schema',
+        p: [
+          'One broken canonical on a template is a thousand broken canonicals. That is why this check belongs to the planning month: it is a single change with a large blast radius, and it needs a deploy window and a rollback plan, not a Friday afternoon.',
+          'Check that every indexable page declares one canonical, that the canonical is absolute, and that it points at a 200 URL rather than a redirect. For multilingual sites, confirm hreflang reciprocity — if page A points at B, B must point back at A — and that every hreflang URL is itself canonical. Structured data is the third template: markup that no longer matches the visible page is a support ticket waiting in Search Console’s enhancement reports.',
+          'The [canonical tag generator](/tools/canonical-tag-generator/), [hreflang checker](/tools/hreflang-checker/) and [schema markup generator](/tools/schema-markup-generator/) cover the three; the [guide to testing structured data](/blog/test-structured-data/) explains why the two validators disagree.',
+        ],
+      },
+      {
+        h: 'The SEO checklist for 2027, in the order to run it',
+        p: [
+          'This is the list we keep. Each row names the thing to look at and what a pass looks like, so it can be handed to someone else without a meeting.',
+        ],
+        table: {
+          head: ['#', 'Check', 'Where', 'Pass looks like'],
+          rows: [
+            ['1', 'robots.txt reachable and intentional', '/robots.txt', '200, plain text, sitemap line, deliberate AI policy'],
+            ['2', 'Sitemap contains only 200 URLs', 'Search Console → Sitemaps', 'No redirects, no 404s, no noindexed URLs'],
+            ['3', 'Key pages render without JavaScript', 'View source', 'Headline and body text present in the HTML'],
+            ['4', 'One canonical per template, absolute', 'Rendered head', '200 target, self-referencing on the canonical page'],
+            ['5', 'hreflang reciprocity', 'Rendered head', 'Every pair points at each other, all 200'],
+            ['6', 'Titles fit the pixel width', 'SERP preview', 'No truncation mid-phrase on mobile width'],
+            ['7', 'Descriptions are unique', 'Meta description checker', 'No duplicates across the template'],
+            ['8', 'Structured data matches the page', 'Rich results test', 'No errors, no markup for content that is not visible'],
+            ['9', 'Open Graph card renders', 'OG image tester', '1200×630 image, title and description present'],
+            ['10', 'Core Web Vitals in the green', 'Search Console → CWV', 'LCP under 2.5s, INP under 200ms, CLS under 0.1'],
+            ['11', 'Analytics and consent still fire', 'Debug view', 'Page view and conversion events, no duplicate hits'],
+            ['12', 'Baseline exported', 'Search Console', 'Clicks, impressions and CTR saved for a March comparison'],
+          ],
+        },
+        p2: [
+          'Twelve checks is roughly an afternoon for a small site and a week for a large one, which is the honest trade. The list is deliberately ordered by cost of not doing it: access problems waste every later fix, and measurement problems make the rest unfalsifiable.',
+        ],
+      },
+      {
+        h: 'Export a baseline before you change anything',
+        p: [
+          'The useful comparison in March is against a number you wrote down now. Export Search Console performance for the last three months and the last twelve, note index coverage, and record Core Web Vitals for each template. Without that, every later result is a story rather than a measurement.',
+          'Then change one thing at a time where possible. Title rewrites are cheap and fast; canonical and hreflang changes are neither. If you do both in the same week and traffic moves, you will not know which one did it — and next December you will be running this checklist without knowing which of last year’s fixes worked.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What should an SEO checklist for 2027 contain?', a: 'Access first (robots.txt, sitemaps, renderability), then metadata (titles, descriptions), then template structure (canonicals, hreflang, schema), then speed and analytics — and a saved baseline so the results can be compared later.' },
+      { q: 'When should I run the 2027 SEO checklist?', a: 'Late November or early December, before January planning locks the quarter. The fixes have time to be crawled and the baseline is fresh, so a March comparison measures your work rather than the holiday season.' },
+      { q: 'How long does a year-end SEO audit take?', a: 'An afternoon for a small site with a handful of templates, up to a week for a large one. Most of the time goes into deciding what to change, not finding it: template fixes need a deploy window and a rollback plan.' },
+      { q: 'Should I block AI crawlers before 2027?', a: 'It depends on whether you want your content used for training. Blocking training crawlers (GPTBot, ClaudeBot, CCBot) does not affect Google rankings, but it can remove you from anything built on that data. Answer-engine fetchers are how assistants cite and link you, so blocking those costs citations.' },
+      { q: 'Is it worth rewriting titles that already rank?', a: 'Usually yes, when the page ranks in positions 5–15 with a low click-through rate. The page is already eligible for the query; the snippet is what is losing the click. Rewrite those before writing new pages.' },
+      { q: 'Do I need to fix everything before January?', a: 'No. Fix access problems and anything that blocks crawling, and put template changes on the January schedule where they can be tested properly. A rushed canonical change is worse than a known-correct one shipped in February.' },
+    ],
+    relatedTools: ['robots-txt-tester', 'website-audit', 'serp-preview-tool', 'meta-description-checker'],
+    relatedGuides: ['website-launch-seo-checklist', 'title-tag-length-2026', 'core-web-vitals', 'rel-canonical-tag'],
+    links: [
+      { label: 'Google: Search Console performance report', url: 'https://support.google.com/webmasters/answer/7576553' },
+      { label: 'Google: Core Web Vitals and page experience', url: 'https://developers.google.com/search/docs/appearance/core-web-vitals' },
+      { label: 'Google: sitemap best practices', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap' },
+    ],
+  },
+  {
+    slug: 'year-end-website-audit',
+    title: 'A year-end website audit you can finish in one afternoon',
+    focus: 'year-end website audit',
+    date: '2026-11-14',
+    updated: '2026-11-14',
+    author: 'Glixtron',
+    metaTitle: 'Year-End Website Audit: One Afternoon, Six Checks',
+    metaDesc: 'Run a year-end website audit in one afternoon: crawlability, status codes, metadata, schema, speed and analytics. The order, the evidence, and what to skip.',
+    intro: 'A year-end audit is not a full technical review. It is a dated check of the things that silently break during a year of deploys, so January starts from a known state instead of a rumour. Six checks, one afternoon, a written record.',
+    sections: [
+      {
+        h: 'What a year-end audit is for',
+        p: [
+          'Sites drift. A plugin update changes a template, a campaign appends tracking parameters to internal links, a redirect chain grows one hop per quarter, and nobody notices because the page still loads for a person with a warm cache. None of these show up as an outage; they show up as a slow decline nobody can attribute.',
+          'The purpose of the audit is to catch drift while it is still cheap: fix a template once instead of a thousand pages later, and write down the state you fixed it from. It is also the one time of year when traffic patterns are unusual enough that a drop is easy to notice and hard to explain — so you want a baseline, not a guess.',
+        ],
+      },
+      {
+        h: 'Check 1 and 2: crawling and status codes',
+        p: [
+          'Fetch `/robots.txt` and read it as a crawler would. It should return 200 with a `text/plain` type, not an HTML error page — a Soft 404 for robots.txt is treated as no file at all. Confirm the `Sitemap:` line resolves, and that the file does not accidentally disallow a directory you launched this year.',
+          'Then sample each template and every URL you retired during the year. A live page should return 200; an old URL should return one permanent redirect to the final target; a deleted page should return 404 or 410. Chains of two or more redirects are the most common finding here, and the fix is a single rule pointing at the final URL.',
+          'The [crawler audit](/tools/web-crawler-audit/) reports the status and redirect chain for a single URL; the [sitemap validator](/tools/sitemap-validator/) checks that the submitted set answers 200; the [.htaccess redirect generator](/tools/htaccess-redirect-generator/) writes the replacement rule in the right order.',
+        ],
+      },
+      {
+        h: 'Check 3 and 4: metadata and structured data',
+        p: [
+          'Metadata rots quietly. The title tag that fit in January is too long after a rebrand added a suffix; the description on fifteen product pages is the same sentence; the Open Graph image still shows last year’s logo. These are cheap to fix and directly affect the click, which is why they belong in the year-end pass rather than a “someday” backlog.',
+          'Structured data drifts for the same reason: the markup was written to match the page, and then the page changed. Run the templates through a rich-results validator and treat any warning as a description of drift. The [meta tag generator](/tools/meta-tag-generator/) and [Open Graph generator](/tools/open-graph-generator/) produce the tags in one pass; the [OG image tester](/tools/og-image-tester/) shows how the card renders before you ship it.',
+        ],
+      },
+      {
+        h: 'Check 5: speed, measured on the template that matters',
+        p: [
+          'Do not audit 500 pages. Pick the template that carries the most traffic — usually the homepage, a product or article template, and one category — and measure those. Core Web Vitals are field metrics, so the Search Console report is the one to read: LCP under 2.5 seconds, INP under 200 milliseconds, CLS under 0.1 at the 75th percentile.',
+          'When a template fails, look at what changed rather than what is theoretically heavy. A hero image that grew during a redesign, a font added for one campaign, a chat widget loaded sitewide — these show up as a single regression with a date. The [image compressor](/tools/image-compressor/) handles the most common cause without a design review, and the [guide to Core Web Vitals](/blog/core-web-vitals/) explains what each metric is actually measuring.',
+        ],
+      },
+      {
+        h: 'Check 6: analytics, consent and the events you rely on',
+        p: [
+          'Every audit should end by checking that the measurement still works. A consent banner update, a tag-manager change or a domain migration can halve your data without touching the site’s appearance. Open a debug view and confirm that a page view fires once, that the conversion event still has its parameters, and that internal links do not carry campaign parameters that overwrite the real source.',
+          'The [UTM link builder](/tools/utm-link-builder/) keeps the parameter set consistent; the [guide to UTM naming conventions](/blog/utm-naming-conventions/) is the reference to check a year of accumulated tags against.',
+        ],
+      },
+      {
+        h: 'Write it down, then wait',
+        p: [
+          'Close the audit with a dated page: what was checked, what was found, what was changed, and what was deliberately left alone. That page is the input to next year’s audit and the first place to look when a metric moves in February.',
+          'Resist fixing everything in the same week. The value of a year-end audit is a clean starting state, and a clean state is easier to reason about when only one thing changed at a time. Park the template rewrites for the January planning cycle and keep the audit’s scope to what can be verified today.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'How long should a year-end website audit take?', a: 'An afternoon for six checks across a handful of templates. The point is not exhaustiveness: it is a dated, verifiable snapshot of the things that drift during a year.' },
+      { q: 'What is the most common finding in a year-end audit?', a: 'Redirect chains and stale metadata. Both accumulate silently through a year of deploys and campaign tags, and both are cheap to fix once you look for them.' },
+      { q: 'Do I need a crawler for a year-end audit?', a: 'Not for the six checks here, which cover one URL or one template at a time. A crawler earns its place when you need to confirm a template fix across thousands of pages after the change.' },
+      { q: 'Should a year-end audit include content pruning?', a: 'It can start the conversation, but pruning deserves its own pass. Deleting or merging pages changes what the site says; that is an editorial decision, not a maintenance check.' },
+      { q: 'What should be in the audit record?', a: 'The date, the URLs and templates checked, the status and metadata found, what changed, and what was deliberately left alone. A month later, the “left alone” list is the part that saves an argument.' },
+    ],
+    relatedTools: ['website-audit', 'web-crawler-audit', 'sitemap-validator', 'og-image-tester'],
+    relatedGuides: ['core-web-vitals', 'image-seo', 'xml-sitemap-best-practices', 'open-graph-image-size-2026'],
+    links: [
+      { label: 'Google: Core Web Vitals thresholds', url: 'https://web.dev/articles/vitals' },
+      { label: 'Google: robots.txt introduction', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro' },
+      { label: 'Google: redirects and Search', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
+    ],
+  },
+  {
+    slug: 'content-pruning-before-january',
+    title: 'Content pruning before January: consolidate, do not delete',
+    focus: 'content pruning',
+    date: '2026-11-14',
+    updated: '2026-11-14',
+    author: 'Glixtron',
+    metaTitle: 'Content Pruning: Merge or Redirect, Do Not Bulk Delete',
+    metaDesc: 'Content pruning without the deleting: find consolidation candidates in Search Console, merge or redirect them, and measure before and after. No bulk deletes.',
+    intro: 'Every December someone proposes deleting the blog. The instinct is right — a site with hundreds of overlapping pages is harder to maintain and harder to trust — but content pruning is a publishing decision made page by page, and deletion is the last step, not the first.',
+    sections: [
+      {
+        h: 'What content pruning is, and what it is not',
+        p: [
+          'Google does not apply a site-wide penalty for having low-traffic pages. A page with no clicks is not evidence of a problem; most pages on most sites get no clicks, and that is normal. Removing content does not automatically lift rankings, and bulk-deleting a section can remove pages that were quietly earning links or answering long-tail queries.',
+          'What actually helps is consolidation: fewer, better pages that each answer a question completely. That is an editorial change — merging two thin posts into one strong one — and it happens to reduce the page count as a side effect, not as the goal.',
+        ],
+      },
+      {
+        h: 'Find candidates with evidence, not with a page-count target',
+        p: [
+          'Start in Search Console performance, filtered to pages. Sort by impressions and look for three patterns. First, near-duplicates: several pages ranking for the same query and splitting the click. Second, pages with impressions but almost no clicks — often a good page with a bad title, which needs a rewrite, not removal. Third, pages with neither impressions nor links, and content that is genuinely superseded.',
+          'Only the third group is a pruning candidate, and even then the answer is usually “merge into the page that already covers this”, not “delete”. Export the list with clicks, impressions and the queries attached; a decision without the query text is a guess about what the page was for.',
+          'A fourth signal cuts across all three: internal links. A page that three other pages link to is load-bearing even with no search traffic, because it passes authority and gives readers somewhere to go. Before you touch it, check what links in — and if the answer is “nothing”, that is itself evidence the page was never part of the site.',
+        ],
+      },
+      {
+        h: 'Three actions, in order of preference',
+        p: [
+          '**Merge.** Take the useful paragraphs from the weaker page, add them to the stronger one, and redirect the weaker URL to it with a 301. This keeps the links, keeps the queries, and produces a page that is more complete. It is the default action for overlapping content.',
+          '**Redirect.** When a page has no unique content but has inbound links or history, a permanent redirect to the closest surviving page preserves most of what it earned. Redirect to one final URL, not through a chain, and only when the target genuinely covers the topic — a redirect to the homepage is not a consolidation, it is a soft 404 with extra steps.',
+          '**Remove.** Only when nothing is worth keeping: no unique information, no links, no impressions, and no successor page. Return 404 (or 410) and let the URL leave the index. This is the rarest of the three, and it should never be a batch operation on a folder.',
+        ],
+      },
+      {
+        h: 'Keep the sitemap and internal links honest',
+        p: [
+          'A consolidation is not finished until the site stops pointing at the old URL. Remove it from the sitemap, update internal links to the new target, and check that the redirect resolves in one hop. Leaving the old URL in the sitemap is the most common way a tidy-up turns into a crawl-error report in January.',
+          'The [sitemap generator](/tools/sitemap-generator/) regenerates the submitted set from the live site; the [redirect generator](/tools/htaccess-redirect-generator/) writes the rules in the correct order; the [internal linking guide](/blog/internal-linking/) covers how to move the links without losing the anchor text that made the page rank.',
+        ],
+      },
+      {
+        h: 'Measure before and after, and give it a quarter',
+        p: [
+          'Record clicks, impressions and the top queries for every page you touch, before the change. Then wait. Consolidation usually shows up as impressions moving to the surviving URL within a few weeks and clicks following if the merged page is genuinely better. A drop in total impressions with a rise in clicks is a good outcome: you removed redundant results and kept the demand.',
+          'If nothing moves in a quarter, the merge was neutral — which is still better than carrying two pages that compete with each other. Judge the project on the surviving pages, not on the number you deleted.',
+        ],
+      },
+    ],
+    faqs: [
+      { q: 'What is content pruning?', a: 'Consolidating overlapping or superseded pages into fewer, stronger ones — usually by merging and redirecting — so each topic is answered by one page. Deleting pages is only the last option, and the rarest.' },
+      { q: 'Does deleting low-traffic pages improve SEO?', a: 'Not by itself. Google does not penalise a site for having pages that get no clicks, and removing content does not automatically lift rankings. Merging overlapping pages into one stronger page is what usually helps.' },
+      { q: 'Should I delete or redirect a pruned page?', a: 'Redirect when the page has links or history and a genuine successor. Delete only when there is no unique content, no links and nothing worth merging. Redirect to one final URL, not to the homepage.' },
+      { q: 'When is the best month to do content pruning?', a: 'Late November to mid-December, before a planning cycle. Traffic is seasonal and the change has time to settle before January reporting, so the site you plan around is the site you have.' },
+      { q: 'How do I know pruning worked?', a: 'Track clicks and impressions for the pages you touched and for the surviving targets. Impressions shifting to the surviving URL within a few weeks is the expected outcome; total clicks should hold or rise.' },
+    ],
+    relatedTools: ['sitemap-generator', 'htaccess-redirect-generator', 'web-crawler-audit', 'keyword-density-checker'],
+    relatedGuides: ['internal-linking', 'htaccess-301-redirect', 'http-status-codes-seo', 'xml-sitemap-best-practices'],
+    links: [
+      { label: 'Google: managing your site’s content', url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content' },
+      { label: 'Google: page removals from Search', url: 'https://support.google.com/webmasters/answer/1663419' },
+      { label: 'Google: 301 redirects', url: 'https://developers.google.com/search/docs/crawling-indexing/301-redirects' },
     ],
   },
 ];

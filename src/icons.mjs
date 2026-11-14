@@ -50,13 +50,14 @@ const P = {
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.6 6.4 8.4 6 8.4-6"/>',
   wallet: '<path d="M4 7.4A2.4 2.4 0 0 1 6.4 5H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6.4A2.4 2.4 0 0 1 4 18.6Z"/><path d="M4 8h16M15.4 14.4h3"/>',
   bars: '<path d="M5 20V12M10 20V6M15 20v-5M20 20V9"/>',
-  arrowTurn: '<path d="M4 18V9a3 3 0 0 1 3-3h11"/><path d="m15 3 3 3-3 3"/>',
+  resultsCheck: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7.2 6.5h.01M10.2 6.5h.01"/><path d="m8 15 2 2 5-5"/>',  arrowTurn: '<path d="M4 18V9a3 3 0 0 1 3-3h11"/><path d="m15 3 3 3-3 3"/>',
 };
 
 const MAP = {
   'meta-tag-generator': 'tag', 'open-graph-generator': 'share', 'twitter-card-generator': 'social',
   'canonical-tag-generator': 'linkMaster', 'hreflang-tag-generator': 'globe', 'schema-markup-generator': 'braces',
   'serp-preview-tool': 'searchWindow', 'meta-description-checker': 'textCheck', 'web-crawler-audit': 'crawl',
+  'rich-results-tester': 'resultsCheck',
   'seo-score-checker': 'gauge', 'og-image-tester': 'imageCheck', 'hreflang-checker': 'globeCheck',
   'website-audit': 'clipboard',
   'robots-txt-generator': 'bot', 'robots-txt-tester': 'botCheck', 'ai-crawler-blocker': 'shieldSlash',

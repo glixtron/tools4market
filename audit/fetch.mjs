@@ -182,6 +182,33 @@ export function createReader({ target = 'live', cache = false } = {}) {
  * the exact confusion this tool exists to prevent, one level up. Compare the
  * newest source mtime with dist/index.html rather than trusting either alone.
  */
+/**
+ * Every path `dist/` can answer, as URL paths, for the link resolver.
+ *
+ * A dist audit used to treat "not in the sitemap and not crawled" as broken.
+ * That is right for a page the build forgot, and wrong for two deliberate cases:
+ * noindexed legal pages (out of the sitemap on purpose, still linked from every
+ * footer) and static files the build copies in (the research `dataset.csv`).
+ * On disk is the only honest definition of "resolves" for a local build.
+ */
+async function distPaths() {
+  const out = new Set();
+  const walk = async (dir) => {
+    let entries;
+    try { entries = await readdir(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) await walk(p);
+      else {
+        const rel = '/' + path.relative(DIST, p).split(path.sep).join('/');
+        out.add(rel.replace(/\/index\.html$/, '/'));
+      }
+    }
+  };
+  await walk(DIST);
+  return out;
+}
+
 async function distFreshness() {
   const newestUnder = async (dir) => {
     let newest = 0;
@@ -259,6 +286,7 @@ export async function discover({ target = 'live', origin = ORIGIN, cache = false
     origin: base,
     read,
     dist: target === 'dist' ? await distFreshness() : null,
+    distPaths: target === 'dist' ? await distPaths() : null,
     index: { url: base + '/sitemap.xml', status: indexRes.status, body: indexRes.body, locs: indexLocs },
     sitemaps,
     urls,

@@ -635,7 +635,7 @@ ${note('Patterns run locally with JavaScript\u2019s RegExp engine — nothing yo
     icon: '🔳',
     card: 'Turn any text or link into a scannable QR code and download it as PNG or SVG, free.',
     usedFor: 'for links, WiFi details and print',
-    keywords: 'qr code generator create qr code png svg download url wifi free online',
+    keywords: 'qr code generator create qr code png svg download url wifi barcode free online',
     focus: 'qr code generator',
     h1: 'QR Code Generator — download as SVG or PNG',
     metaTitle: 'QR Code Generator: Free PNG & SVG QR Maker (2026)',
@@ -661,6 +661,7 @@ ${note('Patterns run locally with JavaScript\u2019s RegExp engine — nothing yo
       { q: 'Which error correction level should I pick?', a: 'Levels L, M, Q and H recover roughly 7, 15, 25 and 30 percent of the code. M suits most uses; pick H when the code will be small, damaged, written on or printed somewhere busy.' },
       { q: 'Can I make a WiFi QR code with this QR code generator?', a: 'Yes. Enter the standard WIFI string with the network name and password in the format WIFI:T:WPA;S:network;P:password;; and most phone cameras will offer to join the network when scanned.' },
       { q: 'Why will my QR code not scan?', a: 'Usual causes are a code printed too small, no clear border around it, or a link missing its protocol. Keep the quiet zone, size it for the distance it will be read from, and test with a phone before printing.' },
+      { q: 'Does this QR code generator make a traditional barcode?', a: 'No. A QR code is a two-dimensional barcode that holds text or a URL, which is what this tool encodes. The striped one-dimensional formats used on retail packaging are a different symbology and are not generated here.' },
     ],
     html: `
 ${f.text('qr-text', 'Text or link to encode', 'https://tools4market.online')}

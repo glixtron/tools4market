@@ -22,3 +22,9 @@ package-lock.json
 
 # Audit crawl cache (npm run audit --cache)
 .cache/
+
+# Daily snapshot output (npm run daily) — regenerated every run
+artifacts/daily/
+
+# Local preview screenshots (not part of the build)
+.preview/
