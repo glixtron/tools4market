@@ -5,7 +5,7 @@
 // description, H1, intro, keyword placement, section depth, FAQ quality,
 // structured data completeness, internal linking, and HTML hygiene.
 // Prints a per-defect report; exits non-zero if anything fails.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { TOOLS, CATEGORIES, JOBS, SEARCH_EXAMPLES, EDITOR_PICKS, POLICY } from '../src/data/index.js';
 import { ARTICLES } from '../src/data/blog.js';
@@ -313,7 +313,46 @@ for (const t of TOOLS) {
   }
   ok('manifest.webmanifest: exists at the root', read('manifest.webmanifest').includes('Tools4Market'));
 
-  // --- homepage: task-led messaging + editorial hierarchy
+  // --- 404: one document, served at any depth
+  // The CDN answers a mistyped /tools/x/y/ with the same 404.html that lives at
+  // the root, so every asset reference in it has to be root-absolute. With `../`
+  // the CSS resolved against the mistyped depth and the page loaded unstyled.
+  {
+    const nf = read('404.html');
+    const parentRelative = [...nf.matchAll(/(?:href|src)="(\.\.\/[^"]*)"/g)].map((m) => m[1]);
+    ok('404.html: no parent-relative href/src', parentRelative.length === 0, parentRelative.slice(0, 3).join(', '));
+    ok('404.html: stylesheet is root-absolute', /href="\/assets\/style\.css\?v=/.test(nf));
+    ok('404.html: logo is root-absolute', /src="\/assets\/logo-mark\.png\?v=/.test(nf));
+    ok('404.html: internal links are root-absolute', /href="\/seo-tools\/"/.test(nf) && /href="\/blog\/"/.test(nf));
+  }
+
+  // --- one header, one footer, identical links on every page
+  // Every page on the site is wrapped by layout(), so the chrome is shared by
+  // construction — but only a check notices when a new page type (a section
+  // index, a comparison template) is rendered outside that wrapper, or when a
+  // page quietly loses a nav item. Compare link sets against the homepage.
+  {
+    const pages = readdirSync(DIST, { recursive: true }).map(String).filter((f) => f.endsWith('.html')).sort();
+    const hrefs = (s) => [...s.matchAll(/<a\b[^>]*href="([^"]*)"/g)].map((m) => m[1]);
+    const abs = (u, at) => (u.startsWith('#') || u.startsWith('http') || u.startsWith('mailto:') ? u : new URL(u, 'https://x' + at).pathname);
+    const chrome = (html, at) => {
+      const h = html.match(/<header[\s\S]*?<\/header>/g) || [];
+      const f = html.match(/<footer[\s\S]*?<\/footer>/g) || [];
+      if (h.length !== 1 || f.length !== 1) return { bad: `header×${h.length} footer×${f.length}` };
+      return { header: hrefs(h[0]).map((u) => abs(u, at)).join('|'), footer: hrefs(f[0]).map((u) => abs(u, at)).join('|') };
+    };
+    const home = chrome(read('index.html'), '/');
+    const drift = [];
+    for (const f of pages) {
+      const at = '/' + f.replace(/\\/g, '/').replace(/index\.html$/, '');
+      const c = chrome(read(f), at);
+      if (c.bad) drift.push(`${f} (${c.bad})`);
+      else if (c.header !== home.header) drift.push(`${f} (header differs)`);
+      else if (c.footer !== home.footer) drift.push(`${f} (footer differs)`);
+    }
+    ok(`all ${pages.length} pages carry one homepage-identical header + footer`, drift.length === 0, drift.slice(0, 5).join(', '));
+  }
+
   const home = read('index.html');
   ok('home: outcome-led H1', home.includes('<h1>Find the right tool. Finish the job.</h1>'));
   ok('home: task-language search placeholder', home.includes('Search tools by task'));

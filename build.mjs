@@ -143,6 +143,12 @@ const esc = (s) => String(s ?? '')
 
 // relative link between two root-relative paths ('/x/y/' style)
 function rel(from, to) {
+  // The 404 document is one file served by the CDN at whatever URL the visitor
+  // mistyped. A relative path resolves against that URL's depth, so the same
+  // `../assets/style.css` that works at /404.html becomes /tools/assets/... at
+  // /tools/does-not-exist/ and the page loads with no stylesheet. Absolute
+  // paths are the only ones that survive every depth.
+  if (from === '/404.html') return to;
   const f = from.split('/').filter(Boolean);
   const t = to.split('/').filter(Boolean);
   let i = 0;
